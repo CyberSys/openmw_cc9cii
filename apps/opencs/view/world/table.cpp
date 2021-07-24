@@ -908,8 +908,7 @@ void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelI
     if (mAutoJump)
     {
         selectRow(bottomRight.row());
-        //scrollTo(mProxyModel->index(bottomRight.row(), 0), QAbstractItemView::PositionAtCenter);
-        scrollTo(bottomRight, QAbstractItemView::PositionAtCenter); // alternative
+        scrollTo(bottomRight, QAbstractItemView::PositionAtCenter);
     }
 }
 

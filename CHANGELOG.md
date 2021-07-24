@@ -28,6 +28,7 @@
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
+    Feature #2554: Modifying an object triggers the instances table to scroll to the corresponding record
 
 0.47.0
 ------
