@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_CLASSCHECK_H
 #define CSM_TOOLS_CLASSCHECK_H
 
-#include <components/esm/loadclas.hpp>
+#include <components/esm3/clas.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that class records are internally consistent
     class ClassCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Class>& mClasses;
+            const CSMWorld::IdCollection<ESM3::Class>& mClasses;
             bool mIgnoreBaseRecords;
 
         public:
 
-            ClassCheckStage (const CSMWorld::IdCollection<ESM::Class>& classes);
+            ClassCheckStage (const CSMWorld::IdCollection<ESM3::Class>& classes);
 
             int setup() override;
             ///< \return number of steps

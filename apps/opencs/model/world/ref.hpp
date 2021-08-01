@@ -3,12 +3,12 @@
 
 #include <utility>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 namespace CSMWorld
 {
     /// \brief Wrapper for CellRef sub record
-    struct CellRef : public ESM::CellRef
+    struct CellRef : public ESM3::CellRef
     {
         std::string mId;
         std::string mCell;

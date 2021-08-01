@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_JOURNALCHECK_H
 #define CSM_TOOLS_JOURNALCHECK_H
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/dial.hpp>
 
 #include "../world/idcollection.hpp"
 #include "../world/infocollection.hpp"
@@ -15,7 +15,7 @@ namespace CSMTools
     {
     public:
 
-        JournalCheckStage(const CSMWorld::IdCollection<ESM::Dialogue>& journals,
+        JournalCheckStage(const CSMWorld::IdCollection<ESM3::Dialogue>& journals,
             const CSMWorld::InfoCollection& journalInfos);
 
         int setup() override;
@@ -26,7 +26,7 @@ namespace CSMTools
 
     private:
 
-        const CSMWorld::IdCollection<ESM::Dialogue>& mJournals;
+        const CSMWorld::IdCollection<ESM3::Dialogue>& mJournals;
         const CSMWorld::InfoCollection& mJournalInfos;
         bool mIgnoreBaseRecords;
 

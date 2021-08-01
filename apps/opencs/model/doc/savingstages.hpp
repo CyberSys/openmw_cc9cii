@@ -11,7 +11,7 @@
 
 #include "savingstate.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Dialogue;
 }
@@ -118,7 +118,7 @@ namespace CSMDoc
     class WriteDialogueCollectionStage : public Stage
     {
             SavingState& mState;
-            const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
+            const CSMWorld::IdCollection<ESM3::Dialogue>& mTopics;
             CSMWorld::InfoCollection& mInfos;
 
         public:

@@ -7,7 +7,7 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
@@ -432,23 +432,21 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             continue;
 
         try {
-            ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder =
-            ToUTF8::calculateEncoding(mEncoding.toStdString());
-            fileReader.setEncoder(&encoder);
-            fileReader.open(std::string(dir.absoluteFilePath(path2).toUtf8().constData()));
+            ESM::Reader* fileReader = ESM::Reader::getReader(dir.absoluteFilePath(path2).toUtf8().constData());
+            ToUTF8::Utf8Encoder encoder = ToUTF8::calculateEncoding(mEncoding.toStdString());
+            fileReader->setEncoder(&encoder);
 
             EsmFile *file = new EsmFile(path2);
          
-            for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
-                itemIter != fileReader.getGameFiles().end(); ++itemIter)
+            for (std::vector<ESM::MasterData>::const_iterator itemIter = fileReader->getGameFiles().begin();
+                itemIter != fileReader->getGameFiles().end(); ++itemIter)
                 file->addGameFile(QString::fromUtf8(itemIter->name.c_str()));
 
-            file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
+            file->setAuthor     (QString::fromUtf8(fileReader->getAuthor().c_str()));
             file->setDate       (info.lastModified());
-            file->setFormat     (fileReader.getFormat());
+            file->setFormat     (fileReader->getFormat());
             file->setFilePath       (info.absoluteFilePath());
-            file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
+            file->setDescription(QString::fromUtf8(fileReader->getDesc().c_str()));
 
             // HACK
             // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing

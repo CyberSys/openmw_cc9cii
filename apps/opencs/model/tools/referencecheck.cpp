@@ -6,7 +6,7 @@ CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     const CSMWorld::RefCollection& references,
     const CSMWorld::RefIdCollection& referencables,
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-    const CSMWorld::IdCollection<ESM::Faction>& factions)
+    const CSMWorld::IdCollection<ESM3::Faction>& factions)
     :
     mReferences(references),
     mObjects(referencables),

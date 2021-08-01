@@ -4,7 +4,7 @@
 
 #include "../prefs/state.hpp"
 
-CSMTools::JournalCheckStage::JournalCheckStage(const CSMWorld::IdCollection<ESM::Dialogue> &journals,
+CSMTools::JournalCheckStage::JournalCheckStage(const CSMWorld::IdCollection<ESM3::Dialogue> &journals,
     const CSMWorld::InfoCollection& journalInfos)
     : mJournals(journals), mJournalInfos(journalInfos)
 {
@@ -20,13 +20,13 @@ int CSMTools::JournalCheckStage::setup()
 
 void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Dialogue> &journalRecord = mJournals.getRecord(stage);
+    const CSMWorld::Record<ESM3::Dialogue> &journalRecord = mJournals.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && journalRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || journalRecord.isDeleted())
         return;
 
-    const ESM::Dialogue &journal = journalRecord.get();
+    const ESM3::Dialogue &journal = journalRecord.get();
     int statusNamedCount = 0;
     int totalInfoCount = 0;
     std::set<int> questIndices;
@@ -44,7 +44,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
         totalInfoCount += 1;
 
-        if (journalInfo.mQuestStatus == ESM::DialInfo::QS_Name)
+        if (journalInfo.mQuestStatus == ESM3::DialInfo::QS_Name)
         {
             statusNamedCount += 1;
         }

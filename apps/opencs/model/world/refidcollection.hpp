@@ -13,6 +13,7 @@
 namespace ESM
 {
     class ESMWriter;
+    class Reader;
 }
 
 namespace CSMWorld
@@ -103,7 +104,7 @@ namespace CSMWorld
 
             const RecordBase& getRecord (int index) const override;
 
-            void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
+            void load (ESM::Reader& reader, bool base, UniversalId::Type type);
 
             int getAppendIndex (const std::string& id, UniversalId::Type type) const override;
             ///< \param type Will be ignored, unless the collection supports multiple record types

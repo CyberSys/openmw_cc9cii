@@ -363,15 +363,14 @@ int CS::Editor::run()
     }
     else
     {
-        ESM::ESMReader fileReader;
+        std::unique_ptr<ESM::Reader> fileReader(ESM::Reader::getReader(mFileToLoad.string()));
         ToUTF8::Utf8Encoder encoder = ToUTF8::calculateEncoding(mEncodingName);
-        fileReader.setEncoder(&encoder);
-        fileReader.open(mFileToLoad.string());
+        fileReader->setEncoder(&encoder);
 
         std::vector<boost::filesystem::path> discoveredFiles;
 
-        for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
-            itemIter != fileReader.getGameFiles().end(); ++itemIter)
+        for (std::vector<ESM::MasterData>::const_iterator itemIter = fileReader->getGameFiles().begin();
+            itemIter != fileReader->getGameFiles().end(); ++itemIter)
         {
             for (Files::PathContainer::const_iterator pathIter = mDataDirs.begin();
                 pathIter != mDataDirs.end(); ++pathIter)

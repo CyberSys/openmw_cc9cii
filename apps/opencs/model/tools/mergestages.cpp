@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm3/reader.hpp>
 
 #include "mergestate.hpp"
 
@@ -45,9 +46,10 @@ void CSMTools::FinishMergedDocumentStage::perform (int stage, CSMDoc::Messages& 
     // document).
     boost::filesystem::path path = mState.mSource.getContentFiles()[0];
 
-    ESM::ESMReader reader;
+    // FIXME: document saving necessarily has to be done differently for different ESM formats
+    //        (assumed ESM3 for below)
+    ESM3::Reader& reader = static_cast<ESM3::Reader&>(*ESM::Reader::getReader(path.string()));
     reader.setEncoder (&mEncoder);
-    reader.open (path.string());
 
     CSMWorld::MetaData source;
     source.mId = "sys::meta";

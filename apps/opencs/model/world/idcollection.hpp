@@ -1,7 +1,7 @@
 #ifndef CSM_WOLRD_IDCOLLECTION_H
 #define CSM_WOLRD_IDCOLLECTION_H
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 #include "collection.hpp"
 #include "land.hpp"
@@ -12,12 +12,12 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class IdCollection : public Collection<ESXRecordT, IdAccessorT>
     {
-            virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted);
+            virtual void loadRecord (ESXRecordT& record, ESM::Reader& reader, bool& isDeleted);
 
         public:
 
             /// \return Index of loaded record (-1 if no record was loaded)
-            int load (ESM::ESMReader& reader, bool base);
+            int load (ESM::Reader& reader, bool base);
 
             /// \param index Index at which the record can be found.
             /// Special values: -2 index unknown, -1 record does not exist yet and therefore
@@ -34,22 +34,22 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     void IdCollection<ESXRecordT, IdAccessorT>::loadRecord (ESXRecordT& record,
-                                                            ESM::ESMReader& reader,
+                                                            ESM::Reader& reader,
                                                             bool& isDeleted)
     {
-        record.load (reader, isDeleted);
+        record.load (static_cast<ESM3::Reader&>(reader), isDeleted);
     }
 
     template<>
     inline void IdCollection<Land, IdAccessor<Land> >::loadRecord (Land& record,
-        ESM::ESMReader& reader, bool& isDeleted)
+        ESM::Reader& reader, bool& isDeleted)
     {
-        record.load (reader, isDeleted);
+        record.load (static_cast<ESM3::Reader&>(reader), isDeleted);
 
         // Load all land data for now. A future optimisation may only load non-base data
         // if a suitable mechanism for avoiding race conditions can be established.
-        int flags = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
-            ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
+        int flags = ESM3::Land::DATA_VHGT | ESM3::Land::DATA_VNML |
+                    ESM3::Land::DATA_VCLR | ESM3::Land::DATA_VTEX;
         record.loadData (flags);
 
         // Prevent data from being reloaded.
@@ -57,7 +57,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
+    int IdCollection<ESXRecordT, IdAccessorT>::load (ESM::Reader& reader, bool base)
     {
         ESXRecordT record;
         bool isDeleted = false;

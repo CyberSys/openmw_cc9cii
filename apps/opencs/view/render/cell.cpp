@@ -125,9 +125,9 @@ void CSVRender::Cell::updateLand()
     int landIndex = land.searchId(mId);
     if (landIndex != -1 && !land.getRecord(mId).isDeleted())
     {
-        const ESM::Land& esmLand = land.getRecord(mId).get();
+        const ESM3::Land& esmLand = land.getRecord(mId).get();
 
-        if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+        if (esmLand.getLandData (ESM3::Land::DATA_VHGT))
         {
             if (mTerrain)
             {

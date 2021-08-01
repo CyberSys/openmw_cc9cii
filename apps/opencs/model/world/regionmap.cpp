@@ -51,13 +51,13 @@ CSMWorld::CellCoordinates CSMWorld::RegionMap::getIndex (const Cell& cell) const
 
 void CSMWorld::RegionMap::buildRegions()
 {
-    const IdCollection<ESM::Region>& regions = mData.getRegions();
+    const IdCollection<ESM3::Region>& regions = mData.getRegions();
 
     int size = regions.getSize();
 
     for (int i=0; i<size; ++i)
     {
-        const Record<ESM::Region>& region = regions.getRecord (i);
+        const Record<ESM3::Region>& region = regions.getRecord (i);
 
         if (!region.isDeleted())
             mColours.insert (std::make_pair (Misc::StringUtils::lowerCase (region.get().mId),
@@ -417,11 +417,11 @@ void CSMWorld::RegionMap::regionsAboutToBeRemoved (const QModelIndex& parent, in
 {
     std::vector<std::string> update;
 
-    const IdCollection<ESM::Region>& regions = mData.getRegions();
+    const IdCollection<ESM3::Region>& regions = mData.getRegions();
 
     for (int i=start; i<=end; ++i)
     {
-        const Record<ESM::Region>& region = regions.getRecord (i);
+        const Record<ESM3::Region>& region = regions.getRecord (i);
 
         update.push_back (region.get().mId);
 
@@ -435,11 +435,11 @@ void CSMWorld::RegionMap::regionsInserted (const QModelIndex& parent, int start,
 {
     std::vector<std::string> update;
 
-    const IdCollection<ESM::Region>& regions = mData.getRegions();
+    const IdCollection<ESM3::Region>& regions = mData.getRegions();
 
     for (int i=start; i<=end; ++i)
     {
-        const Record<ESM::Region>& region = regions.getRecord (i);
+        const Record<ESM3::Region>& region = regions.getRecord (i);
 
         if (!region.isDeleted())
         {
@@ -459,11 +459,11 @@ void CSMWorld::RegionMap::regionsChanged (const QModelIndex& topLeft, const QMod
 
     std::vector<std::string> update;
 
-    const IdCollection<ESM::Region>& regions = mData.getRegions();
+    const IdCollection<ESM3::Region>& regions = mData.getRegions();
 
     for (int i=topLeft.row(); i<=bottomRight.column(); ++i)
     {
-        const Record<ESM::Region>& region = regions.getRecord (i);
+        const Record<ESM3::Region>& region = regions.getRecord (i);
 
         update.push_back (region.get().mId);
 

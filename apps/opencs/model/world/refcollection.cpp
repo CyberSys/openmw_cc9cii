@@ -36,7 +36,7 @@ namespace CSMWorld
     }
 }
 
-void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
+void CSMWorld::RefCollection::load (ESM::Reader& reader, int cellIndex, bool base,
     std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
@@ -45,12 +45,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
     CellRef ref;
     ref.mNew = false;
-    ESM::MovedCellRef mref;
+    ESM3::MovedCellRef mref;
     mref.mRefNum.mIndex = 0;
     bool isDeleted = false;
     bool isMoved = false;
 
-    while (ESM::Cell::getNextRef(reader, ref, isDeleted, mref, isMoved))
+    while (ESM3::Cell::getNextRef(static_cast<ESM3::Reader&>(reader), ref, isDeleted, mref, isMoved))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).

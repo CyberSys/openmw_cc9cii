@@ -4,7 +4,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::EnchantmentCheckStage::EnchantmentCheckStage (const CSMWorld::IdCollection<ESM::Enchantment>& enchantments)
+CSMTools::EnchantmentCheckStage::EnchantmentCheckStage (const CSMWorld::IdCollection<ESM3::Enchantment>& enchantments)
     : mEnchantments (enchantments)
 {
     mIgnoreBaseRecords = false;
@@ -19,13 +19,13 @@ int CSMTools::EnchantmentCheckStage::setup()
 
 void CSMTools::EnchantmentCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Enchantment>& record = mEnchantments.getRecord (stage);
+    const CSMWorld::Record<ESM3::Enchantment>& record = mEnchantments.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Enchantment& enchantment = record.get();
+    const ESM3::Enchantment& enchantment = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Enchantment, enchantment.mId);
 
@@ -47,7 +47,7 @@ void CSMTools::EnchantmentCheckStage::perform (int stage, CSMDoc::Messages& mess
     }
     else
     {
-        std::vector<ESM::ENAMstruct>::const_iterator effect = enchantment.mEffects.mList.begin();
+        std::vector<ESM3::ENAMstruct>::const_iterator effect = enchantment.mEffects.mList.begin();
 
         for (size_t i = 1; i <= enchantment.mEffects.mList.size(); i++)
         {

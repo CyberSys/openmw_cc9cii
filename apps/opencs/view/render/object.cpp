@@ -85,7 +85,7 @@ void CSVRender::Object::update()
     const int ModelIndex = referenceables.findColumnIndex (CSMWorld::Columns::ColumnId_Model);
 
     int index = referenceables.searchId (mReferenceableId);
-    const ESM::Light* light = nullptr;
+    const ESM3::Light* light = nullptr;
 
     mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
 
@@ -102,7 +102,7 @@ void CSVRender::Object::update()
 
     if (recordType == CSMWorld::UniversalId::Type_Light)
     {
-        light = &dynamic_cast<const CSMWorld::Record<ESM::Light>& >(referenceables.getRecord(index)).get();
+        light = &dynamic_cast<const CSMWorld::Record<ESM3::Light>& >(referenceables.getRecord(index)).get();
         if (model.empty())
             model = "marker_light.nif";
     }

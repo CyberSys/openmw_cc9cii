@@ -5,19 +5,19 @@
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 
 #include "mask.hpp"
 
 #include "../../model/world/cellcoordinates.hpp"
 
-const int CSVRender::CellBorder::CellSize = ESM::Land::REAL_SIZE;
+const int CSVRender::CellBorder::CellSize = ESM3::Land::REAL_SIZE;
 
 /*
     The number of vertices per cell border is equal to the number of vertices per edge
     minus the duplicated corner vertices. An additional vertex to close the loop is NOT needed.
 */
-const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
+const int CSVRender::CellBorder::VertexCount = (ESM3::Land::LAND_SIZE * 4) - 4;
 
 
 CSVRender::CellBorder::CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords)
@@ -38,9 +38,9 @@ CSVRender::CellBorder::~CellBorder()
     mParentNode->removeChild(mBaseNode);
 }
 
-void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
+void CSVRender::CellBorder::buildShape(const ESM3::Land& esmLand)
 {
-    const ESM::Land::LandData* landData = esmLand.getLandData(ESM::Land::DATA_VHGT);
+    const ESM3::Land::LandData* landData = esmLand.getLandData(ESM3::Land::DATA_VHGT);
 
     if (!landData)
         return;
@@ -57,14 +57,14 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
         Traverse the cell border counter-clockwise starting at the SW corner vertex (0, 0).
         Each loop starts at a corner vertex and ends right before the next corner vertex.
     */
-    for (; x < ESM::Land::LAND_SIZE - 1; ++x)
+    for (; x < ESM3::Land::LAND_SIZE - 1; ++x)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    x = ESM::Land::LAND_SIZE - 1;
-    for (; y < ESM::Land::LAND_SIZE - 1; ++y)
+    x = ESM3::Land::LAND_SIZE - 1;
+    for (; y < ESM3::Land::LAND_SIZE - 1; ++y)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    y = ESM::Land::LAND_SIZE - 1;
+    y = ESM3::Land::LAND_SIZE - 1;
     for (; x > 0; --x)
         vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
@@ -97,10 +97,10 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
 
 size_t CSVRender::CellBorder::landIndex(int x, int y)
 {
-    return static_cast<size_t>(y) * ESM::Land::LAND_SIZE + x;
+    return static_cast<size_t>(y) * ESM3::Land::LAND_SIZE + x;
 }
 
 float CSVRender::CellBorder::scaleToWorld(int value)
 {
-    return (CellSize + 128) * (float)value / ESM::Land::LAND_SIZE;
+    return (CellSize + 128) * (float)value / ESM3::Land::LAND_SIZE;
 }

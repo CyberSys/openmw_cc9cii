@@ -41,7 +41,7 @@ namespace CSMWorld
               : mCells (cells), mNextId (0)
             {}
 
-            void load (ESM::ESMReader& reader, int cellIndex, bool base,
+            void load (ESM::Reader& reader, int cellIndex, bool base,
                 std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages);
             ///< Load a sequence of references.
 

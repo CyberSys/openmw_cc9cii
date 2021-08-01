@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_FACTIONCHECK_H
 #define CSM_TOOLS_FACTIONCHECK_H
 
-#include <components/esm/loadfact.hpp>
+#include <components/esm3/fact.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that faction records are internally consistent
     class FactionCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            const CSMWorld::IdCollection<ESM3::Faction>& mFactions;
             bool mIgnoreBaseRecords;
 
         public:
 
-            FactionCheckStage (const CSMWorld::IdCollection<ESM::Faction>& factions);
+            FactionCheckStage (const CSMWorld::IdCollection<ESM3::Faction>& factions);
 
             int setup() override;
             ///< \return number of steps

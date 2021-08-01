@@ -6,7 +6,7 @@
 #include "collection.hpp"
 #include "info.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Dialogue;
 }
@@ -66,7 +66,7 @@ namespace CSMWorld
             ///
             /// \return Success?
 
-            void load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue);
+            void load (ESM3::Reader& reader, bool base, const ESM3::Dialogue& dialogue);
 
             Range getTopicRange (const std::string& topic) const;
             ///< Return iterators that point to the beginning and past the end of the range for

@@ -5,9 +5,9 @@
 
 namespace CSMWorld
 {
-    void Land::load(ESM::ESMReader &esm, bool &isDeleted)
+    void Land::load(ESM::Reader& reader, bool &isDeleted)
     {
-        ESM::Land::load(esm, isDeleted);
+        ESM3::Land::load(static_cast<ESM3::Reader&>(reader), isDeleted);
     }
 
     std::string Land::createUniqueRecordId(int x, int y)
