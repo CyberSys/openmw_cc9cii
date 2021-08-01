@@ -52,7 +52,7 @@ namespace CSVRender
     private:
         void loadSkeleton(const std::string& model);
         void loadBodyParts();
-        void attachBodyPart(ESM::PartReferenceType, const std::string& mesh);
+        void attachBodyPart(ESM3::PartReferenceType, const std::string& mesh);
 
         std::string getBodyPartMesh(const std::string& bodyPartId);
 

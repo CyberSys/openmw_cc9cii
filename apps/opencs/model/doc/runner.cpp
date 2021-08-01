@@ -73,7 +73,7 @@ void CSMDoc::Runner::start (bool delayed)
         QStringList arguments;
         arguments << "--skip-menu";
 
-        if (mProfile.mFlags & ESM::DebugProfile::Flag_BypassNewGame)
+        if (mProfile.mFlags & ESM3::DebugProfile::Flag_BypassNewGame)
             arguments << "--new-game=0";
         else
             arguments << "--new-game=1";
@@ -120,7 +120,7 @@ bool CSMDoc::Runner::isRunning() const
     return mRunning;
 }
 
-void CSMDoc::Runner::configure (const ESM::DebugProfile& profile,
+void CSMDoc::Runner::configure (const ESM3::DebugProfile& profile,
     const std::vector<std::string>& contentFiles, const std::string& startupInstruction)
 {
     mProfile = profile;

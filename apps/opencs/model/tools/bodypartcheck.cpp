@@ -3,9 +3,9 @@
 #include "../prefs/state.hpp"
 
 CSMTools::BodyPartCheckStage::BodyPartCheckStage(
-        const CSMWorld::IdCollection<ESM::BodyPart> &bodyParts,
+        const CSMWorld::IdCollection<ESM3::BodyPart> &bodyParts,
         const CSMWorld::Resources                   &meshes,
-        const CSMWorld::IdCollection<ESM::Race>     &races ) :
+        const CSMWorld::IdCollection<ESM3::Race>     &races ) :
     mBodyParts(bodyParts),
     mMeshes(meshes),
     mRaces(races)
@@ -22,21 +22,21 @@ int CSMTools::BodyPartCheckStage::setup()
 
 void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &messages)
 {
-    const CSMWorld::Record<ESM::BodyPart> &record = mBodyParts.getRecord(stage);
+    const CSMWorld::Record<ESM3::BodyPart> &record = mBodyParts.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::BodyPart &bodyPart = record.get();
+    const ESM3::BodyPart &bodyPart = record.get();
 
     CSMWorld::UniversalId id( CSMWorld::UniversalId::Type_BodyPart, bodyPart.mId );
 
     // Check BYDT
-    if (bodyPart.mData.mPart >= ESM::BodyPart::MP_Count )
+    if (bodyPart.mData.mPart >= ESM3::BodyPart::MP_Count )
         messages.add(id, "Invalid part", "", CSMDoc::Message::Severity_Error);
 
-    if (bodyPart.mData.mType > ESM::BodyPart::MT_Armor )
+    if (bodyPart.mData.mType > ESM3::BodyPart::MT_Armor )
         messages.add(id, "Invalid type", "", CSMDoc::Message::Severity_Error);
 
     // Check MODL
@@ -46,7 +46,7 @@ void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &message
         messages.add(id, "Model '" + bodyPart.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     // Check FNAM for skin body parts (for non-skin body parts it's meaningless)
-    if ( bodyPart.mData.mType == ESM::BodyPart::MT_Skin )
+    if ( bodyPart.mData.mType == ESM3::BodyPart::MT_Skin )
     {
         if ( bodyPart.mRace.empty() )
             messages.add(id, "Race is missing", "", CSMDoc::Message::Severity_Error);

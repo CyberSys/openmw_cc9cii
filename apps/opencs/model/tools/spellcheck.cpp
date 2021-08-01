@@ -9,7 +9,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::SpellCheckStage::SpellCheckStage (const CSMWorld::IdCollection<ESM::Spell>& spells)
+CSMTools::SpellCheckStage::SpellCheckStage (const CSMWorld::IdCollection<ESM3::Spell>& spells)
 : mSpells (spells)
 {
     mIgnoreBaseRecords = false;
@@ -24,13 +24,13 @@ int CSMTools::SpellCheckStage::setup()
 
 void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Spell>& record = mSpells.getRecord (stage);
+    const CSMWorld::Record<ESM3::Spell>& record = mSpells.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Spell& spell = record.get();
+    const ESM3::Spell& spell = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Spell, spell.mId);
 

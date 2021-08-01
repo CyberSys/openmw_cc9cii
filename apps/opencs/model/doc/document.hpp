@@ -93,11 +93,11 @@ namespace CSMDoc
 
             void addOptionalMagicEffects();
 
-            void addOptionalGmst (const ESM::GameSetting& gmst);
+            void addOptionalGmst (const ESM3::GameSetting& gmst);
 
-            void addOptionalGlobal (const ESM::Global& global);
+            void addOptionalGlobal (const ESM3::Global& global);
 
-            void addOptionalMagicEffect (const ESM::MagicEffect& effect);
+            void addOptionalMagicEffect (const ESM3::MagicEffect& effect);
 
         public:
 

@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_SOUNDCHECK_H
 #define CSM_TOOLS_SOUNDCHECK_H
 
-#include <components/esm/loadsoun.hpp>
+#include <components/esm3/soun.hpp>
 
 #include "../world/resources.hpp"
 #include "../world/idcollection.hpp"
@@ -13,13 +13,13 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that sound records are internally consistent
     class SoundCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Sound>& mSounds;
+            const CSMWorld::IdCollection<ESM3::Sound>& mSounds;
             const CSMWorld::Resources &mSoundFiles;
             bool mIgnoreBaseRecords;
 
         public:
 
-            SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound>& sounds,
+            SoundCheckStage (const CSMWorld::IdCollection<ESM3::Sound>& sounds,
                              const CSMWorld::Resources &soundfiles);
 
             int setup() override;

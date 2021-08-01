@@ -10,7 +10,7 @@
 #include <QProcess>
 #include <QTextDocument>
 
-#include <components/esm/debugprofile.hpp>
+#include <components/esm3/debugprofile.hpp>
 
 class QTemporaryFile;
 
@@ -24,7 +24,7 @@ namespace CSMDoc
 
             QProcess mProcess;
             bool mRunning;
-            ESM::DebugProfile mProfile;
+            ESM3::DebugProfile mProfile;
             std::vector<std::string> mContentFiles;
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
@@ -47,7 +47,7 @@ namespace CSMDoc
             /// is not necessarily identical to the moment the child process is started.
             bool isRunning() const;
 
-            void configure (const ESM::DebugProfile& profile,
+            void configure (const ESM3::DebugProfile& profile,
                 const std::vector<std::string>& contentFiles,
                 const std::string& startupInstruction);
 

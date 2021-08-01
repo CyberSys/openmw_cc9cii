@@ -5,8 +5,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace CSMWorld
@@ -21,7 +25,7 @@ namespace CSMWorld
 
         void blank();
 
-        void load (ESM::ESMReader& esm);
+        void load (ESM3::Reader& esm);
         void save (ESM::ESMWriter& esm) const;
     };
 }

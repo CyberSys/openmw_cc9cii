@@ -9,13 +9,14 @@
 #include "../world/universalid.hpp"
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
-    const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
-    const CSMWorld::IdCollection<ESM::Class>& classes,
-    const CSMWorld::IdCollection<ESM::Faction>& faction,
-    const CSMWorld::IdCollection<ESM::Script>& scripts,
+    const CSMWorld::RefIdData& referenceable,
+    const CSMWorld::IdCollection<ESM3::Race>& races,
+    const CSMWorld::IdCollection<ESM3::Class>& classes,
+    const CSMWorld::IdCollection<ESM3::Faction>& faction,
+    const CSMWorld::IdCollection<ESM3::Script>& scripts,
     const CSMWorld::Resources& models,
     const CSMWorld::Resources& icons,
-    const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts)
+    const CSMWorld::IdCollection<ESM3::BodyPart>& bodyparts)
    :mReferencables(referenceable),
     mRaces(races),
     mClasses(classes),
@@ -244,7 +245,7 @@ int CSMTools::ReferenceableCheckStage::setup()
 
 void CSMTools::ReferenceableCheckStage::bookCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Book >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Book >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -253,18 +254,18 @@ void CSMTools::ReferenceableCheckStage::bookCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Book& book = (dynamic_cast<const CSMWorld::Record<ESM::Book>& >(baseRecord)).get();
+    const ESM3::Book& book = (dynamic_cast<const CSMWorld::Record<ESM3::Book>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Book, book.mId);
 
-    inventoryItemCheck<ESM::Book>(book, messages, id.toString(), true);
+    inventoryItemCheck<ESM3::Book>(book, messages, id.toString(), true);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Book>(book, messages, id.toString());
+    scriptCheck<ESM3::Book>(book, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::activatorCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Activator >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Activator >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -273,7 +274,7 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Activator& activator = (dynamic_cast<const CSMWorld::Record<ESM::Activator>& >(baseRecord)).get();
+    const ESM3::Activator& activator = (dynamic_cast<const CSMWorld::Record<ESM3::Activator>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Activator, activator.mId);
 
     if (activator.mModel.empty())
@@ -282,12 +283,12 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
         messages.add(id, "Model '" + activator.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Activator>(activator, messages, id.toString());
+    scriptCheck<ESM3::Activator>(activator, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::potionCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Potion >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Potion >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -296,20 +297,20 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Potion& potion = (dynamic_cast<const CSMWorld::Record<ESM::Potion>& >(baseRecord)).get();
+    const ESM3::Potion& potion = (dynamic_cast<const CSMWorld::Record<ESM3::Potion>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
 
-    inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
+    inventoryItemCheck<ESM3::Potion>(potion, messages, id.toString());
     /// \todo Check magic effects for validity
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Potion>(potion, messages, id.toString());
+    scriptCheck<ESM3::Potion>(potion, messages, id.toString());
 }
 
 
 void CSMTools::ReferenceableCheckStage::apparatusCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Apparatus >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Apparatus >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -318,20 +319,20 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Apparatus& apparatus = (dynamic_cast<const CSMWorld::Record<ESM::Apparatus>& >(baseRecord)).get();
+    const ESM3::Apparatus& apparatus = (dynamic_cast<const CSMWorld::Record<ESM3::Apparatus>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Apparatus, apparatus.mId);
 
-    inventoryItemCheck<ESM::Apparatus>(apparatus, messages, id.toString());
+    inventoryItemCheck<ESM3::Apparatus>(apparatus, messages, id.toString());
 
-    toolCheck<ESM::Apparatus>(apparatus, messages, id.toString());
+    toolCheck<ESM3::Apparatus>(apparatus, messages, id.toString());
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Apparatus>(apparatus, messages, id.toString());
+    scriptCheck<ESM3::Apparatus>(apparatus, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::armorCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Armor >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Armor >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -340,10 +341,10 @@ void CSMTools::ReferenceableCheckStage::armorCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Armor& armor = (dynamic_cast<const CSMWorld::Record<ESM::Armor>& >(baseRecord)).get();
+    const ESM3::Armor& armor = (dynamic_cast<const CSMWorld::Record<ESM3::Armor>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Armor, armor.mId);
 
-    inventoryItemCheck<ESM::Armor>(armor, messages, id.toString(), true);
+    inventoryItemCheck<ESM3::Armor>(armor, messages, id.toString(), true);
 
     // Armor should have positive armor class, but 0 class is not an error
     if (armor.mData.mArmor < 0)
@@ -354,12 +355,12 @@ void CSMTools::ReferenceableCheckStage::armorCheck(
         messages.add(id, "Durability is non-positive", "", CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Armor>(armor, messages, id.toString());
+    scriptCheck<ESM3::Armor>(armor, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::clothingCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Clothing >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Clothing >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -368,17 +369,17 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Clothing& clothing = (dynamic_cast<const CSMWorld::Record<ESM::Clothing>& >(baseRecord)).get();
+    const ESM3::Clothing& clothing = (dynamic_cast<const CSMWorld::Record<ESM3::Clothing>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Clothing, clothing.mId);
-    inventoryItemCheck<ESM::Clothing>(clothing, messages, id.toString(), true);
+    inventoryItemCheck<ESM3::Clothing>(clothing, messages, id.toString(), true);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Clothing>(clothing, messages, id.toString());
+    scriptCheck<ESM3::Clothing>(clothing, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::containerCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Container >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Container >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -387,7 +388,7 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Container& container = (dynamic_cast<const CSMWorld::Record<ESM::Container>& >(baseRecord)).get();
+    const ESM3::Container& container = (dynamic_cast<const CSMWorld::Record<ESM3::Container>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Container, container.mId);
 
     //checking for name
@@ -408,11 +409,11 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     inventoryListCheck(container.mInventory.mList, messages, id.toString());
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Container>(container, messages, id.toString());
+    scriptCheck<ESM3::Container>(container, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::creatureCheck (
-    int stage, const CSMWorld::RefIdDataContainer< ESM::Creature >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::Creature >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -421,7 +422,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Creature& creature = (dynamic_cast<const CSMWorld::Record<ESM::Creature>&>(baseRecord)).get();
+    const ESM3::Creature& creature = (dynamic_cast<const CSMWorld::Record<ESM3::Creature>&>(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Creature, creature.mId);
 
     if (creature.mName.empty())
@@ -504,12 +505,12 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     inventoryListCheck(creature.mInventory.mList, messages, id.toString());
  
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Creature>(creature, messages, id.toString());
+    scriptCheck<ESM3::Creature>(creature, messages, id.toString());
     /// \todo Check spells, teleport table, AI data and AI packages for validity
 }
 
 void CSMTools::ReferenceableCheckStage::doorCheck(
-    int stage, const CSMWorld::RefIdDataContainer< ESM::Door >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::Door >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -518,7 +519,7 @@ void CSMTools::ReferenceableCheckStage::doorCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Door& door = (dynamic_cast<const CSMWorld::Record<ESM::Door>&>(baseRecord)).get();
+    const ESM3::Door& door = (dynamic_cast<const CSMWorld::Record<ESM3::Door>&>(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, door.mId);
 
     //usual, name or model
@@ -531,12 +532,12 @@ void CSMTools::ReferenceableCheckStage::doorCheck(
         messages.add(id, "Model '" + door.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Door>(door, messages, id.toString());
+    scriptCheck<ESM3::Door>(door, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::ingredientCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Ingredient >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Ingredient >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -545,18 +546,18 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Ingredient& ingredient = (dynamic_cast<const CSMWorld::Record<ESM::Ingredient>& >(baseRecord)).get();
+    const ESM3::Ingredient& ingredient = (dynamic_cast<const CSMWorld::Record<ESM3::Ingredient>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, ingredient.mId);
 
-    inventoryItemCheck<ESM::Ingredient>(ingredient, messages, id.toString());
+    inventoryItemCheck<ESM3::Ingredient>(ingredient, messages, id.toString());
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Ingredient>(ingredient, messages, id.toString());
+    scriptCheck<ESM3::Ingredient>(ingredient, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::CreatureLevList >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -565,15 +566,15 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::CreatureLevList& CreatureLevList = (dynamic_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baseRecord)).get();
+    const ESM3::CreatureLevList& CreatureLevList = (dynamic_cast<const CSMWorld::Record<ESM3::CreatureLevList>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, CreatureLevList.mId); //CreatureLevList but Type_CreatureLevelledList :/
 
-    listCheck<ESM::CreatureLevList>(CreatureLevList, messages, id.toString());
+    listCheck<ESM3::CreatureLevList>(CreatureLevList, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::ItemLevList >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -582,14 +583,14 @@ void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::ItemLevList& ItemLevList = (dynamic_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baseRecord)).get();
+    const ESM3::ItemLevList& ItemLevList = (dynamic_cast<const CSMWorld::Record<ESM3::ItemLevList>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, ItemLevList.mId);
 
-    listCheck<ESM::ItemLevList>(ItemLevList, messages, id.toString());
+    listCheck<ESM3::ItemLevList>(ItemLevList, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::lightCheck(
-    int stage, const CSMWorld::RefIdDataContainer< ESM::Light >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::Light >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -598,22 +599,22 @@ void CSMTools::ReferenceableCheckStage::lightCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Light& light = (dynamic_cast<const CSMWorld::Record<ESM::Light>& >(baseRecord)).get();
+    const ESM3::Light& light = (dynamic_cast<const CSMWorld::Record<ESM3::Light>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Light, light.mId);
 
     if (light.mData.mRadius < 0)
         messages.add(id, "Light radius is negative", "", CSMDoc::Message::Severity_Error);
 
-    if (light.mData.mFlags & ESM::Light::Carry)
-        inventoryItemCheck<ESM::Light>(light, messages, id.toString());
+    if (light.mData.mFlags & ESM3::Light::Carry)
+        inventoryItemCheck<ESM3::Light>(light, messages, id.toString());
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Light>(light, messages, id.toString());
+    scriptCheck<ESM3::Light>(light, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::lockpickCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Lockpick >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Lockpick >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -622,20 +623,20 @@ void CSMTools::ReferenceableCheckStage::lockpickCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Lockpick& lockpick = (dynamic_cast<const CSMWorld::Record<ESM::Lockpick>& >(baseRecord)).get();
+    const ESM3::Lockpick& lockpick = (dynamic_cast<const CSMWorld::Record<ESM3::Lockpick>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Lockpick, lockpick.mId);
 
-    inventoryItemCheck<ESM::Lockpick>(lockpick, messages, id.toString());
+    inventoryItemCheck<ESM3::Lockpick>(lockpick, messages, id.toString());
 
-    toolCheck<ESM::Lockpick>(lockpick, messages, id.toString(), true);
+    toolCheck<ESM3::Lockpick>(lockpick, messages, id.toString(), true);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Lockpick>(lockpick, messages, id.toString());
+    scriptCheck<ESM3::Lockpick>(lockpick, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::miscCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Miscellaneous >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Miscellaneous >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -644,17 +645,17 @@ void CSMTools::ReferenceableCheckStage::miscCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Miscellaneous& miscellaneous = (dynamic_cast<const CSMWorld::Record<ESM::Miscellaneous>& >(baseRecord)).get();
+    const ESM3::Miscellaneous& miscellaneous = (dynamic_cast<const CSMWorld::Record<ESM3::Miscellaneous>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Miscellaneous, miscellaneous.mId);
 
-    inventoryItemCheck<ESM::Miscellaneous>(miscellaneous, messages, id.toString());
+    inventoryItemCheck<ESM3::Miscellaneous>(miscellaneous, messages, id.toString());
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Miscellaneous>(miscellaneous, messages, id.toString());
+    scriptCheck<ESM3::Miscellaneous>(miscellaneous, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::npcCheck (
-    int stage, const CSMWorld::RefIdDataContainer< ESM::NPC >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::NPC >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -662,7 +663,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     if (baseRecord.isDeleted())
         return;
 
-    const ESM::NPC& npc = (dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(baseRecord)).get();
+    const ESM3::NPC& npc = (dynamic_cast<const CSMWorld::Record<ESM3::NPC>& >(baseRecord)).get();
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Npc, npc.mId);
 
     //Detect if player is present
@@ -676,9 +677,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     short level(npc.mNpdt.mLevel);
     int gold(npc.mNpdt.mGold);
 
-    if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
+    if (npc.mNpdtType == ESM3::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
-        if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0010 = autocalculated flag
+        if ((npc.mFlags & ESM3::NPC::Autocalc) == 0) //0x0010 = autocalculated flag
         {
             messages.add(id, "NPC with autocalculated stats doesn't have autocalc flag turned on", "", CSMDoc::Message::Severity_Error); //should not happen?
             return;
@@ -755,11 +756,11 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     inventoryListCheck(npc.mInventory.mList, messages, id.toString());
  
     // Check that mentioned scripts exist
-    scriptCheck<ESM::NPC>(npc, messages, id.toString());
+    scriptCheck<ESM3::NPC>(npc, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::weaponCheck(
-    int stage, const CSMWorld::RefIdDataContainer< ESM::Weapon >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::Weapon >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord (stage);
@@ -768,7 +769,7 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Weapon& weapon = (dynamic_cast<const CSMWorld::Record<ESM::Weapon>& >(baseRecord)).get();
+    const ESM3::Weapon& weapon = (dynamic_cast<const CSMWorld::Record<ESM3::Weapon>& >(baseRecord)).get();
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Weapon, weapon.mId);
 
     //TODO, It seems that this stuff for spellcasting is obligatory and In fact We should check if records are present
@@ -800,13 +801,13 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
           weapon.mId == "VFX_Multiple8" ||
           weapon.mId == "VFX_Multiple9"))
     {
-        inventoryItemCheck<ESM::Weapon>(weapon, messages, id.toString(), true);
+        inventoryItemCheck<ESM3::Weapon>(weapon, messages, id.toString(), true);
 
-        if (!(weapon.mData.mType == ESM::Weapon::MarksmanBow ||
-                weapon.mData.mType == ESM::Weapon::MarksmanCrossbow ||
-                weapon.mData.mType == ESM::Weapon::MarksmanThrown ||
-                weapon.mData.mType == ESM::Weapon::Arrow ||
-                weapon.mData.mType == ESM::Weapon::Bolt))
+        if (!(weapon.mData.mType == ESM3::Weapon::MarksmanBow ||
+                weapon.mData.mType == ESM3::Weapon::MarksmanCrossbow ||
+                weapon.mData.mType == ESM3::Weapon::MarksmanThrown ||
+                weapon.mData.mType == ESM3::Weapon::Arrow ||
+                weapon.mData.mType == ESM3::Weapon::Bolt))
         {
             if (weapon.mData.mSlash[0] > weapon.mData.mSlash[1])
                 messages.add(id, "Minimum slash damage higher than maximum", "", CSMDoc::Message::Severity_Warning);
@@ -818,9 +819,9 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
         if (weapon.mData.mChop[0] > weapon.mData.mChop[1])
             messages.add(id, "Minimum chop damage higher than maximum", "", CSMDoc::Message::Severity_Warning);
 
-        if (!(weapon.mData.mType == ESM::Weapon::Arrow ||
-                weapon.mData.mType == ESM::Weapon::Bolt ||
-                weapon.mData.mType == ESM::Weapon::MarksmanThrown))
+        if (!(weapon.mData.mType == ESM3::Weapon::Arrow ||
+                weapon.mData.mType == ESM3::Weapon::Bolt ||
+                weapon.mData.mType == ESM3::Weapon::MarksmanThrown))
         {
             //checking of health
             if (weapon.mData.mHealth == 0)
@@ -832,12 +833,12 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
     }
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Weapon>(weapon, messages, id.toString());
+    scriptCheck<ESM3::Weapon>(weapon, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::probeCheck(
     int stage,
-    const CSMWorld::RefIdDataContainer< ESM::Probe >& records,
+    const CSMWorld::RefIdDataContainer< ESM3::Probe >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
@@ -846,18 +847,18 @@ void CSMTools::ReferenceableCheckStage::probeCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Probe& probe = (dynamic_cast<const CSMWorld::Record<ESM::Probe>& >(baseRecord)).get();
+    const ESM3::Probe& probe = (dynamic_cast<const CSMWorld::Record<ESM3::Probe>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Probe, probe.mId);
 
-    inventoryItemCheck<ESM::Probe>(probe, messages, id.toString());
-    toolCheck<ESM::Probe>(probe, messages, id.toString(), true);
+    inventoryItemCheck<ESM3::Probe>(probe, messages, id.toString());
+    toolCheck<ESM3::Probe>(probe, messages, id.toString(), true);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Probe>(probe, messages, id.toString());
+    scriptCheck<ESM3::Probe>(probe, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::repairCheck (
-    int stage, const CSMWorld::RefIdDataContainer< ESM::Repair >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::Repair >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord (stage);
@@ -866,18 +867,18 @@ void CSMTools::ReferenceableCheckStage::repairCheck (
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Repair& repair = (dynamic_cast<const CSMWorld::Record<ESM::Repair>& >(baseRecord)).get();
+    const ESM3::Repair& repair = (dynamic_cast<const CSMWorld::Record<ESM3::Repair>& >(baseRecord)).get();
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Repair, repair.mId);
 
-    inventoryItemCheck<ESM::Repair> (repair, messages, id.toString());
-    toolCheck<ESM::Repair> (repair, messages, id.toString(), true);
+    inventoryItemCheck<ESM3::Repair> (repair, messages, id.toString());
+    toolCheck<ESM3::Repair> (repair, messages, id.toString(), true);
 
     // Check that mentioned scripts exist
-    scriptCheck<ESM::Repair>(repair, messages, id.toString());
+    scriptCheck<ESM3::Repair>(repair, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::staticCheck (
-    int stage, const CSMWorld::RefIdDataContainer< ESM::Static >& records,
+    int stage, const CSMWorld::RefIdDataContainer< ESM3::Static >& records,
     CSMDoc::Messages& messages)
 {
     const CSMWorld::RecordBase& baseRecord = records.getRecord (stage);
@@ -886,7 +887,7 @@ void CSMTools::ReferenceableCheckStage::staticCheck (
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::Static& staticElement = (dynamic_cast<const CSMWorld::Record<ESM::Static>& >(baseRecord)).get();
+    const ESM3::Static& staticElement = (dynamic_cast<const CSMWorld::Record<ESM3::Static>& >(baseRecord)).get();
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Static, staticElement.mId);
 
     if (staticElement.mModel.empty())
@@ -904,7 +905,7 @@ void CSMTools::ReferenceableCheckStage::finalCheck (CSMDoc::Messages& messages)
 }
 
 void CSMTools::ReferenceableCheckStage::inventoryListCheck(
-    const std::vector<ESM::ContItem>& itemList, 
+    const std::vector<ESM3::ContItem>& itemList, 
     CSMDoc::Messages& messages, 
     const std::string& id)
 {

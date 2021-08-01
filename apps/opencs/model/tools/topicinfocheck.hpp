@@ -3,13 +3,13 @@
 
 #include <set>
 
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loaddial.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/loadregn.hpp>
+#include <components/esm3/clas.hpp>
+#include <components/esm3/dial.hpp>
+#include <components/esm3/fact.hpp>
+#include <components/esm3/glob.hpp>
+#include <components/esm3/gmst.hpp>
+#include <components/esm3/race.hpp>
+#include <components/esm3/regn.hpp>
 
 #include "../world/cell.hpp"
 #include "../world/idcollection.hpp"
@@ -29,14 +29,14 @@ namespace CSMTools
         TopicInfoCheckStage(
             const CSMWorld::InfoCollection& topicInfos,
             const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-            const CSMWorld::IdCollection<ESM::Class>& classes,
-            const CSMWorld::IdCollection<ESM::Faction>& factions,
-            const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
-            const CSMWorld::IdCollection<ESM::Global>& globals,
-            const CSMWorld::IdCollection<ESM::Dialogue>& journals,
-            const CSMWorld::IdCollection<ESM::Race>& races,
-            const CSMWorld::IdCollection<ESM::Region>& regions,
-            const CSMWorld::IdCollection<ESM::Dialogue>& topics,
+            const CSMWorld::IdCollection<ESM3::Class>& classes,
+            const CSMWorld::IdCollection<ESM3::Faction>& factions,
+            const CSMWorld::IdCollection<ESM3::GameSetting>& gmsts,
+            const CSMWorld::IdCollection<ESM3::Global>& globals,
+            const CSMWorld::IdCollection<ESM3::Dialogue>& journals,
+            const CSMWorld::IdCollection<ESM3::Race>& races,
+            const CSMWorld::IdCollection<ESM3::Region>& regions,
+            const CSMWorld::IdCollection<ESM3::Dialogue>& topics,
             const CSMWorld::RefIdData& referencables,
             const CSMWorld::Resources& soundFiles);
 
@@ -51,14 +51,14 @@ namespace CSMTools
         const CSMWorld::InfoCollection& mTopicInfos;
 
         const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
-        const CSMWorld::IdCollection<ESM::Class>& mClasses;
-        const CSMWorld::IdCollection<ESM::Faction>& mFactions;
-        const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
-        const CSMWorld::IdCollection<ESM::Global>& mGlobals;
-        const CSMWorld::IdCollection<ESM::Dialogue>& mJournals;
-        const CSMWorld::IdCollection<ESM::Race>& mRaces;
-        const CSMWorld::IdCollection<ESM::Region>& mRegions;
-        const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
+        const CSMWorld::IdCollection<ESM3::Class>& mClasses;
+        const CSMWorld::IdCollection<ESM3::Faction>& mFactions;
+        const CSMWorld::IdCollection<ESM3::GameSetting>& mGameSettings;
+        const CSMWorld::IdCollection<ESM3::Global>& mGlobals;
+        const CSMWorld::IdCollection<ESM3::Dialogue>& mJournals;
+        const CSMWorld::IdCollection<ESM3::Race>& mRaces;
+        const CSMWorld::IdCollection<ESM3::Region>& mRegions;
+        const CSMWorld::IdCollection<ESM3::Dialogue>& mTopics;
 
         const CSMWorld::RefIdData& mReferencables;
         const CSMWorld::Resources& mSoundFiles;
@@ -73,7 +73,7 @@ namespace CSMTools
         bool verifyFactionRank(const std::string& name, int rank, const CSMWorld::UniversalId& id,
             CSMDoc::Messages& messages);
         bool verifyItem(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-        bool verifySelectStruct(const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id,
+        bool verifySelectStruct(const ESM3::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id,
             CSMDoc::Messages& messages);
         bool verifySound(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
 

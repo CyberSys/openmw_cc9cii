@@ -85,9 +85,30 @@ add_component_dir (esm
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects util custommarkerstate stolenitems transport animationstate controlsstate mappings luascripts
+    common reader
+    )
+
+add_component_dir (esm3
+    body bsgn cell clas dial ench fact glob gmst info land mgef pgrd race regn scpt skil sndg soun spel sscr tes3
+    acti alch appa armo book clot cont crea door ingr levlist ligh lock ltex misc npc_ prob repa stat weap
+    aipackage cellref effectlist mappings spelllist transport
+    cellid debugprofile filter locals reader variant variantimp
+    )
+
+add_component_dir (esm4
+    achr acre acti alch aloc ammo anio appa arma armo aspc book bptd cell clas clfm clot common cont crea dial
+    dobj door eyes flor flst formid furn glob gras hair hdpt idle idlm imod info ingr keym land lgtm
+    ligh ltex lvlc lvli lvln mato misc mset mstt musc navi navm note npc_ otft pack pgrd pgre pwat qust
+    race reader refr regn road sbsp scol scpt scrl sgst slgm sndr soun stat tact term tes4 tree txst
+    weap wrld
     )
 
 add_component_dir (esmterrain
+    storage
+    )
+
+    # NOTE: temporary copy of esmterrain - simply here in order to separate OpenMW and OpenCS reader
+add_component_dir (esm3terrain
     storage
     )
 

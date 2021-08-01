@@ -9,8 +9,9 @@
 #include <QColor>
 #include <QVector>
 
-#include <components/esm/loadbody.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm/defs.hpp>  // Position
+#include <components/esm3/body.hpp>
+#include <components/esm3/skil.hpp>
 #include <components/esm/loadrace.hpp>
 
 #include "columnbase.hpp"
@@ -404,7 +405,7 @@ namespace CSMWorld
         {
             int skill = record.get().mData.getSkill (mIndex, mMajor);
 
-            return QString::fromUtf8 (ESM::Skill::indexToId (skill).c_str());
+            return QString::fromUtf8 (ESM3::Skill::indexToId (skill).c_str());
         }
 
         void set (Record<ESXRecordT>& record, const QVariant& data) override
@@ -582,7 +583,7 @@ namespace CSMWorld
 
         QVariant get (const Record<ESXRecordT>& record) const override
         {
-            const ESM::Race::MaleFemaleF& value =
+            const ESM3::Race::MaleFemaleF& value =
                 mWeight ? record.get().mData.mWeight : record.get().mData.mHeight;
 
             return mMale ? value.mMale : value.mFemale;
@@ -592,7 +593,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            ESM::Race::MaleFemaleF& value =
+            ESM3::Race::MaleFemaleF& value =
                 mWeight ? record2.mData.mWeight : record2.mData.mHeight;
 
             (mMale ? value.mMale : value.mFemale) = data.toFloat();
@@ -1777,7 +1778,7 @@ namespace CSMWorld
         QVariant get(const Record<ESXRecordT>& record) const override
         {
             // Implemented this way to allow additional gender types in the future.
-            if ((record.get().mData.mFlags & ESM::BodyPart::BPF_Female) == ESM::BodyPart::BPF_Female)
+            if ((record.get().mData.mFlags & ESM3::BodyPart::BPF_Female) == ESM3::BodyPart::BPF_Female)
                 return 1;
 
             return 0;
@@ -1789,9 +1790,9 @@ namespace CSMWorld
 
             // Implemented this way to allow additional gender types in the future.
             if (data.toInt() == 1)
-                record2.mData.mFlags = (record2.mData.mFlags & ~ESM::BodyPart::BPF_Female) | ESM::BodyPart::BPF_Female;
+                record2.mData.mFlags = (record2.mData.mFlags & ~ESM3::BodyPart::BPF_Female) | ESM3::BodyPart::BPF_Female;
             else
-                record2.mData.mFlags = record2.mData.mFlags & ~ESM::BodyPart::BPF_Female;
+                record2.mData.mFlags = record2.mData.mFlags & ~ESM3::BodyPart::BPF_Female;
 
             record.setModified(record2);
         }
@@ -2506,14 +2507,14 @@ namespace CSMWorld
         bool isEditable() const override;
     };
 
-    struct BodyPartRaceColumn : public RaceColumn<ESM::BodyPart>
+    struct BodyPartRaceColumn : public RaceColumn<ESM3::BodyPart>
     {
-        const MeshTypeColumn<ESM::BodyPart> *mMeshType;
+        const MeshTypeColumn<ESM3::BodyPart> *mMeshType;
 
-        BodyPartRaceColumn(const MeshTypeColumn<ESM::BodyPart> *meshType);
+        BodyPartRaceColumn(const MeshTypeColumn<ESM3::BodyPart> *meshType);
 
-        QVariant get(const Record<ESM::BodyPart> &record) const override;
-        void set(Record<ESM::BodyPart> &record, const QVariant &data) override;
+        QVariant get(const Record<ESM3::BodyPart> &record) const override;
+        void set(Record<ESM3::BodyPart> &record, const QVariant &data) override;
         bool isEditable() const override;
     };
 }

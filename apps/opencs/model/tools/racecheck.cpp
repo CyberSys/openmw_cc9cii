@@ -6,12 +6,12 @@
 
 void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Race>& record = mRaces.getRecord (stage);
+    const CSMWorld::Record<ESM3::Race>& record = mRaces.getRecord (stage);
 
     if (record.isDeleted())
         return;
 
-    const ESM::Race& race = record.get();
+    const ESM3::Race& race = record.get();
 
     // Consider mPlayable flag even when "Base" records are ignored
     if (race.mData.mFlags & 0x1)
@@ -55,7 +55,7 @@ void CSMTools::RaceCheckStage::performFinal (CSMDoc::Messages& messages)
         messages.add(id, "No playable race", "", CSMDoc::Message::Severity_SeriousError);
 }
 
-CSMTools::RaceCheckStage::RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races)
+CSMTools::RaceCheckStage::RaceCheckStage (const CSMWorld::IdCollection<ESM3::Race>& races)
 : mRaces (races), mPlayable (false)
 {
     mIgnoreBaseRecords = false;

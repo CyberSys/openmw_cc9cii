@@ -4,7 +4,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound> &sounds,
+CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM3::Sound> &sounds,
                                             const CSMWorld::Resources &soundfiles)
     : mSounds (sounds),
       mSoundFiles (soundfiles)
@@ -21,13 +21,13 @@ int CSMTools::SoundCheckStage::setup()
 
 void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Sound>& record = mSounds.getRecord (stage);
+    const CSMWorld::Record<ESM3::Sound>& record = mSounds.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Sound& sound = record.get();
+    const ESM3::Sound& sound = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Sound, sound.mId);
 

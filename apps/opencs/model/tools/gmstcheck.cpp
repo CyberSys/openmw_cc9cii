@@ -6,7 +6,7 @@
 
 #include "../world/defaultgmsts.hpp"
 
-CSMTools::GmstCheckStage::GmstCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings)
+CSMTools::GmstCheckStage::GmstCheckStage(const CSMWorld::IdCollection<ESM3::GameSetting>& gameSettings)
     : mGameSettings(gameSettings)
 {
     mIgnoreBaseRecords = false;
@@ -21,13 +21,13 @@ int CSMTools::GmstCheckStage::setup()
 
 void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::GameSetting>& record = mGameSettings.getRecord (stage);
+    const CSMWorld::Record<ESM3::GameSetting>& record = mGameSettings.getRecord (stage);
     
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
     
-    const ESM::GameSetting& gmst = record.get();
+    const ESM3::GameSetting& gmst = record.get();
     
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Gmst, gmst.mId);
     

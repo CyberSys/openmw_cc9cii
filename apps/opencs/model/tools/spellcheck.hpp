@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_SPELLCHECK_H
 #define CSM_TOOLS_SPELLCHECK_H
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/spel.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that spell records are internally consistent
     class SpellCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Spell>& mSpells;
+            const CSMWorld::IdCollection<ESM3::Spell>& mSpells;
             bool mIgnoreBaseRecords;
 
         public:
 
-            SpellCheckStage (const CSMWorld::IdCollection<ESM::Spell>& spells);
+            SpellCheckStage (const CSMWorld::IdCollection<ESM3::Spell>& spells);
 
             int setup() override;
             ///< \return number of steps

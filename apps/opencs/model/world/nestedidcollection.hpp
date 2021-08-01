@@ -7,11 +7,6 @@
 #include "nestedcollection.hpp"
 #include "nestedcoladapterimp.hpp"
 
-namespace ESM
-{
-    class ESMReader;
-}
-
 namespace CSMWorld
 {
     struct NestedTableWrapperBase;

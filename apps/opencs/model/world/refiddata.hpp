@@ -6,25 +6,26 @@
 #include <memory>
 #include <cassert>
 
-#include <components/esm/loadacti.hpp>
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadstat.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadmisc.hpp>
+#include <components/esm3/acti.hpp>
+#include <components/esm3/alch.hpp>
+#include <components/esm3/appa.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/book.hpp>
+#include <components/esm3/clot.hpp>
+#include <components/esm3/cont.hpp>
+#include <components/esm3/crea.hpp>
+#include <components/esm3/door.hpp>
+#include <components/esm3/ingr.hpp>
+#include <components/esm3/levlist.hpp>
+#include <components/esm3/ligh.hpp>
+#include <components/esm3/lock.hpp>
+#include <components/esm3/prob.hpp>
+#include <components/esm3/repa.hpp>
+#include <components/esm3/stat.hpp>
+#include <components/esm3/weap.hpp>
+#include <components/esm3/npc_.hpp>
+#include <components/esm3/misc.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 
 #include <components/misc/stringops.hpp>
@@ -34,7 +35,7 @@
 
 namespace ESM
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace CSMWorld
@@ -55,7 +56,7 @@ namespace CSMWorld
 
         virtual void insertRecord (std::unique_ptr<RecordBase> record) = 0;
 
-        virtual int load (ESM::ESMReader& reader, bool base) = 0;
+        virtual int load (ESM::Reader& reader, bool base) = 0;
         ///< \return index of a loaded record or -1 if no record was loaded
 
         virtual void erase (int index, int count) = 0;
@@ -82,7 +83,7 @@ namespace CSMWorld
 
         void insertRecord (std::unique_ptr<RecordBase> record) override;
 
-        int load (ESM::ESMReader& reader, bool base) override;
+        int load (ESM::Reader& reader, bool base) override;
         ///< \return index of a loaded record or -1 if no record was loaded
 
         void erase (int index, int count) override;
@@ -141,12 +142,12 @@ namespace CSMWorld
     }
 
     template<typename RecordT>
-    int RefIdDataContainer<RecordT>::load (ESM::ESMReader& reader, bool base)
+    int RefIdDataContainer<RecordT>::load (ESM::Reader& reader, bool base)
     {
         RecordT record;
         bool isDeleted = false;
 
-        record.load(reader, isDeleted);
+        record.load(static_cast<ESM3::Reader&>(reader), isDeleted);
 
         int index = 0;
         int numRecords = static_cast<int>(mContainer.size());
@@ -239,26 +240,26 @@ namespace CSMWorld
 
         private:
 
-            RefIdDataContainer<ESM::Activator> mActivators;
-            RefIdDataContainer<ESM::Potion> mPotions;
-            RefIdDataContainer<ESM::Apparatus> mApparati;
-            RefIdDataContainer<ESM::Armor> mArmors;
-            RefIdDataContainer<ESM::Book> mBooks;
-            RefIdDataContainer<ESM::Clothing> mClothing;
-            RefIdDataContainer<ESM::Container> mContainers;
-            RefIdDataContainer<ESM::Creature> mCreatures;
-            RefIdDataContainer<ESM::Door> mDoors;
-            RefIdDataContainer<ESM::Ingredient> mIngredients;
-            RefIdDataContainer<ESM::CreatureLevList> mCreatureLevelledLists;
-            RefIdDataContainer<ESM::ItemLevList> mItemLevelledLists;
-            RefIdDataContainer<ESM::Light> mLights;
-            RefIdDataContainer<ESM::Lockpick> mLockpicks;
-            RefIdDataContainer<ESM::Miscellaneous> mMiscellaneous;
-            RefIdDataContainer<ESM::NPC> mNpcs;
-            RefIdDataContainer<ESM::Probe> mProbes;
-            RefIdDataContainer<ESM::Repair> mRepairs;
-            RefIdDataContainer<ESM::Static> mStatics;
-            RefIdDataContainer<ESM::Weapon> mWeapons;
+            RefIdDataContainer<ESM3::Activator> mActivators;
+            RefIdDataContainer<ESM3::Potion> mPotions;
+            RefIdDataContainer<ESM3::Apparatus> mApparati;
+            RefIdDataContainer<ESM3::Armor> mArmors;
+            RefIdDataContainer<ESM3::Book> mBooks;
+            RefIdDataContainer<ESM3::Clothing> mClothing;
+            RefIdDataContainer<ESM3::Container> mContainers;
+            RefIdDataContainer<ESM3::Creature> mCreatures;
+            RefIdDataContainer<ESM3::Door> mDoors;
+            RefIdDataContainer<ESM3::Ingredient> mIngredients;
+            RefIdDataContainer<ESM3::CreatureLevList> mCreatureLevelledLists;
+            RefIdDataContainer<ESM3::ItemLevList> mItemLevelledLists;
+            RefIdDataContainer<ESM3::Light> mLights;
+            RefIdDataContainer<ESM3::Lockpick> mLockpicks;
+            RefIdDataContainer<ESM3::Miscellaneous> mMiscellaneous;
+            RefIdDataContainer<ESM3::NPC> mNpcs;
+            RefIdDataContainer<ESM3::Probe> mProbes;
+            RefIdDataContainer<ESM3::Repair> mRepairs;
+            RefIdDataContainer<ESM3::Static> mStatics;
+            RefIdDataContainer<ESM3::Weapon> mWeapons;
 
             std::map<std::string, LocalIndex> mIndex;
 
@@ -294,7 +295,7 @@ namespace CSMWorld
 
             int getAppendIndex (UniversalId::Type type) const;
 
-            void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
+            void load (ESM::Reader& reader, bool base, UniversalId::Type type);
 
             int getSize() const;
 
@@ -306,26 +307,26 @@ namespace CSMWorld
             void save (int index, ESM::ESMWriter& writer) const;
 
             //RECORD CONTAINERS ACCESS METHODS
-            const RefIdDataContainer<ESM::Book>& getBooks() const;
-            const RefIdDataContainer<ESM::Activator>& getActivators() const;
-            const RefIdDataContainer<ESM::Potion>& getPotions() const;
-            const RefIdDataContainer<ESM::Apparatus>& getApparati() const;
-            const RefIdDataContainer<ESM::Armor>& getArmors() const;
-            const RefIdDataContainer<ESM::Clothing>& getClothing() const;
-            const RefIdDataContainer<ESM::Container>& getContainers() const;
-            const RefIdDataContainer<ESM::Creature>& getCreatures() const;
-            const RefIdDataContainer<ESM::Door>& getDoors() const;
-            const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
-            const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
-            const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
-            const RefIdDataContainer<ESM::Light>& getLights() const;
-            const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
-            const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
-            const RefIdDataContainer<ESM::NPC>& getNPCs() const;
-            const RefIdDataContainer<ESM::Weapon >& getWeapons() const;
-            const RefIdDataContainer<ESM::Probe >& getProbes() const;
-            const RefIdDataContainer<ESM::Repair>& getRepairs() const;
-            const RefIdDataContainer<ESM::Static>& getStatics() const;
+            const RefIdDataContainer<ESM3::Book>& getBooks() const;
+            const RefIdDataContainer<ESM3::Activator>& getActivators() const;
+            const RefIdDataContainer<ESM3::Potion>& getPotions() const;
+            const RefIdDataContainer<ESM3::Apparatus>& getApparati() const;
+            const RefIdDataContainer<ESM3::Armor>& getArmors() const;
+            const RefIdDataContainer<ESM3::Clothing>& getClothing() const;
+            const RefIdDataContainer<ESM3::Container>& getContainers() const;
+            const RefIdDataContainer<ESM3::Creature>& getCreatures() const;
+            const RefIdDataContainer<ESM3::Door>& getDoors() const;
+            const RefIdDataContainer<ESM3::Ingredient>& getIngredients() const;
+            const RefIdDataContainer<ESM3::CreatureLevList>& getCreatureLevelledLists() const;
+            const RefIdDataContainer<ESM3::ItemLevList>& getItemLevelledList() const;
+            const RefIdDataContainer<ESM3::Light>& getLights() const;
+            const RefIdDataContainer<ESM3::Lockpick>& getLocpicks() const;
+            const RefIdDataContainer<ESM3::Miscellaneous>& getMiscellaneous() const;
+            const RefIdDataContainer<ESM3::NPC>& getNPCs() const;
+            const RefIdDataContainer<ESM3::Weapon >& getWeapons() const;
+            const RefIdDataContainer<ESM3::Probe >& getProbes() const;
+            const RefIdDataContainer<ESM3::Repair>& getRepairs() const;
+            const RefIdDataContainer<ESM3::Static>& getStatics() const;
 
             void copyTo (int index, RefIdData& target) const;
     };

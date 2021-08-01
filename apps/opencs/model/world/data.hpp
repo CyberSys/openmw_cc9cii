@@ -9,25 +9,26 @@
 #include <QObject>
 #include <QModelIndex>
 
-#include <components/esm/loadglob.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/loadsoun.hpp>
-#include <components/esm/loadscpt.hpp>
-#include <components/esm/loadregn.hpp>
-#include <components/esm/loadbsgn.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loaddial.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadbody.hpp>
-#include <components/esm/loadsndg.hpp>
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadsscr.hpp>
-#include <components/esm/debugprofile.hpp>
-#include <components/esm/filter.hpp>
+#include <components/esm3/glob.hpp>
+#include <components/esm3/gmst.hpp>
+#include <components/esm3/skil.hpp>
+#include <components/esm3/clas.hpp>
+#include <components/esm3/fact.hpp>
+#include <components/esm3/race.hpp>
+#include <components/esm3/soun.hpp>
+#include <components/esm3/scpt.hpp>
+#include <components/esm3/sscr.hpp>
+#include <components/esm3/regn.hpp>
+#include <components/esm3/bsgn.hpp>
+#include <components/esm3/spel.hpp>
+#include <components/esm3/dial.hpp>
+#include <components/esm3/ench.hpp>
+#include <components/esm3/body.hpp>
+#include <components/esm3/sndg.hpp>
+#include <components/esm3/mgef.hpp>
+#include <components/esm3/sscr.hpp>
+#include <components/esm3/debugprofile.hpp>
+#include <components/esm3/filter.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -66,10 +67,15 @@ namespace Fallback
     class Map;
 }
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
     struct Dialogue;
+}
+
+namespace ESM4
+{
+    union RecordHeader;
 }
 
 namespace CSMWorld
@@ -82,26 +88,26 @@ namespace CSMWorld
             Q_OBJECT
 
             ToUTF8::Utf8Encoder mEncoder;
-            IdCollection<ESM::Global> mGlobals;
-            IdCollection<ESM::GameSetting> mGmsts;
-            IdCollection<ESM::Skill> mSkills;
-            IdCollection<ESM::Class> mClasses;
-            NestedIdCollection<ESM::Faction> mFactions;
-            NestedIdCollection<ESM::Race> mRaces;
-            IdCollection<ESM::Sound> mSounds;
-            IdCollection<ESM::Script> mScripts;
-            NestedIdCollection<ESM::Region> mRegions;
-            NestedIdCollection<ESM::BirthSign> mBirthsigns;
-            NestedIdCollection<ESM::Spell> mSpells;
-            IdCollection<ESM::Dialogue> mTopics;
-            IdCollection<ESM::Dialogue> mJournals;
-            NestedIdCollection<ESM::Enchantment> mEnchantments;
-            IdCollection<ESM::BodyPart> mBodyParts;
-            IdCollection<ESM::MagicEffect> mMagicEffects;
+            IdCollection<ESM3::Global> mGlobals;
+            IdCollection<ESM3::GameSetting> mGmsts;
+            IdCollection<ESM3::Skill> mSkills;
+            IdCollection<ESM3::Class> mClasses;
+            NestedIdCollection<ESM3::Faction> mFactions;
+            NestedIdCollection<ESM3::Race> mRaces;
+            IdCollection<ESM3::Sound> mSounds;
+            IdCollection<ESM3::Script> mScripts;
+            NestedIdCollection<ESM3::Region> mRegions;
+            NestedIdCollection<ESM3::BirthSign> mBirthsigns;
+            NestedIdCollection<ESM3::Spell> mSpells;
+            IdCollection<ESM3::Dialogue> mTopics;
+            IdCollection<ESM3::Dialogue> mJournals;
+            NestedIdCollection<ESM3::Enchantment> mEnchantments;
+            IdCollection<ESM3::BodyPart> mBodyParts;
+            IdCollection<ESM3::MagicEffect> mMagicEffects;
             SubCellCollection<Pathgrid> mPathgrids;
-            IdCollection<ESM::DebugProfile> mDebugProfiles;
-            IdCollection<ESM::SoundGenerator> mSoundGens;
-            IdCollection<ESM::StartScript> mStartScripts;
+            IdCollection<ESM3::DebugProfile> mDebugProfiles;
+            IdCollection<ESM3::SoundGenerator> mSoundGens;
+            IdCollection<ESM3::StartScript> mStartScripts;
             NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             NestedIdCollection<Cell> mCells;
@@ -109,17 +115,18 @@ namespace CSMWorld
             IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
-            IdCollection<ESM::Filter> mFilters;
+            IdCollection<ESM3::Filter> mFilters;
             Collection<MetaData> mMetaData;
             std::unique_ptr<ActorAdapter> mActorAdapter;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
-            ESM::ESMReader *mReader;
-            const ESM::Dialogue *mDialogue; // last loaded dialogue
+            ESM::Reader* mReader;
+            const ESM3::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<unsigned int, unsigned int> > mRefLoadCache;
             int mReaderIndex;
+            std::vector<std::string> mLoadedFiles; // FIXME: probably duplicated data
 
             bool mFsStrict;
             Files::PathContainer mDataPaths;
@@ -128,7 +135,10 @@ namespace CSMWorld
             ResourcesManager mResourcesManager;
             std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
-            std::vector<std::shared_ptr<ESM::ESMReader> > mReaders;
+            std::vector<std::shared_ptr<ESM::Reader> > mReaders;
+            // FIXME: hack to workaround the differences between OpenCS and OpenMW
+            //        without rewriting the code block copied from OpenMW
+            //std::vector<ESM::Reader*> mReaderList;
 
             std::map<std::string, int> mContentFileNames;
 
@@ -147,6 +157,9 @@ namespace CSMWorld
 
             void loadFallbackEntries();
 
+            bool loadTes4Group (CSMDoc::Messages& messages);
+            bool loadTes4Record (const ESM4::RecordHeader& hdr, CSMDoc::Messages& messages);
+
         public:
 
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
@@ -160,57 +173,57 @@ namespace CSMWorld
 
             std::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
 
-            const IdCollection<ESM::Global>& getGlobals() const;
+            const IdCollection<ESM3::Global>& getGlobals() const;
 
-            IdCollection<ESM::Global>& getGlobals();
+            IdCollection<ESM3::Global>& getGlobals();
 
-            const IdCollection<ESM::GameSetting>& getGmsts() const;
+            const IdCollection<ESM3::GameSetting>& getGmsts() const;
 
-            IdCollection<ESM::GameSetting>& getGmsts();
+            IdCollection<ESM3::GameSetting>& getGmsts();
 
-            const IdCollection<ESM::Skill>& getSkills() const;
+            const IdCollection<ESM3::Skill>& getSkills() const;
 
-            IdCollection<ESM::Skill>& getSkills();
+            IdCollection<ESM3::Skill>& getSkills();
 
-            const IdCollection<ESM::Class>& getClasses() const;
+            const IdCollection<ESM3::Class>& getClasses() const;
 
-            IdCollection<ESM::Class>& getClasses();
+            IdCollection<ESM3::Class>& getClasses();
 
-            const IdCollection<ESM::Faction>& getFactions() const;
+            const IdCollection<ESM3::Faction>& getFactions() const;
 
-            IdCollection<ESM::Faction>& getFactions();
+            IdCollection<ESM3::Faction>& getFactions();
 
-            const IdCollection<ESM::Race>& getRaces() const;
+            const IdCollection<ESM3::Race>& getRaces() const;
 
-            IdCollection<ESM::Race>& getRaces();
+            IdCollection<ESM3::Race>& getRaces();
 
-            const IdCollection<ESM::Sound>& getSounds() const;
+            const IdCollection<ESM3::Sound>& getSounds() const;
 
-            IdCollection<ESM::Sound>& getSounds();
+            IdCollection<ESM3::Sound>& getSounds();
 
-            const IdCollection<ESM::Script>& getScripts() const;
+            const IdCollection<ESM3::Script>& getScripts() const;
 
-            IdCollection<ESM::Script>& getScripts();
+            IdCollection<ESM3::Script>& getScripts();
 
-            const IdCollection<ESM::Region>& getRegions() const;
+            const IdCollection<ESM3::Region>& getRegions() const;
 
-            IdCollection<ESM::Region>& getRegions();
+            IdCollection<ESM3::Region>& getRegions();
 
-            const IdCollection<ESM::BirthSign>& getBirthsigns() const;
+            const IdCollection<ESM3::BirthSign>& getBirthsigns() const;
 
-            IdCollection<ESM::BirthSign>& getBirthsigns();
+            IdCollection<ESM3::BirthSign>& getBirthsigns();
 
-            const IdCollection<ESM::Spell>& getSpells() const;
+            const IdCollection<ESM3::Spell>& getSpells() const;
 
-            IdCollection<ESM::Spell>& getSpells();
+            IdCollection<ESM3::Spell>& getSpells();
 
-            const IdCollection<ESM::Dialogue>& getTopics() const;
+            const IdCollection<ESM3::Dialogue>& getTopics() const;
 
-            IdCollection<ESM::Dialogue>& getTopics();
+            IdCollection<ESM3::Dialogue>& getTopics();
 
-            const IdCollection<ESM::Dialogue>& getJournals() const;
+            const IdCollection<ESM3::Dialogue>& getJournals() const;
 
-            IdCollection<ESM::Dialogue>& getJournals();
+            IdCollection<ESM3::Dialogue>& getJournals();
 
             const InfoCollection& getTopicInfos() const;
 
@@ -232,21 +245,21 @@ namespace CSMWorld
 
             RefCollection& getReferences();
 
-            const IdCollection<ESM::Filter>& getFilters() const;
+            const IdCollection<ESM3::Filter>& getFilters() const;
 
-            IdCollection<ESM::Filter>& getFilters();
+            IdCollection<ESM3::Filter>& getFilters();
 
-            const IdCollection<ESM::Enchantment>& getEnchantments() const;
+            const IdCollection<ESM3::Enchantment>& getEnchantments() const;
 
-            IdCollection<ESM::Enchantment>& getEnchantments();
+            IdCollection<ESM3::Enchantment>& getEnchantments();
 
-            const IdCollection<ESM::BodyPart>& getBodyParts() const;
+            const IdCollection<ESM3::BodyPart>& getBodyParts() const;
 
-            IdCollection<ESM::BodyPart>& getBodyParts();
+            IdCollection<ESM3::BodyPart>& getBodyParts();
 
-            const IdCollection<ESM::DebugProfile>& getDebugProfiles() const;
+            const IdCollection<ESM3::DebugProfile>& getDebugProfiles() const;
 
-            IdCollection<ESM::DebugProfile>& getDebugProfiles();
+            IdCollection<ESM3::DebugProfile>& getDebugProfiles();
 
             const IdCollection<CSMWorld::Land>& getLand() const;
 
@@ -256,21 +269,21 @@ namespace CSMWorld
 
             IdCollection<CSMWorld::LandTexture>& getLandTextures();
 
-            const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
+            const IdCollection<ESM3::SoundGenerator>& getSoundGens() const;
 
-            IdCollection<ESM::SoundGenerator>& getSoundGens();
+            IdCollection<ESM3::SoundGenerator>& getSoundGens();
 
-            const IdCollection<ESM::MagicEffect>& getMagicEffects() const;
+            const IdCollection<ESM3::MagicEffect>& getMagicEffects() const;
 
-            IdCollection<ESM::MagicEffect>& getMagicEffects();
+            IdCollection<ESM3::MagicEffect>& getMagicEffects();
 
             const SubCellCollection<Pathgrid>& getPathgrids() const;
 
             SubCellCollection<Pathgrid>& getPathgrids();
 
-            const IdCollection<ESM::StartScript>& getStartScripts() const;
+            const IdCollection<ESM3::StartScript>& getStartScripts() const;
 
-            IdCollection<ESM::StartScript>& getStartScripts();
+            IdCollection<ESM3::StartScript>& getStartScripts();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;

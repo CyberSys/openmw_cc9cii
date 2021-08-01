@@ -589,7 +589,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
             return false;
         }
 
-        const CSMWorld::Record<ESM::Filter>& record = mData.getFilters().getRecord (index);
+        const CSMWorld::Record<ESM3::Filter>& record = mData.getFilters().getRecord (index);
 
         if (record.isDeleted())
         {

@@ -4,7 +4,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::RegionCheckStage::RegionCheckStage (const CSMWorld::IdCollection<ESM::Region>& regions)
+CSMTools::RegionCheckStage::RegionCheckStage (const CSMWorld::IdCollection<ESM3::Region>& regions)
 : mRegions (regions)
 {
     mIgnoreBaseRecords = false;
@@ -19,13 +19,13 @@ int CSMTools::RegionCheckStage::setup()
 
 void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Region>& record = mRegions.getRecord (stage);
+    const CSMWorld::Record<ESM3::Region>& record = mRegions.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Region& region = record.get();
+    const ESM3::Region& region = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Region, region.mId);
 
@@ -42,7 +42,7 @@ void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (chances != 100)
         messages.add(id, "Weather chances do not add up to 100", "", CSMDoc::Message::Severity_Error);
 
-    for (const ESM::Region::SoundRef& sound : region.mSoundList)
+    for (const ESM3::Region::SoundRef& sound : region.mSoundList)
     {
         if (sound.mChance > 100)
             messages.add(id, "Chance of '" + sound.mSound + "' sound to play is over 100 percent", "", CSMDoc::Message::Severity_Warning);

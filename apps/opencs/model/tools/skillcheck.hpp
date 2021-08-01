@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_SKILLCHECK_H
 #define CSM_TOOLS_SKILLCHECK_H
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that skill records are internally consistent
     class SkillCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Skill>& mSkills;
+            const CSMWorld::IdCollection<ESM3::Skill>& mSkills;
             bool mIgnoreBaseRecords;
 
         public:
 
-            SkillCheckStage (const CSMWorld::IdCollection<ESM::Skill>& skills);
+            SkillCheckStage (const CSMWorld::IdCollection<ESM3::Skill>& skills);
 
             int setup() override;
             ///< \return number of steps

@@ -1,11 +1,15 @@
 #include "infocollection.hpp"
 
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
+
 #include <stdexcept>
 #include <iterator>
 #include <cassert>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/reader.hpp>
+#include <components/esm3/dial.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -32,7 +36,7 @@ namespace CSMWorld
         if (index == size)
             mRecords.push_back(std::move(record2));
         else
-            mRecords.insert(mRecords.begin()+index, std::move(record2));
+            mRecords.insert(mRecords.begin()+index, std::move(record2)); // FIXME: insertion to vector can be very slow
 
         // index map is updated in InfoCollection::insertRecord()
     }
@@ -196,7 +200,7 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
     return true;
 }
 
-void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
+void CSMWorld::InfoCollection::load (ESM3::Reader& reader, bool base, const ESM3::Dialogue& dialogue)
 {
     Info info;
     bool isDeleted = false;
@@ -373,6 +377,8 @@ void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record,
     if (separator == std::string::npos)
         throw std::runtime_error("invalid info ID: " + id);
 
+    std::string lowerId2 = Misc::StringUtils::lowerCase(id);
+
     Collection<Info, IdAccessor<Info> >::insertRecord(std::move(record), index, type); // add records only
 
     // adjust index
@@ -392,6 +398,8 @@ void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record,
 
     // get iterator for existing topic or a new topic
     std::string lowerId = Misc::StringUtils::lowerCase(id);
+
+    // NOTE: insert failure is ignored (i.e. does not overwrite mInfoIndex entry)
     std::pair<std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator, bool> res
         = mInfoIndex.insert(
                 std::make_pair(lowerId.substr(0, separator),

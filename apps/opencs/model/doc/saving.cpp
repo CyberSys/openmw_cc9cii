@@ -16,13 +16,13 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteHeaderStage (mDocument, mState, true));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Filter> > (
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Filter> > (
         mDocument.getData().getFilters(), mState, CSMWorld::Scope_Project));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::DebugProfile> > (
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::DebugProfile> > (
         mDocument.getData().getDebugProfiles(), mState, CSMWorld::Scope_Project));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script> > (
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Script> > (
         mDocument.getData().getScripts(), mState, CSMWorld::Scope_Project));
 
     appendStage (new CloseSaveStage (mState));
@@ -32,52 +32,52 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteHeaderStage (mDocument, mState, false));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Global> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Global> >
         (mDocument.getData().getGlobals(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::GameSetting> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::GameSetting> >
         (mDocument.getData().getGmsts(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Skill> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Skill> >
         (mDocument.getData().getSkills(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Class> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Class> >
         (mDocument.getData().getClasses(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Faction> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Faction> >
         (mDocument.getData().getFactions(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Race> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Race> >
         (mDocument.getData().getRaces(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Sound> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Sound> >
         (mDocument.getData().getSounds(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Script> >
         (mDocument.getData().getScripts(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Region> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Region> >
         (mDocument.getData().getRegions(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::BirthSign> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::BirthSign> >
         (mDocument.getData().getBirthsigns(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Spell> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Spell> >
         (mDocument.getData().getSpells(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Enchantment> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::Enchantment> >
         (mDocument.getData().getEnchantments(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::BodyPart> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::BodyPart> >
         (mDocument.getData().getBodyParts(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::SoundGenerator> >
         (mDocument.getData().getSoundGens(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::MagicEffect> >
         (mDocument.getData().getMagicEffects(), mState));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::StartScript> >
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM3::StartScript> >
         (mDocument.getData().getStartScripts(), mState));
 
     appendStage (new WriteRefIdCollectionStage (mDocument, mState));

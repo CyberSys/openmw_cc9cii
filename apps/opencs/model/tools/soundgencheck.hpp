@@ -10,14 +10,14 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that sound gen records are internally consistent
     class SoundGenCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::SoundGenerator> &mSoundGens;
-            const CSMWorld::IdCollection<ESM::Sound> &mSounds;
+            const CSMWorld::IdCollection<ESM3::SoundGenerator> &mSoundGens;
+            const CSMWorld::IdCollection<ESM3::Sound> &mSounds;
             const CSMWorld::RefIdCollection &mObjects;
             bool mIgnoreBaseRecords;
 
         public:
-            SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,
-                               const CSMWorld::IdCollection<ESM::Sound> &sounds,
+            SoundGenCheckStage(const CSMWorld::IdCollection<ESM3::SoundGenerator> &soundGens,
+                               const CSMWorld::IdCollection<ESM3::Sound> &sounds,
                                const CSMWorld::RefIdCollection &objects);
 
             int setup() override;

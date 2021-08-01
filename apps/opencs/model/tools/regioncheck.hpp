@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_REGIONCHECK_H
 #define CSM_TOOLS_REGIONCHECK_H
 
-#include <components/esm/loadregn.hpp>
+#include <components/esm3/regn.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that region records are internally consistent
     class RegionCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Region>& mRegions;
+            const CSMWorld::IdCollection<ESM3::Region>& mRegions;
             bool mIgnoreBaseRecords;
 
         public:
 
-            RegionCheckStage (const CSMWorld::IdCollection<ESM::Region>& regions);
+            RegionCheckStage (const CSMWorld::IdCollection<ESM3::Region>& regions);
 
             int setup() override;
             ///< \return number of steps

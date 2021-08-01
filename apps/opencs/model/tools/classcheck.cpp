@@ -9,7 +9,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::ClassCheckStage::ClassCheckStage (const CSMWorld::IdCollection<ESM::Class>& classes)
+CSMTools::ClassCheckStage::ClassCheckStage (const CSMWorld::IdCollection<ESM3::Class>& classes)
 : mClasses (classes)
 {
     mIgnoreBaseRecords = false;
@@ -24,13 +24,13 @@ int CSMTools::ClassCheckStage::setup()
 
 void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Class>& record = mClasses.getRecord (stage);
+    const CSMWorld::Record<ESM3::Class>& record = mClasses.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Class& class_ = record.get();
+    const ESM3::Class& class_ = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Class, class_.mId);
 

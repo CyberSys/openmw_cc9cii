@@ -2,9 +2,9 @@
 
 #include <sstream>
 
-void CSMWorld::Cell::load (ESM::ESMReader &esm, bool &isDeleted)
+void CSMWorld::Cell::load (ESM::Reader& reader, bool& isDeleted)
 {
-    ESM::Cell::load (esm, isDeleted, false);
+    ESM3::Cell::load (static_cast<ESM3::Reader&>(reader), isDeleted, false);
 
     mId = mName;
     if (isExterior())

@@ -2,13 +2,13 @@
 
 #include <map>
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
 
-CSMTools::FactionCheckStage::FactionCheckStage (const CSMWorld::IdCollection<ESM::Faction>& factions)
+CSMTools::FactionCheckStage::FactionCheckStage (const CSMWorld::IdCollection<ESM3::Faction>& factions)
 : mFactions (factions)
 {
     mIgnoreBaseRecords = false;
@@ -23,13 +23,13 @@ int CSMTools::FactionCheckStage::setup()
 
 void CSMTools::FactionCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Faction>& record = mFactions.getRecord (stage);
+    const CSMWorld::Record<ESM3::Faction>& record = mFactions.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Faction& faction = record.get();
+    const ESM3::Faction& faction = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Faction, faction.mId);
 
@@ -53,7 +53,7 @@ void CSMTools::FactionCheckStage::perform (int stage, CSMDoc::Messages& messages
     for (auto &skill : skills)
         if (skill.second>1)
         {
-            messages.add(id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Skill " + ESM3::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Error);
         }
 
     /// \todo check data members that can't be edited in the table view
