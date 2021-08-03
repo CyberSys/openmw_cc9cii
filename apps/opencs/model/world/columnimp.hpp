@@ -335,7 +335,7 @@ namespace CSMWorld
     struct NameColumn : public Column<ESXRecordT>
     {
         NameColumn(ColumnBase::Display display = ColumnBase::Display_String)
-        : Column (Columns::ColumnId_Name, display) {}
+        : Column<ESXRecordT> (Columns::ColumnId_Name, display) {}
 
         QVariant get (const Record<ESXRecordT>& record) const override
         {
