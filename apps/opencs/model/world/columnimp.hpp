@@ -12,7 +12,7 @@
 #include <components/esm/defs.hpp>  // Position
 #include <components/esm3/body.hpp>
 #include <components/esm3/skil.hpp>
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/race.hpp>
 
 #include "columnbase.hpp"
 #include "columns.hpp"

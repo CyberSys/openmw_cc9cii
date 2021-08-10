@@ -9,7 +9,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Vec3>
 
-#include <components/sceneutil/pathgridutil.hpp>
+#include <components/sceneutil/pathgridutil_temp.hpp>
 
 #include "../../model/world/cell.hpp"
 #include "../../model/world/commands.hpp"
@@ -46,7 +46,7 @@ namespace CSVRender
         QString text("Pathgrid: ");
         text += mPathgrid->getId().c_str();
         text += " (";
-        text += QString::number(SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0)));
+        text += QString::number(SceneUtil3::getPathgridNode(static_cast<unsigned short>(hit.index0)));
         text += ")";
 
         return text;
@@ -197,8 +197,8 @@ namespace CSVRender
             const CSMWorld::Pathgrid::Point& pointA = source->mPoints[mDragOrigin];
             const CSMWorld::Pathgrid::Point& pointB = source->mPoints[node];
 
-            osg::Vec3f start = osg::Vec3f(pointA.mX, pointA.mY, pointA.mZ + SceneUtil::DiamondHalfHeight);
-            osg::Vec3f end = osg::Vec3f(pointB.mX, pointB.mY, pointB.mZ + SceneUtil::DiamondHalfHeight);
+            osg::Vec3f start = osg::Vec3f(pointA.mX, pointA.mY, pointA.mZ + SceneUtil3::DiamondHalfHeight);
+            osg::Vec3f end = osg::Vec3f(pointB.mX, pointB.mY, pointB.mZ + SceneUtil3::DiamondHalfHeight);
 
             createDragGeometry(start, end, true);
         }
@@ -211,7 +211,7 @@ namespace CSVRender
         {
             const CSMWorld::Pathgrid::Point& point = source->mPoints[mDragOrigin];
 
-            osg::Vec3f start = osg::Vec3f(point.mX, point.mY, point.mZ + SceneUtil::DiamondHalfHeight);
+            osg::Vec3f start = osg::Vec3f(point.mX, point.mY, point.mZ + SceneUtil3::DiamondHalfHeight);
             osg::Vec3f end = pos - mBaseNode->getPosition();
             createDragGeometry(start, end, false);
         }
@@ -523,7 +523,7 @@ namespace CSVRender
             }
 
             removePathgridGeometry();
-            mPathgridGeometry = SceneUtil::createPathgridGeometry(*source);
+            mPathgridGeometry = SceneUtil3::createPathgridGeometry(*source);
             mPathgridGeode->addDrawable(mPathgridGeometry);
 
             createSelectedGeometry(*source);
@@ -552,7 +552,7 @@ namespace CSVRender
     {
         removeSelectedGeometry();
 
-        mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, mSelected);
+        mSelectedGeometry = SceneUtil3::createPathgridSelectedWireframe(source, mSelected);
         mPathgridGeode->addDrawable(mSelectedGeometry);
     }
 

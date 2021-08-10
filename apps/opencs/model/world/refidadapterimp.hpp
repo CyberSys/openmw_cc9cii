@@ -6,7 +6,7 @@
 #include <QVariant>
 
 #include <components/esm3/alch.hpp>
-#include <components/esm/loadench.hpp>
+#include <components/esm3/ench.hpp>
 #include <components/esm3/appa.hpp>
 #include <components/esm3/npc_.hpp>
 #include <components/esm3/crea.hpp>

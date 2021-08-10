@@ -58,6 +58,7 @@ add_component_dir (sceneutil
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
     actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
     screencapture
+    lightutil_temp pathgridutil_temp
     )
 
 add_component_dir (nif

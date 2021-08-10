@@ -3,7 +3,7 @@
 #include <sstream>
 #include <map>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/spel.hpp>
 
 #include "../prefs/state.hpp"
 
@@ -38,9 +38,12 @@ void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (spell.mName.empty())
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
+    // Cost is 32-bit unsigned, so cannot be negative
+#if 0
     // test for invalid cost values
-    if (spell.mData.mCost<0)
+    if (spell.mData.mCost < 0)
         messages.add(id, "Spell cost is negative", "", CSMDoc::Message::Severity_Error);
+#endif
 
     /// \todo check data members that can't be edited in the table view
 }

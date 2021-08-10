@@ -357,7 +357,7 @@ namespace CSMWorld
                 }
                 case 3:
                 {
-                    if (effect.mRange >=0 && effect.mRange <=2)
+                    if (effect.mRange <= 2) // Range is 32-bit unsigned
                         return effect.mRange;
                     else
                         throw std::runtime_error("Magic effects range unexpected value");

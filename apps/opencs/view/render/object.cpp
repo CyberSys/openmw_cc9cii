@@ -27,7 +27,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/lightutil.hpp>
+#include <components/sceneutil/lightutil_temp.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "actor.hpp"
@@ -140,7 +140,7 @@ void CSVRender::Object::update()
     if (light)
     {
         bool isExterior = false; // FIXME
-        SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior);
+        SceneUtil3::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior);
     }
 }
 
