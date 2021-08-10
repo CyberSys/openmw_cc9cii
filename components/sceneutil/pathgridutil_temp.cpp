@@ -1,11 +1,11 @@
-#include "pathgridutil.hpp"
+#include "pathgridutil_temp.hpp"
 
 #include <osg/Geometry>
 #include <osg/Material>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/pgrd.hpp>
 
-namespace SceneUtil
+namespace SceneUtil3
 {
     const unsigned short DiamondVertexCount = 6;
     const unsigned short DiamondIndexCount = 24;
@@ -74,7 +74,7 @@ namespace SceneUtil
     const osg::Vec4f DiamondWireColor = osg::Vec4f(0.72f, 0.f, 0.96f, 1.f);
     const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
 
-    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
+    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM3::Pathgrid& pathgrid)
     {
         const unsigned short PointCount = static_cast<unsigned short>(pathgrid.mPoints.size());
         const size_t EdgeCount = pathgrid.mEdges.size();
@@ -98,7 +98,7 @@ namespace SceneUtil
             // Add each point/node
             for (unsigned short pointIndex = 0; pointIndex < PointCount; ++pointIndex)
             {
-                const ESM::Pathgrid::Point& point = pathgrid.mPoints[pointIndex];
+                const ESM3::Pathgrid::Point& point = pathgrid.mPoints[pointIndex];
                 osg::Vec3f position = osg::Vec3f(point.mX, point.mY, point.mZ);
 
                 unsigned short vertexOffset = pointIndex * DiamondTotalVertexCount;
@@ -128,15 +128,15 @@ namespace SceneUtil
             // Add edges
             unsigned short lineIndex = 0;
 
-            for (ESM::Pathgrid::EdgeList::const_iterator edge = pathgrid.mEdges.begin();
+            for (ESM3::Pathgrid::EdgeList::const_iterator edge = pathgrid.mEdges.begin();
                 edge != pathgrid.mEdges.end(); ++edge)
             {
                 if (edge->mV0 == edge->mV1 || edge->mV0 < 0 || edge->mV0 >= PointCount ||
                     edge->mV1 < 0 || edge->mV1 >= PointCount)
                     continue;
 
-                const ESM::Pathgrid::Point& from = pathgrid.mPoints[edge->mV0];
-                const ESM::Pathgrid::Point& to = pathgrid.mPoints[edge->mV1];
+                const ESM3::Pathgrid::Point& from = pathgrid.mPoints[edge->mV0];
+                const ESM3::Pathgrid::Point& to = pathgrid.mPoints[edge->mV1];
 
                 osg::Vec3f fromPos = osg::Vec3f(from.mX, from.mY, from.mZ);
                 osg::Vec3f toPos = osg::Vec3f(to.mX, to.mY, to.mZ);
@@ -183,7 +183,7 @@ namespace SceneUtil
         return gridGeometry;
     }
 
-    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(const ESM::Pathgrid& pathgrid,
+    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(const ESM3::Pathgrid& pathgrid,
         const std::vector<unsigned short>& selected)
     {
         const unsigned short PointCount = selected.size();
@@ -206,7 +206,7 @@ namespace SceneUtil
             // Add each point/node
             for (unsigned short it = 0; it < PointCount; ++it)
             {
-                const ESM::Pathgrid::Point& point = pathgrid.mPoints[selected[it]];
+                const ESM3::Pathgrid::Point& point = pathgrid.mPoints[selected[it]];
                 osg::Vec3f position = osg::Vec3f(point.mX, point.mY, point.mZ) + wireOffset;
 
                 unsigned short vertexOffset = it * DiamondVertexCount;

@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <memory>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"

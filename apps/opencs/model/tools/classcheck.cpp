@@ -2,8 +2,9 @@
 
 #include <map>
 
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/clas.hpp>
+#include <components/esm3/skil.hpp>
+#include <components/esm/attr.hpp>
 
 #include "../prefs/state.hpp"
 
@@ -43,13 +44,15 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
-    for (int i=0; i<2; ++i)
-        if (class_.mData.mAttribute[i]==-1)
+    for (int i = 0; i < 2; ++i)
+        // NOTE: ESM3::Class::blank() sets mAttribute[2] to 0 which corresponds to "Strength"
+        if (class_.mData.mAttribute[i] >= ESM::Attribute::Length)
         {
             messages.add(id, "Attribute #" + std::to_string(i) + " is not set", "", CSMDoc::Message::Severity_Error);
         }
 
-    if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
+    if (class_.mData.mAttribute[0] == class_.mData.mAttribute[1]
+            && class_.mData.mAttribute[0] < ESM::Attribute::Length)
     {
         messages.add(id, "Same attribute is listed twice", "", CSMDoc::Message::Severity_Error);
     }
@@ -64,6 +67,6 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
     for (auto &skill : skills)
         if (skill.second>1)
         {
-            messages.add(id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Skill " + ESM3::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Error);
         }
 }

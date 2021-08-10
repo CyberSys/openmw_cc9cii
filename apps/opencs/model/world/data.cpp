@@ -7,8 +7,8 @@
 #include <QAbstractItemModel>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/glob.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include <components/esm3/reader.hpp>
 #include <components/esm4/reader.hpp>

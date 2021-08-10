@@ -3,7 +3,7 @@
 #include <components/esm3/armo.hpp>
 #include <components/esm3/clot.hpp>
 #include <components/esm3/npc_.hpp>
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/race.hpp>
 #include <components/esm3/mappings.hpp>
 #include <components/sceneutil/actorutil.hpp>
 
@@ -496,7 +496,7 @@ namespace CSMWorld
         }
 
         auto& race = raceRecord.get();
-        data->reset_data(id, race.mData.mFlags & ESM::Race::Beast);
+        data->reset_data(id, race.mData.mFlags & ESM3::Race::Beast);
 
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)
