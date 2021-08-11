@@ -999,16 +999,18 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
     // FIXME: used by terrain to get the plugin index
     // See: b2ddd3c2596004d9ee9122c33ce4a57007836a42
-    //      ESMTerrain::Storage::getVtexIndexAt()
-    //      ESM::Land::mPlugin
-    if (!mReader->isEsm4())
-        static_cast<ESM3::Reader*>(mReader)->setIndex((project || !base) ? 0 : mReaderIndex++);
+    //      ESM3Terrain::Storage::getVtexIndexAt()
+    //      ESM3::Land::mPlugin
+    mReader->setModIndex((project || !base) ? 0 : mReaderIndex++);
 
-    // FIXME: used by ESMStore to track dependencies (OpenCS doesn't track dependencies yet)
+    // FIXME: used by ESMStore to track dependencies (OpenCS doesn't track dependencies)
     // See: 2175f13b67e9075455bc944b0e32cdd0cb9b5ceb
     //      896ab44d1e919852aae03be9ecb71378f031b6f5
     //mReaderList.push_back(mReader);
     //mReader->setGlobalReaderList(&mReaderList);
+    //
+    // then used by ESMStore::load()
+    //mLandTextures.resize(esm.getGlobalReaderList()->size());
 
     if (mReader->isEsm4())
     {
@@ -1024,39 +1026,16 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
         {
             // FIXME: temp commented out
             //reader->setIndex(mReaderIndex-1); // use the same index
-            reader->setModIndex(mReaderIndex-1);
+            //reader->setModIndex(mReaderIndex-1);
             reader->updateModIndices(mLoadedFiles);
             mLoadedFiles.push_back(path.filename().string());
         }
     }
-#if 0
-    else // track dependencies
-    {
-        const std::vector<ESM::MasterData> &masters = mReader->getGameFiles();
-        std::vector<ESM3::Reader*> *allPlugins = mReader->getGlobalReaderList();
-        for (size_t j = 0; j < masters.size(); j++) {
-            const ESM::Header::MasterData &mast = masters[j];
-            std::string fname = mast.name;
-            int index = ~0;
-            for (int i = 0; i < mReaderIndex -1; i++) {
-                const std::string candidate = allPlugins->at(i)->getContext().filename;
-                std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-                if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index == (int)~0) {
-                // Tried to load a parent file that has not been loaded yet. This is bad,
-                //  the launcher should have taken care of this.
-                std::string fstring = "File " + mReader->getName() + " asks for parent file " + masters[j].name
-                    + ", but it has not been loaded yet. Please check your load order.";
-                mReader->fail(fstring);
-            }
-            mReader->addParentFileIndex(index);
-        }
-    }
-#endif
+
+    // NOTE: Unlike OpenMW (see ESMStore::load()) we don't enforce content file master
+    //       dependencies.  For OpenCS, the content selector won't allow it anyway.
+    //       Even if the content selector rule is relaxed in future we shouldn't enforce
+    //       it because the end-user may have legitimate reasons.
 
     mBase = base;
     mProject = project;

@@ -11,7 +11,7 @@ namespace CSMWorld
     {
         ESM3::LandTexture::load(static_cast<ESM3::Reader&>(reader), isDeleted);
 
-        mPluginIndex = static_cast<ESM3::Reader&>(reader).getIndex(); // FIXME: is there another way to get index?
+        mPluginIndex = static_cast<ESM3::Reader&>(reader).getModIndex(); // FIXME: is there another way to get index?
     }
 
     std::string LandTexture::createUniqueRecordId(int plugin, int index)

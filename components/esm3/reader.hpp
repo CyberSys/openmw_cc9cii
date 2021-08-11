@@ -21,6 +21,11 @@ namespace ESM3
         std::uint32_t   modIndex;         // the sequential position of this file in the load order:
                                           //  0x00 reserved, 0xFF in-game
 
+        // When working with multiple esX files, we will generate lists of all files that
+        //  actually contribute to a specific cell. Therefore, we need to store the index
+        //  of the file belonging to this contest. See CellStore::(list/load)refs for details.
+        std::vector<std::uint32_t> parentFileIndices;
+
         std::size_t     filePos;          // File position. Only used for stored contexts, not regularly
                                           // updated within the reader itself.
 
@@ -30,12 +35,6 @@ namespace ESM3
         RecordHeader    recordHeader;     // header of the current record or group being processed
         SubRecordHeader subRecordHeader;  // header of the current sub record being processed
         std::uint32_t   recordRead;       // bytes read from the sub records, incl. the current one
-
-        // When working with multiple esX files, we will generate lists of all files that
-        //  actually contribute to a specific cell. Therefore, we need to store the index
-        //  of the file belonging to this contest. See CellStore::(list/load)refs for details.
-        int index;
-        std::vector<int> parentFileIndices;
     };
 
     class Reader : public ESM::Reader
@@ -49,8 +48,6 @@ namespace ESM3
         size_t mFileSize;
 
         Files::IStreamPtr    mStream;
-
-        std::vector<Reader> *mGlobalReaderList;
 
         /// Raw opening. Opens the file and sets everything up but doesn't
         /// parse the header.
@@ -164,17 +161,11 @@ namespace ESM3
         //  terrain palette, but Reader does not pass a reference to the correct plugin
         //  to the individual load() methods. This hack allows to pass this reference
         //  indirectly to the load() method.
-        void setIndex(const int index) { mCtx.index = index;}
-        int getIndex() {return mCtx.index;}
+        void setModIndex(std::uint32_t index) final { mCtx.modIndex = index;}
+        std::uint32_t getModIndex() {return mCtx.modIndex;}
 
-        // used by ESMStore to track dependencies
-        // see 2175f13b67e9075455bc944b0e32cdd0cb9b5ceb
-        //     896ab44d1e919852aae03be9ecb71378f031b6f5
-        void setGlobalReaderList(std::vector<Reader> *list) {mGlobalReaderList = list;}
-        std::vector<Reader> *getGlobalReaderList() {return mGlobalReaderList;}
-
-        void addParentFileIndex(int index) { mCtx.parentFileIndices.push_back(index); }
-        const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; } // used by ESM3::Cell
+        void addParentFileIndex(std::uint32_t index) { mCtx.parentFileIndices.push_back(index); }
+        const std::vector<std::uint32_t>& getParentFileIndices() const { return mCtx.parentFileIndices; }
 
         // FIXME: for testing only
         //bool checkReadFile() { return (mCtx.readFile != mCtx.filePos+mCtx.recordHeader.dataSize); }

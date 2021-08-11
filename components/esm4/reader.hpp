@@ -48,6 +48,10 @@ namespace ESM4
         std::uint32_t   modIndex;         // the sequential position of this file in the load order:
                                           //  0x00 reserved, 0xFF in-game (see notes below)
 
+        // position in the vector = mod index of master files above
+        // value = adjusted mod index based on all the files loaded so far
+        std::vector<std::uint32_t> parentFileIndices;
+
         std::size_t     recHeaderSize;    // normally should be already set correctly, but just in
                                           //  case the file was re-opened.  default = TES5 size,
                                           //  can be reduced for TES4 by setRecHeaderSize()
@@ -161,8 +165,6 @@ namespace ESM4
 
         bool restoreContext(const ReaderContext& ctx); // returns the result of re-reading the header
 
-        //std::size_t openTes4File(const std::string& filename);
-
         template<typename T>
         inline void get(T& t) { mStream->read((char*)&t, sizeof(T)); }
 
@@ -196,7 +198,7 @@ namespace ESM4
 
         // The object setting up this reader needs to supply the file's load order index
         // so that the formId's in this file can be adjusted with the file (i.e. mod) index.
-        void setModIndex(int index) { mCtx.modIndex = (index << 24) & 0xff000000; }
+        void setModIndex(std::uint32_t index) final { mCtx.modIndex = (index << 24) & 0xff000000; }
         void updateModIndices(const std::vector<std::string>& files);
 
         // Maybe should throw an exception if called when not valid?

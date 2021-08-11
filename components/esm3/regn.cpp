@@ -29,13 +29,13 @@ namespace ESM3
                 case ESM3::SUB_CNAM: reader.get(mMapColor); break;
                 case ESM3::SUB_WEAT:
                 {
-                    if (reader.esmVersion() == ESM::VER_12)
+                    if (reader.esmVersion() == ESM::VER_120)
                     {
                         mData.mA = 0;
                         mData.mB = 0;
                         reader.get(mData, sizeof(mData) - 2);
                     }
-                    else if (reader.esmVersion() == ESM::VER_13)
+                    else if (reader.esmVersion() == ESM::VER_130)
                     {
                         // May include the additional two bytes (but not necessarily)
                         if (subHdr.dataSize == sizeof(mData))

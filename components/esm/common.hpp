@@ -22,10 +22,8 @@ namespace ESM
 
     enum ESMVersions
     {
-#if 0 // commented out temporarily due to redefinition in esmcommon
-        VER_12  = 0x3f99999a, // TES3
-        VER_13  = 0x3fa66666, // TES3
-#endif
+        VER_120 = 0x3f99999a, // TES3
+        VER_130 = 0x3fa66666, // TES3
         VER_080 = 0x3f4ccccd, // TES4
         VER_100 = 0x3f800000, // TES4
         VER_132 = 0x3fa8f5c3, // FONV Courier's Stash, DeadMoney

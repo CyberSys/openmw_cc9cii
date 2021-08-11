@@ -15,7 +15,7 @@ namespace CSMWorld
     /// \brief Wrapper for LandTexture record, providing info which plugin the LandTexture was loaded from.
     struct LandTexture : public ESM3::LandTexture
     {
-        int mPluginIndex;
+        std::uint32_t mPluginIndex;
 
         void load (ESM::Reader& reader, bool& isDeleted);
 

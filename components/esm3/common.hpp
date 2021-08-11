@@ -277,7 +277,7 @@ namespace ESM3
         SUB_ENDT = MKTAG('E','N','D','T'), // Enchant
 
         SUB_MVRF = MKTAG('M','V','R','F'), // Moved Reference
-        SUB_FRMR = MKTAG('F','R','M','R')  // From Reference
+        SUB_FRMR = MKTAG('F','R','M','R')  // Form Reference
     };
 
     enum RecordFlag

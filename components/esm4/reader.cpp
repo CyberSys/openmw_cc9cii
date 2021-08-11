@@ -53,7 +53,10 @@
 
 #include "formid.hpp"
 
-ESM4::ReaderContext::ReaderContext() : modIndex(0), recHeaderSize(sizeof(ESM4::RecordHeader)),
+namespace ESM4
+{
+
+ReaderContext::ReaderContext() : modIndex(0), recHeaderSize(sizeof(RecordHeader)),
     filePos(0), recordRead(0), currWorld(0), currCell(0), cellGridValid(false)
 {
     currCellGrid.cellId = 0;
@@ -61,7 +64,8 @@ ESM4::ReaderContext::ReaderContext() : modIndex(0), recHeaderSize(sizeof(ESM4::R
     currCellGrid.grid.y = 0;
 }
 
-ESM4::Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename) : mStream(esmStream)
+Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename)
+    : mEncoder(nullptr), mFileSize(0), mStream(esmStream)
 {
     // used by ESMReader only?
     mCtx.filename = filename;
@@ -77,9 +81,9 @@ ESM4::Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename) :
     std::uint32_t subRecName = 0;
     mStream->read((char*)&subRecName, sizeof(subRecName));
     if (subRecName == 0x52444548) // "HEDR"
-        mCtx.recHeaderSize = sizeof(ESM4::RecordHeader) - 4; // TES4 header size is 4 bytes smaller than TES5 header
+        mCtx.recHeaderSize = sizeof(RecordHeader) - 4; // TES4 header size is 4 bytes smaller than TES5 header
     else
-        mCtx.recHeaderSize = sizeof(ESM4::RecordHeader);
+        mCtx.recHeaderSize = sizeof(RecordHeader);
 
     // restart from the beginning (i.e. "TES4" record header)
     mStream->seekg(0, mStream->beg);
@@ -93,7 +97,7 @@ ESM4::Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename) :
     mCtx.recHeaderSize = isTes4 ? sizeof(ESM4::RecordHeader) - 4 : sizeof(ESM4::RecordHeader);
 #endif
     getRecordHeader();
-    if (mCtx.recordHeader.record.typeId == ESM4::REC_TES4)
+    if (mCtx.recordHeader.record.typeId == REC_TES4)
     {
         mHeader.load(*this);
         mCtx.fileRead += mCtx.recordHeader.record.dataSize;
@@ -104,7 +108,7 @@ ESM4::Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename) :
         fail("Unknown file format");
 }
 
-ESM4::Reader::~Reader()
+Reader::~Reader()
 {
 }
 
@@ -113,7 +117,7 @@ ESM4::Reader::~Reader()
 //
 // The record header needs to be saved in the context or the header needs to be re-loaded after
 // restoring the context. The latter option was chosen.
-ESM4::ReaderContext ESM4::Reader::getContext()
+ReaderContext Reader::getContext()
 {
     mCtx.filePos = mStream->tellg();
     mCtx.filePos -= mCtx.recHeaderSize; // update file position
@@ -121,7 +125,7 @@ ESM4::ReaderContext ESM4::Reader::getContext()
 }
 
 // NOTE: Assumes that the caller has reopened the file if necessary
-bool ESM4::Reader::restoreContext(const ESM4::ReaderContext& ctx)
+bool Reader::restoreContext(const ReaderContext& ctx)
 {
     if (mSavedStream) // TODO: doesn't seem to ever happen
     {
@@ -136,14 +140,14 @@ bool ESM4::Reader::restoreContext(const ESM4::ReaderContext& ctx)
     return getRecordHeader();
 }
 
-void ESM4::Reader::close()
+void Reader::close()
 {
     mStream.reset();
     //clearCtx();
     //mHeader.blank();
 }
 
-void ESM4::Reader::openRaw(Files::IStreamPtr esmStream, const std::string& filename)
+void Reader::openRaw(Files::IStreamPtr esmStream, const std::string& filename)
 {
     close();
 
@@ -156,7 +160,7 @@ void ESM4::Reader::openRaw(Files::IStreamPtr esmStream, const std::string& filen
 
 }
 
-void ESM4::Reader::open(Files::IStreamPtr esmStream, const std::string &filename)
+void Reader::open(Files::IStreamPtr esmStream, const std::string &filename)
 {
     openRaw(esmStream, filename);
 
@@ -166,7 +170,7 @@ void ESM4::Reader::open(Files::IStreamPtr esmStream, const std::string &filename
     if (getExact(modVer)) // get the first 4 bytes of the record header only
     {
         // FIXME: need to setup header/context
-        if (modVer == ESM4::REC_TES4)
+        if (modVer == REC_TES4)
         {
         }
         else
@@ -177,48 +181,13 @@ void ESM4::Reader::open(Files::IStreamPtr esmStream, const std::string &filename
     throw std::runtime_error("Unknown file format"); // can't yet use fail() as mCtx is not setup
 }
 
-[[noreturn]] void ESM4::Reader::fail(const std::string& msg)
-{
-    std::stringstream ss;
-#if 0
-    ss << "ESM Error: " << msg;
-    ss << "\n  File: " << mCtx.filename;
-    ss << "\n  Record: " << mCtx.recName.toString();
-    ss << "\n  Subrecord: " << mCtx.subName.toString();
-    if (mEsm.get())
-        ss << "\n  Offset: 0x" << std::hex << mEsm->tellg();
-#endif
-    throw std::runtime_error(ss.str());
-}
-
-#if 0
-// TODO: consider checking file path using boost::filesystem::exists()
-std::size_t ESM4::Reader::openTes4File(const std::string& name)
-{
-    mCtx.filename = name;
-
-    mStream = Files::IStreamPtr(Files::openConstrainedFileStream(name.c_str()));
-
-    mStream->seekg(0, std::ios::end); // FIXME: is there a better way, or eliminate the need to get the size?
-    mFileSize = mStream->tellg();
-    mStream->seekg(0, std::ios::beg);
-
-    return mFileSize;
-}
-#endif
-
-void ESM4::Reader::setRecHeaderSize(const std::size_t size)
+void Reader::setRecHeaderSize(const std::size_t size)
 {
     mCtx.recHeaderSize = size;
 }
 
-//void ESM4::Reader::registerForUpdates(ESM4::ReaderObserver *observer)
-//{
-//    mObserver = observer;
-//}
-
 // FIXME: only "English" strings supported for now
-void ESM4::Reader::buildLStringIndex()
+void Reader::buildLStringIndex()
 {
     if ((mHeader.mFlags & Rec_ESM) == 0 || (mHeader.mFlags & Rec_Localized) == 0)
         return;
@@ -231,7 +200,7 @@ void ESM4::Reader::buildLStringIndex()
     buildLStringIndex("Strings/" + filename + "_English.DLSTRINGS", Type_DLStrings);
 }
 
-void ESM4::Reader::buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType)
+void Reader::buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType)
 {
     std::uint32_t numEntries;
     std::uint32_t dataSize;
@@ -268,7 +237,7 @@ void ESM4::Reader::buildLStringIndex(const std::string& stringFile, LocalizedStr
     //assert (dataStart - filestream->tell() == 0 && "String file start of data section mismatch");
 }
 
-void ESM4::Reader::getLocalizedString(std::string& str)
+void Reader::getLocalizedString(std::string& str)
 {
     if (!hasLocalizedStrings())
         return (void)getZString(str);
@@ -280,7 +249,7 @@ void ESM4::Reader::getLocalizedString(std::string& str)
 }
 
 // FIXME: very messy and probably slow/inefficient
-void ESM4::Reader::getLocalizedStringImpl(const FormId stringId, std::string& str)
+void Reader::getLocalizedStringImpl(const FormId stringId, std::string& str)
 {
     const std::map<FormId, LStringOffset>::const_iterator it = mLStringIndex.find(stringId);
 
@@ -321,7 +290,7 @@ void ESM4::Reader::getLocalizedStringImpl(const FormId stringId, std::string& st
         throw std::runtime_error("ESM4::Reader::getLocalizedString localized string not found");
 }
 
-bool ESM4::Reader::getRecordHeader()
+bool Reader::getRecordHeader()
 {
     // FIXME: this seems very hacky but we may have skipped subrecords from within an inflated data block
     if (/*mStream->eof() && */mSavedStream)
@@ -334,9 +303,6 @@ bool ESM4::Reader::getRecordHeader()
     std::size_t bytesRead = (std::size_t)mStream->gcount();
 
     // keep track of data left to read from the file
-    // FIXME: having a default instance of mObserver might be faster than checking for null all the time?
-    //if (mObserver)
-        //mObserver->update(mCtx.recHeaderSize);
     mCtx.fileRead += mCtx.recHeaderSize;
 
     mCtx.recordRead = 0; // for keeping track of sub records
@@ -346,184 +312,22 @@ bool ESM4::Reader::getRecordHeader()
 
     // HACK: mCtx.groupStack.back() is updated before the record data are read/skipped
     //       N.B. the data must be fully read/skipped for this to work
-    if (mCtx.recordHeader.record.typeId != ESM4::REC_GRUP && !mCtx.groupStack.empty())
+    if (mCtx.recordHeader.record.typeId != REC_GRUP && !mCtx.groupStack.empty())
     {
         mCtx.groupStack.back().second += (std::uint32_t)mCtx.recHeaderSize + mCtx.recordHeader.record.dataSize;
 
         // keep track of data left to read from the file
-        //if (mObserver)
-            //mObserver->update(mCtx.recordHeader.record.dataSize);
         mCtx.fileRead += mCtx.recordHeader.record.dataSize;
     }
 
     return bytesRead == mCtx.recHeaderSize;
 }
 
-bool ESM4::Reader::getSubRecordHeader()
-{
-    bool result = false;
-    // NOTE: some SubRecords have 0 dataSize (e.g. SUB_RDSD in one of REC_REGN records in Oblivion.esm).
-    // Also SUB_XXXX has zero dataSize and the following 4 bytes represent the actual dataSize
-    // - hence it require manual updtes to mCtx.recordRead via updateRecordRead()
-    // See ESM4::NavMesh and ESM4::World.
-    if (mCtx.recordHeader.record.dataSize - mCtx.recordRead >= sizeof(mCtx.subRecordHeader))
-    {
-        result = getExact(mCtx.subRecordHeader);
-        // HACK: below assumes sub-record data will be read or skipped in full;
-        //       this hack aims to avoid updating mCtx.recordRead each time anything is read
-        mCtx.recordRead += (sizeof(mCtx.subRecordHeader) + mCtx.subRecordHeader.dataSize);
-    }
-    else if (mCtx.recordRead > mCtx.recordHeader.record.dataSize)
-    {
-        // try to correct any overshoot, seek to the end of the expected data
-        // this will only work if mCtx.subRecordHeader.dataSize was fully read or skipped
-        // (i.e. it will only correct mCtx.subRecordHeader.dataSize being incorrect)
-        // TODO: not tested
-        std::uint32_t overshoot = (std::uint32_t)mCtx.recordRead - mCtx.recordHeader.record.dataSize;
-
-        std::size_t pos = mStream->tellg();
-        mStream->seekg(pos - overshoot);
-
-        return false;
-    }
-
-    return result;
-}
-
-// NOTE: the parameter 'files' must have the file names in the loaded order
-void ESM4::Reader::updateModIndices(const std::vector<std::string>& files)
-{
-    if (files.size() >= 0xff)
-        throw std::runtime_error("ESM4::Reader::updateModIndices too many files"); // 0xff is reserved
-
-    // NOTE: this map is rebuilt each time this method is called (i.e. each time a file is loaded)
-    // Perhaps there is an opportunity to optimize this by saving the result somewhere.
-    // But then, the number of files is at most around 250 so perhaps keeping it simple might be better.
-
-    // build a lookup map
-    std::unordered_map<std::string, size_t> fileIndex;
-
-    for (size_t i = 0; i < files.size(); ++i) // ATTENTION: assumes current file is not included
-        fileIndex[boost::to_lower_copy<std::string>(files[i])] = i;
-
-    mHeader.mModIndices.resize(mHeader.mMaster.size());
-    for (unsigned int i = 0; i < mHeader.mMaster.size(); ++i)
-    {
-        // locate the position of the dependency in already loaded files
-        std::unordered_map<std::string, size_t>::const_iterator it
-            = fileIndex.find(boost::to_lower_copy<std::string>(mHeader.mMaster[i].name));
-
-        if (it != fileIndex.end())
-            mHeader.mModIndices[i] = (std::uint32_t)((it->second << 24) & 0xff000000);
-        else
-            throw std::runtime_error("ESM4::Reader::updateModIndices required dependency file not loaded");
-#if 0
-        std::cout << "Master Mod: " << mCtx.header.mMaster[i].name << ", " // FIXME: debugging only
-                  << ESM4::formIdToString(mCtx.header.mModIndices[i]) << std::endl;
-#endif
-    }
-
-    if (!mHeader.mModIndices.empty() &&  mHeader.mModIndices[0] != 0)
-        throw std::runtime_error("ESM4::Reader::updateModIndices base modIndex is not zero");
-}
-
-void ESM4::Reader::enterGroup()
-{
-#ifdef DEBUG_GROUPSTACK
-    std::string padding = ""; // FIXME: debugging only
-    padding.insert(0, mCtx.groupStack.size()*2, ' ');
-    std::cout << padding << "Starting record group "
-              << ESM4::printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
-#endif
-    // empty group if the group size is same as the header size
-    if (mCtx.recordHeader.group.groupSize == (std::uint32_t)mCtx.recHeaderSize)
-    {
-#ifdef DEBUG_GROUPSTACK
-        std::cout << padding << "Ignoring record group " // FIXME: debugging only
-            << ESM4::printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type)
-            << " (empty)" << std::endl;
-#endif
-        if (!mCtx.groupStack.empty()) // top group may be empty (e.g. HAIR in Skyrim)
-        {
-            // don't put on the stack, exitGroupCheck() may not get called before recursing into this method
-            mCtx.groupStack.back().second += mCtx.recordHeader.group.groupSize;
-            exitGroupCheck();
-        }
-
-        return; // don't push an empty group, just return
-    }
-
-    // push group
-    mCtx.groupStack.push_back(std::make_pair(mCtx.recordHeader.group,
-                /*mCtx.recordHeader.group.groupSize - */(std::uint32_t)mCtx.recHeaderSize));
-}
-
-const ESM4::CellGrid& ESM4::Reader::currCellGrid() const
-{
-    // Maybe should throw an exception instead?
-    assert (mCtx.cellGridValid && "Attempt to use an invalid cell grid");
-
-    return mCtx.currCellGrid;
-}
-
-void ESM4::Reader::exitGroupCheck()
-{
-    if (mCtx.groupStack.empty())
-        return;
-
-    // pop finished groups (note reading too much is allowed here)
-    std::uint32_t lastGroupSize = mCtx.groupStack.back().first.groupSize;
-    while (mCtx.groupStack.back().second >= lastGroupSize)
-    {
-#ifdef DEBUG_GROUPSTACK
-        ESM4::GroupTypeHeader grp = mCtx.groupStack.back().first; // FIXME: grp is for debugging only
-#endif
-        // try to correct any overshoot
-        // TODO: not tested
-        std::uint32_t overshoot = mCtx.groupStack.back().second - lastGroupSize;
-        if (overshoot > 0)
-        {
-            std::size_t pos = mStream->tellg();
-            mStream->seekg(pos - overshoot);
-        }
-
-        mCtx.groupStack.pop_back();
-#ifdef DEBUG_GROUPSTACK
-        std::string padding = ""; // FIXME: debugging only
-        padding.insert(0, mCtx.groupStack.size()*2, ' ');
-        std::cout << padding << "Finished record group " << ESM4::printLabel(grp.label, grp.type) << std::endl;
-#endif
-        // if the previous group was the final one no need to do below
-        if (mCtx.groupStack.empty())
-            return;
-
-        mCtx.groupStack.back().second += lastGroupSize;
-        lastGroupSize = mCtx.groupStack.back().first.groupSize;
-
-        assert (lastGroupSize >= mCtx.groupStack.back().second && "Read more records than available");
-//#if 0
-        if (mCtx.groupStack.back().second > lastGroupSize) // FIXME: debugging only
-            std::cerr << ESM4::printLabel(mCtx.groupStack.back().first.label,
-                                          mCtx.groupStack.back().first.type)
-                      << " read more records than available" << std::endl;
-//#endif
-    }
-}
-
-// WARNING: this method should be used after first calling enterGroup()
-// else the method may try to dereference an element that does not exist
-const ESM4::GroupTypeHeader& ESM4::Reader::grp(std::size_t pos) const
-{
-    assert (pos <= mCtx.groupStack.size()-1 && "ESM4::Reader::grp - exceeded stack depth");
-
-    return (*(mCtx.groupStack.end()-pos-1)).first;
-}
-
-void ESM4::Reader::getRecordData(bool dump)
+void Reader::getRecordData(bool dump)
 {
     std::uint32_t uncompressedSize = 0;
 
-    if ((mCtx.recordHeader.record.flags & ESM4::Rec_Compressed) != 0)
+    if ((mCtx.recordHeader.record.flags & Rec_Compressed) != 0)
     {
         mStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(std::uint32_t));
 
@@ -569,7 +373,138 @@ if (dump)
     }
 }
 
-void ESM4::Reader::skipGroupData()
+void Reader::skipRecordData()
+{
+    assert (mCtx.recordRead <= mCtx.recordHeader.record.dataSize && "Skipping after reading more than available");
+    mStream->ignore(mCtx.recordHeader.record.dataSize - mCtx.recordRead);
+    mCtx.recordRead = mCtx.recordHeader.record.dataSize; // for getSubRecordHeader()
+}
+
+bool Reader::getSubRecordHeader()
+{
+    bool result = false;
+    // NOTE: some SubRecords have 0 dataSize (e.g. SUB_RDSD in one of REC_REGN records in Oblivion.esm).
+    // Also SUB_XXXX has zero dataSize and the following 4 bytes represent the actual dataSize
+    // - hence it require manual updtes to mCtx.recordRead via updateRecordRead()
+    // See ESM4::NavMesh and ESM4::World.
+    if (mCtx.recordHeader.record.dataSize - mCtx.recordRead >= sizeof(mCtx.subRecordHeader))
+    {
+        result = getExact(mCtx.subRecordHeader);
+        // HACK: below assumes sub-record data will be read or skipped in full;
+        //       this hack aims to avoid updating mCtx.recordRead each time anything is read
+        mCtx.recordRead += (sizeof(mCtx.subRecordHeader) + mCtx.subRecordHeader.dataSize);
+    }
+    else if (mCtx.recordRead > mCtx.recordHeader.record.dataSize)
+    {
+        // try to correct any overshoot, seek to the end of the expected data
+        // this will only work if mCtx.subRecordHeader.dataSize was fully read or skipped
+        // (i.e. it will only correct mCtx.subRecordHeader.dataSize being incorrect)
+        // TODO: not tested
+        std::uint32_t overshoot = (std::uint32_t)mCtx.recordRead - mCtx.recordHeader.record.dataSize;
+
+        std::size_t pos = mStream->tellg();
+        mStream->seekg(pos - overshoot);
+
+        return false;
+    }
+
+    return result;
+}
+
+void Reader::skipSubRecordData()
+{
+    mStream->ignore(mCtx.subRecordHeader.dataSize);
+}
+
+void Reader::skipSubRecordData(std::uint32_t size)
+{
+    mStream->ignore(size);
+}
+
+void Reader::enterGroup()
+{
+#ifdef DEBUG_GROUPSTACK
+    std::string padding = ""; // FIXME: debugging only
+    padding.insert(0, mCtx.groupStack.size()*2, ' ');
+    std::cout << padding << "Starting record group "
+              << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
+#endif
+    // empty group if the group size is same as the header size
+    if (mCtx.recordHeader.group.groupSize == (std::uint32_t)mCtx.recHeaderSize)
+    {
+#ifdef DEBUG_GROUPSTACK
+        std::cout << padding << "Ignoring record group " // FIXME: debugging only
+            << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type)
+            << " (empty)" << std::endl;
+#endif
+        if (!mCtx.groupStack.empty()) // top group may be empty (e.g. HAIR in Skyrim)
+        {
+            // don't put on the stack, exitGroupCheck() may not get called before recursing into this method
+            mCtx.groupStack.back().second += mCtx.recordHeader.group.groupSize;
+            exitGroupCheck();
+        }
+
+        return; // don't push an empty group, just return
+    }
+
+    // push group
+    mCtx.groupStack.push_back(std::make_pair(mCtx.recordHeader.group, (std::uint32_t)mCtx.recHeaderSize));
+}
+
+void Reader::exitGroupCheck()
+{
+    if (mCtx.groupStack.empty())
+        return;
+
+    // pop finished groups (note reading too much is allowed here)
+    std::uint32_t lastGroupSize = mCtx.groupStack.back().first.groupSize;
+    while (mCtx.groupStack.back().second >= lastGroupSize)
+    {
+#ifdef DEBUG_GROUPSTACK
+        GroupTypeHeader grp = mCtx.groupStack.back().first; // FIXME: grp is for debugging only
+#endif
+        // try to correct any overshoot
+        // TODO: not tested
+        std::uint32_t overshoot = mCtx.groupStack.back().second - lastGroupSize;
+        if (overshoot > 0)
+        {
+            std::size_t pos = mStream->tellg();
+            mStream->seekg(pos - overshoot);
+        }
+
+        mCtx.groupStack.pop_back();
+#ifdef DEBUG_GROUPSTACK
+        std::string padding = ""; // FIXME: debugging only
+        padding.insert(0, mCtx.groupStack.size()*2, ' ');
+        std::cout << padding << "Finished record group " << printLabel(grp.label, grp.type) << std::endl;
+#endif
+        // if the previous group was the final one no need to do below
+        if (mCtx.groupStack.empty())
+            return;
+
+        mCtx.groupStack.back().second += lastGroupSize;
+        lastGroupSize = mCtx.groupStack.back().first.groupSize;
+
+        assert (lastGroupSize >= mCtx.groupStack.back().second && "Read more records than available");
+//#if 0
+        if (mCtx.groupStack.back().second > lastGroupSize) // FIXME: debugging only
+            std::cerr << printLabel(mCtx.groupStack.back().first.label,
+                                          mCtx.groupStack.back().first.type)
+                      << " read more records than available" << std::endl;
+//#endif
+    }
+}
+
+// WARNING: this method should be used after first calling enterGroup()
+// else the method may try to dereference an element that does not exist
+const GroupTypeHeader& Reader::grp(std::size_t pos) const
+{
+    assert (pos <= mCtx.groupStack.size()-1 && "ESM4::Reader::grp - exceeded stack depth");
+
+    return (*(mCtx.groupStack.end()-pos-1)).first;
+}
+
+void Reader::skipGroupData()
 {
     assert (!mCtx.groupStack.empty() && "Skipping group with an empty stack");
 
@@ -579,28 +514,24 @@ void ESM4::Reader::skipGroupData()
     mStream->ignore(skipSize);
 
     // keep track of data left to read from the file
-    //if (mObserver)
-        //mObserver->update(skipSize);
     mCtx.fileRead += skipSize;
 
     mCtx.groupStack.back().second = mCtx.groupStack.back().first.groupSize;
 }
 
-void ESM4::Reader::skipGroup()
+void Reader::skipGroup()
 {
 #ifdef DEBUG_GROUPSTACK
     std::string padding = ""; // FIXME: debugging only
     padding.insert(0, mCtx.groupStack.size()*2, ' ');
     std::cout << padding << "Skipping record group "
-              << ESM4::printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
+              << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
 #endif
     // subtract the size of header already read before skipping
     std::uint32_t skipSize = mCtx.recordHeader.group.groupSize - (std::uint32_t)mCtx.recHeaderSize;
     mStream->ignore(skipSize);
 
     // keep track of data left to read from the file
-    //if (mObserver)
-        //mObserver->update(skipSize);
     mCtx.fileRead += skipSize;
 
     // NOTE: mCtx.groupStack.back().second already has mCtx.recHeaderSize from enterGroup()
@@ -608,26 +539,54 @@ void ESM4::Reader::skipGroup()
         mCtx.groupStack.back().second += mCtx.recordHeader.group.groupSize;
 }
 
-void ESM4::Reader::skipRecordData()
+const CellGrid& Reader::currCellGrid() const
 {
-    assert (mCtx.recordRead <= mCtx.recordHeader.record.dataSize && "Skipping after reading more than available");
-    mStream->ignore(mCtx.recordHeader.record.dataSize - mCtx.recordRead);
-    mCtx.recordRead = mCtx.recordHeader.record.dataSize; // for getSubRecordHeader()
+    // Maybe should throw an exception instead?
+    assert (mCtx.cellGridValid && "Attempt to use an invalid cell grid");
+
+    return mCtx.currCellGrid;
 }
 
-void ESM4::Reader::skipSubRecordData()
+// NOTE: the parameter 'files' must have the file names in the loaded order
+void Reader::updateModIndices(const std::vector<std::string>& files)
 {
-    mStream->ignore(mCtx.subRecordHeader.dataSize);
-}
+    if (files.size() >= 0xff)
+        throw std::runtime_error("ESM4::Reader::updateModIndices too many files"); // 0xff is reserved
 
-void ESM4::Reader::skipSubRecordData(std::uint32_t size)
-{
-    mStream->ignore(size);
+    // NOTE: this map is rebuilt each time this method is called (i.e. each time a file is loaded)
+    // Perhaps there is an opportunity to optimize this by saving the result somewhere.
+    // But then, the number of files is at most around 250 so perhaps keeping it simple might be better.
+
+    // build a lookup map
+    std::unordered_map<std::string, size_t> fileIndex;
+
+    for (size_t i = 0; i < files.size(); ++i) // ATTENTION: assumes current file is not included
+        fileIndex[boost::to_lower_copy<std::string>(files[i])] = i;
+
+    mCtx.parentFileIndices.resize(mHeader.mMaster.size());
+    for (unsigned int i = 0; i < mHeader.mMaster.size(); ++i)
+    {
+        // locate the position of the dependency in already loaded files
+        std::unordered_map<std::string, size_t>::const_iterator it
+            = fileIndex.find(boost::to_lower_copy<std::string>(mHeader.mMaster[i].name));
+
+        if (it != fileIndex.end())
+            mCtx.parentFileIndices[i] = (std::uint32_t)((it->second << 24) & 0xff000000);
+        else
+            throw std::runtime_error("ESM4::Reader::updateModIndices required dependency file not loaded");
+#if 0
+        std::cout << "Master Mod: " << mCtx.header.mMaster[i].name << ", " // FIXME: debugging only
+                  << formIdToString(mCtx.parentFileIndices[i]) << std::endl;
+#endif
+    }
+
+    if (!mCtx.parentFileIndices.empty() &&  mCtx.parentFileIndices[0] != 0)
+        throw std::runtime_error("ESM4::Reader::updateModIndices base modIndex is not zero");
 }
 
 // ModIndex adjusted formId according to master file dependencies
 // (see http://www.uesp.net/wiki/Tes4Mod:FormID_Fixup)
-// NOTE: need to update modindex to mModIndices.size() before saving
+// NOTE: need to update modindex to parentFileIndices.size() before saving
 //
 // FIXME: probably should add a parameter to check for mCtx.header::mOverrides
 //        (ACHR, LAND, NAVM, PGRE, PHZD, REFR), but not sure what exactly overrides mean
@@ -635,20 +594,20 @@ void ESM4::Reader::skipSubRecordData(std::uint32_t size)
 // FIXME: Apparently ModIndex '00' in an ESP means the object is defined in one of its masters.
 //        This means we may need to search multiple times to get the correct id.
 //        (see https://www.uesp.net/wiki/Tes4Mod:Formid#ModIndex_Zero)
-void ESM4::Reader::adjustFormId(FormId& id)
+void Reader::adjustFormId(FormId& id)
 {
-    if (mHeader.mModIndices.empty())
+    if (mCtx.parentFileIndices.empty())
         return;
 
     std::size_t index = (id >> 24) & 0xff;
 
-    if (index < mHeader.mModIndices.size())
-        id = mHeader.mModIndices[index] | (id & 0x00ffffff);
+    if (index < mCtx.parentFileIndices.size())
+        id = mCtx.parentFileIndices[index] | (id & 0x00ffffff);
     else
         id = mCtx.modIndex | (id & 0x00ffffff);
 }
 
-bool ESM4::Reader::getFormId(FormId& id)
+bool Reader::getFormId(FormId& id)
 {
     if (!getExact(id))
         return false;
@@ -657,7 +616,23 @@ bool ESM4::Reader::getFormId(FormId& id)
     return true;
 }
 
-void ESM4::Reader::adjustGRUPFormId()
+void Reader::adjustGRUPFormId()
 {
     adjustFormId(mCtx.recordHeader.group.label.value);
+}
+
+[[noreturn]] void Reader::fail(const std::string& msg)
+{
+    std::stringstream ss;
+
+    ss << "ESM Error: " << msg;
+    ss << "\n  File: " << mCtx.filename;
+    ss << "\n  Record: " << ESM::printName(mCtx.recordHeader.record.typeId);
+    ss << "\n  Subrecord: " << ESM::printName(mCtx.subRecordHeader.typeId);
+    if (mStream.get())
+        ss << "\n  Offset: 0x" << std::hex << mStream->tellg();
+
+    throw std::runtime_error(ss.str());
+}
+
 }
