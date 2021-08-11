@@ -16,7 +16,7 @@ Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename)
 }
 
 // FIXME: only required by ESM3::Land
-Reader::Reader() : mEncoder(nullptr), mFileSize(0), mGlobalReaderList(nullptr)
+Reader::Reader() : mEncoder(nullptr), mFileSize(0)
 {
     clearCtx();
 }
@@ -84,11 +84,10 @@ void Reader::clearCtx()
 {
    mCtx.filename.clear();
    mCtx.modIndex = 0;
+   mCtx.parentFileIndices.clear();
    mCtx.fileRead = 0;
    mCtx.fileRead = 0;
    mCtx.recordRead = 0;
-   mCtx.index = 0;
-   mCtx.parentFileIndices.clear();
 }
 
 bool Reader::getRecordHeader()

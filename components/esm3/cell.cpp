@@ -24,7 +24,7 @@ namespace
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
     void adjustRefNum (ESM3::RefNum& refNum, ESM3::Reader& reader)
     {
-        unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
+        std::uint32_t local = (refNum.mIndex & 0xff000000) >> 24;
 
         // If we have an index value that does not make sense, assume that it was an addition
         // by the present plugin (but a faulty one)
@@ -38,7 +38,7 @@ namespace
         else
         {
             // This is an addition by the present plugin. Set the corresponding plugin index.
-            refNum.mContentFile = reader.getIndex();
+            refNum.mContentFile = reader.getModIndex();
         }
     }
 }

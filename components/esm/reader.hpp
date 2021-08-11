@@ -36,6 +36,8 @@ namespace ESM
         // used by CSMWorld::Data::startLoading() and getTotalRecords() for loading progress bar
         virtual inline int getRecordCount() const = 0;
 
+        virtual void setModIndex(std::uint32_t index) = 0;
+
         // used by CSMWorld::Data::getTotalRecords()
         virtual void close() = 0;
 

@@ -125,8 +125,8 @@ namespace CSMWorld
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<unsigned int, unsigned int> > mRefLoadCache;
-            int mReaderIndex;
-            std::vector<std::string> mLoadedFiles; // FIXME: probably duplicated data
+            unsigned int mReaderIndex;
+            std::vector<std::string> mLoadedFiles;
 
             bool mFsStrict;
             Files::PathContainer mDataPaths;

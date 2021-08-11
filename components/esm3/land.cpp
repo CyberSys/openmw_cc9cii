@@ -45,7 +45,7 @@ namespace ESM3
 
         isDeleted = false;
 
-        mPlugin = reader.getIndex();
+        mPlugin = reader.getModIndex();
 
         bool hasLocation = false;
         //bool isLoaded = false;

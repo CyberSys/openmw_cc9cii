@@ -13,7 +13,7 @@
 
 namespace ESM3
 {
-    int GroundcoverIndex = std::numeric_limits<int>::max();
+    std::uint32_t GroundcoverIndex = 0xfffffffe;
 
     void RefNum::load (Reader& reader, bool wide, const std::string& tag)
     {
