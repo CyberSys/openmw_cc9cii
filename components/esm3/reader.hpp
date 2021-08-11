@@ -69,11 +69,11 @@ namespace ESM3
     public:
 
         Reader(Files::IStreamPtr esmStream, const std::string& filename);
-        Reader(); // FIXME: public as loadland.cpp uses it
+        Reader(); // public as ESM3::Land and ESMTool uses it
         ~Reader() {}
 
-        // FIXME: should be private but ESMTool uses it
-        void openRaw(const std::string &filename);
+        void open(const std::string &filename); // FIXME: redundant but ESMTool uses it
+        void openRaw(const std::string &filename); // FIXME: should be private but ESMTool uses it
 
         /** Close the file, resets all information. After calling close()
             the structure may be reused to load a new file.

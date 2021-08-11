@@ -981,6 +981,11 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
+    // This section was probably copied from OpenMW where ESM3Terrain::Storage::getVtexIndexAt()
+    // gets the plugin index (i.e. ESM3::Land::mPlugin) but even in OpenMW the readers are not
+    // reused (a new reader is created and saved context is restored).
+    // Also see: 8786fb639ff5ce1d1e608ede1f11a746df9319cc
+#if 0
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
     if (mReader) // only for ESM4
     {
@@ -990,6 +995,9 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
         mReader = nullptr;
     }
+#else
+    delete mReader;
+#endif
 
     if (mDialogue)
         throw std::logic_error ("won't start loading, someone forgot to cleanup");
@@ -997,39 +1005,13 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mReader = ESM::Reader::getReader(path.string());
     mReader->setEncoder (&mEncoder);
 
-    // FIXME: used by terrain to get the plugin index
-    // See: b2ddd3c2596004d9ee9122c33ce4a57007836a42
-    //      ESM3Terrain::Storage::getVtexIndexAt()
-    //      ESM3::Land::mPlugin
     mReader->setModIndex((project || !base) ? 0 : mReaderIndex++);
-
-    // FIXME: used by ESMStore to track dependencies (OpenCS doesn't track dependencies)
-    // See: 2175f13b67e9075455bc944b0e32cdd0cb9b5ceb
-    //      896ab44d1e919852aae03be9ecb71378f031b6f5
-    //mReaderList.push_back(mReader);
-    //mReader->setGlobalReaderList(&mReaderList);
-    //
-    // then used by ESMStore::load()
-    //mLandTextures.resize(esm.getGlobalReaderList()->size());
+    mLoadedFiles.push_back(path.filename().string());
 
     if (mReader->isEsm4())
     {
         ESM4::Reader* reader = static_cast<ESM4::Reader*>(mReader);
-
-        // for TES4/TES5 whether a dependent file is loaded is already checked in
-        // ESM4::Reader::updateModIndices()
-        unsigned int esmVer = reader->esmVersion();
-        bool isTes4 = esmVer == ESM4::VER_080 || esmVer == ESM4::VER_100;
-        bool isTes5 = esmVer == ESM4::VER_094 || esmVer == ESM4::VER_170;
-        bool isFONV = esmVer == ESM4::VER_132 || esmVer == ESM4::VER_133 || esmVer == ESM4::VER_134;
-        if (isTes4 || isTes5 || isFONV)
-        {
-            // FIXME: temp commented out
-            //reader->setIndex(mReaderIndex-1); // use the same index
-            //reader->setModIndex(mReaderIndex-1);
-            reader->updateModIndices(mLoadedFiles);
-            mLoadedFiles.push_back(path.filename().string());
-        }
+        reader->updateModIndices(mLoadedFiles);
     }
 
     // NOTE: Unlike OpenMW (see ESMStore::load()) we don't enforce content file master
@@ -1104,6 +1086,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     if (!mReader->hasMoreRecs()) // FIXME: how to do this independently without vtable
     {
+#if 0
         if (mBase)
         {
             // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
@@ -1114,6 +1097,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             mReaders.push_back(ptr);
         }
         else
+#endif
             delete mReader;
 
         mReader = nullptr;

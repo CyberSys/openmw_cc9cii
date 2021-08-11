@@ -10,9 +10,10 @@
 
 #include <boost/program_options.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/records.hpp>
+#include <components/esm3/records.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "record.hpp"
 
@@ -26,11 +27,11 @@ struct ESMData
     std::string author;
     std::string description;
     unsigned int version;
-    std::vector<ESM::Header::MasterData> masters;
+    std::vector<ESM::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
     // Value: (Reference, Deleted flag)
-    std::map<ESM::Cell *, std::deque<std::pair<ESM::CellRef, bool> > > mCellRefs;
+    std::map<ESM3::Cell *, std::deque<std::pair<ESM3::CellRef, bool> > > mCellRefs;
     std::map<int, int> mRecordStats;
 
 };
@@ -52,7 +53,7 @@ struct Arguments
     std::string name;
 
     ESMData data;
-    ESM::ESMReader reader;
+    ESM3::Reader reader;
     ESM::ESMWriter writer;
 };
 
@@ -184,8 +185,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     return true;
 }
 
-void printRaw(ESM::ESMReader &esm);
-void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info);
+void printRaw(ESM3::Reader& esm);
+void loadCell(ESM3::Cell& cell, ESM3::Reader& esm, Arguments& info);
 
 int load(Arguments& info);
 int clone(Arguments& info);
@@ -220,7 +221,7 @@ int main(int argc, char**argv)
     return 0;
 }
 
-void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
+void loadCell(ESM3::Cell& cell, ESM3::Reader& esm, Arguments& info)
 {
     bool quiet = (info.quiet_given || info.mode == "clone");
     bool save = (info.mode == "clone");
@@ -232,11 +233,11 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     cell.restore(esm, 0);
 
     // Loop through all the references
-    ESM::CellRef ref;
+    ESM3::CellRef ref;
     if(!quiet) std::cout << "  References:\n";
 
     bool deleted = false;
-    ESM::MovedCellRef movedCellRef;
+    ESM3::MovedCellRef movedCellRef;
     bool moved = false;
     while(cell.getNextRef(esm, ref, deleted, movedCellRef, moved))
     {
@@ -288,30 +289,30 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     }
 }
 
-void printRaw(ESM::ESMReader &esm)
+void printRaw(ESM3::Reader& esm)
 {
     while(esm.hasMoreRecs())
     {
-        ESM::NAME n = esm.getRecName();
-        std::cout << "Record: " << n.toString() << '\n';
-        esm.getRecHeader();
+        esm.getRecordHeader();
+        std::cout << "Record: " << ESM::printName(esm.hdr().typeId) << '\n';
         while(esm.hasMoreSubs())
         {
             size_t offs = esm.getFileOffset();
-            esm.getSubName();
-            esm.skipHSub();
-            n = esm.retSubName();
+            esm.getSubRecordHeader();
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+
             std::ios::fmtflags f(std::cout.flags());
-            std::cout << "    " << n.toString() << " - " << esm.getSubSize()
+            std::cout << "    " << ESM::printName(subHdr.typeId) << " - " << subHdr.dataSize
                  << " bytes @ 0x" << std::hex << offs << '\n';
             std::cout.flags(f);
+            esm.skipSubRecordData();
         }
     }
 }
 
 int load(Arguments& info)
 {
-    ESM::ESMReader& esm = info.reader;
+    ESM3::Reader& esm = info.reader;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
     esm.setEncoder(&encoder);
 
@@ -339,6 +340,7 @@ int load(Arguments& info)
 
         esm.open(filename);
 
+
         info.data.author = esm.getAuthor();
         info.data.description = esm.getDesc();
         info.data.masters = esm.getGameFiles();
@@ -347,8 +349,8 @@ int load(Arguments& info)
         {
             std::cout << "Author: " << esm.getAuthor() << '\n'
                  << "Description: " << esm.getDesc() << '\n'
-                 << "File format version: " << esm.getFVer() << '\n';
-            std::vector<ESM::Header::MasterData> masterData = esm.getGameFiles();
+                 << "File format version: " << esm.esmVersion() << '\n';
+            std::vector<ESM::MasterData> masterData = esm.getGameFiles();
             if (!masterData.empty())
             {
                 std::cout << "Masters:" << '\n';
@@ -360,20 +362,20 @@ int load(Arguments& info)
         // Loop through all records
         while(esm.hasMoreRecs())
         {
-            const ESM::NAME n = esm.getRecName();
-            uint32_t flags;
-            esm.getRecHeader(flags);
+            esm.getRecordHeader();
+            uint32_t flags = esm.hdr().flags;
+            std::string recName = ESM::printName(esm.hdr().typeId);
 
-            EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
+            EsmTool::RecordBase *record = EsmTool::RecordBase::create(esm.hdr().typeId);
             if (record == nullptr)
             {
-                if (skipped.count(n.intval) == 0)
+                if (skipped.count(esm.hdr().typeId) == 0)
                 {
-                    std::cout << "Skipping " << n.toString() << " records.\n";
-                    skipped.emplace(n.intval);
+                    std::cout << "Skipping " << recName << " records.\n";
+                    skipped.emplace(esm.hdr().typeId);
                 }
 
-                esm.skipRecord();
+                esm.skipRecordData();
                 if (quiet) break;
                 std::cout << "  Skipping\n";
 
@@ -389,7 +391,7 @@ int load(Arguments& info)
             if (!info.types.empty())
             {
                 std::vector<std::string>::iterator match;
-                match = std::find(info.types.begin(), info.types.end(), n.toString());
+                match = std::find(info.types.begin(), info.types.end(), recName);
                 if (match == info.types.end()) interested = false;
             }
 
@@ -398,13 +400,13 @@ int load(Arguments& info)
 
             if(!quiet && interested)
             {
-                std::cout << "\nRecord: " << n.toString() << " '" << record->getId() << "'\n";
+                std::cout << "\nRecord: " << recName << " '" << record->getId() << "'\n";
                 record->print();
             }
 
             if (record->getType().intval == ESM::REC_CELL && loadCells && interested)
             {
-                loadCell(record->cast<ESM::Cell>()->get(), esm, info);
+                loadCell(record->cast<ESM3::Cell>()->get(), esm, info);
             }
 
             if (save)
@@ -415,7 +417,7 @@ int load(Arguments& info)
             {
                 delete record;
             }
-            ++info.data.mRecordStats[n.intval];
+            ++info.data.mRecordStats[esm.hdr().typeId];
         }
 
     } catch(std::exception &e) {
@@ -479,7 +481,7 @@ int clone(Arguments& info)
     esm.setVersion(info.data.version);
     esm.setRecordCount (recordCount);
 
-    for (const ESM::Header::MasterData &master : info.data.masters)
+    for (const ESM::MasterData &master : info.data.masters)
         esm.addMaster(master.name, master.size);
 
     std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
@@ -497,10 +499,10 @@ int clone(Arguments& info)
 
         record->save(esm);
         if (typeName.intval == ESM::REC_CELL) {
-            ESM::Cell *ptr = &record->cast<ESM::Cell>()->get();
+            ESM3::Cell *ptr = &record->cast<ESM3::Cell>()->get();
             if (!info.data.mCellRefs[ptr].empty()) 
             {
-                for (std::pair<ESM::CellRef, bool> &ref : info.data.mCellRefs[ptr])
+                for (std::pair<ESM3::CellRef, bool> &ref : info.data.mCellRefs[ptr])
                     ref.first.save(esm, ref.second);
             }
         }

@@ -268,7 +268,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                         ss << std::setfill('0') << std::setw(2) << std::hex << (int)(dataBuf[i]);
                     if ((i & 0x000f) == 0xf) // wrap around
                         ss << "\n";
-                    else if (i < subHdr.dataSize-1)
+                    else if (i < (size_t)(subHdr.dataSize-1)) // quiesce gcc
                         ss << " ";
                 }
                 std::cout << ss.str() << std::endl;

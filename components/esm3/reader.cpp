@@ -21,22 +21,22 @@ Reader::Reader() : mEncoder(nullptr), mFileSize(0)
     clearCtx();
 }
 
-void Reader::openRaw(Files::IStreamPtr _esm, const std::string& name)
+void Reader::openRaw(Files::IStreamPtr esmStream, const std::string& filename)
 {
     close();
-    mStream = _esm;
+    mStream = esmStream;
 
     mCtx.fileRead = 0;
     mCtx.filePos = 0; // FIXME: for temp testing only
-    mCtx.filename = name;
+    mCtx.filename = filename;
     mStream->seekg(0, mStream->end);
     mFileSize = mStream->tellg();
     mStream->seekg(0, mStream->beg);
 }
 
-void Reader::open(Files::IStreamPtr _esm, const std::string &name)
+void Reader::open(Files::IStreamPtr esmStream, const std::string &filename)
 {
-    openRaw(_esm, name);
+    openRaw(esmStream, filename);
 
     getRecordHeader();
     if (mCtx.recordHeader.typeId == ESM3::REC_TES3)
@@ -45,6 +45,14 @@ void Reader::open(Files::IStreamPtr _esm, const std::string &name)
     }
     else
         fail("Not a valid Morrowind file");
+}
+
+// FIXME: redundant but ESMTool uses it
+void Reader::open(const std::string &filename)
+{
+    Files::IStreamPtr esmStream(Files::openConstrainedFileStream (filename.c_str ()));
+
+    open(esmStream, filename);
 }
 
 // FIXME: redundant but ESMTool uses it
@@ -113,21 +121,7 @@ bool Reader::getSubRecordHeader()
     bool result = false;
 
     assert(mCtx.recordRead <= mCtx.recordHeader.dataSize && "Read more from the stream than the record size.");
-    /*if (mCtx.recordRead > mCtx.recordHeader.dataSize)
-    {
-        // NOTE: only works if the offending sub-record is the last one
-
-        // try to correct any overshoot, seek to the end of the expected data
-        // this will only work if mCtx.subRecordHeader.dataSize was fully read or skipped
-        // (i.e. it will only correct mCtx.subRecordHeader.dataSize being incorrect)
-        std::uint32_t overshoot = (std::uint32_t)mCtx.recordRead - mCtx.recordHeader.dataSize;
-
-        std::size_t pos = mStream->tellg();
-        mStream->seekg(pos - overshoot);
-
-        return false;
-    }
-    else */if (mCtx.recordHeader.dataSize - mCtx.recordRead >= sizeof(SubRecordHeader))
+    if (mCtx.recordHeader.dataSize - mCtx.recordRead >= sizeof(SubRecordHeader))
     {
         result = getExact(mCtx.subRecordHeader);
         assert (mStream->gcount() == sizeof(mCtx.subRecordHeader));

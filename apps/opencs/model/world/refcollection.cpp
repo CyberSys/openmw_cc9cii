@@ -94,7 +94,7 @@ void CSMWorld::RefCollection::load (ESM::Reader& reader, int cellIndex, bool bas
 
         std::map<unsigned int, unsigned int>::iterator iter = cache.find(refNum);
 
-        if (ref.mRefNum.mContentFile != -1 && !base) ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
+        if (ref.mRefNum.mContentFile != 0xffffffff && !base) ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
 
         if (isDeleted)
         {
