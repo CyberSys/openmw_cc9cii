@@ -6,6 +6,7 @@
 
 //#include <cassert>
 #include <stdexcept>
+#include <cstring>
 
 //#include <iostream> // FIXME: debugging only
 
@@ -37,10 +38,15 @@ void ESM3::Header::load(ESM3::Reader& reader)
             }
             case ESM3::SUB_HEDR:
             {
+                char tmp[256];
                 reader.get(mData.version);
                 reader.get(mData.type);
-                reader.get(*mData.author.data(), 32); // NOTE: fixed size string
-                reader.get(*mData.desc.data(), 256);  // NOTE: fixed size string
+                // NOTE: OpenMW/ESSImporter/etc expect trailing nulls removed
+                reader.get(tmp[0], 32);  // NOTE: fixed size string
+                mData.author = std::string(&tmp[0]);
+                memset(&tmp[0], 0, 32);
+                reader.get(tmp[0], 256);  // NOTE: fixed size string
+                mData.desc = std::string(&tmp[0]);
                 reader.get(mData.records);
 
                 break;

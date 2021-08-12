@@ -152,6 +152,12 @@ void Reader::skipRecordData()
     mCtx.recordRead = mCtx.recordHeader.dataSize; // for getSubRecordHeader()
 }
 
+void Reader::unreadSubRecordHeader()
+{
+    mStream->seekg(-sizeof(SubRecordHeader), std::ios_base::cur);
+    mCtx.recordRead -= (sizeof(SubRecordHeader) + mCtx.subRecordHeader.dataSize);
+}
+
 [[noreturn]] void Reader::fail(const std::string &msg)
 {
     std::stringstream ss;

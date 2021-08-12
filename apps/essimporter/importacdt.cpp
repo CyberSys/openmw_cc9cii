@@ -1,135 +1,173 @@
 #include "importacdt.hpp"
 
-#include <components/esm/esmreader.hpp>
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
-#include <components/esm/cellref.hpp>
+#include <cassert>
+
+#include <components/esm3/reader.hpp>
+
+#include <components/esm3/cellref.hpp>
 
 namespace ESSImport
 {
-
-    void ActorData::load(ESM::ESMReader &esm)
+    // NOTE: assumes this method was called immediately after "NAME" sub-record
+    //       without reading the next sub-record header
+    void ActorData::load(ESM3::Reader& esm)
     {
-        if (esm.isNextSub("ACTN"))
-        {
-            /*
-            Activation flags:
-            ActivationFlag_UseEnabled  = 1
-            ActivationFlag_OnActivate  = 2
-            ActivationFlag_OnDeath  = 10h
-            ActivationFlag_OnKnockout  = 20h
-            ActivationFlag_OnMurder  = 40h
-            ActivationFlag_DoorOpening  = 100h
-            ActivationFlag_DoorClosing  = 200h
-            ActivationFlag_DoorJammedOpening  = 400h
-            ActivationFlag_DoorJammedClosing  = 800h
-            */
-            esm.skipHSub();
-        }
-
-        if (esm.isNextSub("STPR"))
-            esm.skipHSub();
-
-        if (esm.isNextSub("MNAM"))
-           esm.skipHSub();
-
-        bool isDeleted = false;
-        ESM::CellRef::loadData(esm, isDeleted);
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME);
 
         mHasACDT = false;
-        if (esm.isNextSub("ACDT"))
-        {
-            mHasACDT = true;
-            esm.getHT(mACDT);
-        }
-
         mHasACSC = false;
-        if (esm.isNextSub("ACSC"))
-        {
-            mHasACSC = true;
-            esm.getHT(mACSC);
-        }
-
-        if (esm.isNextSub("ACSL"))
-            esm.skipHSubSize(112);
-
-        if (esm.isNextSub("CSTN"))
-            esm.skipHSub(); // "PlayerSaveGame", link to some object?
-
-        if (esm.isNextSub("LSTN"))
-            esm.skipHSub(); // "PlayerSaveGame", link to some object?
-
-        // unsure at which point between LSTN and TGTN
-        if (esm.isNextSub("CSHN"))
-            esm.skipHSub(); // "PlayerSaveGame", link to some object?
-
-        // unsure if before or after CSTN/LSTN
-        if (esm.isNextSub("LSHN"))
-            esm.skipHSub(); // "PlayerSaveGame", link to some object?
-
-        while (esm.isNextSub("TGTN"))
-            esm.skipHSub(); // "PlayerSaveGame", link to some object?
-
-        while (esm.isNextSub("FGTN"))
-            esm.getHString(); // fight target?
-
-        // unsure at which point between TGTN and CRED
-        if (esm.isNextSub("AADT"))
-        {
-            // occurred when a creature was in the middle of its attack, 44 bytes
-            esm.skipHSub();
-        }
-
-        // unsure at which point between FGTN and CHRD
-        if (esm.isNextSub("PWPC"))
-            esm.skipHSub();
-        if (esm.isNextSub("PWPS"))
-            esm.skipHSub();
-
-        if (esm.isNextSub("WNAM"))
-        {
-            std::string id = esm.getHString();
-
-            if (esm.isNextSub("XNAM"))
-                mSelectedEnchantItem = esm.getHString();
-            else
-                mSelectedSpell = id;
-
-            if (esm.isNextSub("YNAM"))
-                esm.skipHSub(); // 4 byte, 0
-        }
-
-        while (esm.isNextSub("APUD"))
-        {
-            // used power
-            esm.getSubHeader();
-            std::string id = esm.getString(32);
-            (void)id;
-            // timestamp can't be used: this is the total hours passed, calculated by
-            // timestamp = 24 * (365 * year + cumulativeDays[month] + day)
-            // unfortunately cumulativeDays[month] is not clearly defined,
-            // in the (non-MCP) vanilla version the first month was missing, but MCP added it.
-            double timestamp;
-            esm.getT(timestamp);
-        }
-
-        // FIXME: not all actors have this, add flag
-        if (esm.isNextSub("CHRD")) // npc only
-                esm.getHExact(mSkills, 27*2*sizeof(int));
-
-        if (esm.isNextSub("CRED")) // creature only
-            esm.getHExact(mCombatStats, 3*2*sizeof(int));
-
-        mSCRI.load(esm);
-
-        if (esm.isNextSub("ND3D"))
-            esm.skipHSub();
-
         mHasANIS = false;
-        if (esm.isNextSub("ANIS"))
+
+        bool subHdrRead = false;
+        bool finished = false;
+        bool doOnce = false;
+        while (!finished && (subHdrRead || esm.getSubRecordHeader()))
         {
-            mHasANIS = true;
-            esm.getHT(mANIS);
+            subHdrRead = false;
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_ACTN:
+                {
+                    /*
+                    Activation flags:
+                    ActivationFlag_UseEnabled  = 1
+                    ActivationFlag_OnActivate  = 2
+                    ActivationFlag_OnDeath     = 10h
+                    ActivationFlag_OnKnockout  = 20h
+                    ActivationFlag_OnMurder    = 40h
+                    ActivationFlag_DoorOpening = 100h
+                    ActivationFlag_DoorClosing = 200h
+                    ActivationFlag_DoorJammedOpening  = 400h
+                    ActivationFlag_DoorJammedClosing  = 800h
+                    */
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_STPR:
+                case ESM3::SUB_MNAM:
+                {
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_ACDT:
+                {
+                    mHasACDT = true;
+                    esm.get(mACDT);
+                    break;
+                }
+                case ESM3::SUB_ACSC:
+                {
+                    mHasACSC = true;
+                    esm.get(mACSC);
+                    break;
+                }
+                case ESM3::SUB_ACSL:
+                {
+                    assert(esm.subRecordHeader().dataSize == 112 && "ACSL incorrect data size");
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_CSTN:
+                case ESM3::SUB_LSTN:
+                case ESM3::SUB_CSHN: // unsure at which point between LSTN and TGTN
+                case ESM3::SUB_LSHN: // unsure if before or after CSTN/LSTN
+                case ESM3::SUB_TGTN:
+                {
+                    esm.skipSubRecordData(); // "PlayerSaveGame", link to some object?
+                    break;
+                }
+                case ESM3::SUB_AADT: // unsure at which point between TGTN and CRED
+                {
+                    esm.skipSubRecordData(); // occurred when a creature was in the middle of its attack, 44 bytes
+                    break;
+                }
+                case ESM3::SUB_FGTN: // fight target?
+                case ESM3::SUB_PWPC: // unsure at which point between FGTN and CHRD
+                case ESM3::SUB_PWPS:
+                case ESM3::SUB_ND3D:
+                case ESM3::SUB_YNAM: // 4 byte, 0
+                {
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_WNAM:
+                {
+                    esm.getZString(mSelectedSpell);
+                    break;
+                }
+                case ESM3::SUB_XNAM:
+                {
+                    esm.getZString(mSelectedEnchantItem);
+                    mSelectedSpell.clear(); // NOTE: seems very strange logic here (don't blame me, I only copied it)
+                    break;
+                }
+                case ESM3::SUB_APUD:
+                {
+                    // used power
+                    char tmp[32];
+                    esm.get(tmp[0], 32);
+                    std::string id(&tmp[0]);
+                    (void)id;
+                    // timestamp can't be used: this is the total hours passed, calculated by
+                    // timestamp = 24 * (365 * year + cumulativeDays[month] + day)
+                    // unfortunately cumulativeDays[month] is not clearly defined,
+                    // in the (non-MCP) vanilla version the first month was missing, but MCP added it.
+                    double timestamp;
+                    esm.get(timestamp);
+                    break;
+                }
+                // FIXME: not all actors have this, add flag
+                case ESM3::SUB_CHRD: // npc only
+                {
+                    assert(subHdr.dataSize == 27 * 2 * sizeof(int) && "CHRD incorrect data size");
+                    esm.get(mSkills, 27 * 2 * sizeof(int));
+                    break;
+                }
+                case ESM3::SUB_CRED: // creature only
+                {
+                    assert(subHdr.dataSize == 3 * 2 * sizeof(int) && "CRED incorrect data size");
+                    esm.get(mCombatStats, 3 * 2 * sizeof(int));
+                    break;
+                }
+                case ESM3::SUB_SCRI:
+                {
+                    subHdrRead = mSCRI.load(esm);
+                    break;
+                }
+                case ESM3::SUB_ANIS:
+                {
+                    mHasANIS = true;
+                    esm.get(mANIS);
+                    break;
+                }
+                default:
+                {
+                    // Unknown sub-records are either in ESM3::CellRef (i.e. parent class) or
+                    // in ESSImport::CellRef (i.e. child class).  Ensure that we check the parent
+                    // class only once.
+                    if (doOnce)
+                    {
+                        esm.unreadSubRecordHeader(); // prepare for continuing in CellRef::load()
+                        finished = true;
+                        break;
+                    }
+                    else
+                        doOnce = true;
+
+                    // Not keen to modify CellRef::loadData() so we do this hack to "unread"
+                    // the sub-record header.
+                    esm.unreadSubRecordHeader(); // prepare for loading ESM3::CellRef::loadData()
+                    bool isDeleted = false;
+                    subHdrRead = ESM3::CellRef::loadData(esm, isDeleted);
+
+                    break;
+                }
+            }
         }
     }
-
 }

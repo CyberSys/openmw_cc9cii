@@ -117,7 +117,7 @@ namespace ESM3
             void loadId (Reader& reader, bool wideRefNum = false);
 
             /// Implicitly called by load
-            void loadData (Reader& reader, bool &isDeleted);
+            bool loadData (Reader& reader, bool& isDeleted);
 
             void save (ESM::ESMWriter& esm, bool wideRefNum = false, bool inInventory = false, bool isDeleted = false) const;
 

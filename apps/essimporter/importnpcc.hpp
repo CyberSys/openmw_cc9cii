@@ -1,15 +1,15 @@
 #ifndef OPENMW_ESSIMPORT_NPCC_H
 #define OPENMW_ESSIMPORT_NPCC_H
 
-#include <components/esm/loadcont.hpp>
+#include <components/esm3/cont.hpp>
 
-#include <components/esm/aipackage.hpp>
+#include <components/esm3/aipackage.hpp>
 
 #include "importinventory.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -27,9 +27,9 @@ namespace ESSImport
         } mNPDT;
 
         Inventory mInventory;
-        ESM::AIPackageList mAiPackages;
+        ESM3::AIPackageList mAiPackage;
 
-        void load(ESM::ESMReader &esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

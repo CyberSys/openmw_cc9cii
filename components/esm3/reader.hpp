@@ -93,7 +93,7 @@ namespace ESM3
         inline const std::string getDesc() const final { return mHeader.mData.desc; }
 
         std::string getName() const { return mCtx.filename; }; // used by ESM::CellRef for debugging
-        //const ESM3::Header& getHeader() const { return mHeader; }
+        const ESM3::Header& getHeader() const { return mHeader; } // used by ESSImporter
         inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
         inline unsigned int numRecords() const { return mHeader.mData.records; }
 
@@ -131,6 +131,7 @@ namespace ESM3
 
         // Read x bytes of header. The caller can then decide whether to process or skip the data.
         bool getSubRecordHeader();
+        void unreadSubRecordHeader(); // only used by ESSImporter
 
         // Skip the data part of a subrecord
         // Note: assumes the header was read correctly and nothing else was read

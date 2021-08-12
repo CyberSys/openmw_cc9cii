@@ -1,18 +1,23 @@
 #include "importinventory.hpp"
 
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+
+#include <cassert>
 #include <stdexcept>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
-
-    void Inventory::load(ESM::ESMReader &esm)
+    void Inventory::load(ESM3::Reader& esm)
     {
-        while (esm.isNextSub("NPCO"))
+        //assert(esm.subRecordHeader().typeId == ESM3::SUB_NPCO); // only if coming from NPCC::load()?
         {
+            assert(esm.subRecordHeader().dataSize == 4 + 32);
             ContItem contItem;
-            esm.getHT(contItem);
+            esm.get(contItem);
 
             InventoryItem item;
             item.mId = contItem.mItem.toString();
@@ -20,16 +25,16 @@ namespace ESSImport
             item.mRelativeEquipmentSlot = -1;
             item.mLockLevel = 0;
             item.mRefNum.unset();
-
-            unsigned int itemCount = std::abs(item.mCount);
+            item.mChargeInt = -1;
+#if 0
             bool separateStacks = false;
-            for (unsigned int i=0;i<itemCount;++i)
+            for (unsigned int i = 0; i < item.mCount ; ++i)
             {
                 bool newStack = esm.isNextSub("XIDX");
                 if (newStack)
                 {
                     unsigned int idx;
-                    esm.getHT(idx);
+                    esm.get(idx);
                     separateStacks = true;
                     item.mCount = 1;
                 }
@@ -38,7 +43,7 @@ namespace ESSImport
 
                 // for XSOL and XCHG seen so far, but probably others too
                 bool isDeleted = false;
-                item.ESM::CellRef::loadData(esm, isDeleted);
+                item.ESM3::CellRef::loadData(esm, isDeleted);
 
                 int charge=-1;
                 esm.getHNOT(charge, "XHLT");
@@ -49,9 +54,10 @@ namespace ESSImport
             }
 
             if (!separateStacks)
+#endif
                 mItems.push_back(item);
         }
-
+#if 0
         // equipped items
         while (esm.isNextSub("WIDX"))
         {
@@ -73,6 +79,7 @@ namespace ESSImport
 
             mItems[itemIndex].mRelativeEquipmentSlot = slotIndex;
         }
+#endif
     }
 
 }

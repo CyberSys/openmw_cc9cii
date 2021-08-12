@@ -3,13 +3,12 @@
 
 #include <map>
 
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/player.hpp>
-#include <components/esm/dialoguestate.hpp>
-#include <components/esm/globalmap.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/controlsstate.hpp>
+#include <components/esm3/npc_.hpp>
+#include <components/esm3/player.hpp>
+#include <components/esm3/dialoguestate.hpp>
+#include <components/esm3/globalmap.hpp>
+#include <components/esm3/crea.hpp>
+#include <components/esm3/controlsstate.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
@@ -17,28 +16,25 @@
 #include "importplayer.hpp"
 #include "importsplm.h"
 
-
-
 namespace ESSImport
 {
-
     struct Context
     {
         // set from the TES3 header
         std::string mPlayerCellName;
 
-        ESM::Player mPlayer;
-        ESM::NPC mPlayerBase;
+        ESM3::Player mPlayer;
+        ESM3::NPC mPlayerBase;
         std::string mCustomPlayerClassName;
 
-        ESM::DialogueState mDialogueState;
+        ESM3::DialogueState mDialogueState;
 
-        ESM::ControlsState mControlsState;
+        ESM3::ControlsState mControlsState;
 
         // cells which should show an explored overlay on the global map
         std::set<std::pair<int, int> > mExploredCells;
 
-        ESM::GlobalMap mGlobalMapState;
+        ESM3::GlobalMap mGlobalMapState;
 
         int mDay, mMonth, mYear;
         float mHour;
@@ -51,8 +47,8 @@ namespace ESSImport
         std::map<std::pair<int, std::string>, int> mActorIdMap;
         int mNextActorId;
 
-        std::map<std::string, ESM::Creature> mCreatures;
-        std::map<std::string, ESM::NPC> mNpcs;
+        std::map<std::string, ESM3::Creature> mCreatures;
+        std::map<std::string, ESM3::NPC> mNpcs;
 
         std::vector<SPLM::ActiveSpell> mActiveSpells;
 
@@ -63,7 +59,7 @@ namespace ESSImport
             , mHour(0.f)
             , mNextActorId(0)
         {
-            ESM::CellId playerCellId;
+            ESM3::CellId playerCellId;
             playerCellId.mPaged = true;
             playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;
             mPlayer.mCellId = playerCellId;

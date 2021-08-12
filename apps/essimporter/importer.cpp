@@ -8,20 +8,21 @@
 #include <osgDB/ReadFile>
 #include <osg/ImageUtils>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/defs.hpp>
+#include <components/esm/defs.hpp> // REC_NPC_, etc, for writing
 
-#include <components/esm/savedgame.hpp>
-#include <components/esm/player.hpp>
+#include <components/esm3/savedgame.hpp>
+#include <components/esm/savedgame.hpp> // for ESMWriter
+#include <components/esm3/player.hpp>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadlevlist.hpp>
+#include <components/esm3/alch.hpp>
+#include <components/esm3/spel.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/weap.hpp>
+#include <components/esm3/clot.hpp>
+#include <components/esm3/ench.hpp>
+#include <components/esm3/levlist.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -34,7 +35,7 @@
 namespace
 {
 
-    void writeScreenshot(const ESM::Header& fileHeader, ESM::SavedGame& out)
+    void writeScreenshot(const ESM3::Header& fileHeader, ESM::SavedGame& out)
     {
         if (fileHeader.mSCRS.size() != 128*128*4)
         {
@@ -115,26 +116,24 @@ namespace ESSImport
 
     void read(const std::string& filename, File& file)
     {
-        ESM::ESMReader esm;
+        ESM3::Reader esm;
         esm.open(filename);
 
         while (esm.hasMoreRecs())
         {
-            ESM::NAME n = esm.getRecName();
-            esm.getRecHeader();
+            esm.getRecordHeader();
 
             File::Record rec;
-            rec.mName = n.toString();
+            rec.mName = ESM::printName(esm.hdr().typeId);
             rec.mFileOffset = esm.getFileOffset();
             while (esm.hasMoreSubs())
             {
                 File::Subrecord sub;
-                esm.getSubName();
-                esm.getSubHeader();
+                esm.getSubRecordHeader();
                 sub.mFileOffset = esm.getFileOffset();
-                sub.mName = esm.retSubName().toString();
-                sub.mData.resize(esm.getSubSize());
-                esm.getExact(&sub.mData[0], sub.mData.size());
+                sub.mName = ESM::printName(esm.subRecordHeader().typeId);
+                sub.mData.resize(esm.subRecordHeader().dataSize);
+                esm.get(sub.mData[0], sub.mData.size());
                 rec.mSubrecords.push_back(sub);
             }
             file.mRecords.push_back(rec);
@@ -255,14 +254,14 @@ namespace ESSImport
     void Importer::run()
     {
         ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding));
-        ESM::ESMReader esm;
+        ESM3::Reader esm;
         esm.open(mEssFile);
         esm.setEncoder(&encoder);
 
         Context context;
 
-        const ESM::Header& header = esm.getHeader();
-        context.mPlayerCellName = header.mGameData.mCurrentCell.toString();
+        const ESM3::Header& header = esm.getHeader();
+        context.mPlayerCellName = std::string(&header.mGameData.mCurrentCell[0]);
 
         const unsigned int recREFR = ESM::FourCC<'R','E','F','R'>::value;
         const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;
@@ -287,16 +286,16 @@ namespace ESSImport
         converters[recSTLN      ] = std::shared_ptr<Converter>(new ConvertSTLN());
         converters[recGAME      ] = std::shared_ptr<Converter>(new ConvertGAME());
         converters[ESM::REC_CELL] = std::shared_ptr<Converter>(new ConvertCell());
-        converters[ESM::REC_ALCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Potion>());
+        converters[ESM::REC_ALCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Potion>());
         converters[ESM::REC_CLAS] = std::shared_ptr<Converter>(new ConvertClass());
-        converters[ESM::REC_SPEL] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Spell>());
-        converters[ESM::REC_ARMO] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Armor>());
-        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Weapon>());
-        converters[ESM::REC_CLOT] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Clothing>());
-        converters[ESM::REC_ENCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Enchantment>());
-        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Weapon>());
-        converters[ESM::REC_LEVC] = std::shared_ptr<Converter>(new DefaultConverter<ESM::CreatureLevList>());
-        converters[ESM::REC_LEVI] = std::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
+        converters[ESM::REC_SPEL] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Spell>());
+        converters[ESM::REC_ARMO] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Armor>());
+        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Weapon>());
+        converters[ESM::REC_CLOT] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Clothing>());
+        converters[ESM::REC_ENCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Enchantment>());
+        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Weapon>());
+        converters[ESM::REC_LEVC] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::CreatureLevList>());
+        converters[ESM::REC_LEVI] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::ItemLevList>());
         converters[ESM::REC_CNTC] = std::shared_ptr<Converter>(new ConvertCNTC());
         converters[ESM::REC_FACT] = std::shared_ptr<Converter>(new ConvertFACT());
         converters[ESM::REC_INFO] = std::shared_ptr<Converter>(new ConvertINFO());
@@ -305,7 +304,7 @@ namespace ESSImport
         converters[recJOUR      ] = std::shared_ptr<Converter>(new ConvertJOUR());
         converters[ESM::REC_SCPT] = std::shared_ptr<Converter>(new ConvertSCPT());
         converters[ESM::REC_PROJ] = std::shared_ptr<Converter>(new ConvertPROJ());
-        converters[recSPLM] = std::shared_ptr<Converter>(new ConvertSPLM());
+        converters[recSPLM      ] = std::shared_ptr<Converter>(new ConvertSPLM());
 
         // TODO:
         // - REGN (weather in certain regions?)
@@ -321,24 +320,24 @@ namespace ESSImport
 
         while (esm.hasMoreRecs())
         {
-            ESM::NAME n = esm.getRecName();
-            esm.getRecHeader();
+            esm.getRecordHeader();
 
-            auto it = converters.find(n.intval);
+            auto it = converters.find(esm.hdr().typeId);
             if (it != converters.end())
             {
                 it->second->read(esm);
             }
             else
             {
-                if (unknownRecords.insert(n.intval).second)
+                if (unknownRecords.insert(esm.hdr().typeId).second)
                 {
                     std::ios::fmtflags f(std::cerr.flags());
-                    std::cerr << "Error: unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
+                    std::cerr << "Error: unknown record " << ESM::printName(esm.hdr().typeId)
+                              << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
                     std::cerr.flags(f);
                 }
 
-                esm.skipRecord();
+                esm.skipRecordData();
             }
         }
 
@@ -369,13 +368,13 @@ namespace ESSImport
         profile.mInGameTime.mGameHour = context.mHour;
         profile.mInGameTime.mMonth = context.mMonth;
         profile.mInGameTime.mYear = context.mYear;
-        profile.mPlayerCell = header.mGameData.mCurrentCell.toString();
+        profile.mPlayerCell = std::string(&header.mGameData.mCurrentCell[0]);
         if (context.mPlayerBase.mClass == "NEWCLASSID_CHARGEN")
             profile.mPlayerClassName = context.mCustomPlayerClassName;
         else
             profile.mPlayerClassId = context.mPlayerBase.mClass;
         profile.mPlayerLevel = context.mPlayerBase.mNpdt.mLevel;
-        profile.mPlayerName = header.mGameData.mPlayerName.toString();
+        profile.mPlayerName = std::string(&header.mGameData.mPlayerName[0]);
 
         writeScreenshot(header, profile);
 

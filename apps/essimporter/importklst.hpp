@@ -4,9 +4,9 @@
 #include <string>
 #include <map>
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -15,7 +15,7 @@ namespace ESSImport
     /// Kill Stats
     struct KLST
     {
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
 
         /// RefId, kill count
         std::map<std::string, int> mKillCounter;

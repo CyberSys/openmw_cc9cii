@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -20,7 +20,7 @@ namespace ESSImport
         std::string mName; // NAME, should be assigned from outside as usual
         std::vector<std::string> mInfo; // list of journal entries for the quest
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

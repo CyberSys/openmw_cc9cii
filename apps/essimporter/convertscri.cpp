@@ -1,14 +1,16 @@
 #include "convertscri.hpp"
 
+#include <components/esm3/variant.hpp>
+
 namespace
 {
 
     template <typename T, ESM::VarType VariantType>
-    void storeVariables(const std::vector<T>& variables, ESM::Locals& locals, const std::string& scriptname)
+    void storeVariables(const std::vector<T>& variables, ESM3::Locals& locals, const std::string& scriptname)
     {
         for (const auto& variable : variables)
         {
-            ESM::Variant val(variable);
+            ESM3::Variant val(variable);
             val.setType(VariantType);
             locals.mVariables.emplace_back(std::string(), val);
         }
@@ -19,7 +21,7 @@ namespace
 namespace ESSImport
 {
 
-    void convertSCRI(const SCRI &scri, ESM::Locals &locals)
+    void convertSCRI(const SCRI &scri, ESM3::Locals &locals)
     {
         // order *is* important, as we do not have variable names available in this format
         storeVariables<short, ESM::VT_Short> (scri.mShorts, locals, scri.mScript);

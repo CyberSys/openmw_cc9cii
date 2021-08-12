@@ -1,55 +1,73 @@
 #include "importscri.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
-
-    void SCRI::load(ESM::ESMReader &esm)
+    // called from SCPT::load(), etc, and sub-record header was already read
+    bool SCRI::load(ESM3::Reader& esm)
     {
-        mScript = esm.getHNOString("SCRI");
-
         int numShorts = 0, numLongs = 0, numFloats = 0;
-        if (esm.isNextSub("SLCS"))
-        {
-            esm.getSubHeader();
-            esm.getT(numShorts);
-            esm.getT(numLongs);
-            esm.getT(numFloats);
-        }
 
-        if (esm.isNextSub("SLSD"))
+        bool scriptRead = false;
+        do
         {
-            esm.getSubHeader();
-            for (int i=0; i<numShorts; ++i)
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                short val;
-                esm.getT(val);
-                mShorts.push_back(val);
+                case ESM3::SUB_SCRI:
+                {
+                    esm.getZString(mScript);
+                    break;
+                }
+                case ESM3::SUB_SLCS:
+                {
+                    esm.get(numShorts);
+                    esm.get(numLongs);
+                    esm.get(numFloats);
+                    break;
+                }
+                case ESM3::SUB_SLSD:
+                {
+                    for (int i = 0; i < numShorts; ++i)
+                    {
+                        short val;
+                        esm.get(val);
+                        mShorts.push_back(val);
+                    }
+                    break;
+                }
+                case ESM3::SUB_SLLD:
+                {
+                    // I haven't seen Longs in a save file yet, but SLLD would make sense for the name
+                    // TODO: test this
+                    for (int i = 0; i < numLongs; ++i)
+                    {
+                        int val;
+                        esm.get(val);
+                        mLongs.push_back(val);
+                    }
+                    break;
+                }
+                case ESM3::SUB_SLFD:
+                {
+                    for (int i = 0; i < numFloats; ++i)
+                    {
+                        float val;
+                        esm.get(val);
+                        mFloats.push_back(val);
+                    }
+                    break;
+                }
+                default:
+                    //NOTE: can't call skipSubRecordHeader() here since we've not read the
+                    //       sub-record header yet
+                    scriptRead = true;
+                    break;
             }
         }
-        // I haven't seen Longs in a save file yet, but SLLD would make sense for the name
-        // TODO: test this
-        if (esm.isNextSub("SLLD"))
-        {
-            esm.getSubHeader();
-            for (int i=0; i<numLongs; ++i)
-            {
-                int val;
-                esm.getT(val);
-                mLongs.push_back(val);
-            }
-        }
-        if (esm.isNextSub("SLFD"))
-        {
-            esm.getSubHeader();
-            for (int i=0; i<numFloats; ++i)
-            {
-                float val;
-                esm.getT(val);
-                mFloats.push_back(val);
-            }
-        }
+        while (!scriptRead && esm.getSubRecordHeader());
+
+        return scriptRead;
     }
-
-}
+ }

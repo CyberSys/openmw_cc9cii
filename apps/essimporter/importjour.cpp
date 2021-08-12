@@ -1,13 +1,21 @@
 #include "importjour.hpp"
 
-#include <components/esm/esmreader.hpp>
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+
+#include <cassert>
+
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
-
-    void JOUR::load(ESM::ESMReader &esm)
+    void JOUR::load(ESM3::Reader& esm)
     {
-        mText = esm.getHNString("NAME");
-    }
+        assert(esm.hdr().typeId == ESM3::REC_JOUR);
 
+        esm.getSubRecordHeader();
+        esm.getZString(mText);
+        esm.skipRecordData(); // may have trailing nulls; TODO: test
+    }
 }

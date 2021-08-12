@@ -45,13 +45,17 @@ namespace ESM3
 
                     if (type == 's')
                     {
+                        mValue.setType(ESM::VT_Short);
                         if (std::isnan(value))
-                            mValue = Variant(0);
+                            mValue.setInteger(0);
                         else
-                            mValue = Variant(static_cast<short> (value));
+                            mValue.setInteger(static_cast<short> (value));
                     }
                     else if (type == 'l')
-                        mValue = Variant(static_cast<int> (value));
+                    {
+                        mValue.setType(ESM::VT_Long);
+                        mValue.setInteger(static_cast<int> (value));
+                    }
                     else if (type == 'f')
                         mValue = Variant(value);
                     else

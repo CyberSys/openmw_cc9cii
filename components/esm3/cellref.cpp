@@ -1,8 +1,8 @@
 #include "cellref.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 
 #include <cassert>
 
@@ -73,7 +73,7 @@ namespace ESM3
         }
     }
 
-    void CellRef::loadData(Reader& reader, bool &isDeleted)
+    bool CellRef::loadData(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -138,6 +138,8 @@ namespace ESM3
             mLockLevel = UnbreakableLock;
             mTrap.clear();
         }
+
+        return isLoaded;
     }
 
     void CellRef::save (ESM::ESMWriter& esm, bool wideRefNum, bool inInventory, bool isDeleted) const

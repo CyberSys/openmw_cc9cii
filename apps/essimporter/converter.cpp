@@ -6,8 +6,11 @@
 
 #include <osgDB/WriteFile>
 
-#include <components/esm/creaturestate.hpp>
-#include <components/esm/containerstate.hpp>
+#include <components/esm3/creaturestate.hpp>
+#include <components/esm3/containerstate.hpp>
+#include <components/esm3/npcstate.hpp>
+
+#include <components/esm3/cell.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -29,7 +32,7 @@ namespace
     }
 
 
-    void convertCellRef(const ESSImport::CellRef& cellref, ESM::ObjectState& objstate)
+    void convertCellRef(const ESSImport::CellRef& cellref, ESM3::ObjectState& objstate)
     {
         objstate.mEnabled = cellref.mEnabled;
         objstate.mPosition = cellref.mPos;
@@ -97,15 +100,18 @@ namespace ESSImport
         unsigned int value;
     };
 
-    void ConvertFMAP::read(ESM::ESMReader &esm)
+    void ConvertFMAP::read(ESM3::Reader& esm)
     {
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAPH);
         MAPH maph;
-        esm.getHNT(maph, "MAPH");
+        esm.get(maph);
+
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAPD);
         std::vector<char> data;
-        esm.getSubNameIs("MAPD");
-        esm.getSubHeader();
-        data.resize(esm.getSubSize());
-        esm.getExact(&data[0], data.size());
+        data.resize(esm.subRecordHeader().dataSize);
+        esm.get(data[0], data.size());
 
         mGlobalMapImage = new osg::Image;
         mGlobalMapImage->allocateImage(maph.size, maph.size, 1, GL_RGB, GL_UNSIGNED_BYTE);
@@ -190,9 +196,9 @@ namespace ESSImport
         esm.endRecord(ESM::REC_GMAP);
     }
 
-    void ConvertCell::read(ESM::ESMReader &esm)
+    void ConvertCell::read(ESM3::Reader& esm)
     {
-        ESM::Cell cell;
+        ESM3::Cell cell;
         bool isDeleted = false;
 
         cell.load(esm, isDeleted, false);
@@ -212,6 +218,8 @@ namespace ESSImport
         Cell newcell;
         newcell.mCell = cell;
 
+        std::vector<CellRef> cellrefs;
+
         // fog of war
         // seems to be a 1-bit pixel format, 16*16 pixels
         // TODO: add bleeding of FOW into neighbouring cells (openmw handles this by writing to the textures,
@@ -219,95 +227,113 @@ namespace ESSImport
         unsigned char nam8[32];
         // exterior has 1 NAM8, interior can have multiple ones, and have an extra 4 byte flag at the start
         // (probably offset of that specific fog texture?)
-        while (esm.isNextSub("NAM8"))
+        do
         {
-            if (cell.isExterior()) // TODO: NAM8 occasionally exists for cells that haven't been explored.
-                                   // are there any flags marking explored cells?
-                mContext->mExploredCells.insert(std::make_pair(cell.mData.mX, cell.mData.mY));
-
-            esm.getSubHeader();
-
-            if (esm.getSubSize() == 36)
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                // flag on interiors
-                esm.skip(4);
-            }
-
-            esm.getExact(nam8, 32);
-
-            newcell.mFogOfWar.reserve(16*16);
-            for (int x=0; x<16; ++x)
-            {
-                for (int y=0; y<16; ++y)
+                case ESM3::SUB_NAM8:
                 {
-                    size_t pos = x*16+y;
-                    size_t bytepos = pos/8;
-                    assert(bytepos<32);
-                    int bit = pos%8;
-                    newcell.mFogOfWar.push_back(((nam8[bytepos] >> bit) & (0x1)) ? 0xffffffff : 0x000000ff);
+                    if (cell.isExterior()) // TODO: NAM8 occasionally exists for cells that haven't been explored.
+                                           // are there any flags marking explored cells?
+                        mContext->mExploredCells.insert(std::make_pair(cell.mData.mX, cell.mData.mY));
+
+                    if (subHdr.dataSize == 36)
+                    {
+                        // flag on interiors
+                        int flag;
+                        esm.get(flag); // skip 4
+                    }
+
+                    esm.get(nam8, 32);
+
+                    newcell.mFogOfWar.reserve(16 * 16);
+                    for (int x = 0; x < 16; ++x)
+                    {
+                        for (int y = 0; y < 16; ++y)
+                        {
+                            size_t pos = x * 16 + y;
+                            size_t bytepos = pos / 8;
+                            assert(bytepos < 32);
+                            int bit = pos % 8;
+                            newcell.mFogOfWar.push_back(((nam8[bytepos] >> bit) & (0x1)) ? 0xffffffff : 0x000000ff);
+                        }
+                    }
+
+                    if (cell.isExterior())
+                    {
+                        std::ostringstream filename;
+                        filename << "fog_" << cell.mData.mX << "_" << cell.mData.mY << ".tga";
+
+                        convertImage((char*)&newcell.mFogOfWar[0], newcell.mFogOfWar.size() * 4, 16, 16, GL_RGBA, filename.str());
+                    }
+                    break;
                 }
+                case ESM3::SUB_MVRF:
+                {
+                    // moved reference, not handled yet
+                    // NOTE: MVRF can also occur in within normal references (importcellref.cpp)?
+                    // this does not match the ESM file implementation,
+                    // verify if that can happen with ESM files too
+                    esm.skipSubRecordData(); // skip MVRF
+                    esm.getSubRecordHeader();
+                    esm.skipSubRecordData(); // skip CNDT
+                    break;
+                }
+                case ESM3::SUB_FRMR:
+                {
+                    CellRef ref;
+                    ref.load(esm);
+                    cellrefs.push_back(ref);
+                    break;
+                }
+                case ESM3::SUB_MPCD:
+                {
+                    float notepos[3];
+                    esm.get(notepos, 3 * sizeof(float));
+
+                    // Markers seem to be arranged in a 32*32 grid, notepos has grid-indices.
+                    // This seems to be the reason markers can't be placed everywhere in interior cells,
+                    // i.e. when the grid is exceeded.
+                    // Converting the interior markers correctly could be rather tricky, but is probably similar logic
+                    // as used for the FoW texture placement, which we need to figure out anyway
+                    notepos[1] += 31.f;
+                    notepos[0] += 0.5;
+                    notepos[1] += 0.5;
+                    notepos[0] = Constants::CellSizeInUnits * notepos[0] / 32.f;
+                    notepos[1] = Constants::CellSizeInUnits * notepos[1] / 32.f;
+                    if (cell.isExterior())
+                    {
+                        notepos[0] += Constants::CellSizeInUnits * cell.mData.mX;
+                        notepos[1] += Constants::CellSizeInUnits * cell.mData.mY;
+                    }
+
+                    esm.getSubRecordHeader();
+                    assert(esm.subRecordHeader().typeId == ESM3::SUB_MPNT);
+                    // TODO: what encoding is this in?
+                    std::string note;
+                    esm.getZString(note);
+                    ESM3::CustomMarker marker;
+                    marker.mWorldX = notepos[0];
+                    marker.mWorldY = notepos[1];
+                    marker.mNote = note;
+                    marker.mCell = cell.getCellId();
+                    mMarkers.push_back(marker);
+                    break;
+                }
+                default:
+                    //NOTE: can't call skipSubRecordHeader() here since we've not read the
+                    //       sub-record header yet
+                    if (esm.hasMoreSubs())
+                        std::cerr << "Warning: Unexpected sub-record "
+                                  << ESM::printName(esm.subRecordHeader().typeId)
+                                  << " while loading cell refs" << std::endl;
+                    break;
             }
-
-            if (cell.isExterior())
-            {
-                std::ostringstream filename;
-                filename << "fog_" << cell.mData.mX << "_" << cell.mData.mY << ".tga";
-
-                convertImage((char*)&newcell.mFogOfWar[0], newcell.mFogOfWar.size()*4, 16, 16, GL_RGBA, filename.str());
-            }
         }
-
-        // moved reference, not handled yet
-        // NOTE: MVRF can also occur in within normal references (importcellref.cpp)?
-        // this does not match the ESM file implementation,
-        // verify if that can happen with ESM files too
-        while (esm.isNextSub("MVRF"))
-        {
-            esm.skipHSub(); // skip MVRF
-            esm.getSubName();
-            esm.skipHSub(); // skip CNDT
-        }
-
-        std::vector<CellRef> cellrefs;
-        while (esm.hasMoreSubs() && esm.isNextSub("FRMR"))
-        {
-            CellRef ref;
-            ref.load (esm);
-            cellrefs.push_back(ref);
-        }
-
-        while (esm.isNextSub("MPCD"))
-        {
-            float notepos[3];
-            esm.getHT(notepos, 3*sizeof(float));
-
-            // Markers seem to be arranged in a 32*32 grid, notepos has grid-indices.
-            // This seems to be the reason markers can't be placed everywhere in interior cells,
-            // i.e. when the grid is exceeded.
-            // Converting the interior markers correctly could be rather tricky, but is probably similar logic
-            // as used for the FoW texture placement, which we need to figure out anyway
-            notepos[1] += 31.f;
-            notepos[0] += 0.5;
-            notepos[1] += 0.5;
-            notepos[0] = Constants::CellSizeInUnits * notepos[0] / 32.f;
-            notepos[1] = Constants::CellSizeInUnits * notepos[1] / 32.f;
-            if (cell.isExterior())
-            {
-                notepos[0] += Constants::CellSizeInUnits * cell.mData.mX;
-                notepos[1] += Constants::CellSizeInUnits * cell.mData.mY;
-            }
-            // TODO: what encoding is this in?
-            std::string note = esm.getHNString("MPNT");
-            ESM::CustomMarker marker;
-            marker.mWorldX = notepos[0];
-            marker.mWorldY = notepos[1];
-            marker.mNote = note;
-            marker.mCell = cell.getCellId();
-            mMarkers.push_back(marker);
-        }
+        while (esm.getSubRecordHeader());
 
         newcell.mRefs = cellrefs;
-
 
         if (cell.isExterior())
             mExtCells[std::make_pair(cell.mData.mX, cell.mData.mY)] = newcell;
@@ -317,11 +343,22 @@ namespace ESSImport
 
     void ConvertCell::writeCell(const Cell &cell, ESM::ESMWriter& esm)
     {
-        ESM::Cell esmcell = cell.mCell;
+        ESM3::Cell esmcell = cell.mCell;
         esm.startRecord(ESM::REC_CSTA);
         ESM::CellState csta;
         csta.mHasFogOfWar = 0;
-        csta.mId = esmcell.getCellId();
+
+        // FIXME: this ugly bit of code is here to workaround co-existance of new reader
+        //        and old writer
+        ESM3::CellId newId = esmcell.getCellId();
+        csta.mId.mWorldspace = newId.mWorldspace;
+        csta.mId.mIndex.mX = newId.mIndex.mX;
+        csta.mId.mIndex.mY = newId.mIndex.mY;
+        csta.mId.mPaged = newId.mPaged;
+
+        if (newId.mWorldspace == "abebaal egg mine")
+            std::cout << "newId " << std::endl;
+
         csta.mId.save(esm);
         // TODO csta.mLastRespawn;
         // shouldn't be needed if we respawn on global schedule like in original MW
@@ -330,7 +367,10 @@ namespace ESSImport
 
         for (const auto & cellref : cell.mRefs)
         {
-            ESM::CellRef out (cellref);
+            ESM3::CellRef out (cellref);
+
+            if (cellref.mIndexedRefId == "Kwama Queen00000000")
+                std::cout << "queen " << cellref.mIndexedRefId << std::endl;
 
             // TODO: use mContext->mCreatures/mNpcs
 
@@ -341,7 +381,7 @@ namespace ESSImport
                 out.mRefID = cellref.mIndexedRefId;
                 std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
 
-                ESM::ObjectState objstate;
+                ESM3::ObjectState objstate;
                 objstate.blank();
                 objstate.mRef = out;
                 objstate.mRef.mRefID = idLower;
@@ -362,7 +402,7 @@ namespace ESSImport
                             std::make_pair(refIndex, out.mRefID));
                 if (npccIt != mContext->mNpcChanges.end())
                 {
-                    ESM::NpcState objstate;
+                    ESM3::NpcState objstate;
                     objstate.blank();
                     objstate.mRef = out;
                     objstate.mRef.mRefID = idLower;
@@ -390,7 +430,7 @@ namespace ESSImport
                             std::make_pair(refIndex, out.mRefID));
                 if (cntcIt != mContext->mContainerChanges.end())
                 {
-                    ESM::ContainerState objstate;
+                    ESM3::ContainerState objstate;
                     objstate.blank();
                     objstate.mRef = out;
                     objstate.mRef.mRefID = idLower;
@@ -405,7 +445,7 @@ namespace ESSImport
                             std::make_pair(refIndex, out.mRefID));
                 if (crecIt != mContext->mCreatureChanges.end())
                 {
-                    ESM::CreatureState objstate;
+                    ESM3::CreatureState objstate;
                     objstate.blank();
                     objstate.mRef = out;
                     objstate.mRef.mRefID = idLower;
@@ -453,7 +493,7 @@ namespace ESSImport
         }
     }
 
-    void ConvertPROJ::read(ESM::ESMReader& esm)
+    void ConvertPROJ::read(ESM3::Reader& esm)
     {
         mProj.load(esm);
     }
@@ -511,7 +551,7 @@ namespace ESSImport
         base.mActorId = convertActorId(pnam.mActorId.toString(), *mContext);
     }
 
-    void ConvertSPLM::read(ESM::ESMReader& esm)
+    void ConvertSPLM::read(ESM3::Reader& esm)
     {
         mSPLM.load(esm);
         mContext->mActiveSpells = mSPLM.mActiveSpells;

@@ -3,15 +3,16 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/esm/esmcommon.hpp>
 
 #include "importscri.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -19,22 +20,22 @@ namespace ESSImport
 
     struct ContItem
     {
-        int mCount;
+        std::uint32_t mCount;
         ESM::NAME32 mItem;
     };
 
     struct Inventory
     {
-        struct InventoryItem : public ESM::CellRef
+        struct InventoryItem : public ESM3::CellRef
         {
             std::string mId;
-            int mCount;
+            unsigned int mCount;
             int mRelativeEquipmentSlot;
             SCRI mSCRI;
         };
         std::vector<InventoryItem> mItems;
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

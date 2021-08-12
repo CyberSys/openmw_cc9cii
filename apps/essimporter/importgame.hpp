@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESSIMPORT_GAME_H
 #define OPENMW_ESSIMPORT_GAME_H
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -12,6 +12,7 @@ namespace ESSImport
     /// Weather data
     struct GAME
     {
+#pragma pack(push, 1)
         struct GMDT
         {
            char mCellName[64] {};
@@ -22,10 +23,11 @@ namespace ESSImport
            float mTimeOfNextTransition {0.f}; // weather changes when gamehour == timeOfNextTransition
            int mMasserPhase {0}, mSecundaPhase {0}; // top 3 bytes may be garbage
         };
+#pragma pack(pop)
 
         GMDT mGMDT;
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

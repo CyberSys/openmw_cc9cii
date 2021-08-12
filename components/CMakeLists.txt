@@ -93,8 +93,12 @@ add_component_dir (esm3
     body bsgn cell clas dial ench fact glob gmst info land mgef pgrd race regn scpt skil sndg soun spel sscr tes3
     acti alch appa armo book clot cont crea door ingr levlist ligh lock ltex misc npc_ prob repa stat weap
     aipackage cellref effectlist mappings spelllist transport
+    activespells player containerstate custommarkerstate dialoguestate controlsstate globalmap globalscript
+    inventorystate creaturestate animationstate
+    npcstate objectstate spellstate statstate npcstats creaturestats
     cellid debugprofile filter locals reader variant variantimp
     )
+#   doorstate fogstate cellstate projectilestate queststate savedgamestolenitems weatherstate
 
 add_component_dir (esm4
     achr acre acti alch aloc ammo anio appa arma armo aspc book bptd cell clas clfm clot common cont crea dial

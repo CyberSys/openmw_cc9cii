@@ -6,20 +6,21 @@
 #include <osg/Image>
 #include <osg/ref_ptr>
 
-#include <components/esm/esmreader.hpp>
+#include <components/misc/stringops.hpp>
+
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadglob.hpp>
+#include <components/esm3/cell.hpp>
+#include <components/esm3/book.hpp>
+#include <components/esm3/clas.hpp>
+#include <components/esm3/glob.hpp>
 #include <components/esm/cellstate.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/dialoguestate.hpp>
-#include <components/esm/custommarkerstate.hpp>
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/fact.hpp>
+#include <components/esm3/dialoguestate.hpp>
+#include <components/esm3/custommarkerstate.hpp>
 #include <components/esm/weatherstate.hpp>
-#include <components/esm/globalscript.hpp>
+#include <components/esm3/globalscript.hpp>
 #include <components/esm/queststate.hpp>
 #include <components/esm/stolenitems.hpp>
 #include <components/esm/projectilestate.hpp>
@@ -59,7 +60,7 @@ public:
 
     /// @note The load method of ESM records accept the deleted flag as a parameter.
     /// I don't know can the DELE sub-record appear in saved games, so the deleted flag will be ignored.
-    virtual void read(ESM::ESMReader& esm)
+    virtual void read(ESM3::Reader& esm)
     {
     }
 
@@ -81,7 +82,7 @@ class DefaultConverter : public Converter
 public:
     int getStage() override { return 0; }
 
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
         T record;
         bool isDeleted = false;
@@ -107,9 +108,9 @@ protected:
 class ConvertNPC : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        ESM::NPC npc;
+        ESM3::NPC npc;
         bool isDeleted = false;
 
         npc.load(esm, isDeleted);
@@ -124,7 +125,7 @@ public:
         {
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt.mLevel;
             mContext->mPlayerBase = npc;
-            ESM::SpellState::SpellParams empty;
+            ESM3::SpellState::SpellParams empty;
             // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
             for (const auto & spell : npc.mSpells.mList)
@@ -144,10 +145,10 @@ public:
 class ConvertCREA : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
         // See comment in ConvertNPC
-        ESM::Creature creature;
+        ESM3::Creature creature;
         bool isDeleted = false;
 
         creature.load(esm, isDeleted);
@@ -159,12 +160,12 @@ public:
 // I've seen a CONT record in a certain save file, but the container contents in it
 // were identical to a corresponding CNTC record. See previous comment about redundancy...
 
-class ConvertGlobal : public DefaultConverter<ESM::Global>
+class ConvertGlobal : public DefaultConverter<ESM3::Global>
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        ESM::Global global;
+        ESM3::Global global;
         bool isDeleted = false;
 
         global.load(esm, isDeleted);
@@ -180,12 +181,12 @@ public:
     }
 };
 
-class ConvertClass : public DefaultConverter<ESM::Class>
+class ConvertClass : public DefaultConverter<ESM3::Class>
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        ESM::Class class_;
+        ESM3::Class class_;
         bool isDeleted = false;
 
         class_.load(esm, isDeleted);
@@ -196,12 +197,12 @@ public:
     }
 };
 
-class ConvertBook : public DefaultConverter<ESM::Book>
+class ConvertBook : public DefaultConverter<ESM3::Book>
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        ESM::Book book;
+        ESM3::Book book;
         bool isDeleted = false;
 
         book.load(esm, isDeleted);
@@ -215,9 +216,12 @@ public:
 class ConvertNPCC : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        std::string id = esm.getHNString("NAME");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertNPCC unexpected record");
+        std::string id;
+        esm.getZString(id);
         NPCC npcc;
         npcc.load(esm);
         if (id == "PlayerSaveGame")
@@ -235,23 +239,23 @@ public:
 class ConvertREFR : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
         REFR refr;
         refr.load(esm);
         assert(refr.mRefID == "PlayerSaveGame");
         mContext->mPlayer.mObject.mPosition = refr.mPos;
 
-        ESM::CreatureStats& cStats = mContext->mPlayer.mObject.mCreatureStats;
+        ESM3::CreatureStats& cStats = mContext->mPlayer.mObject.mCreatureStats;
         convertACDT(refr.mActorData.mACDT, cStats);
 
-        ESM::NpcStats& npcStats = mContext->mPlayer.mObject.mNpcStats;
+        ESM3::NpcStats& npcStats = mContext->mPlayer.mObject.mNpcStats;
         convertNpcData(refr.mActorData, npcStats);
 
         mSelectedSpell = refr.mActorData.mSelectedSpell;
         if (!refr.mActorData.mSelectedEnchantItem.empty())
         {
-            ESM::InventoryState& invState = mContext->mPlayer.mObject.mInventory;
+            ESM3::InventoryState& invState = mContext->mPlayer.mObject.mInventory;
 
             for (unsigned int i=0; i<invState.mItems.size(); ++i)
             {
@@ -280,7 +284,7 @@ public:
           mLevitationEnabled(true)
     {}
 
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
         PCDT pcdt;
         pcdt.load(esm);
@@ -306,9 +310,12 @@ private:
 
 class ConvertCNTC : public Converter
 {
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        std::string id = esm.getHNString("NAME");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertCNTC unexpected record");
+        std::string id;
+        esm.getZString(id);
         CNTC cntc;
         cntc.load(esm);
         mContext->mContainerChanges.insert(std::make_pair(std::make_pair(cntc.mIndex,id), cntc));
@@ -318,9 +325,12 @@ class ConvertCNTC : public Converter
 class ConvertCREC : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        std::string id = esm.getHNString("NAME");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertCREC unexpected record");
+        std::string id;
+        esm.getZString(id);
         CREC crec;
         crec.load(esm);
         mContext->mCreatureChanges.insert(std::make_pair(std::make_pair(crec.mIndex,id), crec));
@@ -330,7 +340,7 @@ public:
 class ConvertFMAP : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override;
+    void read(ESM3::Reader& esm) override;
     void write(ESM::ESMWriter &esm) override;
 
 private:
@@ -340,13 +350,13 @@ private:
 class ConvertCell : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override;
+    void read(ESM3::Reader& esm) override;
     void write(ESM::ESMWriter& esm) override;
 
 private:
     struct Cell
     {
-        ESM::Cell mCell;
+        ESM3::Cell mCell;
         std::vector<CellRef> mRefs;
         std::vector<unsigned int> mFogOfWar;
     };
@@ -354,7 +364,7 @@ private:
     std::map<std::string, Cell> mIntCells;
     std::map<std::pair<int, int>, Cell> mExtCells;
 
-    std::vector<ESM::CustomMarker> mMarkers;
+    std::vector<ESM3::CustomMarker> mMarkers;
 
     void writeCell(const Cell& cell, ESM::ESMWriter &esm);
 };
@@ -362,7 +372,7 @@ private:
 class ConvertKLST : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
         KLST klst;
         klst.load(esm);
@@ -389,9 +399,9 @@ private:
 class ConvertFACT : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
-        ESM::Faction faction;
+        ESM3::Faction faction;
         bool isDeleted = false;
 
         faction.load(esm, isDeleted);
@@ -409,25 +419,40 @@ public:
 class ConvertSTLN : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
-        std::string itemid = esm.getHNString("NAME");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertCREC unexpected record");
+        std::string itemid;// = esm.getHNString("NAME");
+        esm.getZString(itemid);
         Misc::StringUtils::lowerCaseInPlace(itemid);
 
-        while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
+        while (esm.getSubRecordHeader())
         {
-            if (esm.retSubName().toString() == "FNAM")
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                std::string factionid = esm.getHString();
-                mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
-            }
-            else
-            {
-                std::string ownerid = esm.getHString();
-                mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
+                case ESM3::SUB_FNAM:
+                {
+                    std::string factionid;
+                    esm.getZString(factionid);
+                    mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
+                    break;
+                }
+                case ESM3::SUB_ONAM:
+                {
+                    std::string ownerid;
+                    esm.getZString(ownerid);
+                    mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData();
+                    break;
             }
         }
-    }
+     }
+
     void write(ESM::ESMWriter &esm) override
     {
         ESM::StolenItems items;
@@ -467,7 +492,7 @@ private:
 class ConvertINFO : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
         INFO info;
         info.load(esm);
@@ -477,9 +502,12 @@ public:
 class ConvertDIAL : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
-        std::string id = esm.getHNString("NAME");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertDIAL unexpected record");
+        std::string id;
+        esm.getZString(id);
         DIAL dial;
         dial.load(esm);
         if (dial.mIndex > 0)
@@ -505,9 +533,12 @@ private:
 class ConvertQUES : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
-        std::string id = esm.getHNString("NAME");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertQUES unexpected record");
+        std::string id;// = esm.getHNString("NAME");
+        esm.getZString(id);
         QUES quest;
         quest.load(esm);
     }
@@ -516,7 +547,7 @@ public:
 class ConvertJOUR : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override
+    void read(ESM3::Reader& esm) override
     {
         JOUR journal;
         journal.load(esm);
@@ -531,7 +562,7 @@ public:
     {
     }
 
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
         mGame.load(esm);
         mHasGame = true;
@@ -578,11 +609,11 @@ private:
 class ConvertSCPT : public Converter
 {
 public:
-    void read(ESM::ESMReader &esm) override
+    void read(ESM3::Reader& esm) override
     {
         SCPT script;
         script.load(esm);
-        ESM::GlobalScript out;
+        ESM3::GlobalScript out;
         convertSCPT(script, out);
         mScripts.push_back(out);
     }
@@ -596,7 +627,7 @@ public:
         }
     }
 private:
-    std::vector<ESM::GlobalScript> mScripts;
+    std::vector<ESM3::GlobalScript> mScripts;
 };
 
 /// Projectile converter
@@ -604,7 +635,7 @@ class ConvertPROJ : public Converter
 {
 public:
     int getStage() override { return 2; }
-    void read(ESM::ESMReader& esm) override;
+    void read(ESM3::Reader& esm) override;
     void write(ESM::ESMWriter& esm) override;
 private:
     void convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam);
@@ -614,7 +645,7 @@ private:
 class ConvertSPLM : public Converter
 {
 public:
-    void read(ESM::ESMReader& esm) override;
+    void read(ESM3::Reader& esm) override;
     void write(ESM::ESMWriter& esm) override;
 private:
     SPLM mSPLM;
