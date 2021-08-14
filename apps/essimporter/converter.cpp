@@ -356,8 +356,9 @@ namespace ESSImport
         csta.mId.mIndex.mY = newId.mIndex.mY;
         csta.mId.mPaged = newId.mPaged;
 
-        if (newId.mWorldspace == "abebaal egg mine")
-            std::cout << "newId " << std::endl;
+        // FIXME: temp testing only
+        //if (newId.mWorldspace == "abebaal egg mine")
+            //std::cout << "newId " << std::endl;
 
         csta.mId.save(esm);
         // TODO csta.mLastRespawn;
@@ -369,8 +370,9 @@ namespace ESSImport
         {
             ESM3::CellRef out (cellref);
 
-            if (cellref.mIndexedRefId == "Kwama Queen00000000")
-                std::cout << "queen " << cellref.mIndexedRefId << std::endl;
+            // FIXME: temp testing
+            //if (cellref.mIndexedRefId == "Kwama Queen00000000")
+                //std::cout << "queen " << cellref.mIndexedRefId << std::endl;
 
             // TODO: use mContext->mCreatures/mNpcs
 

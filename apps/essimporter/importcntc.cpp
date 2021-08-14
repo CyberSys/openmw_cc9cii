@@ -13,19 +13,30 @@ namespace ESSImport
 
     void CNTC::load(ESM3::Reader& esm)
     {
-        mIndex = 0;
         assert(esm.hdr().typeId == ESM3::REC_CNTC);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_INDX);
-        esm.get(mIndex);
-
-        esm.getSubRecordHeader();
-        if (esm.subRecordHeader().typeId == ESM3::SUB_NPCO)
-            mInventory.load(esm);
-
-        // FIXME: XIDX, SCRI, SCHG, XHLT
-        esm.skipRecordData();
+        mIndex = 0;
+        bool subHdrRead = false;
+        while (subHdrRead || esm.getSubRecordHeader())
+        {
+            subHdrRead = false;
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_INDX:
+                {
+                    esm.get(mIndex);
+                    break;
+                }
+                case ESM3::SUB_NPCO:
+                {
+                    subHdrRead = mInventory.load(esm);
+                    break;
+                }
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
     }
 
 }

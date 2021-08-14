@@ -9,7 +9,8 @@ namespace ESSImport
         mIndex = 0;
         assert(esm.hdr().typeId == ESM3::REC_CREC);
 
-        while (esm.getSubRecordHeader())
+        bool subHdrRead = false;
+        while (subHdrRead|| esm.getSubRecordHeader())
         {
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
@@ -39,7 +40,7 @@ namespace ESSImport
                 }
                 case ESM3::SUB_NPCO:
                 {
-                    mInventory.load(esm);
+                    subHdrRead = mInventory.load(esm);
                     break;
                 }
                 default:

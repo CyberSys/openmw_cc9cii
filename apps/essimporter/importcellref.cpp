@@ -5,7 +5,7 @@
 #endif
 
 #include <cassert>
-#include <iostream>
+//#include <iostream>
 
 #include <components/esm3/reader.hpp>
 
@@ -38,8 +38,9 @@ namespace ESSImport
                 {
                     esm.getZString(mIndexedRefId);
 
-                    if (mIndexedRefId == "Kwama Queen00000000")
-                        std::cout << "start " << mIndexedRefId << std::endl;
+                    // FIXME: temp testing
+                    //if (mIndexedRefId == "Kwama Queen00000000")
+                        //std::cout << "start " << mIndexedRefId << std::endl;
 
                     ActorData::load(esm); // TODO: does this always happen here?
                     break;

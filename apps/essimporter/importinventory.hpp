@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <cstdint>
 
 #include <components/esm3/cellref.hpp>
 #include <components/esm/esmcommon.hpp>
@@ -20,7 +19,7 @@ namespace ESSImport
 
     struct ContItem
     {
-        std::uint32_t mCount;
+        int mCount;
         ESM::NAME32 mItem;
     };
 
@@ -29,13 +28,13 @@ namespace ESSImport
         struct InventoryItem : public ESM3::CellRef
         {
             std::string mId;
-            unsigned int mCount;
+            int mCount;
             int mRelativeEquipmentSlot;
             SCRI mSCRI;
         };
         std::vector<InventoryItem> mItems;
 
-        void load(ESM3::Reader& esm);
+        bool load(ESM3::Reader& esm);
     };
 
 }
