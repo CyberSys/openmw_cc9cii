@@ -8,8 +8,8 @@
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/cell.hpp>
+#include <components/esm3/land.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 #include <components/terrain/terraingrid.hpp>
 
@@ -571,7 +571,7 @@ void CSVRender::Cell::setCellMarker()
     {
         const CSMWorld::Record<CSMWorld::Cell>& cellRecord = mData.getCells().getRecord(cellIndex);
         cellExists = !cellRecord.isDeleted();
-        isInteriorCell = cellRecord.get().mData.mFlags & ESM::Cell::Interior;
+        isInteriorCell = cellRecord.get().mData.mFlags & ESM3::Cell::Interior;
     }
 
     if (!isInteriorCell) {

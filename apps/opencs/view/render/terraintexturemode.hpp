@@ -117,8 +117,8 @@ namespace CSVRender
             bool mIsEditing;
             std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
-            const int cellSize {ESM::Land::REAL_SIZE};
-            const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
+            const int cellSize {ESM3::Land::REAL_SIZE};
+            const int landTextureSize {ESM3::Land::LAND_TEXTURE_SIZE};
 
         signals:
             void passBrushTexture(std::string brushTexture);

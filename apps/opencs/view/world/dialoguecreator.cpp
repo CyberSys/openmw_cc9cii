@@ -1,6 +1,6 @@
 #include "dialoguecreator.hpp"
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/dial.hpp>
 
 #include "../../model/doc/document.hpp"
 
@@ -23,14 +23,14 @@ CSVWorld::DialogueCreator::DialogueCreator (CSMWorld::Data& data, QUndoStack& un
 : GenericCreator (data, undoStack, id, true), mType (type)
 {}
 
-CSVWorld::Creator *CSVWorld::TopicCreatorFactory::makeCreator (CSMDoc::Document& document, 
+CSVWorld::Creator *CSVWorld::TopicCreatorFactory::makeCreator (CSMDoc::Document& document,
                                                                const CSMWorld::UniversalId& id) const
 {
-    return new DialogueCreator (document.getData(), document.getUndoStack(), id, ESM::Dialogue::Topic);
+    return new DialogueCreator (document.getData(), document.getUndoStack(), id, ESM3::Dialogue::Topic);
 }
 
-CSVWorld::Creator *CSVWorld::JournalCreatorFactory::makeCreator (CSMDoc::Document& document, 
+CSVWorld::Creator *CSVWorld::JournalCreatorFactory::makeCreator (CSMDoc::Document& document,
                                                                  const CSMWorld::UniversalId& id) const
 {
-    return new DialogueCreator (document.getData(), document.getUndoStack(), id, ESM::Dialogue::Journal);
+    return new DialogueCreator (document.getData(), document.getUndoStack(), id, ESM3::Dialogue::Journal);
 }

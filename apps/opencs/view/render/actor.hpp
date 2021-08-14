@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-#include <components/esm/loadarmo.hpp>
+#include <components/esm3/armo.hpp>
 #include <components/sceneutil/visitor.hpp>
 
 #include "../../model/world/actoradapter.hpp"

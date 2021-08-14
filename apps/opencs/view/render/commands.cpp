@@ -1,6 +1,6 @@
 #include "commands.hpp"
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 
 #include "terrainselection.hpp"
 

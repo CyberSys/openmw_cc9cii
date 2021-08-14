@@ -20,9 +20,9 @@ CSVRender::BrushDraw::BrushDraw(osg::ref_ptr<osg::Group> parentNode, bool textur
     mBrushDrawNode->addChild(mGeometry);
     mParentNode->addChild(mBrushDrawNode);
     if (mTextureMode)
-        mLandSizeFactor = static_cast<float>(ESM::Land::REAL_SIZE) / static_cast<float>(ESM::Land::LAND_TEXTURE_SIZE);
+        mLandSizeFactor = static_cast<float>(ESM3::Land::REAL_SIZE) / static_cast<float>(ESM3::Land::LAND_TEXTURE_SIZE);
     else
-        mLandSizeFactor = static_cast<float>(ESM::Land::REAL_SIZE) / static_cast<float>(ESM::Land::LAND_SIZE - 1);
+        mLandSizeFactor = static_cast<float>(ESM3::Land::REAL_SIZE) / static_cast<float>(ESM3::Land::LAND_SIZE - 1);
 }
 
 CSVRender::BrushDraw::~BrushDraw()

@@ -8,7 +8,7 @@
 #include <osg/ref_ptr>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 #include "../../model/world/cellcoordinates.hpp"
 
 namespace osg
@@ -73,7 +73,7 @@ namespace CSVRender
             bool noLandLoaded(const std::string& cellId);
 
             bool isLandLoaded(const std::string& cellId);
-            
+
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
