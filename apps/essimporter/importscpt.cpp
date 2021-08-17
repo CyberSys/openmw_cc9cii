@@ -19,10 +19,10 @@ namespace ESSImport
         esm.get(mSCHD);
 
         esm.getSubRecordHeader(); // mSCRI expects this
-        bool subHdrRead = mSCRI.load(esm);
+        bool subDataRemaining = mSCRI.load(esm);
 
         mRefNum = -1;
-        if (subHdrRead || esm.getSubRecordHeader())
+        if (subDataRemaining || esm.getSubRecordHeader())
         {
             if (esm.subRecordHeader().typeId == ESM3::SUB_RNAM)
             {

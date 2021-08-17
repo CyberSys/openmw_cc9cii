@@ -290,7 +290,6 @@ namespace ESSImport
         converters[ESM::REC_CLAS] = std::shared_ptr<Converter>(new ConvertClass());
         converters[ESM::REC_SPEL] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Spell>());
         converters[ESM::REC_ARMO] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Armor>());
-        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Weapon>());
         converters[ESM::REC_CLOT] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Clothing>());
         converters[ESM::REC_ENCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Enchantment>());
         converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM3::Weapon>());

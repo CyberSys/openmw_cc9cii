@@ -419,21 +419,26 @@ public:
 class ConvertSTLN : public Converter
 {
 public:
+    // TODO: investigate what happens if multiple items with the same name is stolen
+    //       (i.e. mStolenItems may need to change to std::vector or something)
     void read(ESM3::Reader& esm) override
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertCREC unexpected record");
-        std::string itemid;// = esm.getHNString("NAME");
-        esm.getZString(itemid);
-        Misc::StringUtils::lowerCaseInPlace(itemid);
+        std::string itemid;
 
         while (esm.getSubRecordHeader())
         {
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
+                case ESM3::SUB_NAME:
+                {
+                    esm.getZString(itemid);
+                    Misc::StringUtils::lowerCaseInPlace(itemid);
+                    break;
+                }
                 case ESM3::SUB_FNAM:
                 {
+                    assert(!itemid.empty() && "ConvertSTLN unexpected record order");
                     std::string factionid;
                     esm.getZString(factionid);
                     mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
@@ -441,6 +446,7 @@ public:
                 }
                 case ESM3::SUB_ONAM:
                 {
+                    assert(!itemid.empty() && "ConvertSTLN unexpected record order");
                     std::string ownerid;
                     esm.getZString(ownerid);
                     mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));

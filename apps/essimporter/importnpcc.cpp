@@ -12,10 +12,10 @@ namespace ESSImport
 {
     void NPCC::load(ESM3::Reader& esm)
     {
-        bool subHdrRead = false;
-        while (subHdrRead || esm.getSubRecordHeader())
+        bool subDataRemaining = false;
+        while (subDataRemaining || esm.getSubRecordHeader())
         {
-            subHdrRead = false;
+            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -40,7 +40,7 @@ namespace ESSImport
                     // NOTE: it is assumed that all inventory related sub-records are grouped
                     //       so we off-load the loading here (i.e. XIDX, SCRI, XHLT occur for
                     //       that inventory item, and WIDX for equipped items)
-                    subHdrRead = mInventory.load(esm);
+                    subDataRemaining = mInventory.load(esm);
                     break;
                 }
                 case ESM3::SUB_MODL: // (do these below ever occur in a savefile?)

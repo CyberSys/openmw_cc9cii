@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <cstring> // memset
+#include <iostream>
 
 #include <components/esm3/reader.hpp>
 
@@ -24,7 +25,12 @@ namespace ESSImport
             switch (subHdr.typeId)
             {
                 case ESM3::SUB_NAME: esm.get(spell.mIndex); break;
-                case ESM3::SUB_SPDT: esm.get(spell.mSPDT); break;
+                case ESM3::SUB_SPDT: esm.get(spell.mSPDT);
+                     std::cout << "type   " << spell.mSPDT.mType << std::endl;
+                     std::cout << "effect " << spell.mSPDT.mId.toString() << std::endl;
+                     std::cout << "caster " << spell.mSPDT.mCasterId.toString() << std::endl;
+                     std::cout << "source " << spell.mSPDT.mSourceId.toString() << std::endl;
+                     break;
                 case ESM3::SUB_TNAM: esm.getZString(spell.mTarget); break;
                 case ESM3::SUB_NPDT:
                 {

@@ -16,16 +16,16 @@ namespace ESSImport
     bool Inventory::load(ESM3::Reader& esm)
     {
         assert(esm.subRecordHeader().typeId == ESM3::SUB_NPCO);
-        bool subHdrRead = true;
+        bool subDataRemaining = true;
 
         int baseIndex = -1;
         int currentIndex = -1; // -1 means uninitialised
         bool doOnce = false;
         //bool finished = false;
-        while (/*!finished && */(subHdrRead || esm.getSubRecordHeader()))
+        while (/*!finished && */(subDataRemaining || esm.getSubRecordHeader()))
         {
-            subHdrRead = false;
-            
+            subDataRemaining = false;
+
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -84,9 +84,9 @@ namespace ESSImport
                 case ESM3::SUB_SCRI: // item script; optional
                 {
                     if (currentIndex > 0) // separate stack
-                        subHdrRead = mItems[currentIndex].mSCRI.load(esm);
+                        subDataRemaining = mItems[currentIndex].mSCRI.load(esm);
                     else
-                        subHdrRead = mItems.back().mSCRI.load(esm);
+                        subDataRemaining = mItems.back().mSCRI.load(esm);
                     break;
                 }
                 case ESM3::SUB_XHLT: // optional
@@ -133,9 +133,9 @@ namespace ESSImport
                     bool isDeleted = false;
                     // for XSOL and XCHG seen so far, but probably others too
                     if (currentIndex > 0)
-                        subHdrRead = mItems[currentIndex].ESM3::CellRef::loadData(esm, isDeleted);
+                        subDataRemaining = mItems[currentIndex].ESM3::CellRef::loadData(esm, isDeleted);
                     else
-                        subHdrRead = mItems.back().ESM3::CellRef::loadData(esm, isDeleted);
+                        subDataRemaining = mItems.back().ESM3::CellRef::loadData(esm, isDeleted);
 
                     break;
                 }

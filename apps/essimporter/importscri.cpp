@@ -9,10 +9,10 @@ namespace ESSImport
     {
         int numShorts = 0, numLongs = 0, numFloats = 0;
 
-        bool subHdrRead = true;
-        while (subHdrRead || esm.getSubRecordHeader())
+        bool subDataRemaining = true;
+        while (subDataRemaining || esm.getSubRecordHeader())
         {
-            subHdrRead = false;
+            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
