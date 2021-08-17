@@ -9,139 +9,119 @@ void ESM3::InventoryState::load (Reader& esm)
 {
     // obsolete
     int index = 0;
-    int itemsCount = 0;
-
-    bool subHdrRead = false;
-    while (subHdrRead || esm.getSubRecordHeader())
+    while (esm.getNextSubRecordType() == ESM3::SUB_IOBJ && esm.getSubRecordHeader())
     {
-        subHdrRead = false;
-        const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
-        switch (subHdr.typeId)
-        {
-            case ESM3::SUB_IOBJ: // obsolete
-            {
-                int unused; // no longer used
-                esm.get(unused);
+        int unused; // no longer used
+        esm.get(unused);
 
-                ObjectState state;
-
-                esm.getSubRecordHeader();
-                if (esm.subRecordHeader().typeId == ESM3::SUB_SLOT) // obsolete
-                {
-                    int slot;
-                    esm.get(slot);
-                    mEquipmentSlots[index] = slot;
-                }
-                else
-                    subHdrRead = true;
-
-                state.mRef.loadId(esm, true);
-                state.load(esm);
-
-                if (state.mCount == 0)
-                    continue;
-
-                mItems.push_back(state);
-
-                ++index;
-                break;
-            }
-            case ESM3::SUB_ICNT:
-            {
-                esm.get(itemsCount);
-                break;
-            }
-            case ESM3::SUB_LEVM: //Next item is Levelled item
-            {
-                //Get its name
-                std::string id;
-                esm.getZString(id);
-                int count;
-                std::string parentGroup = "";
-
-                //Then get its count
-                esm.getSubRecordHeader();
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
-                esm.get(count);
-                //Old save formats don't have information about parent group; check for that
-                esm.getSubRecordHeader();
-                if (esm.subRecordHeader().typeId == ESM3::SUB_LGRP)
-                {
-                    //Newest saves contain parent group
-                    esm.getZString(parentGroup);
-                }
-                else
-                    subHdrRead = true;
-
-                mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
-                break;
-            }
-            case ESM3::SUB_MAGI:
-            {
-                std::string id;
-                esm.getZString(id);
-
-                std::vector<std::pair<float, float> > params;
-                esm.getSubRecordHeader();
-                while (esm.subRecordHeader().typeId == ESM3::SUB_RAND)
-                {
-                    float rand, multiplier;
-                    esm.get(rand);
-
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_MULT);
-                    esm.get(multiplier);
-                    params.emplace_back(rand, multiplier);
-                }
-                mPermanentMagicEffectMagnitudes[id] = params;
-
-                subHdrRead = true;
-                break;
-            }
-            case ESM3::SUB_EQUI:
-            {
-                int equipIndex;
-                esm.get(equipIndex);
-                int slot;
-                esm.get(slot);
-                mEquipmentSlots[equipIndex] = slot;
-                break;
-            }
-            case ESM3::SUB_EQIP:
-            {
-                int slotsCount = 0;
-                esm.get(slotsCount);
-                for (int i = 0; i < slotsCount; i++)
-                {
-                    int equipIndex;
-                    esm.get(equipIndex);
-                    int slot;
-                    esm.get(slot);
-                    mEquipmentSlots[equipIndex] = slot;
-                }
-                break;
-            }
-            case ESM3::SUB_SELE:
-            {
-                mSelectedEnchantItem = -1;
-                esm.get(mSelectedEnchantItem);
-                break;
-            }
-        }
-    }
-
-    for (int i = 0; i < itemsCount; i++)
-    {
         ObjectState state;
 
+        if (esm.getNextSubRecordType() == ESM3::SUB_SLOT && esm.getSubRecordHeader()) // obsolete
+        {
+            int slot;
+            esm.get(slot);
+            mEquipmentSlots[index] = slot;
+        }
+
+        esm.getSubRecordHeader();
         state.mRef.loadId(esm, true);
-        state.load (esm);
+        state.load(esm);
 
         if (state.mCount == 0)
             continue;
 
-        mItems.push_back (state);
+        mItems.push_back(state);
+
+        ++index;
+     }
+
+    int itemsCount = 0;
+    if (esm.getNextSubRecordType() == ESM3::SUB_ICNT && esm.getSubRecordHeader())
+        esm.get(itemsCount);
+    for (int i = 0; i < itemsCount; i++)
+    {
+        ObjectState state;
+
+        esm.getSubRecordHeader(); // FRMR
+        state.mRef.loadId(esm, true);
+        state.load(esm);
+
+        if (state.mCount == 0)
+            continue;
+
+        mItems.push_back(state);
     }
+
+    //Next item is Levelled item
+    while (esm.getNextSubRecordType() == ESM3::SUB_LEVM && esm.getSubRecordHeader())
+    {
+        //Get its name
+        std::string id;
+        esm.getZString(id);
+        int count;
+        std::string parentGroup = "";
+
+        //Then get its count
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
+        esm.get(count);
+
+        //Old save formats don't have information about parent group; check for that
+        if (esm.getNextSubRecordType() == ESM3::SUB_LGRP && esm.getSubRecordHeader())
+        {
+            //Newest saves contain parent group
+            esm.getZString(parentGroup);
+        }
+
+        mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
+    }
+
+    while (esm.getNextSubRecordType() == ESM3::SUB_MAGI && esm.getSubRecordHeader())
+    {
+        std::string id;
+        esm.getZString(id);
+
+        std::vector<std::pair<float, float> > params;
+        while (esm.getNextSubRecordType() == ESM3::SUB_RAND && esm.getSubRecordHeader())
+        {
+            float rand, multiplier;
+            esm.get(rand);
+
+            esm.getSubRecordHeader();
+            assert(esm.subRecordHeader().typeId == ESM3::SUB_MULT);
+            esm.get(multiplier);
+
+            params.emplace_back(rand, multiplier);
+        }
+        mPermanentMagicEffectMagnitudes[id] = params;
+    }
+
+    while (esm.getNextSubRecordType() == ESM3::SUB_EQUI && esm.getSubRecordHeader())
+    {
+        int equipIndex;
+        esm.get(equipIndex);
+        int slot;
+        esm.get(slot);
+        mEquipmentSlots[equipIndex] = slot;
+    }
+
+    if (esm.getNextSubRecordType() == ESM3::SUB_EQIP && esm.getSubRecordHeader())
+    {
+        int slotsCount = 0;
+        esm.get(slotsCount);
+        for (int i = 0; i < slotsCount; i++)
+        {
+            int equipIndex;
+            esm.get(equipIndex);
+            int slot;
+            esm.get(slot);
+            mEquipmentSlots[equipIndex] = slot;
+        }
+    }
+
+    mSelectedEnchantItem = -1;
+    if (esm.getNextSubRecordType() == ESM3::SUB_SELE && esm.getSubRecordHeader())
+        esm.get(mSelectedEnchantItem);
 
     // Old saves had restocking levelled items in a special map
     // This turns items from that map into negative quantities

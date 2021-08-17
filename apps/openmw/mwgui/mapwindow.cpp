@@ -11,7 +11,7 @@
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_FactoryManager.h>
 
-#include <components/esm/globalmap.hpp>
+#include <components/esm3/globalmap.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/settings/settings.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
@@ -108,14 +108,14 @@ namespace
 namespace MWGui
 {
 
-    void CustomMarkerCollection::addMarker(const ESM::CustomMarker &marker, bool triggerEvent)
+    void CustomMarkerCollection::addMarker(const ESM3::CustomMarker &marker, bool triggerEvent)
     {
         mMarkers.insert(std::make_pair(marker.mCell, marker));
         if (triggerEvent)
             eventMarkersChanged();
     }
 
-    void CustomMarkerCollection::deleteMarker(const ESM::CustomMarker &marker)
+    void CustomMarkerCollection::deleteMarker(const ESM3::CustomMarker &marker)
     {
         std::pair<ContainerType::iterator, ContainerType::iterator> range = mMarkers.equal_range(marker.mCell);
 
@@ -131,7 +131,7 @@ namespace MWGui
         throw std::runtime_error("can't find marker to delete");
     }
 
-    void CustomMarkerCollection::updateMarker(const ESM::CustomMarker &marker, const std::string &newNote)
+    void CustomMarkerCollection::updateMarker(const ESM3::CustomMarker &marker, const std::string &newNote)
     {
         std::pair<ContainerType::iterator, ContainerType::iterator> range = mMarkers.equal_range(marker.mCell);
 
@@ -163,7 +163,7 @@ namespace MWGui
         return mMarkers.end();
     }
 
-    CustomMarkerCollection::RangeType CustomMarkerCollection::getMarkers(const ESM::CellId &cellId) const
+    CustomMarkerCollection::RangeType CustomMarkerCollection::getMarkers(const ESM3::CellId &cellId) const
     {
         return mMarkers.equal_range(cellId);
     }
@@ -352,16 +352,16 @@ namespace MWGui
         {
             for (int dY =-mCellDistance; dY <= mCellDistance; ++dY)
             {
-                ESM::CellId cellId;
+                ESM3::CellId cellId;
                 cellId.mPaged = !mInterior;
-                cellId.mWorldspace = (mInterior ? mPrefix : ESM::CellId::sDefaultWorldspace);
+                cellId.mWorldspace = (mInterior ? mPrefix : ESM3::CellId::sDefaultWorldspace);
                 cellId.mIndex.mX = mCurX+dX;
                 cellId.mIndex.mY = mCurY+dY;
 
                 CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellId);
                 for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
                 {
-                    const ESM::CustomMarker& marker = it->second;
+                    const ESM3::CustomMarker& marker = it->second;
 
                     MarkerUserData markerPos (mLocalMapRender);
                     MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
@@ -731,7 +731,7 @@ namespace MWGui
 
         for (MyGUI::Widget* widget : mCustomMarkerWidgets)
         {
-            const auto& marker = *widget->getUserData<ESM::CustomMarker>();
+            const auto& marker = *widget->getUserData<ESM3::CustomMarker>();
             widget->setCoord(getMarkerCoordinates(marker.mWorldX, marker.mWorldY, markerPos, 16));
         }
 
@@ -839,7 +839,7 @@ namespace MWGui
 
     void MapWindow::onCustomMarkerDoubleClicked(MyGUI::Widget *sender)
     {
-        mEditingMarker = *sender->getUserData<ESM::CustomMarker>();
+        mEditingMarker = *sender->getUserData<ESM3::CustomMarker>();
         mEditNoteDialog.setText(mEditingMarker.mNote);
         mEditNoteDialog.showDeleteButton(true);
         mEditNoteDialog.setVisible(true);
@@ -877,7 +877,7 @@ namespace MWGui
             mEditingMarker.mCell.mWorldspace = LocalMapBase::mPrefix;
         else
         {
-            mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            mEditingMarker.mCell.mWorldspace = ESM3::CellId::sDefaultWorldspace;
             mEditingMarker.mCell.mIndex.mX = x;
             mEditingMarker.mCell.mIndex.mY = y;
         }
@@ -1107,10 +1107,10 @@ namespace MWGui
 
     void MapWindow::setGlobalMapMarkerTooltip(MyGUI::Widget* markerWidget, int x, int y)
     {
-        ESM::CellId cellId;
+        ESM3::CellId cellId;
         cellId.mIndex.mX = x;
         cellId.mIndex.mY = y;
-        cellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
+        cellId.mWorldspace = ESM3::CellId::sDefaultWorldspace;
         cellId.mPaged = true;
         CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellId);
         std::vector<std::string> destNotes;
@@ -1288,7 +1288,7 @@ namespace MWGui
 
     void MapWindow::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
-        ESM::GlobalMap map;
+        ESM3::GlobalMap map;
         mGlobalMapRender->write(map);
 
         map.mMarkers = mMarkers;
@@ -1298,18 +1298,18 @@ namespace MWGui
         writer.endRecord(ESM::REC_GMAP);
     }
 
-    void MapWindow::readRecord(ESM::ESMReader &reader, uint32_t type)
+    void MapWindow::readRecord(ESM3::Reader &reader, uint32_t type)
     {
         if (type == ESM::REC_GMAP)
         {
-            ESM::GlobalMap map;
+            ESM3::GlobalMap map;
             map.load(reader);
 
             mGlobalMapRender->read(map);
 
-            for (const ESM::GlobalMap::CellId& cellId : map.mMarkers)
+            for (const ESM3::GlobalMap::CellId& cellId : map.mMarkers)
             {
-                const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(cellId.first, cellId.second);
+                const ESM3::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Cell>().search(cellId.first, cellId.second);
                 if (cell && !cell->mName.empty())
                     addVisitedLocation(cell->mName, cellId.first, cellId.second);
             }

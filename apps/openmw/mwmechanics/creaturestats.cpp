@@ -2,9 +2,10 @@
 
 #include <algorithm>
 #include <climits>
+#include <cassert>
 
-#include <components/esm/creaturestats.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/creaturestats.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -46,8 +47,8 @@ namespace MWMechanics
 
         float normalised = floor(max) == 0 ? 1 : std::max (0.0f, current / max);
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         static const float fFatigueBase = gmst.find("fFatigueBase")->mValue.getFloat();
         static const float fFatigueMult = gmst.find("fFatigueMult")->mValue.getFloat();
@@ -208,8 +209,8 @@ namespace MWMechanics
 
     void CreatureStats::modifyMagicEffects(const MagicEffects &effects)
     {
-        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
-                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier())
+        if (effects.get(ESM3::MagicEffect::FortifyMaximumMagicka).getModifier()
+                != mMagicEffects.get(ESM3::MagicEffect::FortifyMaximumMagicka).getModifier())
             mRecalcMagicka = true;
 
         mMagicEffects.setModifiers(effects);
@@ -229,7 +230,7 @@ namespace MWMechanics
 
     bool CreatureStats::isParalyzed() const
     {
-        return mMagicEffects.get(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
+        return mMagicEffects.get(ESM3::MagicEffect::Paralyze).getMagnitude() > 0;
     }
 
     bool CreatureStats::isDead() const
@@ -345,7 +346,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += std::min(100.f, mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude());
+        evasion += std::min(100.f, mMagicEffects.get(ESM3::MagicEffect::Sanctuary).getMagnitude());
 
         return evasion;
     }
@@ -500,7 +501,7 @@ namespace MWMechanics
         mDrawState = state;
     }
 
-    void CreatureStats::writeState (ESM::CreatureStats& state) const
+    void CreatureStats::writeState (ESM3::CreatureStats& state) const
     {
         for (int i=0; i<ESM::Attribute::Length; ++i)
             mAttributes[i].writeState (state.mAttributes[i]);
@@ -561,7 +562,7 @@ namespace MWMechanics
         }
     }
 
-    void CreatureStats::readState (const ESM::CreatureStats& state)
+    void CreatureStats::readState (const ESM3::CreatureStats& state)
     {
         // HACK: using mGoldPool as an indicator for lack of ACDT during .ess import
         if (state.mGoldPool != INT_MIN)
@@ -608,7 +609,7 @@ namespace MWMechanics
         mMagicEffects.readState(state.mMagicEffects);
 
         // Rebuild the bound item cache
-        for(int effectId = ESM::MagicEffect::BoundDagger; effectId <= ESM::MagicEffect::BoundGloves; effectId++)
+        for(int effectId = ESM3::MagicEffect::BoundDagger; effectId <= ESM3::MagicEffect::BoundGloves; effectId++)
         {
             if(mMagicEffects.get(effectId).getMagnitude() > 0)
                 mBoundItems.insert(effectId);
@@ -690,9 +691,11 @@ namespace MWMechanics
         esm.endRecord(ESM::REC_ACTC);
     }
 
-    void CreatureStats::readActorIdCounter (ESM::ESMReader& esm)
+    void CreatureStats::readActorIdCounter (ESM3::Reader& esm)
     {
-        esm.getHNT(sActorId, "COUN");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
+        esm.get(sActorId);
     }
 
     signed char CreatureStats::getDeathAnimation() const
@@ -710,7 +713,7 @@ namespace MWMechanics
         return mTimeOfDeath;
     }
 
-    std::map<ESM::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
+    std::map<ESM3::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }

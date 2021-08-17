@@ -5,7 +5,7 @@
 
 #include <components/interpreter/types.hpp>
 
-namespace ESM
+namespace ESM3
 {
     class Script;
     struct Locals;
@@ -32,7 +32,7 @@ namespace MWScript
             bool isEmpty() const;
 
             /// \return Did the state of *this change from uninitialised to initialised?
-            bool configure (const ESM::Script& script);
+            bool configure (const ESM3::Script& script);
 
             /// @note var needs to be in lowercase
             ///
@@ -60,10 +60,10 @@ namespace MWScript
             /// \note If locals have not been configured yet, no data is written.
             ///
             /// \return Locals written?
-            bool write (ESM::Locals& locals, const std::string& script) const;
+            bool write (ESM3::Locals& locals, const std::string& script) const;
 
             /// \note Locals will be automatically configured first, if necessary
-            void read (const ESM::Locals& locals, const std::string& script);
+            void read (const ESM3::Locals& locals, const std::string& script);
     };
 }
 

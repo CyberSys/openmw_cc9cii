@@ -88,7 +88,7 @@ namespace MWInput
 
         int countSavedGameRecords() const override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
-        void readRecord(ESM::ESMReader& reader, uint32_t type) override;
+        void readRecord(ESM3::Reader& reader, uint32_t type) override;
 
         void resetIdleTime() override;
 

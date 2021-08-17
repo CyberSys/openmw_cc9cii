@@ -5,8 +5,9 @@
 
 #include <boost/filesystem.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/defs.hpp>
+#include <components/misc/stringops.hpp>
 
 bool MWState::operator< (const Slot& left, const Slot& right)
 {
@@ -20,13 +21,12 @@ void MWState::Character::addSlot (const boost::filesystem::path& path, const std
     slot.mPath = path;
     slot.mTimeStamp = boost::filesystem::last_write_time (path);
 
-    ESM::ESMReader reader;
+    ESM3::Reader reader;
     reader.open (slot.mPath.string());
 
-    if (reader.getRecName()!=ESM::REC_SAVE)
+    reader.getRecordHeader();
+    if (reader.hdr().typeId != ESM3::REC_SAVE)
         return; // invalid save file -> ignore
-
-    reader.getRecHeader();
 
     slot.mProfile.load (reader);
 
@@ -37,7 +37,7 @@ void MWState::Character::addSlot (const boost::filesystem::path& path, const std
     mSlots.push_back (slot);
 }
 
-void MWState::Character::addSlot (const ESM::SavedGame& profile)
+void MWState::Character::addSlot (const ESM3::SavedGame& profile)
 {
     Slot slot;
 
@@ -109,7 +109,7 @@ void MWState::Character::cleanup()
     }
 }
 
-const MWState::Slot *MWState::Character::createSlot (const ESM::SavedGame& profile)
+const MWState::Slot *MWState::Character::createSlot (const ESM3::SavedGame& profile)
 {
     addSlot (profile);
 
@@ -131,7 +131,7 @@ void MWState::Character::deleteSlot (const Slot *slot)
     mSlots.erase (mSlots.begin()+index);
 }
 
-const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM::SavedGame& profile)
+const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM3::SavedGame& profile)
 {
     int index = slot - &mSlots[0];
 
@@ -162,7 +162,7 @@ MWState::Character::SlotIterator MWState::Character::end() const
     return mSlots.rend();
 }
 
-ESM::SavedGame MWState::Character::getSignature() const
+ESM3::SavedGame MWState::Character::getSignature() const
 {
     if (mSlots.empty())
         throw std::logic_error ("character signature not available");

@@ -3,7 +3,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
-#include <components/esm/records.hpp>
+#include <components/esm3/records.hpp>
 #include <components/widgets/list.hpp>
 
 #include "../mwbase/windowmanager.hpp"
@@ -29,14 +29,14 @@ namespace
 
     bool sortMagicEffects (short id1, short id2)
     {
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
-        return gmst.find(ESM::MagicEffect::effectIdToString (id1))->mValue.getString()
-                < gmst.find(ESM::MagicEffect::effectIdToString  (id2))->mValue.getString();
+        return gmst.find(ESM3::MagicEffect::effectIdToString (id1))->mValue.getString()
+                < gmst.find(ESM3::MagicEffect::effectIdToString  (id2))->mValue.getString();
     }
 
-    void init(ESM::ENAMstruct& effect)
+    void init(ESM3::ENAMstruct& effect)
     {
         effect.mArea = 0;
         effect.mDuration = 0;
@@ -111,11 +111,11 @@ namespace MWGui
         return true;
     }
 
-    void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
+    void EditEffectDialog::newEffect (const ESM3::MagicEffect *effect)
     {
-        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
-        bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
-        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
+        bool allowSelf = (effect->mData.mFlags & ESM3::MagicEffect::CastSelf) != 0;
+        bool allowTouch = (effect->mData.mFlags & ESM3::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (effect->mData.mFlags & ESM3::MagicEffect::CastTarget) && !mConstantEffect;
 
         if (!allowSelf && !allowTouch && !allowTarget)
             return; // TODO: Show an error message popup?
@@ -155,10 +155,10 @@ namespace MWGui
         setVisible(true);
     }
 
-    void EditEffectDialog::editEffect (ESM::ENAMstruct effect)
+    void EditEffectDialog::editEffect (ESM3::ENAMstruct effect)
     {
-        const ESM::MagicEffect* magicEffect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+        const ESM3::MagicEffect* magicEffect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(effect.mEffectID);
 
         setMagicEffect(magicEffect);
         mOldEffect = effect;
@@ -188,11 +188,11 @@ namespace MWGui
         updateBoxes();
     }
 
-    void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
+    void EditEffectDialog::setMagicEffect (const ESM3::MagicEffect *effect)
     {
         mEffectImage->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
-        mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
+        mEffectName->setCaptionWithReplacing("#{"+ESM3::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 
         mEffect.mEffectID = effect->mIndex;
 
@@ -210,13 +210,13 @@ namespace MWGui
         mDurationBox->setVisible (false);
         mAreaBox->setVisible (false);
 
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+        if (!(mMagicEffect->mData.mFlags & ESM3::MagicEffect::NoMagnitude))
         {
             mMagnitudeBox->setPosition(mMagnitudeBox->getPosition().left, curY);
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&mConstantEffect==false)
+        if (!(mMagicEffect->mData.mFlags & ESM3::MagicEffect::NoDuration)&&mConstantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);
@@ -236,9 +236,9 @@ namespace MWGui
 
         // cycle through range types until we find something that's allowed
         // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect dialog)
-        bool allowSelf = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
-        bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
-        bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
+        bool allowSelf = (mMagicEffect->mData.mFlags & ESM3::MagicEffect::CastSelf) != 0;
+        bool allowTouch = (mMagicEffect->mData.mFlags & ESM3::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (mMagicEffect->mData.mFlags & ESM3::MagicEffect::CastTarget) && !mConstantEffect;
         if (mEffect.mRange == ESM::RT_Self && !allowSelf)
             mEffect.mRange = (mEffect.mRange+1)%3;
         if (mEffect.mRange == ESM::RT_Touch && !allowTouch)
@@ -306,7 +306,7 @@ namespace MWGui
     void EditEffectDialog::onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
         // make sure the max value is actually larger or equal than the min value
-        size_t magnMin = std::abs(mEffect.mMagnMin); // should never be < 0, this is just here to avoid the compiler warning
+        size_t magnMin = mEffect.mMagnMin;
         if (pos+1 < magnMin)
         {
             pos = mEffect.mMagnMin-1;
@@ -410,7 +410,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound ("Mysticism Hit");
 
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
+        const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
@@ -454,7 +454,7 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        for (const ESM::ENAMstruct& effect : mEffects)
+        for (const ESM3::ENAMstruct& effect : mEffects)
         {
             y += std::max(1.f, MWMechanics::calcEffectCost(effect, nullptr, MWMechanics::EffectCostMethod::PlayerSpell));
 
@@ -462,17 +462,17 @@ namespace MWGui
                 y *= 1.5;
         }
 
-        ESM::EffectList effectList;
+        ESM3::EffectList effectList;
         effectList.mList = mEffects;
         mSpell.mEffects = effectList;
         mSpell.mData.mCost = int(y);
-        mSpell.mData.mType = ESM::Spell::ST_Spell;
+        mSpell.mData.mType = ESM3::Spell::ST_Spell;
         mSpell.mData.mFlags = 0;
 
         mMagickaCost->setCaption(MyGUI::utility::toString(int(y)));
 
         float fSpellMakingValueMult =
-            store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->mValue.getFloat();
+            store.get<ESM3::GameSetting>().find("fSpellMakingValueMult")->mValue.getFloat();
 
         int price = std::max(1, static_cast<int>(y * fSpellMakingValueMult));
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
@@ -522,18 +522,18 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
+            const ESM3::Spell* spell = it->first;
 
             // only normal spells count
-            if (spell->mData.mType != ESM::Spell::ST_Spell)
+            if (spell->mData.mType != ESM3::Spell::ST_Spell)
                 continue;
 
-            for (const ESM::ENAMstruct& effectInfo : spell->mEffects.mList)
+            for (const ESM3::ENAMstruct& effectInfo : spell->mEffects.mList)
             {
-                const ESM::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+                const ESM3::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(effectInfo.mEffectID);
 
                 // skip effects that do not allow spellmaking/enchanting
-                int requiredFlags = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
+                int requiredFlags = (mType == Spellmaking) ? ESM3::MagicEffect::AllowSpellmaking : ESM3::MagicEffect::AllowEnchanting;
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
 
@@ -549,8 +549,8 @@ namespace MWGui
         int i=0;
         for (const short effectId : knownEffects)
         {
-            mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
-                                               ESM::MagicEffect::effectIdToString(effectId))->mValue.getString());
+            mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM3::GameSetting>().find(
+                                               ESM3::MagicEffect::effectIdToString(effectId))->mValue.getString());
             mButtonMapping[i] = effectId;
             ++i;
         }
@@ -559,8 +559,8 @@ namespace MWGui
 
         for (const short effectId : knownEffects)
         {
-            std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
-                                               ESM::MagicEffect::effectIdToString(effectId))->mValue.getString();
+            std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM3::GameSetting>().find(
+                                               ESM3::MagicEffect::effectIdToString(effectId))->mValue.getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
 
             ToolTips::createMagicEffectToolTip (w, effectId);
@@ -580,8 +580,8 @@ namespace MWGui
 
     void EffectEditorBase::onSelectAttribute ()
     {
-        const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+        const ESM3::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(mSelectedKnownEffectId);
 
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
@@ -591,8 +591,8 @@ namespace MWGui
 
     void EffectEditorBase::onSelectSkill ()
     {
-        const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+        const ESM3::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(mSelectedKnownEffectId);
 
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
@@ -622,10 +622,10 @@ namespace MWGui
         int buttonId = *sender->getUserData<int>();
         mSelectedKnownEffectId = mButtonMapping[buttonId];
 
-        const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+        const ESM3::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(mSelectedKnownEffectId);
 
-        if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+        if (effect->mData.mFlags & ESM3::MagicEffect::TargetSkill)
         {
             delete mSelectSkillDialog;
             mSelectSkillDialog = new SelectSkillDialog();
@@ -633,7 +633,7 @@ namespace MWGui
             mSelectSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectSkill);
             mSelectSkillDialog->setVisible (true);
         }
-        else if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+        else if (effect->mData.mFlags & ESM3::MagicEffect::TargetAttribute)
         {
             delete mSelectAttributeDialog;
             mSelectAttributeDialog = new SelectAttributeDialog();
@@ -643,7 +643,7 @@ namespace MWGui
         }
         else
         {
-            for (const ESM::ENAMstruct& effectInfo : mEffects)
+            for (const ESM3::ENAMstruct& effectInfo : mEffects)
             {
                 if (effectInfo.mEffectID == mSelectedKnownEffectId)
                 {
@@ -656,14 +656,14 @@ namespace MWGui
         }
     }
 
-    void EffectEditorBase::onEffectModified (ESM::ENAMstruct effect)
+    void EffectEditorBase::onEffectModified (ESM3::ENAMstruct effect)
     {
         mEffects[mSelectedEffect] = effect;
 
         updateEffectsView();
     }
 
-    void EffectEditorBase::onEffectRemoved (ESM::ENAMstruct effect)
+    void EffectEditorBase::onEffectRemoved (ESM3::ENAMstruct effect)
     {
         mEffects.erase(mEffects.begin() + mSelectedEffect);
         updateEffectsView();
@@ -677,7 +677,7 @@ namespace MWGui
         MyGUI::IntSize size(0,0);
 
         int i = 0;
-        for (const ESM::ENAMstruct& effectInfo : mEffects)
+        for (const ESM3::ENAMstruct& effectInfo : mEffects)
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectInfo.mEffectID;
@@ -716,7 +716,7 @@ namespace MWGui
         notifyEffectsChanged();
     }
 
-    void EffectEditorBase::onEffectAdded (ESM::ENAMstruct effect)
+    void EffectEditorBase::onEffectAdded (ESM3::ENAMstruct effect)
     {
         mEffects.push_back(effect);
         mSelectedEffect=mEffects.size()-1;
@@ -747,8 +747,8 @@ namespace MWGui
             if (it->mRange != ESM::RT_Self)
             {
                 auto& store = MWBase::Environment::get().getWorld()->getStore();
-                auto magicEffect = store.get<ESM::MagicEffect>().find(it->mEffectID);
-                if ((magicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) == 0)
+                auto magicEffect = store.get<ESM3::MagicEffect>().find(it->mEffectID);
+                if ((magicEffect->mData.mFlags & ESM3::MagicEffect::CastSelf) == 0)
                 {
                     it = mEffects.erase(it);
                     continue;

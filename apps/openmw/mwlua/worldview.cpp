@@ -1,8 +1,10 @@
 #include "worldview.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <cassert>
+
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include "../mwclass/container.hpp"
 
@@ -74,9 +76,11 @@ namespace MWLua
         return static_cast<double>(timeStamp.getDay()) * 24 + timeStamp.getHour();
     }
 
-    void WorldView::load(ESM::ESMReader& esm)
+    void WorldView::load(ESM3::Reader& esm)
     {
-        esm.getHNT(mGameSeconds, "LUAW");
+        esm.getSubRecordHeader();
+        assert(esm.subRecordHeader().typeId == ESM3::SUB_LUAW);
+        esm.get(mGameSeconds);
         ObjectId lastAssignedId;
         lastAssignedId.load(esm, true);
         mObjectRegistry.setLastAssignedId(lastAssignedId);
@@ -136,7 +140,7 @@ namespace MWLua
     MWWorld::CellStore* WorldView::findNamedCell(const std::string& name)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        const ESM::Cell* esmCell = world->getExterior(name);
+        const ESM3::Cell* esmCell = world->getExterior(name);
         if (esmCell)
             return world->getExterior(esmCell->getGridX(), esmCell->getGridY());
         else

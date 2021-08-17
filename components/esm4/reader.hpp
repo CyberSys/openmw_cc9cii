@@ -27,9 +27,6 @@
 #include <cstddef>
 #include <memory>
 
-#include <components/to_utf8/to_utf8.hpp>
-#include <components/files/constrainedfilestream.hpp>
-
 #include "common.hpp"
 #include "tes4.hpp"
 #include "../esm/reader.hpp"
@@ -153,6 +150,8 @@ namespace ESM4
         inline const std::string getAuthor() const final { return mHeader.mAuthor; }
         inline int getFormat() const final { return 0; }; // prob. not relevant for ESM4
         inline const std::string getDesc() const final { return mHeader.mDesc; }
+
+        inline std::string getFileName() const final { return mCtx.filename; }; // not used
 
         inline bool hasMoreRecs() const final { return (mFileSize - mCtx.fileRead) > 0; }
 

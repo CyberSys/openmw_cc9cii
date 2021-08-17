@@ -1,5 +1,11 @@
 #include "savedgame.hpp"
 
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
+
+#include <cassert>
+
 #include "common.hpp"
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
@@ -9,24 +15,43 @@ int ESM3::SavedGame::sCurrentFormat = 16;
 
 void ESM3::SavedGame::load (Reader& esm)
 {
-    mPlayerName = esm.getHNString("PLNA");
-    esm.getHNOT (mPlayerLevel, "PLLE");
+    esm.getSubRecordHeader();
+    assert(esm.subRecordHeader().typeId == ESM3::SUB_PLNA);
+    esm.getString(mPlayerName); // NOTE: not null terminated
 
-    mPlayerClassId = esm.getHNOString("PLCL");
-    mPlayerClassName = esm.getHNOString("PLCN");
+    if (esm.getNextSubRecordType() == ESM3::SUB_PLLE && esm.getSubRecordHeader())
+        esm.get(mPlayerLevel);
 
-    mPlayerCell = esm.getHNString("PLCE");
-    esm.getHNT (mInGameTime, "TSTM", 16);
-    esm.getHNT (mTimePlayed, "TIME");
-    mDescription = esm.getHNString ("DESC");
+    if (esm.getNextSubRecordType() == ESM3::SUB_PLCL && esm.getSubRecordHeader())
+        esm.getString(mPlayerClassId); // NOTE: not null terminated
+    if (esm.getNextSubRecordType() == ESM3::SUB_PLCN && esm.getSubRecordHeader())
+        esm.getString(mPlayerClassName); // NOTE: not null terminated
 
-    while (esm.isNextSub ("DEPE"))
-        mContentFiles.push_back (esm.getHString());
+    esm.getSubRecordHeader();
+    assert(esm.subRecordHeader().typeId == ESM3::SUB_PLCE);
+    esm.getString(mPlayerCell); // NOTE: not null terminated
+    esm.getSubRecordHeader();
+    assert(esm.subRecordHeader().typeId == ESM3::SUB_TSTM);
+    esm.get(mInGameTime, 16);
+    esm.getSubRecordHeader();
+    assert(esm.subRecordHeader().typeId == ESM3::SUB_TIME);
+    esm.get(mTimePlayed);
+    esm.getSubRecordHeader();
+    assert(esm.subRecordHeader().typeId == ESM3::SUB_DESC);
+    esm.getString(mDescription); // NOT: not null terminated
 
-    esm.getSubNameIs("SCRN");
-    esm.getSubHeader();
-    mScreenshot.resize(esm.getSubSize());
-    esm.getExact(mScreenshot.data(), mScreenshot.size());
+    while (esm.getNextSubRecordType() == ESM3::SUB_DEPE && esm.getSubRecordHeader())
+    {
+        std::string contentFile;
+        esm.getString(contentFile); // NOTE: not null terminated
+        mContentFiles.push_back(contentFile);
+    }
+
+    if (esm.getNextSubRecordType() == ESM3::SUB_SCRN && esm.getSubRecordHeader())
+    {
+        mScreenshot.resize(esm.subRecordHeader().dataSize);
+        esm.get(*mScreenshot.data(), mScreenshot.size());
+    }
 }
 
 void ESM3::SavedGame::save (ESM::ESMWriter& esm) const

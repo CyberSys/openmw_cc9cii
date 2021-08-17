@@ -3,9 +3,9 @@
 
 #include <algorithm>
 
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/cont.hpp>
+#include <components/esm3/crea.hpp>
+#include <components/esm3/npc_.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -73,7 +73,7 @@ namespace MWMechanics
         }
         if(amount > 0)
         {
-            ESM::ContItem cont;
+            ESM3::ContItem cont;
             cont.mItem = itemId;
             cont.mCount = amount;
             copy.mInventory.mList.push_back(cont);
@@ -81,11 +81,11 @@ namespace MWMechanics
         }
     }
 
-    template void setBaseAISetting<ESM::Creature>(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value);
-    template void setBaseAISetting<ESM::NPC>(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value);
-    template void modifyBaseInventory<ESM::Creature>(const std::string& actorId, const std::string& itemId, int amount);
-    template void modifyBaseInventory<ESM::NPC>(const std::string& actorId, const std::string& itemId, int amount);
-    template void modifyBaseInventory<ESM::Container>(const std::string& containerId, const std::string& itemId, int amount);
+    template void setBaseAISetting<ESM3::Creature>(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value);
+    template void setBaseAISetting<ESM3::NPC>(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value);
+    template void modifyBaseInventory<ESM3::Creature>(const std::string& actorId, const std::string& itemId, int amount);
+    template void modifyBaseInventory<ESM3::NPC>(const std::string& actorId, const std::string& itemId, int amount);
+    template void modifyBaseInventory<ESM3::Container>(const std::string& containerId, const std::string& itemId, int amount);
 }
 
 #endif

@@ -3,7 +3,7 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include <components/misc/mathutil.hpp>
 
@@ -31,7 +31,7 @@ namespace
 {
 
     //chooses an attack depending on probability to avoid uniformity
-    std::string chooseBestAttack(const ESM::Weapon* weapon);
+    std::string chooseBestAttack(const ESM3::Weapon* weapon);
 
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
         float duration, int weapType, float strength);
@@ -44,7 +44,7 @@ namespace MWMechanics
         mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
     }
 
-    AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
+    AiCombat::AiCombat(const ESM3::AiSequence::AiCombat *combat)
     {
         mTargetActorId = combat->mTargetActorId;
     }
@@ -222,7 +222,7 @@ namespace MWMechanics
         rangeAttack = currentAction->getCombatRange(isRangedCombat);
 
         // Get weapon characteristics
-        const ESM::Weapon* weapon = currentAction->getWeapon();
+        const ESM3::Weapon* weapon = currentAction->getWeapon();
 
         ESM::Position pos = actor.getRefData().getPosition();
         const osg::Vec3f vActorPos(pos.asVec3());
@@ -341,14 +341,14 @@ namespace MWMechanics
                     if (storage.mLOS &&
                             (triggerDist >= 1000 || getDistanceMinusHalfExtents(actor, target) <= triggerDist))
                     {
-                        const ESM::Pathgrid* pathgrid =
-                                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*storage.mCell->getCell());
+                        const ESM3::Pathgrid* pathgrid =
+                                MWBase::Environment::get().getWorld()->getStore().get<ESM3::Pathgrid>().search(*storage.mCell->getCell());
 
                         bool runFallback = true;
 
                         if (pathgrid && !actor.getClass().isPureWaterCreature(actor))
                         {
-                            ESM::Pathgrid::PointList points;
+                            ESM3::Pathgrid::PointList points;
                             Misc::CoordinateConverter coords(storage.mCell->getCell());
 
                             osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
@@ -365,11 +365,11 @@ namespace MWMechanics
 
                             if (!points.empty())
                             {
-                                ESM::Pathgrid::Point dest = points[Misc::Rng::rollDice(points.size())];
+                                ESM3::Pathgrid::Point dest = points[Misc::Rng::rollDice(points.size())];
                                 coords.toWorld(dest);
 
                                 state = AiCombatStorage::FleeState_RunToDestination;
-                                storage.mFleeDest = ESM::Pathgrid::Point(dest.mX, dest.mY, dest.mZ);
+                                storage.mFleeDest = ESM3::Pathgrid::Point(dest.mX, dest.mY, dest.mZ);
 
                                 runFallback = false;
                             }
@@ -403,7 +403,7 @@ namespace MWMechanics
 
             case AiCombatStorage::FleeState_RunToDestination:
                 {
-                    static const float fFleeDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFleeDistance")->mValue.getFloat();
+                    static const float fFleeDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fFleeDistance")->mValue.getFloat();
 
                     float dist = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                     if ((dist > fFleeDistance && !storage.mLOS)
@@ -448,13 +448,13 @@ namespace MWMechanics
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     }
 
-    void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiCombat::writeState(ESM3::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
+        std::unique_ptr<ESM3::AiSequence::AiCombat> combat(new ESM3::AiSequence::AiCombat());
         combat->mTargetActorId = mTargetActorId;
 
-        ESM::AiSequence::AiPackageContainer package;
-        package.mType = ESM::AiSequence::Ai_Combat;
+        ESM3::AiSequence::AiPackageContainer package;
+        package.mType = ESM3::AiSequence::Ai_Combat;
         package.mPackage = combat.release();
         sequence.mPackages.push_back(package);
     }
@@ -467,9 +467,9 @@ namespace MWMechanics
 
         if (targetClass.hasInventoryStore(target))
         {
-            int weapType = ESM::Weapon::None;
+            int weapType = ESM3::Weapon::None;
             MWWorld::ContainerStoreIterator weaponSlot = MWMechanics::getActiveWeapon(target, &weapType);
-            if (weapType > ESM::Weapon::None)
+            if (weapType > ESM3::Weapon::None)
                 targetWeapon = *weaponSlot;
         }
 
@@ -563,7 +563,7 @@ namespace MWMechanics
     }
 
     void AiCombatStorage::startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
-        const ESM::Weapon* weapon, bool distantCombat)
+        const ESM3::Weapon* weapon, bool distantCombat)
     {
         if (mReadyToAttack && characterController.readyToStartAttack())
         {
@@ -579,14 +579,14 @@ namespace MWMechanics
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->mValue.getFloat();
+                float baseDelay = store.get<ESM3::GameSetting>().find("fCombatDelayCreature")->mValue.getFloat();
                 if (actor.getClass().isNpc())
                 {
-                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
+                    baseDelay = store.get<ESM3::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
                 }
 
                 // Say a provoking combat phrase
-                const int iVoiceAttackOdds = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
+                const int iVoiceAttackOdds = store.get<ESM3::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
                 if (Misc::Rng::roll0to99() < iVoiceAttackOdds)
                 {
                     MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
@@ -628,7 +628,7 @@ namespace MWMechanics
         mMovement.mPosition[1] = 0;
         mMovement.mPosition[2] = 0;
         mFleeState = FleeState_None;
-        mFleeDest = ESM::Pathgrid::Point(0, 0, 0);
+        mFleeDest = ESM3::Pathgrid::Point(0, 0, 0);
     }
 
     bool AiCombatStorage::isFleeing()
@@ -641,7 +641,7 @@ namespace MWMechanics
 namespace
 {
 
-std::string chooseBestAttack(const ESM::Weapon* weapon)
+std::string chooseBestAttack(const ESM3::Weapon* weapon)
 {
     std::string attackType;
 
@@ -670,10 +670,10 @@ osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& t
     float duration, int weapType, float strength)
 {
     float projSpeed;
-    const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+    const MWWorld::Store<ESM3::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
     // get projectile speed (depending on weapon type)
-    if (MWMechanics::getWeaponType(weapType)->mWeaponClass == ESM::WeaponType::Thrown)
+    if (MWMechanics::getWeaponType(weapType)->mWeaponClass == ESM3::WeaponType::Thrown)
     {
         static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->mValue.getFloat();
         static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->mValue.getFloat();

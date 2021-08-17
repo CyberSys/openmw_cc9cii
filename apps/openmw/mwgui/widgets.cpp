@@ -22,13 +22,13 @@ namespace MWGui
         /* MWSkill */
 
         MWSkill::MWSkill()
-            : mSkillId(ESM::Skill::Length)
+            : mSkillId(ESM3::Skill::Length)
             , mSkillNameWidget(nullptr)
             , mSkillValueWidget(nullptr)
         {
         }
 
-        void MWSkill::setSkillId(ESM::Skill::SkillEnum skill)
+        void MWSkill::setSkillId(ESM3::Skill::SkillEnum skill)
         {
             mSkillId = skill;
             updateWidgets();
@@ -37,9 +37,9 @@ namespace MWGui
         void MWSkill::setSkillNumber(int skill)
         {
             if (skill < 0)
-                setSkillId(ESM::Skill::Length);
-            else if (skill < ESM::Skill::Length)
-                setSkillId(static_cast<ESM::Skill::SkillEnum>(skill));
+                setSkillId(ESM3::Skill::Length);
+            else if (skill < ESM3::Skill::Length)
+                setSkillId(static_cast<ESM3::Skill::SkillEnum>(skill));
             else
                 throw std::runtime_error("Skill number out of range");
         }
@@ -54,13 +54,13 @@ namespace MWGui
         {
             if (mSkillNameWidget)
             {
-                if (mSkillId == ESM::Skill::Length)
+                if (mSkillId == ESM3::Skill::Length)
                 {
                     mSkillNameWidget->setCaption("");
                 }
                 else
                 {
-                    const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
+                    const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM3::Skill::sSkillNameIds[mSkillId], "");
                     mSkillNameWidget->setCaption(name);
                 }
             }
@@ -219,10 +219,10 @@ namespace MWGui
             const MWWorld::ESMStore &store =
                 MWBase::Environment::get().getWorld()->getStore();
 
-            const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
+            const ESM3::Spell *spell = store.get<ESM3::Spell>().search(mId);
             MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
-            for (const ESM::ENAMstruct& effectInfo : spell->mEffects.mList)
+            for (const ESM3::ENAMstruct& effectInfo : spell->mEffects.mList)
             {
                 MWSpellEffectPtr effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
                 SpellEffectParams params;
@@ -250,7 +250,7 @@ namespace MWGui
                 const MWWorld::ESMStore &store =
                     MWBase::Environment::get().getWorld()->getStore();
 
-                const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
+                const ESM3::Spell *spell = store.get<ESM3::Spell>().search(mId);
                 if (spell)
                     mSpellNameWidget->setCaption(spell->mName);
                 else
@@ -336,10 +336,10 @@ namespace MWGui
         {
         }
 
-        SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
+        SpellEffectList MWEffectList::effectListFromESM(const ESM3::EffectList* effects)
         {
             SpellEffectList result;
-            for (const ESM::ENAMstruct& effectInfo : effects->mList)
+            for (const ESM3::ENAMstruct& effectInfo : effects->mList)
             {
                 SpellEffectParams params;
                 params.mEffectID = effectInfo.mEffectID;
@@ -384,8 +384,8 @@ namespace MWGui
             const MWWorld::ESMStore &store =
                 MWBase::Environment::get().getWorld()->getStore();
 
-            const ESM::MagicEffect *magicEffect =
-                store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
+            const ESM3::MagicEffect *magicEffect =
+                store.get<ESM3::MagicEffect>().search(mEffectParams.mEffectID);
 
             assert(magicEffect);
 
@@ -399,21 +399,21 @@ namespace MWGui
             std::string sec =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", "");
             std::string secs =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", "");
 
-            std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
+            std::string effectIDStr = ESM3::MagicEffect::effectIdToString(mEffectParams.mEffectID);
             std::string spellLine = MWBase::Environment::get().getWindowManager()->getGameSettingString(effectIDStr, "");
 
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && mEffectParams.mSkill != -1)
+            if (magicEffect->mData.mFlags & ESM3::MagicEffect::TargetSkill && mEffectParams.mSkill != -1)
             {
-                spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
+                spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM3::Skill::sSkillNameIds[mEffectParams.mSkill], "");
             }
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && mEffectParams.mAttribute != -1)
+            if (magicEffect->mData.mFlags & ESM3::MagicEffect::TargetAttribute && mEffectParams.mAttribute != -1)
             {
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
             }
 
             if (mEffectParams.mMagnMin || mEffectParams.mMagnMax) {
-                ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
-                if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
+                ESM3::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
+                if ( displayType == ESM3::MagicEffect::MDT_TimesInt ) {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
                     std::stringstream formatter;
 
@@ -424,18 +424,18 @@ namespace MWGui
 
                     spellLine += formatter.str();
                 }
-                else if ( displayType != ESM::MagicEffect::MDT_None  && !mEffectParams.mNoMagnitude) {
+                else if ( displayType != ESM3::MagicEffect::MDT_None  && !mEffectParams.mNoMagnitude) {
                     spellLine += " " + MyGUI::utility::toString(mEffectParams.mMagnMin);
                     if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
                         spellLine += to + MyGUI::utility::toString(mEffectParams.mMagnMax);
 
-                    if ( displayType == ESM::MagicEffect::MDT_Percentage )
+                    if ( displayType == ESM3::MagicEffect::MDT_Percentage )
                         spellLine += pct;
-                    else if ( displayType == ESM::MagicEffect::MDT_Feet )
+                    else if ( displayType == ESM3::MagicEffect::MDT_Feet )
                         spellLine += " " + ft;
-                    else if ( displayType == ESM::MagicEffect::MDT_Level )
+                    else if ( displayType == ESM3::MagicEffect::MDT_Level )
                         spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? lvl : lvls );
-                    else  // ESM::MagicEffect::MDT_Points
+                    else  // ESM3::MagicEffect::MDT_Points
                         spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? pt : pts );
                 }
             }
@@ -443,10 +443,10 @@ namespace MWGui
             // constant effects have no duration and no target
             if (!mEffectParams.mIsConstant)
             {
-                if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
+                if (!(magicEffect->mData.mFlags & ESM3::MagicEffect::AppliedOnce))
                     mEffectParams.mDuration = std::max(1, mEffectParams.mDuration);
 
-                if (mEffectParams.mDuration > 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+                if (mEffectParams.mDuration > 0 && !(magicEffect->mData.mFlags & ESM3::MagicEffect::NoDuration))
                 {
                     spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfor", "") + " " + MyGUI::utility::toString(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
                 }

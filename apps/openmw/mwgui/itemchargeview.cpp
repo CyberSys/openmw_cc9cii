@@ -7,7 +7,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_FactoryManager.h>
 
-#include <components/esm/loadench.hpp>
+#include <components/esm3/ench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -186,7 +186,7 @@ namespace MWGui
                 std::string enchId = line.mItemPtr.getClass().getEnchantment(line.mItemPtr);
                 if (enchId.empty())
                     break;
-                const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
+                const ESM3::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Enchantment>().search(enchId);
                 if (!ench)
                     break;
 

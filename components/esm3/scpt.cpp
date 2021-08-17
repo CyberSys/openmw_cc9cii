@@ -47,7 +47,7 @@ namespace ESM3
             tmp.emplace_back('\0');
             std::stringstream ss;
             ss << "Malformed string table";
-            ss << "\n  File: " << reader.getName();
+            ss << "\n  File: " << reader.getFileName();
             ss << "\n  Record: " << ESM::printName(reader.subRecordHeader().typeId);
             ss << "\n  Subrecord: " << "SCVR";
             ss << "\n  Offset: 0x" << std::hex << reader.getFileOffset();
@@ -68,7 +68,7 @@ namespace ESM3
                     // from the script source, so an overflow is not fatal.
                     std::stringstream ss;
                     ss << "String table overflow";
-                    ss << "\n  File: " << reader.getName();
+                    ss << "\n  File: " << reader.getFileName();
                     ss << "\n  Record: " << ESM::printName(reader.subRecordHeader().typeId);
                     ss << "\n  Subrecord: " << "SCVR";
                     ss << "\n  Offset: 0x" << std::hex << reader.getFileOffset();
@@ -118,7 +118,7 @@ namespace ESM3
                     {
                         std::stringstream ss;
                         ss << "Script data size defined in SCHD subrecord does not match size of SCDT subrecord";
-                        ss << "\n  File: " << reader.getName();
+                        ss << "\n  File: " << reader.getFileName();
                         ss << "\n  Offset: 0x" << std::hex << reader.getFileOffset();
                         Log(Debug::Verbose) << ss.str();
                     }
@@ -129,7 +129,7 @@ namespace ESM3
                 }
                 case ESM3::SUB_SCTX:
                 {
-                    reader.getString(mScriptText); // NOTE: string not null terminated
+                    reader.getString(mScriptText); // NOTE: string not null terminated (but some mods do)
                     break;
                 }
                 case ESM3::SUB_DELE:

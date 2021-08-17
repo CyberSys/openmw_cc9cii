@@ -1,7 +1,7 @@
 #include "aipackage.hpp"
 
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/cell.hpp>
+#include <components/esm3/land.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/misc/coordinateconverter.hpp>
 #include <components/settings/settings.hpp>
@@ -295,9 +295,9 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 
 const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const MWWorld::CellStore *cell)
 {
-    const ESM::CellId& id = cell->getCell()->getCellId();
+    const ESM3::CellId& id = cell->getCell()->getCellId();
     // static cache is OK for now, pathgrids can never change during runtime
-    typedef std::map<ESM::CellId, std::unique_ptr<MWMechanics::PathgridGraph> > CacheMap;
+    typedef std::map<ESM3::CellId, std::unique_ptr<MWMechanics::PathgridGraph> > CacheMap;
     static CacheMap cache;
     CacheMap::iterator found = cache.find(id);
     if (found == cache.end())
@@ -378,7 +378,7 @@ bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const
 
 bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
 {
-    const ESM::Cell* playerCell(getPlayer().getCell()->getCell());
+    const ESM3::Cell* playerCell(getPlayer().getCell()->getCell());
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
@@ -387,8 +387,8 @@ bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // AI shuts down actors before they reach edges of 3 x 3 grid.
         const float distanceFromEdge = 200.0;
-        float minThreshold = (-1.0f * ESM::Land::REAL_SIZE) + distanceFromEdge;
-        float maxThreshold = (2.0f * ESM::Land::REAL_SIZE) - distanceFromEdge;
+        float minThreshold = (-1.0f * ESM3::Land::REAL_SIZE) + distanceFromEdge;
+        float maxThreshold = (2.0f * ESM3::Land::REAL_SIZE) - distanceFromEdge;
         return (position.x() < minThreshold) || (maxThreshold < position.x())
             || (position.y() < minThreshold) || (maxThreshold < position.y());
     }

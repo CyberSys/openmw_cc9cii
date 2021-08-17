@@ -5,15 +5,40 @@
 
 namespace ESM3
 {
-#if 0
+    // equivalent to SUB_MPCD in REC_CELL
+    // (called from StateManager::loadGame() via WindowManager::readRecord())
     void CustomMarker::load(Reader& esm)
     {
-        esm.getHNT(mWorldX, "POSX");
-        esm.getHNT(mWorldY, "POSY");
-        mCell.load(esm);
-        mNote = esm.getHNOString("NOTE");
+        while (esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_POSX:
+                {
+                    esm.get(mWorldX);
+                    break;
+                }
+                case ESM3::SUB_POSY:
+                {
+                    esm.get(mWorldY);
+
+                    // read SUB_SPAC (worldspace) and SUB_CIDX (if paged)
+                    mCell.load(esm);
+                    break;
+                }
+                case ESM3::SUB_NOTE:
+                {
+                    esm.getString(mNote); // NOTE: string not null terminated
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData();
+                    break;
+            }
+        }
     }
-#endif
+
     void CustomMarker::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT("POSX", mWorldX);

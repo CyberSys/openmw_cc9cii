@@ -48,7 +48,7 @@ namespace MWGui
         };
 
         void write (ESM::ESMWriter& writer);
-        void readRecord (ESM::ESMReader& reader, uint32_t type);
+        void readRecord (ESM3::Reader& reader, uint32_t type);
         void clear() override;
 
 

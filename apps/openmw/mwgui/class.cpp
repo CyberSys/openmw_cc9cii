@@ -63,7 +63,7 @@ namespace MWGui
 
         setClassImage(mClassImage, mCurrentClassId);
 
-        mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mCurrentClassId)->mName);
+        mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().get<ESM3::Class>().find(mCurrentClassId)->mName);
 
         center();
     }
@@ -141,7 +141,7 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
         const std::string &classId =
-            player.get<ESM::NPC>()->mBase->mClass;
+            player.get<ESM3::NPC>()->mBase->mClass;
 
         if (!classId.empty())
             setClassId(classId);
@@ -208,13 +208,13 @@ namespace MWGui
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
         std::vector<std::pair<std::string, std::string> > items; // class id, class name
-        for (const ESM::Class& classInfo : store.get<ESM::Class>())
+        for (const ESM3::Class& classInfo : store.get<ESM3::Class>())
         {
             bool playable = (classInfo.mData.mIsPlayable != 0);
             if (!playable) // Only display playable classes
                 continue;
 
-            if (store.get<ESM::Class>().isDynamic(classInfo.mId))
+            if (store.get<ESM3::Class>().isDynamic(classInfo.mId))
                 continue; // custom-made class not relevant for this dialog
 
             items.emplace_back(classInfo.mId, classInfo.mName);
@@ -244,11 +244,11 @@ namespace MWGui
         if (mCurrentClassId.empty())
             return;
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Class *klass = store.get<ESM::Class>().search(mCurrentClassId);
+        const ESM3::Class *klass = store.get<ESM3::Class>().search(mCurrentClassId);
         if (!klass)
             return;
 
-        ESM::Class::Specialization specialization = static_cast<ESM::Class::Specialization>(klass->mData.mSpecialization);
+        ESM3::Class::Specialization specialization = static_cast<ESM3::Class::Specialization>(klass->mData.mSpecialization);
 
         static const char *specIds[3] = {
             "sSpecializationCombat",
@@ -455,17 +455,17 @@ namespace MWGui
         mFavoriteAttribute0->setAttributeId(ESM::Attribute::Strength);
         mFavoriteAttribute1->setAttributeId(ESM::Attribute::Agility);
 
-        mMajorSkill[0]->setSkillId(ESM::Skill::Block);
-        mMajorSkill[1]->setSkillId(ESM::Skill::Armorer);
-        mMajorSkill[2]->setSkillId(ESM::Skill::MediumArmor);
-        mMajorSkill[3]->setSkillId(ESM::Skill::HeavyArmor);
-        mMajorSkill[4]->setSkillId(ESM::Skill::BluntWeapon);
+        mMajorSkill[0]->setSkillId(ESM3::Skill::Block);
+        mMajorSkill[1]->setSkillId(ESM3::Skill::Armorer);
+        mMajorSkill[2]->setSkillId(ESM3::Skill::MediumArmor);
+        mMajorSkill[3]->setSkillId(ESM3::Skill::HeavyArmor);
+        mMajorSkill[4]->setSkillId(ESM3::Skill::BluntWeapon);
 
-        mMinorSkill[0]->setSkillId(ESM::Skill::LongBlade);
-        mMinorSkill[1]->setSkillId(ESM::Skill::Axe);
-        mMinorSkill[2]->setSkillId(ESM::Skill::Spear);
-        mMinorSkill[3]->setSkillId(ESM::Skill::Athletics);
-        mMinorSkill[4]->setSkillId(ESM::Skill::Enchant);
+        mMinorSkill[0]->setSkillId(ESM3::Skill::LongBlade);
+        mMinorSkill[1]->setSkillId(ESM3::Skill::Axe);
+        mMinorSkill[2]->setSkillId(ESM3::Skill::Spear);
+        mMinorSkill[3]->setSkillId(ESM3::Skill::Athletics);
+        mMinorSkill[4]->setSkillId(ESM3::Skill::Enchant);
 
         setSpecialization(0);
         update();
@@ -501,7 +501,7 @@ namespace MWGui
         return mDescription;
     }
 
-    ESM::Class::Specialization CreateClassDialog::getSpecializationId() const
+    ESM3::Class::Specialization CreateClassDialog::getSpecializationId() const
     {
         return mSpecializationId;
     }
@@ -514,9 +514,9 @@ namespace MWGui
         return v;
     }
 
-    std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
+    std::vector<ESM3::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
     {
-        std::vector<ESM::Skill::SkillEnum> v;
+        std::vector<ESM3::Skill::SkillEnum> v;
         for(int i = 0; i < 5; i++)
         {
             v.push_back(mMajorSkill[i]->getSkillId());
@@ -524,9 +524,9 @@ namespace MWGui
         return v;
     }
 
-    std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
+    std::vector<ESM3::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
     {
-        std::vector<ESM::Skill::SkillEnum> v;
+        std::vector<ESM3::Skill::SkillEnum> v;
         for(int i=0; i < 5; i++)
         {
             v.push_back(mMinorSkill[i]->getSkillId());
@@ -582,7 +582,7 @@ namespace MWGui
 
     void CreateClassDialog::setSpecialization(int id)
     {
-        mSpecializationId = (ESM::Class::Specialization) id;
+        mSpecializationId = (ESM3::Class::Specialization) id;
         static const char *specIds[3] = {
             "sSpecializationCombat",
             "sSpecializationMagic",
@@ -635,7 +635,7 @@ namespace MWGui
 
     void CreateClassDialog::onSkillSelected()
     {
-        ESM::Skill::SkillEnum id = mSkillDialog->getSkillId();
+        ESM3::Skill::SkillEnum id = mSkillDialog->getSkillId();
 
         // Avoid duplicate skills by swapping any skill field that matches the selected one
         for (Widgets::MWSkillPtr& skill : mSkills)
@@ -693,9 +693,9 @@ namespace MWGui
         getWidget(mSpecialization0, "Specialization0");
         getWidget(mSpecialization1, "Specialization1");
         getWidget(mSpecialization2, "Specialization2");
-        std::string combat = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Class::sGmstSpecializationIds[ESM::Class::Combat], "");
-        std::string magic = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Class::sGmstSpecializationIds[ESM::Class::Magic], "");
-        std::string stealth = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Class::sGmstSpecializationIds[ESM::Class::Stealth], "");
+        std::string combat = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM3::Class::sGmstSpecializationIds[ESM3::Class::Combat], "");
+        std::string magic = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM3::Class::sGmstSpecializationIds[ESM3::Class::Magic], "");
+        std::string stealth = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM3::Class::sGmstSpecializationIds[ESM3::Class::Stealth], "");
 
         mSpecialization0->setCaption(combat);
         mSpecialization0->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
@@ -703,11 +703,11 @@ namespace MWGui
         mSpecialization1->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
         mSpecialization2->setCaption(stealth);
         mSpecialization2->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
-        mSpecializationId = ESM::Class::Combat;
+        mSpecializationId = ESM3::Class::Combat;
 
-        ToolTips::createSpecializationToolTip(mSpecialization0, combat, ESM::Class::Combat);
-        ToolTips::createSpecializationToolTip(mSpecialization1, magic, ESM::Class::Magic);
-        ToolTips::createSpecializationToolTip(mSpecialization2, stealth, ESM::Class::Stealth);
+        ToolTips::createSpecializationToolTip(mSpecialization0, combat, ESM3::Class::Combat);
+        ToolTips::createSpecializationToolTip(mSpecialization1, magic, ESM3::Class::Magic);
+        ToolTips::createSpecializationToolTip(mSpecialization2, stealth, ESM3::Class::Stealth);
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
@@ -723,11 +723,11 @@ namespace MWGui
     void SelectSpecializationDialog::onSpecializationClicked(MyGUI::Widget* _sender)
     {
         if (_sender == mSpecialization0)
-            mSpecializationId = ESM::Class::Combat;
+            mSpecializationId = ESM3::Class::Combat;
         else if (_sender == mSpecialization1)
-            mSpecializationId = ESM::Class::Magic;
+            mSpecializationId = ESM3::Class::Magic;
         else if (_sender == mSpecialization2)
-            mSpecializationId = ESM::Class::Stealth;
+            mSpecializationId = ESM3::Class::Stealth;
         else
             return;
 
@@ -799,7 +799,7 @@ namespace MWGui
 
     SelectSkillDialog::SelectSkillDialog()
       : WindowModal("openmw_chargen_select_skill.layout")
-      , mSkillId(ESM::Skill::Block)
+      , mSkillId(ESM3::Skill::Block)
     {
         // Centre dialog
         center();
@@ -812,39 +812,39 @@ namespace MWGui
             getWidget(mStealthSkill[i], std::string("StealthSkill").append(1, theIndex));
         }
 
-        struct {Widgets::MWSkillPtr widget; ESM::Skill::SkillEnum skillId;} mSkills[3][9] = {
+        struct {Widgets::MWSkillPtr widget; ESM3::Skill::SkillEnum skillId;} mSkills[3][9] = {
             {
-                {mCombatSkill[0], ESM::Skill::Block},
-                {mCombatSkill[1], ESM::Skill::Armorer},
-                {mCombatSkill[2], ESM::Skill::MediumArmor},
-                {mCombatSkill[3], ESM::Skill::HeavyArmor},
-                {mCombatSkill[4], ESM::Skill::BluntWeapon},
-                {mCombatSkill[5], ESM::Skill::LongBlade},
-                {mCombatSkill[6], ESM::Skill::Axe},
-                {mCombatSkill[7], ESM::Skill::Spear},
-                {mCombatSkill[8], ESM::Skill::Athletics}
+                {mCombatSkill[0], ESM3::Skill::Block},
+                {mCombatSkill[1], ESM3::Skill::Armorer},
+                {mCombatSkill[2], ESM3::Skill::MediumArmor},
+                {mCombatSkill[3], ESM3::Skill::HeavyArmor},
+                {mCombatSkill[4], ESM3::Skill::BluntWeapon},
+                {mCombatSkill[5], ESM3::Skill::LongBlade},
+                {mCombatSkill[6], ESM3::Skill::Axe},
+                {mCombatSkill[7], ESM3::Skill::Spear},
+                {mCombatSkill[8], ESM3::Skill::Athletics}
             },
             {
-                {mMagicSkill[0], ESM::Skill::Enchant},
-                {mMagicSkill[1], ESM::Skill::Destruction},
-                {mMagicSkill[2], ESM::Skill::Alteration},
-                {mMagicSkill[3], ESM::Skill::Illusion},
-                {mMagicSkill[4], ESM::Skill::Conjuration},
-                {mMagicSkill[5], ESM::Skill::Mysticism},
-                {mMagicSkill[6], ESM::Skill::Restoration},
-                {mMagicSkill[7], ESM::Skill::Alchemy},
-                {mMagicSkill[8], ESM::Skill::Unarmored}
+                {mMagicSkill[0], ESM3::Skill::Enchant},
+                {mMagicSkill[1], ESM3::Skill::Destruction},
+                {mMagicSkill[2], ESM3::Skill::Alteration},
+                {mMagicSkill[3], ESM3::Skill::Illusion},
+                {mMagicSkill[4], ESM3::Skill::Conjuration},
+                {mMagicSkill[5], ESM3::Skill::Mysticism},
+                {mMagicSkill[6], ESM3::Skill::Restoration},
+                {mMagicSkill[7], ESM3::Skill::Alchemy},
+                {mMagicSkill[8], ESM3::Skill::Unarmored}
             },
             {
-                {mStealthSkill[0], ESM::Skill::Security},
-                {mStealthSkill[1], ESM::Skill::Sneak},
-                {mStealthSkill[2], ESM::Skill::Acrobatics},
-                {mStealthSkill[3], ESM::Skill::LightArmor},
-                {mStealthSkill[4], ESM::Skill::ShortBlade},
-                {mStealthSkill[5] ,ESM::Skill::Marksman},
-                {mStealthSkill[6] ,ESM::Skill::Mercantile},
-                {mStealthSkill[7] ,ESM::Skill::Speechcraft},
-                {mStealthSkill[8] ,ESM::Skill::HandToHand}
+                {mStealthSkill[0], ESM3::Skill::Security},
+                {mStealthSkill[1], ESM3::Skill::Sneak},
+                {mStealthSkill[2], ESM3::Skill::Acrobatics},
+                {mStealthSkill[3], ESM3::Skill::LightArmor},
+                {mStealthSkill[4], ESM3::Skill::ShortBlade},
+                {mStealthSkill[5] ,ESM3::Skill::Marksman},
+                {mStealthSkill[6] ,ESM3::Skill::Mercantile},
+                {mStealthSkill[7] ,ESM3::Skill::Speechcraft},
+                {mStealthSkill[8] ,ESM3::Skill::HandToHand}
             }
         };
 

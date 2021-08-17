@@ -1,5 +1,7 @@
 #include "weatherstate.hpp"
 
+#include <cassert>
+
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -20,30 +22,58 @@ namespace
 
 namespace ESM3
 {
+    // NOTE: equivalent to REC_GMDT
+    // (called from StateManager::loadGame() via WeatherManager::readRecord())
     void WeatherState::load(Reader& esm)
     {
-        mCurrentRegion = esm.getHNString(currentRegionRecord);
-        esm.getHNT(mTimePassed, timePassedRecord);
-        esm.getHNT(mFastForward, fastForwardRecord);
-        esm.getHNT(mWeatherUpdateTime, weatherUpdateTimeRecord);
-        esm.getHNT(mTransitionFactor, transitionFactorRecord);
-        esm.getHNT(mCurrentWeather, currentWeatherRecord);
-        esm.getHNT(mNextWeather, nextWeatherRecord);
-        esm.getHNT(mQueuedWeather, queuedWeatherRecord);
-
-        while (esm.isNextSub(regionNameRecord))
+        bool subDataRemaining = false;
+        while (subDataRemaining || esm.getSubRecordHeader())
         {
-            std::string regionID = esm.getHString();
-            RegionWeatherState region;
-            esm.getHNT(region.mWeather, regionWeatherRecord);
-            while (esm.isNextSub(regionChanceRecord))
+            subDataRemaining = false;
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                char chance;
-                esm.getHT(chance);
-                region.mChances.push_back(chance);
-            }
+                case ESM3::SUB_CREG: esm.getZString(mCurrentRegion); break;
+                case ESM3::SUB_TMPS: esm.get(mTimePassed); break;
+                case ESM3::SUB_FAST: esm.get(mFastForward); break;
+                case ESM3::SUB_WUPD: esm.get(mWeatherUpdateTime); break;
+                case ESM3::SUB_TRFC: esm.get(mTransitionFactor); break;
+                case ESM3::SUB_CWTH: esm.get(mCurrentWeather); break;
+                case ESM3::SUB_NWTH: esm.get(mNextWeather); break;
+                case ESM3::SUB_QWTH: esm.get(mQueuedWeather); break;
+                case ESM3::SUB_RGNN:
+                {
+                    std::string regionID;
+                    esm.getZString(regionID);
 
-            mRegions.insert(std::make_pair(regionID, region));
+                    RegionWeatherState region;
+                    esm.getSubRecordHeader();
+                    assert(esm.subRecordHeader().typeId == ESM3::SUB_RGNW);
+                    esm.get(region.mWeather);
+
+                    while (esm.getSubRecordHeader())
+                    {
+                        const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
+                        if (subHdr2.typeId == ESM3::SUB_RGNC)
+                        {
+                            char chance;
+                            esm.get(chance);
+                            region.mChances.push_back(chance);
+                        }
+                        else
+                        {
+                            subDataRemaining = true;
+                            break;
+                        }
+                    }
+
+                    mRegions.insert(std::make_pair(regionID, region));
+                    break;
+                }
+                default:
+                    esm.cacheSubRecordHeader(); // World::readRecord() chains these...
+                    return;
+            }
         }
     }
 

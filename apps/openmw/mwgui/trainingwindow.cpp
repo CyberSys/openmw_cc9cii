@@ -80,7 +80,7 @@ namespace MWGui
         std::vector< std::pair<int, float> > skills;
 
         MWMechanics::NpcStats const& actorStats(actor.getClass().getNpcStats(actor));
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i=0; i<ESM3::Skill::Length; ++i)
         {
             float value = getSkillForTraining(actorStats, i);
 
@@ -94,8 +94,8 @@ namespace MWGui
 
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         for (int i=0; i<3; ++i)
         {
@@ -109,7 +109,7 @@ namespace MWGui
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
-            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[skills[i].first] + "} - " + MyGUI::utility::toString(price));
+            button->setCaptionWithReplacing("#{" + ESM3::Skill::sSkillNameIds[skills[i].first] + "} - " + MyGUI::utility::toString(price));
 
             button->setSize(button->getTextSize ().width+12, button->getSize().height);
 
@@ -139,7 +139,7 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
+        int price = pcStats.getSkill (skillId).getBase() * store.get<ESM3::GameSetting>().find("iTrainingMod")->mValue.getInteger();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
@@ -152,7 +152,7 @@ namespace MWGui
         }
 
         // You can not train a skill above its governing attribute
-        const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillId);
+        const ESM3::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Skill>().find(skillId);
         if (pcStats.getSkill(skillId).getBase() >= pcStats.getAttribute(skill->mData.mAttribute).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage17}");
@@ -160,10 +160,10 @@ namespace MWGui
         }
 
         // increase skill
-        MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
+        MWWorld::LiveCellRef<ESM3::NPC> *playerRef = player.get<ESM3::NPC>();
 
-        const ESM::Class *class_ =
-            store.get<ESM::Class>().find(playerRef->mBase->mClass);
+        const ESM3::Class *class_ =
+            store.get<ESM3::Class>().find(playerRef->mBase->mClass);
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold

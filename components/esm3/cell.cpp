@@ -72,14 +72,18 @@ namespace ESM3
 
         bool hasData = false;
         bool isLoaded = false;
-        while (!isLoaded && reader.getSubRecordHeader())
+        while (!isLoaded && reader.getNextSubRecordType() != 0)
         {
             const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
             switch (subHdr.typeId)
             {
-                case ESM3::SUB_NAME: reader.getZString(mName); break;
+                case ESM3::SUB_NAME:
+                    reader.getSubRecordHeader();
+                    reader.getZString(mName);
+                    break;
                 case ESM3::SUB_DATA:
                 {
+                    reader.getSubRecordHeader();
                     assert (subHdr.dataSize == 12 && "CELL incorrect data size");
                     assert (subHdr.dataSize == sizeof(mData) && "CELL incorrect data size");
                     reader.get(mData);
@@ -88,11 +92,12 @@ namespace ESM3
                 }
                 case ESM3::SUB_DELE:
                 {
+                    reader.getSubRecordHeader();
                     reader.skipSubRecordData();
                     isDeleted = true;
                     break;
                 }
-                default: // NOTE: assumes that the sequence of sub-records allows this
+                default:
                     isLoaded = true;
                     break;
             }
@@ -117,13 +122,13 @@ namespace ESM3
         }
     }
 
-    // NOTE: assumes that the sub-record header was just read
     void Cell::loadCell(Reader& reader, bool saveContext)
     {
         bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
-        do {
+        while (!isLoaded && reader.getSubRecordHeader())
+        {
             const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -146,7 +151,7 @@ namespace ESM3
                             mWater = std::numeric_limits<float>::max();
                         Log(Debug::Warning)
                             << "Warning: Encountered invalid water level in cell "
-                            << mName << " defined in " << reader.getName();
+                            << mName << " defined in " << reader.getFileName();
                     }
                     else
                         mWater = waterLevel;
@@ -163,11 +168,12 @@ namespace ESM3
                 case ESM3::SUB_RGNN: reader.getZString(mRegion); break;
                 case ESM3::SUB_NAM5: reader.get(mMapColor); break;
                 case ESM3::SUB_NAM0: reader.get(mRefNumCounter); break;
-                default: // NOTE: assumes that the sequence of sub-records allows this
+                default:
+                    reader.cacheSubRecordHeader(); // urgh
                     isLoaded = true;
                     break;
             }
-        } while (!isLoaded && reader.getSubRecordHeader());
+        }
 
         if (saveContext)
         {
@@ -179,6 +185,7 @@ namespace ESM3
             //std::cout << "sub-rec " << ESM::printName(reader.subRecordHeader().typeId) << std::endl;
     }
 
+    // called from MWWorld::Store<ESM3::Cell>::load()
     void Cell::postLoad(Reader& reader)
     {
         // Save position of the cell references and move on
@@ -260,7 +267,8 @@ namespace ESM3
 
         // MVRF are FRMR are present in pairs. MVRF indicates that following FRMR describes moved CellRef.
         // This function has to skip all moved CellRefs therefore read all such pairs to ignored values.
-        do {
+        while (reader.getSubRecordHeader())
+        {
             const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
 
             bool skipDeleted = false;
@@ -275,12 +283,14 @@ namespace ESM3
                     assert(reader.subRecordHeader().typeId == ESM3::SUB_CNDT && "Unexpected sub-record following MVRF");
                     reader.get(movedCellRef.mTarget);
                     skipDeleted = true;
-                    //reader.getHNOT(movedCellRef.mTarget, "CNDT");
-                    //CellRef skippedCellRef;
-                    //if (!reader.peekNextSub("FRMR"))
-                        //return false;
-                    //bool skippedDeleted;
-                    //skippedCellRef.load(reader, skippedDeleted);
+
+                    if (reader.getNextSubRecordType() == ESM3::SUB_CNDT && reader.getSubRecordHeader())
+                        reader.get(movedCellRef.mTarget);
+                    CellRef skippedCellRef;
+                    if (reader.getNextSubRecordType() != ESM3::SUB_FRMR)
+                        return false;
+                    bool skippedDeleted;
+                    skippedCellRef.load(reader, skippedDeleted);
                     break;
                 }
                 case ESM3::SUB_FRMR:
@@ -304,12 +314,11 @@ namespace ESM3
                     std::cout << "unexpected sub-rec " << ESM::printName(subHdr.typeId) << std::endl;
                     //return false;
             }
-        } while (reader.getSubRecordHeader());
+        }
 
         return false;
     }
 
-    // NOTE: this method assumes that the sub-record header was just read
     bool Cell::getNextRef(Reader& reader, CellRef& cellRef, bool& isDeleted, MovedCellRef& movedCellRef, bool& moved)
     {
         isDeleted = false;
@@ -318,7 +327,8 @@ namespace ESM3
         if (!reader.hasMoreSubs())
             return false;
 
-        do {
+        while (reader.getSubRecordHeader())
+        {
             const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -339,7 +349,7 @@ namespace ESM3
                     std::cout << "unexpected sub-rec " << ESM::printName(subHdr.typeId) << std::endl;
                     //return false;
             }
-        } while (reader.getSubRecordHeader());
+        }
 
         return false;
     }

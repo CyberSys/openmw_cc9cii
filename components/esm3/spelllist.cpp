@@ -10,9 +10,9 @@ namespace ESM3
 {
     void SpellList::add(Reader& reader)
     {
-        std::string spell;
-        reader.getZString(spell);
-        mList.push_back(spell);
+        char spell[32];
+        reader.get(spell[0], 32);
+        mList.emplace_back(&spell[0]);
     }
 
     void SpellList::save(ESM::ESMWriter& esm) const

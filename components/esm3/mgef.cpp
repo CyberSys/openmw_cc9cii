@@ -262,6 +262,11 @@ namespace ESM3
         esm.writeHNOString("DESC", mDescription);
     }
 
+// quiesce "conversion from 'int' to 'short', possible loss of data" warnings
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
     short MagicEffect::getResistanceEffect(short effect)
     {
         // Source https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attribute
@@ -358,6 +363,9 @@ namespace ESM3
         else
             return -1;
     }
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
 
     static std::map<short,std::string> genNameMap()
     {

@@ -5,6 +5,7 @@
 
 void ESM3::Player::load (Reader& esm)
 {
+    esm.getSubRecordHeader();
     mObject.mRef.loadId(esm, true);
     mObject.load (esm);
 
@@ -38,7 +39,7 @@ void ESM3::Player::load (Reader& esm)
             }
             case ESM3::SUB_SIGN:
             {
-                esm.getZString(mBirthsign);
+                esm.getString(mBirthsign); // NOTE: string not null terminated
                 break;
             }
             case ESM3::SUB_CURD:
@@ -52,6 +53,7 @@ void ESM3::Player::load (Reader& esm)
                 break;
             }
             default:
+                esm.cacheSubRecordHeader(); // :sadcat:
                 checkPrevItems = true;
                 break;
         }
@@ -62,15 +64,11 @@ void ESM3::Player::load (Reader& esm)
         std::string boundItemId;
         std::string prevItemId;
 
-        esm.getSubRecordHeader();
-        if (esm.subRecordHeader().typeId == ESM3::SUB_BOUN)
-        {
+        if (esm.getNextSubRecordType() == ESM3::SUB_BOUN && esm.getSubRecordHeader())
             esm.getZString(boundItemId);
-            esm.subRecordHeader();
-        }
 
-        if (esm.subRecordHeader().typeId == ESM3::SUB_PREV)
-            esm.getZString(prevItemId);
+        if (esm.getNextSubRecordType() == ESM3::SUB_PREV && esm.getSubRecordHeader())
+             esm.getZString(prevItemId);
 
         if (!boundItemId.empty())
             mPreviousItems[boundItemId] = prevItemId;

@@ -1,7 +1,7 @@
 #include "container.hpp"
 
-#include <components/esm/loadcont.hpp>
-#include <components/esm/containerstate.hpp>
+#include <components/esm3/cont.hpp>
+#include <components/esm3/containerstate.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -33,7 +33,7 @@
 
 namespace MWClass
 {
-    ContainerCustomData::ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell)
+    ContainerCustomData::ContainerCustomData(const ESM3::Container& container, MWWorld::CellStore* cell)
     {
         unsigned int seed = Misc::Rng::rollDice(std::numeric_limits<int>::max());
         // setting ownership not needed, since taking items from a container inherits the
@@ -41,7 +41,7 @@ namespace MWClass
         mStore.fillNonRandom(container.mInventory, "", seed);
     }
 
-    ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
+    ContainerCustomData::ContainerCustomData(const ESM3::InventoryState& inventory)
     {
         mStore.readState(inventory);
     }
@@ -64,7 +64,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+            MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
 
             // store
             ptr.getRefData().setCustomData (std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()));
@@ -86,9 +86,9 @@ namespace MWClass
 
     void Container::respawn(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
-        if (ref->mBase->mFlags & ESM::Container::Respawn)
+        MWWorld::LiveCellRef<ESM3::Container> *ref =
+            ptr.get<ESM3::Container>();
+        if (ref->mBase->mFlags & ESM3::Container::Respawn)
         {
             // Container was not touched, there is no need to modify its content.
             if (ptr.getRefData().getCustomData() == nullptr)
@@ -119,7 +119,7 @@ namespace MWClass
 
     std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -142,7 +142,7 @@ namespace MWClass
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
+            const ESM3::Sound *sound = store.get<ESM3::Sound>().searchRandom("WolfContainer");
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
@@ -217,7 +217,7 @@ namespace MWClass
 
     std::string Container::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -233,7 +233,7 @@ namespace MWClass
 
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
 
         return ref->mBase->mScript;
     }
@@ -242,7 +242,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Container);
 
-        registerClass (typeid (ESM::Container).name(), instance);
+        registerClass (typeid (ESM3::Container).name(), instance);
     }
 
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
@@ -254,14 +254,14 @@ namespace MWClass
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
-        if (lockLevel > 0 && lockLevel != ESM::UnbreakableLock)
+        if (lockLevel > 0 && lockLevel != ESM3::UnbreakableLock)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
         else if (lockLevel < 0)
             text += "\n#{sUnlocked}";
@@ -282,8 +282,8 @@ namespace MWClass
 
     float Container::getCapacity (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        MWWorld::LiveCellRef<ESM3::Container> *ref =
+            ptr.get<ESM3::Container>();
 
         return ref->mBase->mWeight;
     }
@@ -295,32 +295,32 @@ namespace MWClass
 
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
-        return !(ref->mBase->mFlags & ESM::Container::Organic);
+        const MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
+        return !(ref->mBase->mFlags & ESM3::Container::Organic);
     }
 
     void Container::modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const
     {
-        MWMechanics::modifyBaseInventory<ESM::Container>(containerId, itemId, amount);
+        MWMechanics::modifyBaseInventory<ESM3::Container>(containerId, itemId, amount);
     }
 
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM3::Container> *ref = ptr.get<ESM3::Container>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
+    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const
     {
         if (!state.mHasCustomState)
             return;
 
-        const ESM::ContainerState& containerState = state.asContainerState();
+        const ESM3::ContainerState& containerState = state.asContainerState();
         ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory));
     }
 
-    void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
+    void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const
     {
         if (!ptr.getRefData().getCustomData())
         {
@@ -335,7 +335,7 @@ namespace MWClass
             return;
         }
 
-        ESM::ContainerState& containerState = state.asContainerState();
+        ESM3::ContainerState& containerState = state.asContainerState();
         customData.mStore.writeState (containerState.mInventory);
     }
 }

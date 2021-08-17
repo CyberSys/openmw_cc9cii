@@ -115,19 +115,19 @@ namespace MWGui
 
         switch(mEnchanting.getCastStyle())
         {
-            case ESM::Enchantment::CastOnce:
+            case ESM3::Enchantment::CastOnce:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
                 setConstantEffect(false);
                 break;
-            case ESM::Enchantment::WhenStrikes:
+            case ESM3::Enchantment::WhenStrikes:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
                 setConstantEffect(false);
                 break;
-            case ESM::Enchantment::WhenUsed:
+            case ESM3::Enchantment::WhenUsed:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
                 setConstantEffect(false);
                 break;
-            case ESM::Enchantment::ConstantEffect:
+            case ESM3::Enchantment::ConstantEffect:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
                 setConstantEffect(true);
                 break;
@@ -338,7 +338,7 @@ namespace MWGui
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
                 if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(item.getCellRef().getRefId(), mPtr))
                 {
-                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->mValue.getString();
+                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("sNotifyMessage49")->mValue.getString();
                     msg = Misc::StringUtils::format(msg, item.getClass().getName(item));
                     MWBase::Environment::get().getWindowManager()->messageBox(msg);
 

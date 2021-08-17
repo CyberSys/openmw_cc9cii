@@ -1,6 +1,6 @@
 #include "static.hpp"
 
-#include <components/esm/loadstat.hpp>
+#include <components/esm3/stat.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -36,7 +36,7 @@ namespace MWClass
 
     std::string Static::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
+        const MWWorld::LiveCellRef<ESM3::Static> *ref = ptr.get<ESM3::Static>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -59,12 +59,12 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Static);
 
-        registerClass (typeid (ESM::Static).name(), instance);
+        registerClass (typeid (ESM3::Static).name(), instance);
     }
 
     MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
+        const MWWorld::LiveCellRef<ESM3::Static> *ref = ptr.get<ESM3::Static>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

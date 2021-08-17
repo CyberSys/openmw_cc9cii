@@ -60,14 +60,14 @@ namespace MWGui
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         for (int i=0; names[i][0]; ++i)
         {
-            setText (names[i][0], store.get<ESM::GameSetting>().find (names[i][1])->mValue.getString());
+            setText (names[i][0], store.get<ESM3::GameSetting>().find (names[i][1])->mValue.getString());
         }
 
         getWidget(mSkillView, "SkillView");
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM3::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
             mSkillWidgetMap.insert(std::make_pair(i, std::make_pair((MyGUI::TextBox*)nullptr, (MyGUI::TextBox*)nullptr)));
@@ -234,7 +234,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore();
 
         float progressRequirement = player.getClass().getNpcStats(player).getSkillProgressRequirement(skillId,
-            *esmStore.get<ESM::Class>().find(player.get<ESM::NPC>()->mBase->mClass));
+            *esmStore.get<ESM3::Class>().find(player.get<ESM3::NPC>()->mBase->mClass));
 
         // This is how vanilla MW displays the progress bar (I think). Note it's slightly inaccurate,
         // due to the int casting in the skill levelup logic. Also the progress label could in rare cases
@@ -246,7 +246,7 @@ namespace MWGui
         w->setUserString("RangePosition_SkillProgress", MyGUI::utility::toString(progressPercent));
     }
 
-    void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void StatsWindow::setValue(const ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         mSkillValues[parSkill] = value;
         std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = mSkillWidgetMap[(int)parSkill];
@@ -314,7 +314,7 @@ namespace MWGui
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
-        for (const int skill : ESM::Skill::sSkillIds)
+        for (const int skill : ESM3::Skill::sSkillIds)
         {
             if (skillSet.find(skill) == skillSet.end())
                 mMiscSkills.push_back(skill);
@@ -334,7 +334,7 @@ namespace MWGui
         MyGUI::Widget* levelWidget;
         for (int i=0; i<2; ++i)
         {
-            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
+            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
 
             levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
@@ -482,16 +482,16 @@ namespace MWGui
 
         for (const int skillId : skills)
         {
-            if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
+            if (skillId < 0 || skillId >= ESM3::Skill::Length) // Skip unknown skill indexes
                 continue;
-            const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
+            const std::string &skillNameId = ESM3::Skill::sSkillNameIds[skillId];
 
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
 
-            const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
+            const ESM3::Skill* skill = esmStore.get<ESM3::Skill>().find(skillId);
 
-            std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
+            std::string icon = "icons\\k\\" + ESM3::Skill::sIconNames[skillId];
 
             const ESM::Attribute* attr =
                 esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
@@ -511,7 +511,7 @@ namespace MWGui
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
             }
 
-            setValue(static_cast<ESM::Skill::SkillEnum>(skillId), mSkillValues.find(skillId)->second);
+            setValue(static_cast<ESM3::Skill::SkillEnum>(skillId), mSkillValues.find(skillId)->second);
         }
     }
 
@@ -540,11 +540,11 @@ namespace MWGui
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::NPC *player =
-            world->getPlayerPtr().get<ESM::NPC>()->mBase;
+        const ESM3::NPC *player =
+            world->getPlayerPtr().get<ESM3::NPC>()->mBase;
 
         // race tooltip
-        const ESM::Race* playerRace = store.get<ESM::Race>().find(player->mRace);
+        const ESM3::Race* playerRace = store.get<ESM3::Race>().find(player->mRace);
 
         MyGUI::Widget* raceWidget;
         getWidget(raceWidget, "RaceText");
@@ -555,8 +555,8 @@ namespace MWGui
         // class tooltip
         MyGUI::Widget* classWidget;
 
-        const ESM::Class *playerClass =
-            store.get<ESM::Class>().find(player->mClass);
+        const ESM3::Class *playerClass =
+            store.get<ESM3::Class>().find(player->mClass);
 
         getWidget(classWidget, "ClassText");
         ToolTips::createClassToolTip(classWidget, *playerClass);
@@ -573,8 +573,8 @@ namespace MWGui
             for (auto& factionPair : mFactions)
             {
                 const std::string& factionId = factionPair.first;
-                const ESM::Faction *faction =
-                    store.get<ESM::Faction>().find(factionId);
+                const ESM3::Faction *faction =
+                    store.get<ESM3::Faction>().find(factionId);
                 if (faction->mData.mIsHidden == 1)
                     continue;
 
@@ -608,7 +608,7 @@ namespace MWGui
                         // player doesn't have max rank yet
                         text += std::string("\n\n#{fontcolourhtml=header}#{sNextRank} ") + faction->mRanks[rank+1];
 
-                        ESM::RankData rankData = faction->mData.mRankData[rank+1];
+                        ESM3::RankData rankData = faction->mData.mRankData[rank+1];
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
@@ -627,7 +627,7 @@ namespace MWGui
 
                                 firstSkill = false;
 
-                                text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
+                                text += "#{"+ESM3::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
                             }
                         }
 
@@ -653,8 +653,8 @@ namespace MWGui
                 addSeparator(coord1, coord2);
 
             addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
-            const ESM::BirthSign *sign =
-                store.get<ESM::BirthSign>().find(mBirthSignId);
+            const ESM3::BirthSign *sign =
+                store.get<ESM3::BirthSign>().find(mBirthSignId);
             MyGUI::Widget* w = addItem(sign->mName, coord1, coord2);
 
             ToolTips::createBirthsignToolTip(w, mBirthSignId);

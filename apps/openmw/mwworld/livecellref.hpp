@@ -7,7 +7,7 @@
 
 #include "refdata.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct ObjectState;
 }
@@ -31,30 +31,30 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(const std::string& type, const ESM::CellRef &cref=ESM::CellRef());
+        LiveCellRefBase(const std::string& type, const ESM3::CellRef &cref=ESM3::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
 
-        virtual void load (const ESM::ObjectState& state) = 0;
+        virtual void load (const ESM3::ObjectState& state) = 0;
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.
         ///
         /// \attention Must not be called with an invalid \a state.
 
-        virtual void save (ESM::ObjectState& state) const = 0;
+        virtual void save (ESM3::ObjectState& state) const = 0;
         ///< Save LiveCellRef state into \a state.
 
         protected:
 
-            void loadImp (const ESM::ObjectState& state);
+            void loadImp (const ESM3::ObjectState& state);
             ///< Load state into a LiveCellRef, that has already been initialised with base and
             /// class.
             ///
             /// \attention Must not be called with an invalid \a state.
 
-            void saveImp (ESM::ObjectState& state) const;
+            void saveImp (ESM3::ObjectState& state) const;
             ///< Save LiveCellRef state into \a state.
 
-            static bool checkStateImp (const ESM::ObjectState& state);
+            static bool checkStateImp (const ESM3::ObjectState& state);
             ///< Check if state is valid and report errors.
             ///
             /// \return Valid?
@@ -62,7 +62,7 @@ namespace MWWorld
             /// \note Does not check if the RefId exists.
     };
 
-    inline bool operator== (const LiveCellRefBase& cellRef, const ESM::RefNum refNum)
+    inline bool operator== (const LiveCellRefBase& cellRef, const ESM3::RefNum refNum)
     {
         return cellRef.mRef.getRefNum()==refNum;
     }
@@ -76,7 +76,7 @@ namespace MWWorld
     template <typename X>
     struct LiveCellRef : public LiveCellRefBase
     {
-        LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
+        LiveCellRef(const ESM3::CellRef& cref, const X* b = nullptr)
             : LiveCellRefBase(typeid(X).name(), cref), mBase(b)
         {}
 
@@ -87,15 +87,15 @@ namespace MWWorld
         // The object that this instance is based on.
         const X* mBase;
 
-        void load (const ESM::ObjectState& state) override;
+        void load (const ESM3::ObjectState& state) override;
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.
         ///
         /// \attention Must not be called with an invalid \a state.
 
-        void save (ESM::ObjectState& state) const override;
+        void save (ESM3::ObjectState& state) const override;
         ///< Save LiveCellRef state into \a state.
 
-        static bool checkState (const ESM::ObjectState& state);
+        static bool checkState (const ESM3::ObjectState& state);
         ///< Check if state is valid and report errors.
         ///
         /// \return Valid?
@@ -104,19 +104,19 @@ namespace MWWorld
     };
 
     template <typename X>
-    void LiveCellRef<X>::load (const ESM::ObjectState& state)
+    void LiveCellRef<X>::load (const ESM3::ObjectState& state)
     {
         loadImp (state);
     }
 
     template <typename X>
-    void LiveCellRef<X>::save (ESM::ObjectState& state) const
+    void LiveCellRef<X>::save (ESM3::ObjectState& state) const
     {
         saveImp (state);
     }
 
     template <typename X>
-    bool LiveCellRef<X>::checkState (const ESM::ObjectState& state)
+    bool LiveCellRef<X>::checkState (const ESM3::ObjectState& state)
     {
         return checkStateImp (state);
     }

@@ -10,8 +10,8 @@ namespace MWRender
 {
 
     TerrainStorage::TerrainStorage(Resource::ResourceSystem* resourceSystem, const std::string& normalMapPattern, const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
-        : ESMTerrain::Storage(resourceSystem->getVFS(), normalMapPattern, normalHeightMapPattern, autoUseNormalMaps, specularMapPattern, autoUseSpecularMaps)
-        , mLandManager(new LandManager(ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX))
+        : ESM3Terrain::Storage(resourceSystem->getVFS(), normalMapPattern, normalHeightMapPattern, autoUseNormalMaps, specularMapPattern, autoUseSpecularMaps)
+        , mLandManager(new LandManager(ESM3::Land::DATA_VCLR|ESM3::Land::DATA_VHGT|ESM3::Land::DATA_VNML|ESM3::Land::DATA_VTEX))
         , mResourceSystem(resourceSystem)
     {
         mResourceSystem->addResourceManager(mLandManager.get());
@@ -27,7 +27,7 @@ namespace MWRender
         const MWWorld::ESMStore &esmStore =
              MWBase::Environment::get().getWorld()->getStore();
 
-        const ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
+        const ESM3::Land* land = esmStore.get<ESM3::Land>().search(cellX, cellY);
         return land != nullptr;
     }
 
@@ -38,8 +38,8 @@ namespace MWRender
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
-        MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
-        for (; it != esmStore.get<ESM::Land>().end(); ++it)
+        MWWorld::Store<ESM3::Land>::iterator it = esmStore.get<ESM3::Land>().begin();
+        for (; it != esmStore.get<ESM3::Land>().end(); ++it)
         {
             if (it->mX < minX)
                 minX = static_cast<float>(it->mX);
@@ -61,16 +61,16 @@ namespace MWRender
         return mLandManager.get();
     }
 
-    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
+    osg::ref_ptr<const ESM3Terrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
     {
         return mLandManager->getLand(cellX, cellY);
     }
 
-    const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
+    const ESM3::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
     {
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
-        return esmStore.get<ESM::LandTexture>().search(index, plugin);
+        return esmStore.get<ESM3::LandTexture>().search(index, plugin);
     }
 
 

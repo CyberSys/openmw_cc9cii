@@ -3,6 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
+
+#include "common.hpp"
 
 namespace ESM
 {
@@ -30,7 +33,7 @@ namespace ESM3
 
         // Record name used to read references. Must be set before load() is
         // called.
-        const char *mRecName;
+        std::uint32_t mRecName;
 
         struct LevelItem
         {
@@ -60,12 +63,11 @@ namespace ESM3
                               // level, not just the closest below
                               // player.
         };
-#if 0
+
         CreatureLevList()
         {
-            mRecName = "CNAM";
+            mRecName = ESM3::SUB_CNAM;
         }
-#endif
     };
 
     struct ItemLevList: LevelledListBase
@@ -87,12 +89,11 @@ namespace ESM3
                               // level, not just the closest below
                               // player.
         };
-#if 0
+
         ItemLevList()
         {
-            mRecName = "INAM";
+            mRecName = ESM3::SUB_INAM;
         }
-#endif
     };
 }
 #endif

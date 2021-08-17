@@ -44,7 +44,7 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
-    for (int i = 0; i < 2; ++i)
+    for (std::uint32_t i = 0; i < 2; ++i)
         // NOTE: ESM3::Class::blank() sets mAttribute[2] to 0 which corresponds to "Strength"
         if (class_.mData.mAttribute[i] >= ESM::Attribute::Length)
         {
@@ -60,8 +60,8 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
     // test for non-unique skill
     std::map<int, int> skills; // ID, number of occurrences
 
-    for (int i=0; i<5; ++i)
-        for (int i2=0; i2<2; ++i2)
+    for (std::uint32_t i = 0; i < 5; ++i)
+        for (std::uint32_t i2 = 0; i2 < 2; ++i2)
             ++skills[class_.mData.mSkills[i][i2]];
 
     for (auto &skill : skills)

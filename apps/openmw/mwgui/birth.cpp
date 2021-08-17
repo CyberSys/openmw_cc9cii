@@ -17,7 +17,7 @@
 namespace
 {
 
-    bool sortBirthSigns(const std::pair<std::string, const ESM::BirthSign*>& left, const std::pair<std::string, const ESM::BirthSign*>& right)
+    bool sortBirthSigns(const std::pair<std::string, const ESM3::BirthSign*>& left, const std::pair<std::string, const ESM3::BirthSign*>& right)
     {
         return left.second->mName.compare (right.second->mName) < 0;
     }
@@ -139,13 +139,13 @@ namespace MWGui
     {
         mBirthList->removeAllItems();
 
-        const MWWorld::Store<ESM::BirthSign> &signs =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
+        const MWWorld::Store<ESM3::BirthSign> &signs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::BirthSign>();
 
         // sort by name
-        std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
+        std::vector < std::pair<std::string, const ESM3::BirthSign*> > birthSigns;
 
-        for (const ESM::BirthSign& sign : signs)
+        for (const ESM3::BirthSign& sign : signs)
         {
             birthSigns.emplace_back(sign.mId, &sign);
         }
@@ -187,8 +187,8 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        const ESM::BirthSign *birth =
-            store.get<ESM::BirthSign>().find(mCurrentBirthId);
+        const ESM3::BirthSign *birth =
+            store.get<ESM3::BirthSign>().find(mCurrentBirthId);
 
         mBirthImage->setImageTexture(MWBase::Environment::get().getWindowManager()->correctTexturePath(birth->mTexture));
 
@@ -199,18 +199,18 @@ namespace MWGui
         for (; it != end; ++it)
         {
             const std::string &spellId = *it;
-            const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
+            const ESM3::Spell *spell = store.get<ESM3::Spell>().search(spellId);
             if (!spell)
                 continue; // Skip spells which cannot be found
-            ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
-            if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Ability && type != ESM::Spell::ST_Power)
+            ESM3::Spell::SpellType type = static_cast<ESM3::Spell::SpellType>(spell->mData.mType);
+            if (type != ESM3::Spell::ST_Spell && type != ESM3::Spell::ST_Ability && type != ESM3::Spell::ST_Power)
                 continue; // We only want spell, ability and powers.
 
-            if (type == ESM::Spell::ST_Ability)
+            if (type == ESM3::Spell::ST_Ability)
                 abilities.push_back(spellId);
-            else if (type == ESM::Spell::ST_Power)
+            else if (type == ESM3::Spell::ST_Power)
                 powers.push_back(spellId);
-            else if (type == ESM::Spell::ST_Spell)
+            else if (type == ESM3::Spell::ST_Spell)
                 spells.push_back(spellId);
         }
 

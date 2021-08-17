@@ -58,7 +58,6 @@ add_component_dir (sceneutil
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
     actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
     screencapture
-    lightutil_temp pathgridutil_temp
     )
 
 add_component_dir (nif
@@ -94,11 +93,12 @@ add_component_dir (esm3
     acti alch appa armo book clot cont crea door ingr levlist ligh lock ltex misc npc_ prob repa stat weap
     aipackage cellref effectlist mappings spelllist transport
     activespells player containerstate custommarkerstate dialoguestate controlsstate globalmap globalscript
-    inventorystate creaturestate animationstate
-    npcstate objectstate spellstate statstate npcstats creaturestats
     cellid debugprofile filter locals reader variant variantimp
+    inventorystate creaturestate animationstate npcstate objectstate spellstate statstate npcstats creaturestats
+    savedgame journalentry quickkeys creaturelevliststate aisequence magiceffects stolenitems luascripts
+    doorstate fogstate cellstate projectilestate queststate savedgame stolenitems weatherstate
     )
-#   doorstate fogstate cellstate projectilestate queststate savedgamestolenitems weatherstate
+#   attr defs esmcommon records util
 
 add_component_dir (esm4
     achr acre acti alch aloc ammo anio appa arma armo aspc book bptd cell clas clfm clot common cont crea dial

@@ -21,7 +21,7 @@ namespace ESM3
 
     struct ContItem
     {
-        std::uint32_t mCount;
+        int mCount;
         std::string mItem;
     };
 

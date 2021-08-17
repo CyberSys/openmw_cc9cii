@@ -1,6 +1,6 @@
 #include "actor.hpp"
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/mgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -47,13 +47,13 @@ namespace MWClass
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         switch (shield->getClass().getEquipmentSkill(*shield))
         {
-            case ESM::Skill::LightArmor:
+            case ESM3::Skill::LightArmor:
                 sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
                 break;
-            case ESM::Skill::MediumArmor:
+            case ESM3::Skill::MediumArmor:
                 sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
                 break;
-            case ESM::Skill::HeavyArmor:
+            case ESM3::Skill::HeavyArmor:
                 sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
                 break;
             default:
@@ -75,9 +75,9 @@ namespace MWClass
     {
         float weight = getContainerStore(ptr).getWeight();
         const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
-        weight -= effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Feather)).getMagnitude();
+        weight -= effects.get(MWMechanics::EffectKey(ESM3::MagicEffect::Feather)).getMagnitude();
         if (ptr != MWMechanics::getPlayer() || !MWBase::Environment::get().getWorld()->getGodModeState())
-            weight += effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).getMagnitude();
+            weight += effects.get(MWMechanics::EffectKey(ESM3::MagicEffect::Burden)).getMagnitude();
         return (weight < 0) ? 0.0f : weight;
     }
 

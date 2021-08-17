@@ -42,7 +42,7 @@ namespace MWGui
     {
     }
 
-    bool SpellModel::matchingEffectExists(std::string filter, const ESM::EffectList &effects)
+    bool SpellModel::matchingEffectExists(std::string filter, const ESM3::EffectList &effects)
     {
         auto wm = MWBase::Environment::get().getWindowManager();
         const MWWorld::ESMStore &store =
@@ -54,17 +54,17 @@ namespace MWGui
 
             if (effectId != -1)
             {
-                const ESM::MagicEffect *magicEffect =
-                    store.get<ESM::MagicEffect>().search(effectId);
-                std::string effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
+                const ESM3::MagicEffect *magicEffect =
+                    store.get<ESM3::MagicEffect>().search(effectId);
+                std::string effectIDStr = ESM3::MagicEffect::effectIdToString(effectId);
                 std::string fullEffectName = wm->getGameSettingString(effectIDStr, "");
 
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && effect.mSkill != -1)
+                if (magicEffect->mData.mFlags & ESM3::MagicEffect::TargetSkill && effect.mSkill != -1)
                 {
-                    fullEffectName += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.mSkill], "");
+                    fullEffectName += " " + wm->getGameSettingString(ESM3::Skill::sSkillNameIds[effect.mSkill], "");
                 }
 
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && effect.mAttribute != -1)
+                if (magicEffect->mData.mFlags & ESM3::MagicEffect::TargetAttribute && effect.mAttribute != -1)
                 {
                     fullEffectName += " " + wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], "");
                 }
@@ -94,8 +94,8 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
-            if (spell->mData.mType != ESM::Spell::ST_Power && spell->mData.mType != ESM::Spell::ST_Spell)
+            const ESM3::Spell* spell = it->first;
+            if (spell->mData.mType != ESM3::Spell::ST_Power && spell->mData.mType != ESM3::Spell::ST_Spell)
                 continue;
 
             std::string name = Misc::StringUtils::lowerCaseUtf8(spell->mName);
@@ -106,7 +106,7 @@ namespace MWGui
 
             Spell newSpell;
             newSpell.mName = spell->mName;
-            if (spell->mData.mType == ESM::Spell::ST_Spell)
+            if (spell->mData.mType == ESM3::Spell::ST_Spell)
             {
                 newSpell.mType = Spell::Type_Spell;
                 std::string cost = std::to_string(MWMechanics::calcSpellCost(*spell));
@@ -130,14 +130,14 @@ namespace MWGui
             const std::string enchantId = item.getClass().getEnchantment(item);
             if (enchantId.empty())
                 continue;
-            const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
+            const ESM3::Enchantment* enchant = esmStore.get<ESM3::Enchantment>().search(enchantId);
             if (!enchant)
             {
                 Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId();
                 continue;
             }
 
-            if (enchant->mData.mType != ESM::Enchantment::WhenUsed && enchant->mData.mType != ESM::Enchantment::CastOnce)
+            if (enchant->mData.mType != ESM3::Enchantment::WhenUsed && enchant->mData.mType != ESM3::Enchantment::CastOnce)
                 continue;
 
             std::string name = Misc::StringUtils::lowerCaseUtf8(item.getClass().getName(item));
@@ -155,7 +155,7 @@ namespace MWGui
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;
 
             // FIXME: move to mwmechanics
-            if (enchant->mData.mType == ESM::Enchantment::CastOnce)
+            if (enchant->mData.mType == ESM3::Enchantment::CastOnce)
             {
                 newSpell.mCostColumn = "100/100";
                 newSpell.mActive = false;

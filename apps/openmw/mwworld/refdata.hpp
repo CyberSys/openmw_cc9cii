@@ -2,7 +2,7 @@
 #define GAME_MWWORLD_REFDATA_H
 
 #include <components/esm/defs.hpp>
-#include <components/esm/animationstate.hpp>
+#include <components/esm3/animationstate.hpp>
 
 #include "../mwscript/locals.hpp"
 #include "../mwworld/customdata.hpp"
@@ -15,7 +15,7 @@ namespace SceneUtil
     class PositionAttitudeTransform;
 }
 
-namespace ESM
+namespace ESM3
 {
     class Script;
     class CellRef;
@@ -50,7 +50,7 @@ namespace MWWorld
 
             ESM::Position mPosition;
 
-            ESM::AnimationState mAnimationState;
+            ESM3::AnimationState mAnimationState;
 
             std::unique_ptr<CustomData> mCustomData;
 
@@ -71,9 +71,9 @@ namespace MWWorld
             /// @param cellRef Used to copy constant data such as position into this class where it can
             /// be altered without affecting the original data. This makes it possible
             /// to reset the position as the original data is still held in the CellRef
-            RefData (const ESM::CellRef& cellRef);
+            RefData (const ESM3::CellRef& cellRef);
 
-            RefData (const ESM::ObjectState& objectState, bool deletedByContentFile);
+            RefData (const ESM3::ObjectState& objectState, bool deletedByContentFile);
             ///< Ignores local variables and custom data (not enough context available here to
             /// perform these operations).
 
@@ -82,7 +82,7 @@ namespace MWWorld
 
             ~RefData();
 
-            void write (ESM::ObjectState& objectState, const std::string& scriptId = "") const;
+            void write (ESM3::ObjectState& objectState, const std::string& scriptId = "") const;
             ///< Ignores custom data (not enough context available here to
             /// perform this operations).
 
@@ -100,7 +100,7 @@ namespace MWWorld
 
             int getCount(bool absolute = true) const;
 
-            void setLocals (const ESM::Script& script);
+            void setLocals (const ESM3::Script& script);
 
             MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
             void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
@@ -150,8 +150,8 @@ namespace MWWorld
             bool hasChanged() const;
             ///< Has this RefData changed since it was originally loaded?
 
-            const ESM::AnimationState& getAnimationState() const;
-            ESM::AnimationState& getAnimationState();
+            const ESM3::AnimationState& getAnimationState() const;
+            ESM3::AnimationState& getAnimationState();
     };
 }
 

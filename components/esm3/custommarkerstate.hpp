@@ -27,7 +27,7 @@ namespace ESM3
             return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
         }
 
-        //void load (Reader& reader);
+        void load (Reader& reader);
         void save (ESM::ESMWriter& writer) const;
     };
 }

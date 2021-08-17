@@ -6,7 +6,6 @@
 
 #include <cassert>
 
-#include "common.hpp"
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -36,7 +35,7 @@ namespace ESM3
                 case ESM3::SUB_INDX:
                 {
                     reader.get(length);
-#if 0
+
                     mList.resize(length);
 
                     // If this levelled list was already loaded by a previous content file,
@@ -48,10 +47,16 @@ namespace ESM3
                     for (size_t i = 0; i < mList.size(); i++)
                     {
                         LevelItem &li = mList[i];
-                        li.mId = esm.getHNString(mRecName);
-                        esm.getHNT(li.mLevel, "INTV");
+
+                        reader.getSubRecordHeader();
+                        assert(reader.subRecordHeader().typeId == mRecName);
+                        reader.getZString(li.mId); // FIXME: check if null terminated
+
+                        reader.getSubRecordHeader();
+                        assert(reader.subRecordHeader().typeId == ESM3::SUB_INTV);
+                        reader.get(li.mLevel);
                     }
-#endif
+
                     hasList = true;
                     break;
                 }
@@ -114,7 +119,7 @@ namespace ESM3
 
         for (std::vector<LevelItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNCString(mRecName, it->mId);
+            esm.writeHNCString(ESM::printName(mRecName), it->mId);
             esm.writeHNT("INTV", it->mLevel);
         }
     }

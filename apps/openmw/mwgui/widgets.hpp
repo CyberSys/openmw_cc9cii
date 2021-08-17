@@ -3,8 +3,8 @@
 
 #include "../mwmechanics/stat.hpp"
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/skil.hpp>
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
@@ -98,11 +98,11 @@ namespace MWGui
 
             typedef MWMechanics::Stat<float> SkillValue;
 
-            void setSkillId(ESM::Skill::SkillEnum skillId);
+            void setSkillId(ESM3::Skill::SkillEnum skillId);
             void setSkillNumber(int skillId);
             void setSkillValue(const SkillValue& value);
 
-            ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+            ESM3::Skill::SkillEnum getSkillId() const { return mSkillId; }
             const SkillValue& getSkillValue() const { return mValue; }
 
             // Events
@@ -124,7 +124,7 @@ namespace MWGui
 
             void updateWidgets();
 
-            ESM::Skill::SkillEnum mSkillId;
+            ESM3::Skill::SkillEnum mSkillId;
             SkillValue mValue;
             MyGUI::TextBox* mSkillNameWidget;
             MyGUI::TextBox* mSkillValueWidget;
@@ -227,7 +227,7 @@ namespace MWGui
 
             void setEffectList(const SpellEffectList& list);
 
-            static SpellEffectList effectListFromESM(const ESM::EffectList* effects);
+            static SpellEffectList effectListFromESM(const ESM3::EffectList* effects);
 
             /**
              * @param vector to store the created effect widgets
@@ -256,7 +256,7 @@ namespace MWGui
         public:
             MWSpellEffect();
 
-            typedef ESM::ENAMstruct SpellEffectValue;
+            typedef ESM3::ENAMstruct SpellEffectValue;
 
             void setSpellEffect(const SpellEffectParams& params);
 
@@ -269,7 +269,7 @@ namespace MWGui
 
         private:
             static constexpr int sIconOffset = 24;
-            
+
             void updateWidgets();
 
             SpellEffectParams mEffectParams;

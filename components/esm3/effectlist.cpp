@@ -5,11 +5,10 @@
 
 namespace ESM3
 {
-#if 0
     void EffectList::load(Reader& reader)
     {
         mList.clear();
-        while (reader.isNextSub("ENAM"))
+        while (reader.getNextSubRecordType() == ESM3::SUB_ENAM && reader.getSubRecordHeader())
         {
             add(reader);
         }
@@ -18,10 +17,10 @@ namespace ESM3
     void EffectList::add(Reader& reader)
     {
         ENAMstruct s;
-        reader.getHT(s, 24);
+        reader.get(s, 24);
         mList.push_back(s);
     }
-#endif
+
     void EffectList::save(ESM::ESMWriter& esm) const
     {
         for (std::vector<ENAMstruct>::const_iterator it = mList.begin(); it != mList.end(); ++it) {

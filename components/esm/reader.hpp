@@ -3,6 +3,9 @@
 
 #include <vector>
 
+#include <components/files/constrainedfilestream.hpp>
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "common.hpp" // MasterData
 
 namespace ToUTF8
@@ -14,10 +17,15 @@ namespace ESM
 {
     class Reader
     {
+        std::vector<Reader*>* mGlobalReaderList;
+
     public:
         virtual ~Reader() {}
 
         static Reader* getReader(const std::string& filename);
+
+        void setGlobalReaderList(std::vector<Reader*> *list) {mGlobalReaderList = list;}
+        std::vector<Reader*> *getGlobalReaderList() {return mGlobalReaderList;}
 
         virtual inline bool isEsm4() const = 0;
 
@@ -32,6 +40,8 @@ namespace ESM
         virtual inline const std::string getAuthor() const = 0;
         virtual inline const std::string getDesc() const = 0;
         virtual inline int getFormat() const = 0;
+
+        virtual inline std::string getFileName() const = 0;
 
         // used by CSMWorld::Data::startLoading() and getTotalRecords() for loading progress bar
         virtual inline int getRecordCount() const = 0;

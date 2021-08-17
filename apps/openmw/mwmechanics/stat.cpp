@@ -1,6 +1,6 @@
 #include "stat.hpp"
 
-#include <components/esm/statstate.hpp>
+#include <components/esm3/statstate.hpp>
 
 namespace MWMechanics
 {
@@ -100,13 +100,13 @@ namespace MWMechanics
     }
 
     template<typename T>
-    void Stat<T>::writeState (ESM::StatState<T>& state) const
+    void Stat<T>::writeState (ESM3::StatState<T>& state) const
     {
         state.mBase = mBase;
         state.mMod = mCurrentModified;
     }
     template<typename T>
-    void Stat<T>::readState (const ESM::StatState<T>& state)
+    void Stat<T>::readState (const ESM3::StatState<T>& state)
     {
         mBase = state.mBase;
         mModified = state.mBase;
@@ -216,13 +216,13 @@ namespace MWMechanics
     }
 
     template<typename T>
-    void DynamicStat<T>::writeState (ESM::StatState<T>& state) const
+    void DynamicStat<T>::writeState (ESM3::StatState<T>& state) const
     {
         mStatic.writeState (state);
         state.mCurrent = mCurrent;
     }
     template<typename T>
-    void DynamicStat<T>::readState (const ESM::StatState<T>& state)
+    void DynamicStat<T>::readState (const ESM3::StatState<T>& state)
     {
         mStatic.readState (state);
         mCurrent = state.mCurrent;
@@ -277,14 +277,14 @@ namespace MWMechanics
         return mDamage;
     }
 
-    void AttributeValue::writeState (ESM::StatState<float>& state) const
+    void AttributeValue::writeState (ESM3::StatState<float>& state) const
     {
         state.mBase = mBase;
         state.mMod = mModifier;
         state.mDamage = mDamage;
     }
 
-    void AttributeValue::readState (const ESM::StatState<float>& state)
+    void AttributeValue::readState (const ESM3::StatState<float>& state)
     {
         mBase = state.mBase;
         mModifier = state.mMod;
@@ -305,13 +305,13 @@ namespace MWMechanics
         mProgress = progress;
     }
 
-    void SkillValue::writeState (ESM::StatState<float>& state) const
+    void SkillValue::writeState (ESM3::StatState<float>& state) const
     {
         AttributeValue::writeState (state);
         state.mProgress = mProgress;
     }
 
-    void SkillValue::readState (const ESM::StatState<float>& state)
+    void SkillValue::readState (const ESM3::StatState<float>& state)
     {
         AttributeValue::readState (state);
         mProgress = state.mProgress;

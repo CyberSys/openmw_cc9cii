@@ -9,10 +9,10 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/cellid.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -173,7 +173,7 @@ namespace MWWorld
         listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
-        if (mEsm[0].getFormat() == 0)
+        if (mEsm[0]->getFormat() == 0)
             ensureNeededRecords();
 
         mCurrentDate.reset(new DateTimeManager());
@@ -183,7 +183,7 @@ namespace MWWorld
         mStore.setUp(true);
         mStore.movePlayerRecord();
 
-        mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
+        mSwimHeightScale = mStore.get<ESM3::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
 
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
 
@@ -307,7 +307,7 @@ namespace MWWorld
             mPlayer->clear();
             mPlayer->setCell(nullptr);
             mPlayer->getPlayer().getRefData() = RefData();
-            mPlayer->set(mStore.get<ESM::NPC>().find ("player"));
+            mPlayer->set(mStore.get<ESM3::NPC>().find ("player"));
         }
 
         mCells.clear();
@@ -370,7 +370,8 @@ namespace MWWorld
         writer.endRecord(ESM::REC_CAM_);
     }
 
-    void World::readRecord (ESM::ESMReader& reader, uint32_t type,
+    // (called from StateManager::loadGame())
+    void World::readRecord (ESM3::Reader& reader, uint32_t type,
         const std::map<int, int>& contentFileMap)
     {
         switch (type)
@@ -379,9 +380,16 @@ namespace MWWorld
                 MWMechanics::CreatureStats::readActorIdCounter(reader);
                 return;
             case ESM::REC_ENAB:
-                reader.getHNT(mTeleportEnabled, "TELE");
-                reader.getHNT(mLevitationEnabled, "LEVT");
+            {
+                reader.getSubRecordHeader();
+                assert(reader.subRecordHeader().typeId == ESM3::SUB_TELE);
+                reader.get(mTeleportEnabled);
+
+                reader.getSubRecordHeader();
+                assert(reader.subRecordHeader().typeId == ESM3::SUB_LEVT);
+                reader.get(mLevitationEnabled);
                 return;
+            }
             case ESM::REC_PLAY:
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
@@ -408,85 +416,85 @@ namespace MWWorld
 
     void World::ensureNeededRecords()
     {
-        std::map<std::string, ESM::Variant> gmst;
+        std::map<std::string, ESM3::Variant> gmst;
         // Companion (tribunal)
-        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
-        gmst["sCompanionWarningMessage"] = ESM::Variant("Warning message");
-        gmst["sCompanionWarningButtonOne"] = ESM::Variant("Button 1");
-        gmst["sCompanionWarningButtonTwo"] = ESM::Variant("Button 2");
-        gmst["sProfitValue"] = ESM::Variant("Profit Value");
-        gmst["sTeleportDisabled"] = ESM::Variant("Teleport disabled");
-        gmst["sLevitateDisabled"] = ESM::Variant("Levitate disabled");
+        gmst["sCompanionShare"] = ESM3::Variant("Companion Share");
+        gmst["sCompanionWarningMessage"] = ESM3::Variant("Warning message");
+        gmst["sCompanionWarningButtonOne"] = ESM3::Variant("Button 1");
+        gmst["sCompanionWarningButtonTwo"] = ESM3::Variant("Button 2");
+        gmst["sProfitValue"] = ESM3::Variant("Profit Value");
+        gmst["sTeleportDisabled"] = ESM3::Variant("Teleport disabled");
+        gmst["sLevitateDisabled"] = ESM3::Variant("Levitate disabled");
 
         // Missing in unpatched MW 1.0
-        gmst["sDifficulty"] = ESM::Variant("Difficulty");
-        gmst["fDifficultyMult"] = ESM::Variant(5.f);
-        gmst["sAuto_Run"] = ESM::Variant("Auto Run");
-        gmst["sServiceRefusal"] = ESM::Variant("Service Refusal");
-        gmst["sNeedOneSkill"] = ESM::Variant("Need one skill");
-        gmst["sNeedTwoSkills"] = ESM::Variant("Need two skills");
-        gmst["sEasy"] = ESM::Variant("Easy");
-        gmst["sHard"] = ESM::Variant("Hard");
-        gmst["sDeleteNote"] = ESM::Variant("Delete Note");
-        gmst["sEditNote"] = ESM::Variant("Edit Note");
-        gmst["sAdmireSuccess"] = ESM::Variant("Admire Success");
-        gmst["sAdmireFail"] = ESM::Variant("Admire Fail");
-        gmst["sIntimidateSuccess"] = ESM::Variant("Intimidate Success");
-        gmst["sIntimidateFail"] = ESM::Variant("Intimidate Fail");
-        gmst["sTauntSuccess"] = ESM::Variant("Taunt Success");
-        gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
-        gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
-        gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
-        gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
-        gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
-        gmst["fFleeDistance"] = ESM::Variant(3000.f);
-        gmst["sMaxSale"] = ESM::Variant("Max Sale");
-        gmst["sAnd"] = ESM::Variant("and");
+        gmst["sDifficulty"] = ESM3::Variant("Difficulty");
+        gmst["fDifficultyMult"] = ESM3::Variant(5.f);
+        gmst["sAuto_Run"] = ESM3::Variant("Auto Run");
+        gmst["sServiceRefusal"] = ESM3::Variant("Service Refusal");
+        gmst["sNeedOneSkill"] = ESM3::Variant("Need one skill");
+        gmst["sNeedTwoSkills"] = ESM3::Variant("Need two skills");
+        gmst["sEasy"] = ESM3::Variant("Easy");
+        gmst["sHard"] = ESM3::Variant("Hard");
+        gmst["sDeleteNote"] = ESM3::Variant("Delete Note");
+        gmst["sEditNote"] = ESM3::Variant("Edit Note");
+        gmst["sAdmireSuccess"] = ESM3::Variant("Admire Success");
+        gmst["sAdmireFail"] = ESM3::Variant("Admire Fail");
+        gmst["sIntimidateSuccess"] = ESM3::Variant("Intimidate Success");
+        gmst["sIntimidateFail"] = ESM3::Variant("Intimidate Fail");
+        gmst["sTauntSuccess"] = ESM3::Variant("Taunt Success");
+        gmst["sTauntFail"] = ESM3::Variant("Taunt Fail");
+        gmst["sBribeSuccess"] = ESM3::Variant("Bribe Success");
+        gmst["sBribeFail"] = ESM3::Variant("Bribe Fail");
+        gmst["fNPCHealthBarTime"] = ESM3::Variant(5.f);
+        gmst["fNPCHealthBarFade"] = ESM3::Variant(1.f);
+        gmst["fFleeDistance"] = ESM3::Variant(3000.f);
+        gmst["sMaxSale"] = ESM3::Variant("Max Sale");
+        gmst["sAnd"] = ESM3::Variant("and");
 
         // Werewolf (BM)
-        gmst["fWereWolfRunMult"] = ESM::Variant(1.3f);
-        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(2.f);
-        gmst["iWerewolfFightMod"] = ESM::Variant(100);
-        gmst["iWereWolfFleeMod"] = ESM::Variant(100);
-        gmst["iWereWolfLevelToAttack"] = ESM::Variant(20);
-        gmst["iWereWolfBounty"] = ESM::Variant(1000);
-        gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
+        gmst["fWereWolfRunMult"] = ESM3::Variant(1.3f);
+        gmst["fWereWolfSilverWeaponDamageMult"] = ESM3::Variant(2.f);
+        gmst["iWerewolfFightMod"] = ESM3::Variant(100);
+        gmst["iWereWolfFleeMod"] = ESM3::Variant(100);
+        gmst["iWereWolfLevelToAttack"] = ESM3::Variant(20);
+        gmst["iWereWolfBounty"] = ESM3::Variant(1000);
+        gmst["fCombatDistanceWerewolfMod"] = ESM3::Variant(0.3f);
 
         for (const auto &params : gmst)
         {
-            if (!mStore.get<ESM::GameSetting>().search(params.first))
+            if (!mStore.get<ESM3::GameSetting>().search(params.first))
             {
-                ESM::GameSetting record;
+                ESM3::GameSetting record;
                 record.mId = params.first;
                 record.mValue = params.second;
                 mStore.insertStatic(record);
             }
         }
 
-        std::map<std::string, ESM::Variant> globals;
+        std::map<std::string, ESM3::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
-        globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
-        globals["werewolfclawmult"] = ESM::Variant(25.f);
-        globals["pcknownwerewolf"] = ESM::Variant(0);
+        globals["dayspassed"] = ESM3::Variant(1); // but the addons start counting at 1 :(
+        globals["werewolfclawmult"] = ESM3::Variant(25.f);
+        globals["pcknownwerewolf"] = ESM3::Variant(0);
 
         // following should exist in all versions of MW, but not necessarily in TCs
-        globals["gamehour"] = ESM::Variant(0.f);
-        globals["timescale"] = ESM::Variant(30.f);
-        globals["day"] = ESM::Variant(1);
-        globals["month"] = ESM::Variant(1);
-        globals["year"] = ESM::Variant(1);
-        globals["pcrace"] = ESM::Variant(0);
-        globals["pchascrimegold"] = ESM::Variant(0);
-        globals["pchasgolddiscount"] = ESM::Variant(0);
-        globals["crimegolddiscount"] = ESM::Variant(0);
-        globals["crimegoldturnin"] = ESM::Variant(0);
-        globals["pchasturnin"] = ESM::Variant(0);
+        globals["gamehour"] = ESM3::Variant(0.f);
+        globals["timescale"] = ESM3::Variant(30.f);
+        globals["day"] = ESM3::Variant(1);
+        globals["month"] = ESM3::Variant(1);
+        globals["year"] = ESM3::Variant(1);
+        globals["pcrace"] = ESM3::Variant(0);
+        globals["pchascrimegold"] = ESM3::Variant(0);
+        globals["pchasgolddiscount"] = ESM3::Variant(0);
+        globals["crimegolddiscount"] = ESM3::Variant(0);
+        globals["crimegoldturnin"] = ESM3::Variant(0);
+        globals["pchasturnin"] = ESM3::Variant(0);
 
         for (const auto &params : globals)
         {
-            if (!mStore.get<ESM::Global>().search(params.first))
+            if (!mStore.get<ESM3::Global>().search(params.first))
             {
-                ESM::Global record;
+                ESM3::Global record;
                 record.mId = params.first;
                 record.mValue = params.second;
                 mStore.insertStatic(record);
@@ -503,9 +511,9 @@ namespace MWWorld
 
         for (const auto &params : statics)
         {
-            if (!mStore.get<ESM::Static>().search(params.first))
+            if (!mStore.get<ESM3::Static>().search(params.first))
             {
-                ESM::Static record;
+                ESM3::Static record;
                 record.mId = params.first;
                 record.mModel = params.second;
                 mStore.insertStatic(record);
@@ -517,9 +525,9 @@ namespace MWWorld
 
         for (const auto &params : doors)
         {
-            if (!mStore.get<ESM::Door>().search(params.first))
+            if (!mStore.get<ESM3::Door>().search(params.first))
             {
-                ESM::Door record;
+                ESM3::Door record;
                 record.mId = params.first;
                 record.mModel = params.second;
                 mStore.insertStatic(record);
@@ -531,21 +539,26 @@ namespace MWWorld
     {
         // Must be cleared before mRendering is destroyed
         mProjectileManager->clear();
+
+        for (size_t i = 0; i < mEsm.size(); ++i)
+        {
+            delete mEsm[i];
+        }
     }
 
-    const ESM::Cell *World::getExterior (const std::string& cellName) const
+    const ESM3::Cell *World::getExterior (const std::string& cellName) const
     {
         // first try named cells
-        const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
+        const ESM3::Cell *cell = mStore.get<ESM3::Cell>().searchExtByName (cellName);
         if (cell)
             return cell;
 
         // didn't work -> now check for regions
-        for (const ESM::Region &region : mStore.get<ESM::Region>())
+        for (const ESM3::Region &region : mStore.get<ESM3::Region>())
         {
             if (Misc::StringUtils::ciEqual(cellName, region.mName))
             {
-                return mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
+                return mStore.get<ESM3::Cell>().searchExtByRegion(region.mId);
             }
         }
 
@@ -562,7 +575,7 @@ namespace MWWorld
         return mCells.getInterior (name);
     }
 
-    CellStore *World::getCell (const ESM::CellId& id)
+    CellStore *World::getCell (const ESM3::CellId& id)
     {
         if (id.mPaged)
             return getExterior (id.mIndex.mX, id.mIndex.mY);
@@ -606,7 +619,7 @@ namespace MWWorld
         return mStore;
     }
 
-    std::vector<ESM::ESMReader>& World::getEsmReader()
+    std::vector<ESM::Reader*>& World::getEsmReader()
     {
         return mEsm;
     }
@@ -666,17 +679,17 @@ namespace MWWorld
         return getCellName(cell->getCell());
     }
 
-    std::string World::getCellName(const ESM::Cell* cell) const
+    std::string World::getCellName(const ESM3::Cell* cell) const
     {
         if (cell)
         {
             if (!cell->isExterior() || !cell->mName.empty())
                 return cell->mName;
 
-            if (const ESM::Region* region = mStore.get<ESM::Region>().search (cell->mRegion))
+            if (const ESM3::Region* region = mStore.get<ESM3::Region>().search (cell->mRegion))
                 return region->mName;
         }
-        return mStore.get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
+        return mStore.get<ESM3::GameSetting>().find ("sDefaultCellname")->mValue.getString();
     }
 
     void World::removeRefScript (MWWorld::RefData *ref)
@@ -747,7 +760,7 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
-    Ptr World::searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum)
+    Ptr World::searchPtrViaRefNum (const std::string& id, const ESM3::RefNum& refNum)
     {
         return mCells.getPtr (id, refNum);
     }
@@ -783,11 +796,11 @@ namespace MWWorld
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             FindContainerVisitor visitor(ptr);
-            cellstore->forEachType<ESM::Container>(visitor);
+            cellstore->forEachType<ESM3::Container>(visitor);
             if (visitor.mResult.isEmpty())
-                cellstore->forEachType<ESM::Creature>(visitor);
+                cellstore->forEachType<ESM3::Creature>(visitor);
             if (visitor.mResult.isEmpty())
-                cellstore->forEachType<ESM::NPC>(visitor);
+                cellstore->forEachType<ESM3::NPC>(visitor);
 
             if (!visitor.mResult.isEmpty())
                 return visitor.mResult;
@@ -798,9 +811,9 @@ namespace MWWorld
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
-            reference.getTypeName()==typeid (ESM::NPC).name() ||
-            reference.getTypeName()==typeid (ESM::Creature).name())
+        if( reference.getTypeName()==typeid (ESM3::Container).name() ||
+            reference.getTypeName()==typeid (ESM3::NPC).name() ||
+            reference.getTypeName()==typeid (ESM3::Creature).name())
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -841,9 +854,9 @@ namespace MWWorld
 
     void World::removeContainerScripts(const Ptr& reference)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
-            reference.getTypeName()==typeid (ESM::NPC).name() ||
-            reference.getTypeName()==typeid (ESM::Creature).name())
+        if( reference.getTypeName()==typeid (ESM3::Container).name() ||
+            reference.getTypeName()==typeid (ESM3::NPC).name() ||
+            reference.getTypeName()==typeid (ESM3::Creature).name())
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -972,7 +985,7 @@ namespace MWWorld
         mPhysics->clearQueuedMovement();
         mDiscardMovements = true;
 
-        if (changeEvent && mCurrentWorldSpace != ESM::CellId::sDefaultWorldspace)
+        if (changeEvent && mCurrentWorldSpace != ESM3::CellId::sDefaultWorldspace)
         {
             // changed worldspace
             mProjectileManager->clear();
@@ -984,7 +997,7 @@ namespace MWWorld
         mRendering->getCamera()->instantTransition();
     }
 
-    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+    void World::changeToCell (const ESM3::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         if (!changeEvent)
             mCurrentWorldSpace = cellId.mWorldspace;
@@ -1007,7 +1020,7 @@ namespace MWWorld
         if (mActivationDistanceOverride >= 0)
             return static_cast<float>(mActivationDistanceOverride);
 
-        static const int iMaxActivateDist = mStore.get<ESM::GameSetting>().find("iMaxActivateDist")->mValue.getInteger();
+        static const int iMaxActivateDist = mStore.get<ESM3::GameSetting>().find("iMaxActivateDist")->mValue.getInteger();
         return static_cast<float>(iMaxActivateDist);
     }
 
@@ -1612,7 +1625,7 @@ namespace MWWorld
         // Cancel door closing sound if collision with actor is detected
         if (collisionWithActor)
         {
-            const ESM::Door* ref = door.get<ESM::Door>()->mBase;
+            const ESM3::Door* ref = door.get<ESM3::Door>()->mBase;
 
             if (state == MWWorld::DoorState::Opening)
             {
@@ -1699,93 +1712,93 @@ namespace MWWorld
         }
     }
 
-    const ESM::Potion *World::createRecord (const ESM::Potion& record)
+    const ESM3::Potion *World::createRecord (const ESM3::Potion& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Class *World::createRecord (const ESM::Class& record)
+    const ESM3::Class *World::createRecord (const ESM3::Class& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Spell *World::createRecord (const ESM::Spell& record)
+    const ESM3::Spell *World::createRecord (const ESM3::Spell& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Cell *World::createRecord (const ESM::Cell& record)
+    const ESM3::Cell *World::createRecord (const ESM3::Cell& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::CreatureLevList *World::createOverrideRecord(const ESM::CreatureLevList &record)
+    const ESM3::CreatureLevList *World::createOverrideRecord(const ESM3::CreatureLevList &record)
     {
         return mStore.overrideRecord(record);
     }
 
-    const ESM::ItemLevList *World::createOverrideRecord(const ESM::ItemLevList &record)
+    const ESM3::ItemLevList *World::createOverrideRecord(const ESM3::ItemLevList &record)
     {
         return mStore.overrideRecord(record);
     }
 
-    const ESM::Creature *World::createOverrideRecord(const ESM::Creature &record)
+    const ESM3::Creature *World::createOverrideRecord(const ESM3::Creature &record)
     {
         return mStore.overrideRecord(record);
     }
 
-    const ESM::NPC *World::createOverrideRecord(const ESM::NPC &record)
+    const ESM3::NPC *World::createOverrideRecord(const ESM3::NPC &record)
     {
         return mStore.overrideRecord(record);
     }
 
-    const ESM::Container *World::createOverrideRecord(const ESM::Container &record)
+    const ESM3::Container *World::createOverrideRecord(const ESM3::Container &record)
     {
         return mStore.overrideRecord(record);
     }
 
-    const ESM::NPC *World::createRecord(const ESM::NPC &record)
+    const ESM3::NPC *World::createRecord(const ESM3::NPC &record)
     {
         bool update = false;
 
         if (Misc::StringUtils::ciEqual(record.mId, "player"))
         {
-            const ESM::NPC *player =
-                mPlayer->getPlayer().get<ESM::NPC>()->mBase;
+            const ESM3::NPC *player =
+                mPlayer->getPlayer().get<ESM3::NPC>()->mBase;
 
             update = record.isMale() != player->isMale() ||
                      !Misc::StringUtils::ciEqual(record.mRace, player->mRace) ||
                      !Misc::StringUtils::ciEqual(record.mHead, player->mHead) ||
                      !Misc::StringUtils::ciEqual(record.mHair, player->mHair);
         }
-        const ESM::NPC *ret = mStore.insert(record);
+        const ESM3::NPC *ret = mStore.insert(record);
         if (update) {
             renderPlayer();
         }
         return ret;
     }
 
-    const ESM::Armor *World::createRecord (const ESM::Armor& record)
+    const ESM3::Armor *World::createRecord (const ESM3::Armor& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Weapon *World::createRecord (const ESM::Weapon& record)
+    const ESM3::Weapon *World::createRecord (const ESM3::Weapon& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Clothing *World::createRecord (const ESM::Clothing& record)
+    const ESM3::Clothing *World::createRecord (const ESM3::Clothing& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Enchantment *World::createRecord (const ESM::Enchantment& record)
+    const ESM3::Enchantment *World::createRecord (const ESM3::Enchantment& record)
     {
         return mStore.insert(record);
     }
 
-    const ESM::Book *World::createRecord (const ESM::Book& record)
+    const ESM3::Book *World::createRecord (const ESM3::Book& record)
     {
         return mStore.insert(record);
     }
@@ -1874,7 +1887,7 @@ namespace MWWorld
         bool swimming = isSwimming(player);
         bool flying = isFlying(player);
 
-        static const float i1stPersonSneakDelta = mStore.get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
+        static const float i1stPersonSneakDelta = mStore.get<ESM3::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
         if (sneaking && !swimming && !flying)
             mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
         else
@@ -1883,10 +1896,10 @@ namespace MWWorld
         int blind = 0;
         auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
         if (!mGodMode)
-            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
+            blind = static_cast<int>(magicEffects.get(ESM3::MagicEffect::Blind).getMagnitude());
         MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
 
-        int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
+        int nightEye = static_cast<int>(magicEffects.get(ESM3::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
     }
 
@@ -1895,7 +1908,7 @@ namespace MWWorld
         std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = mStore.get<ESM::Spell>().search(selectedSpell);
+            const ESM3::Spell* spell = mStore.get<ESM3::Spell>().search(selectedSpell);
             if (spell)
                 preloadEffects(&spell->mEffects);
         }
@@ -1905,7 +1918,7 @@ namespace MWWorld
             std::string enchantId = selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem);
             if (!enchantId.empty())
             {
-                const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(enchantId);
+                const ESM3::Enchantment* ench = mStore.get<ESM3::Enchantment>().search(enchantId);
                 if (ench)
                     preloadEffects(&ench->mEffects);
             }
@@ -1916,8 +1929,8 @@ namespace MWWorld
             std::string enchantId = selectedWeapon.getClass().getEnchantment(selectedWeapon);
             if (!enchantId.empty())
             {
-                const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(enchantId);
-                if (ench && ench->mData.mType == ESM::Enchantment::WhenStrikes)
+                const ESM3::Enchantment* ench = mStore.get<ESM3::Enchantment>().search(enchantId);
+                if (ench && ench->mData.mType == ESM3::Enchantment::WhenStrikes)
                     preloadEffects(&ench->mEffects);
             }
         }
@@ -2023,7 +2036,7 @@ namespace MWWorld
         const CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
+            if (!(currentCell->getCell()->mData.mFlags & ESM3::Cell::QuasiEx))
                 return false;
             else
                 return true;
@@ -2075,7 +2088,7 @@ namespace MWWorld
 
         bool operator()(const MWWorld::Ptr& ptr)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *static_cast<MWWorld::LiveCellRef<ESM::Door>* >(ptr.getBase());
+            MWWorld::LiveCellRef<ESM3::Door>& ref = *static_cast<MWWorld::LiveCellRef<ESM3::Door>* >(ptr.getBase());
 
             if (!ref.mData.isEnabled() || ref.mData.isDeleted())
                 return true;
@@ -2085,7 +2098,7 @@ namespace MWWorld
                 World::DoorMarker newMarker;
                 newMarker.name = MWClass::Door::getDestination(ref);
 
-                ESM::CellId cellid;
+                ESM3::CellId cellid;
                 if (!ref.mRef.getDestCell().empty())
                 {
                     cellid.mWorldspace = ref.mRef.getDestCell();
@@ -2117,7 +2130,7 @@ namespace MWWorld
     void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
     {
         GetDoorMarkerVisitor visitor(out);
-        cell->forEachType<ESM::Door>(visitor);
+        cell->forEachType<ESM3::Door>(visitor);
     }
 
     void World::setWaterHeight(const float height)
@@ -2295,13 +2308,13 @@ namespace MWWorld
             return false;
 
         const bool isPlayer = ptr == getPlayerConstPtr();
-        if (!(isPlayer && mGodMode) && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0)
+        if (!(isPlayer && mGodMode) && stats.getMagicEffects().get(ESM3::MagicEffect::Paralyze).getModifier() > 0)
             return false;
 
         if (ptr.getClass().canFly(ptr))
             return true;
 
-        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0
+        if(stats.getMagicEffects().get(ESM3::MagicEffect::Levitate).getMagnitude() > 0
                 && isLevitationEnabled())
             return true;
 
@@ -2318,7 +2331,7 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).getMagnitude() > 0)
+        if(stats.getMagicEffects().get(ESM3::MagicEffect::SlowFall).getMagnitude() > 0)
             return true;
 
         return false;
@@ -2394,7 +2407,7 @@ namespace MWWorld
     {
         return mRendering->getCamera()->isFirstPerson();
     }
-    
+
     bool World::isPreviewModeEnabled() const
     {
         return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::Preview;
@@ -2446,7 +2459,7 @@ namespace MWWorld
 
     void World::setupPlayer()
     {
-        const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
+        const ESM3::NPC *player = mStore.get<ESM3::NPC>().find("player");
         if (!mPlayer)
             mPlayer.reset(new MWWorld::Player(player));
         else
@@ -2517,7 +2530,7 @@ namespace MWWorld
         if ((actor->getCollisionMode() && (!mPhysics->isOnSolidGround(player) || fallHeight >= epsilon)) || isFlying(player))
             return Rest_PlayerIsInAir;
 
-        if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
+        if((currentCell->getCell()->mData.mFlags&ESM3::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
             return Rest_OnlyWaiting;
 
         return Rest_Allowed;
@@ -2737,7 +2750,7 @@ namespace MWWorld
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             GetContainersOwnedByVisitor visitor (owner, out);
-            cellstore->forEachType<ESM::Container>(visitor);
+            cellstore->forEachType<ESM3::Container>(visitor);
         }
     }
 
@@ -2799,7 +2812,7 @@ namespace MWWorld
             return false;
 
         std::vector<const MWWorld::CellRef *> sortedDoors;
-        for (const MWWorld::LiveCellRef<ESM::Door>& door : cellStore->getReadOnlyDoors().mList)
+        for (const MWWorld::LiveCellRef<ESM3::Door>& door : cellStore->getReadOnlyDoors().mList)
         {
             if (!door.mRef.getTeleport())
                 continue;
@@ -2837,7 +2850,7 @@ namespace MWWorld
             {
                 // Find door leading to our current teleport door
                 // and use its destination to position inside cell.
-                for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source->getReadOnlyDoors().mList)
+                for (const MWWorld::LiveCellRef<ESM3::Door>& destDoor : source->getReadOnlyDoors().mList)
                 {
                     if (Misc::StringUtils::ciEqual(name, destDoor.mRef.getDestCell()))
                     {
@@ -2851,7 +2864,7 @@ namespace MWWorld
             }
         }
         // Fall back to the first static location.
-        const MWWorld::CellRefList<ESM::Static>::List &statics = cellStore->getReadOnlyStatics().mList;
+        const MWWorld::CellRefList<ESM3::Static>::List &statics = cellStore->getReadOnlyStatics().mList;
         if (!statics.empty())
         {
             pos = statics.begin()->mRef.getPosition();
@@ -2866,7 +2879,7 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        const ESM::Cell *ext = getExterior(name);
+        const ESM3::Cell *ext = getExterior(name);
 
         if (!ext && name.find(',') != std::string::npos) {
             try {
@@ -2946,6 +2959,7 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
+    // FIXME: need to test ESM3 loader here
     void World::loadContentFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader)
     {
@@ -2966,7 +2980,7 @@ namespace MWWorld
             idx++;
         }
 
-        ESM::GroundcoverIndex = idx;
+        ESM3::GroundcoverIndex = idx;
 
         for (const std::string &file : groundcover)
         {
@@ -2997,7 +3011,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
+            const ESM3::Spell* spell = mStore.get<ESM3::Spell>().find(selectedSpell);
             int spellCost = MWMechanics::calcSpellCost(*spell);
 
             // Check mana
@@ -3010,7 +3024,7 @@ namespace MWWorld
             }
 
             // If this is a power, check if it was already used in the last 24h
-            if (!fail && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell))
+            if (!fail && spell->mData.mType == ESM3::Spell::ST_Power && !stats.getSpells().canUsePower(spell))
             {
                 message = "#{sPowerAlreadyUsed}";
                 fail = true;
@@ -3039,7 +3053,7 @@ namespace MWWorld
         if (!actor.isEmpty() && actor != MWMechanics::getPlayer() && !manualSpell)
             stats.getAiSequence().getCombatTargets(targetActors);
 
-        const float fCombatDistance = mStore.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+        const float fCombatDistance = mStore.get<ESM3::GameSetting>().find("fCombatDistance")->mValue.getFloat();
 
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
 
@@ -3121,7 +3135,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
+            const ESM3::Spell* spell = mStore.get<ESM3::Spell>().find(selectedSpell);
             cast.cast(spell);
         }
         else if (actor.getClass().hasInventoryStore(actor))
@@ -3188,14 +3202,14 @@ namespace MWWorld
                             float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1) override
         {
             const ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            const auto magicEffect = store.get<ESM::MagicEffect>().find(key.mId);
-            if ((magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) == 0)
+            const auto magicEffect = store.get<ESM3::MagicEffect>().find(key.mId);
+            if ((magicEffect->mData.mFlags & ESM3::MagicEffect::ContinuousVfx) == 0)
                 return;
-            const ESM::Static* castStatic;
+            const ESM3::Static* castStatic;
             if (!magicEffect->mHit.empty())
-                castStatic = store.get<ESM::Static>().find (magicEffect->mHit);
+                castStatic = store.get<ESM3::Static>().find (magicEffect->mHit);
             else
-                castStatic = store.get<ESM::Static>().find ("VFX_DefaultHit");
+                castStatic = store.get<ESM3::Static>().find ("VFX_DefaultHit");
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mActor);
             if (anim && !castStatic->mModel.empty())
                 anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, /*loop*/true, "", magicEffect->mParticle);
@@ -3222,10 +3236,10 @@ namespace MWWorld
 
     void World::breakInvisibility(const Ptr &actor)
     {
-        actor.getClass().getCreatureStats(actor).getSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
+        actor.getClass().getCreatureStats(actor).getSpells().purgeEffect(ESM3::MagicEffect::Invisibility);
+        actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM3::MagicEffect::Invisibility);
         if (actor.getClass().hasInventoryStore(actor))
-            actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+            actor.getClass().getInventoryStore(actor).purgeEffect(ESM3::MagicEffect::Invisibility);
 
         // Normally updated once per frame, but here it is kinda important to do it right away.
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
@@ -3248,7 +3262,7 @@ namespace MWWorld
             int ambientTotal = (ambient & 0xff)
                     + ((ambient>>8) & 0xff)
                     + ((ambient>>16) & 0xff);
-            return !(cell->getCell()->mData.mFlags & ESM::Cell::NoSleep) && ambientTotal <= 201;
+            return !(cell->getCell()->mData.mFlags & ESM3::Cell::NoSleep) && ambientTotal <= 201;
         }
     }
 
@@ -3273,7 +3287,7 @@ namespace MWWorld
                 if ( !next ) continue;
 
                 // Check if any door in the cell leads to an exterior directly
-                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next->getReadOnlyDoors().mList)
+                for (const MWWorld::LiveCellRef<ESM3::Door>& ref : next->getReadOnlyDoors().mList)
                 {
                     if (!ref.mRef.getTeleport()) continue;
 
@@ -3329,7 +3343,7 @@ namespace MWWorld
                 }
 
                 // Check if any door in the cell leads to an exterior directly
-                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next->getReadOnlyDoors().mList)
+                for (const MWWorld::LiveCellRef<ESM3::Door>& ref : next->getReadOnlyDoors().mList)
                 {
                     if (!ref.mRef.getTeleport()) continue;
 
@@ -3445,7 +3459,7 @@ namespace MWWorld
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
-            bool isContainer = ptr.getClass().getTypeName() == typeid(ESM::Container).name();
+            bool isContainer = ptr.getClass().getTypeName() == typeid(ESM3::Container).name();
             if (mType != World::Detect_Creature && (ptr.getClass().isActor() || isContainer))
             {
                 // but ignore containers without resolved content
@@ -3478,10 +3492,10 @@ namespace MWWorld
                 // If in werewolf form, this detects only NPCs, otherwise only creatures
                 if (detector.getClass().isNpc() && detector.getClass().getNpcStats(detector).isWerewolf())
                 {
-                    if (ptr.getClass().getTypeName() != typeid(ESM::NPC).name())
+                    if (ptr.getClass().getTypeName() != typeid(ESM3::NPC).name())
                         return false;
                 }
-                else if (ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                else if (ptr.getClass().getTypeName() != typeid(ESM3::Creature).name())
                     return false;
 
                 if (ptr.getClass().getCreatureStats(ptr).isDead())
@@ -3500,11 +3514,11 @@ namespace MWWorld
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         float dist=0;
         if (type == World::Detect_Creature)
-            dist = effects.get(ESM::MagicEffect::DetectAnimal).getMagnitude();
+            dist = effects.get(ESM3::MagicEffect::DetectAnimal).getMagnitude();
         else if (type == World::Detect_Key)
-            dist = effects.get(ESM::MagicEffect::DetectKey).getMagnitude();
+            dist = effects.get(ESM3::MagicEffect::DetectKey).getMagnitude();
         else if (type == World::Detect_Enchantment)
-            dist = effects.get(ESM::MagicEffect::DetectEnchantment).getMagnitude();
+            dist = effects.get(ESM3::MagicEffect::DetectEnchantment).getMagnitude();
 
         if (!dist)
             return;
@@ -3530,7 +3544,7 @@ namespace MWWorld
     {
         float telekinesisRangeBonus =
                     mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
+                    .get(ESM3::MagicEffect::Telekinesis).getMagnitude();
         telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
         float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
@@ -3554,8 +3568,8 @@ namespace MWWorld
         int bounty = player.getClass().getNpcStats(player).getBounty();
         int playerGold = player.getClass().getContainerStore(player).count(ContainerStore::sGoldId);
 
-        static float fCrimeGoldDiscountMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->mValue.getFloat();
-        static float fCrimeGoldTurnInMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->mValue.getFloat();
+        static float fCrimeGoldDiscountMult = mStore.get<ESM3::GameSetting>().find("fCrimeGoldDiscountMult")->mValue.getFloat();
+        static float fCrimeGoldTurnInMult = mStore.get<ESM3::GameSetting>().find("fCrimeGoldTurnInMult")->mValue.getFloat();
 
         int discount = static_cast<int>(bounty * fCrimeGoldDiscountMult);
         int turnIn = static_cast<int>(bounty * fCrimeGoldTurnInMult);
@@ -3620,7 +3634,7 @@ namespace MWWorld
             mPlayer->recordCrimeId();
             confiscateStolenItems(player);
 
-            static int iDaysinPrisonMod = mStore.get<ESM::GameSetting>().find("iDaysinPrisonMod")->mValue.getInteger();
+            static int iDaysinPrisonMod = mStore.get<ESM3::GameSetting>().find("iDaysinPrisonMod")->mValue.getInteger();
             mDaysInPrison = std::max(1, bounty / iDaysinPrisonMod);
 
             return;
@@ -3681,9 +3695,9 @@ namespace MWWorld
 
     void World::spawnRandomCreature(const std::string &creatureList)
     {
-        const ESM::CreatureLevList* list = mStore.get<ESM::CreatureLevList>().find(creatureList);
+        const ESM3::CreatureLevList* list = mStore.get<ESM3::CreatureLevList>().find(creatureList);
 
-        static int iNumberCreatures = mStore.get<ESM::GameSetting>().find("iNumberCreatures")->mValue.getInteger();
+        static int iNumberCreatures = mStore.get<ESM3::GameSetting>().find("iNumberCreatures")->mValue.getInteger();
         int numCreatures = 1 + Misc::Rng::rollDice(iNumberCreatures); // [1, iNumberCreatures]
 
         for (int i=0; i<numCreatures; ++i)
@@ -3717,15 +3731,15 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
     }
 
-    void World::explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,
+    void World::explodeSpell(const osg::Vec3f& origin, const ESM3::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,
                              const std::string& id, const std::string& sourceName, const bool fromProjectile)
     {
-        std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
-        for (const ESM::ENAMstruct& effectInfo : effects.mList)
+        std::map<MWWorld::Ptr, std::vector<ESM3::ENAMstruct> > toApply;
+        for (const ESM3::ENAMstruct& effectInfo : effects.mList)
         {
-            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+            const ESM3::MagicEffect* effect = mStore.get<ESM3::MagicEffect>().find(effectInfo.mEffectID);
 
-            if (effectInfo.mRange != rangeType || (effectInfo.mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
+            if ((int)effectInfo.mRange != rangeType || (effectInfo.mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
                 continue; // Not right range type, or not area effect and hit an actor
 
             if (fromProjectile && effectInfo.mArea <= 0)
@@ -3735,11 +3749,11 @@ namespace MWWorld
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
 
             // Spawn the explosion orb effect
-            const ESM::Static* areaStatic;
+            const ESM3::Static* areaStatic;
             if (!effect->mArea.empty())
-                areaStatic = mStore.get<ESM::Static>().find (effect->mArea);
+                areaStatic = mStore.get<ESM3::Static>().find (effect->mArea);
             else
-                areaStatic = mStore.get<ESM::Static>().find ("VFX_DefaultArea");
+                areaStatic = mStore.get<ESM3::Static>().find ("VFX_DefaultArea");
 
             std::string texture = effect->mParticle;
 
@@ -3797,7 +3811,7 @@ namespace MWWorld
             cast.mId = id;
             cast.mSourceName = sourceName;
             cast.mStack = false;
-            ESM::EffectList effectsToApply;
+            ESM3::EffectList effectsToApply;
             effectsToApply.mList = applyPair.second;
             cast.inflict(applyPair.first, caster, effectsToApply, rangeType, false, true);
         }
@@ -3882,11 +3896,11 @@ namespace MWWorld
         }
     }
 
-    void World::preloadEffects(const ESM::EffectList *effectList)
+    void World::preloadEffects(const ESM3::EffectList *effectList)
     {
-        for (const ESM::ENAMstruct& effectInfo : effectList->mList)
+        for (const ESM3::ENAMstruct& effectInfo : effectList->mList)
         {
-            const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+            const ESM3::MagicEffect *effect = mStore.get<ESM3::MagicEffect>().find(effectInfo.mEffectID);
 
             if (MWMechanics::isSummoningEffect(effectInfo.mEffectID))
             {

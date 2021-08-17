@@ -9,7 +9,7 @@
 #include <components/detournavigator/areatype.hpp>
 #include <components/detournavigator/status.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/pgrd.hpp>
 
 namespace MWWorld
 {
@@ -148,18 +148,18 @@ namespace MWMechanics
             }
 
             /// utility function to convert a osg::Vec3f to a Pathgrid::Point
-            static ESM::Pathgrid::Point makePathgridPoint(const osg::Vec3f& v)
+            static ESM3::Pathgrid::Point makePathgridPoint(const osg::Vec3f& v)
             {
-                return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
+                return ESM3::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
             }
 
             /// utility function to convert an ESM::Position to a Pathgrid::Point
-            static ESM::Pathgrid::Point makePathgridPoint(const ESM::Position& p)
+            static ESM3::Pathgrid::Point makePathgridPoint(const ESM::Position& p)
             {
-                return ESM::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
+                return ESM3::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
             }
 
-            static osg::Vec3f makeOsgVec3(const ESM::Pathgrid::Point& p)
+            static osg::Vec3f makeOsgVec3(const ESM3::Pathgrid::Point& p)
             {
                 return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
             }
@@ -168,7 +168,7 @@ namespace MWMechanics
             // Caller needs to be careful for very short distances (i.e. less than 1)
             // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
             //
-            static float distanceSquared(const ESM::Pathgrid::Point& point, const osg::Vec3f& pos)
+            static float distanceSquared(const ESM3::Pathgrid::Point& point, const osg::Vec3f& pos)
             {
                 return (MWMechanics::PathFinder::makeOsgVec3(point) - pos).length2();
             }
@@ -179,7 +179,7 @@ namespace MWMechanics
             //
             // NOTE: pos is expected to be in local coordinates, as is grid->mPoints
             //
-            static int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
+            static int getClosestPoint(const ESM3::Pathgrid* grid, const osg::Vec3f& pos)
             {
                 assert(grid && !grid->mPoints.empty());
 

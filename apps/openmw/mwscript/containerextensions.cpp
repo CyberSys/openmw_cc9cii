@@ -13,7 +13,7 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -50,18 +50,18 @@ namespace
 
     void addRandomToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& owner, MWWorld::ContainerStore& store, bool topLevel = true)
     {
-        if(itemPtr.getTypeName() == typeid(ESM::ItemLevList).name())
+        if(itemPtr.getTypeName() == typeid(ESM3::ItemLevList).name())
         {
-            const ESM::ItemLevList* levItemList = itemPtr.get<ESM::ItemLevList>()->mBase;
+            const ESM3::ItemLevList* levItemList = itemPtr.get<ESM3::ItemLevList>()->mBase;
 
-            if(topLevel && count > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
+            if(topLevel && count > 1 && levItemList->mFlags & ESM3::ItemLevList::Each)
             {
                 for(int i = 0; i < count; i++)
                     addRandomToStore(itemPtr, 1, owner, store, true);
             }
             else
             {
-                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false);
+                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM3::ItemLevList>()->mBase, false);
                 if (itemId.empty())
                     return;
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), itemId, 1);
@@ -108,7 +108,7 @@ namespace MWScript
                     // Check if "item" can be placed in a container
                     MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
                     MWWorld::Ptr itemPtr = manualRef.getPtr();
-                    bool isLevelledList = itemPtr.getClass().getTypeName() == typeid(ESM::ItemLevList).name();
+                    bool isLevelledList = itemPtr.getClass().getTypeName() == typeid(ESM3::ItemLevList).name();
                     if(!isLevelledList)
                         MWWorld::ContainerStore::getType(itemPtr);
 
@@ -120,16 +120,16 @@ namespace MWScript
                     }
 
                     // Calls to unresolved containers affect the base record
-                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() && (!ptr.getRefData().getCustomData() ||
+                    if(ptr.getClass().getTypeName() == typeid(ESM3::Container).name() && (!ptr.getRefData().getCustomData() ||
                     !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
-                        const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
+                        const ESM3::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
                         {
                             // use the new base record
-                            container.get<ESM::Container>()->mBase = baseRecord;
+                            container.get<ESM3::Container>()->mBase = baseRecord;
                             if(container.getRefData().getCustomData())
                             {
                                 auto& store = container.getClass().getContainerStore(container);
@@ -232,15 +232,15 @@ namespace MWScript
                         return;
                     }
                     // Calls to unresolved containers affect the base record instead
-                    else if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
+                    else if(ptr.getClass().getTypeName() == typeid(ESM3::Container).name() &&
                         (!ptr.getRefData().getCustomData() || !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
-                        const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
+                        const ESM3::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
                         {
-                            container.get<ESM::Container>()->mBase = baseRecord;
+                            container.get<ESM3::Container>()->mBase = baseRecord;
                             if(container.getRefData().getCustomData())
                             {
                                 auto& store = container.getClass().getContainerStore(container);
@@ -310,7 +310,7 @@ namespace MWScript
                     {
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
                         it = ptr.getClass().getContainerStore (ptr).add (ref.getPtr(), 1, ptr, false);
-                        Log(Debug::Warning) << "Implicitly adding one " << item << 
+                        Log(Debug::Warning) << "Implicitly adding one " << item <<
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";
                     }
@@ -379,19 +379,19 @@ namespace MWScript
 
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (slot);
-                    
-                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Armor).name())
+
+                    if (it == invStore.end() || it->getTypeName () != typeid(ESM3::Armor).name())
                     {
                         runtime.push(-1);
                         return;
                     }
 
                     int skill = it->getClass().getEquipmentSkill (*it) ;
-                    if (skill == ESM::Skill::HeavyArmor)
+                    if (skill == ESM3::Skill::HeavyArmor)
                         runtime.push(2);
-                    else if (skill == ESM::Skill::MediumArmor)
+                    else if (skill == ESM3::Skill::MediumArmor)
                         runtime.push(1);
-                    else if (skill == ESM::Skill::LightArmor)
+                    else if (skill == ESM3::Skill::LightArmor)
                         runtime.push(0);
                     else
                         runtime.push(-1);
@@ -464,13 +464,13 @@ namespace MWScript
                         runtime.push(-1);
                         return;
                     }
-                    else if (it->getTypeName() != typeid(ESM::Weapon).name())
+                    else if (it->getTypeName() != typeid(ESM3::Weapon).name())
                     {
-                        if (it->getTypeName() == typeid(ESM::Lockpick).name())
+                        if (it->getTypeName() == typeid(ESM3::Lockpick).name())
                         {
                             runtime.push(-2);
                         }
-                        else if (it->getTypeName() == typeid(ESM::Probe).name())
+                        else if (it->getTypeName() == typeid(ESM3::Probe).name())
                         {
                             runtime.push(-3);
                         }
@@ -481,7 +481,7 @@ namespace MWScript
                         return;
                     }
 
-                    runtime.push(it->get<ESM::Weapon>()->mBase->mData.mType);
+                    runtime.push(it->get<ESM3::Weapon>()->mBase->mData.mType);
                 }
         };
 

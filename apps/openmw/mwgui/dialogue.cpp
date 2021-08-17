@@ -367,7 +367,7 @@ namespace MWGui
         if (mGoodbye || dialogueManager->isInChoice())
             return;
 
-        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         const std::string sPersuasion = gmst.find("sPersuasion")->mValue.getString();
         const std::string sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
@@ -460,7 +460,7 @@ namespace MWGui
     void DialogueWindow::restock()
     {
         MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
-        float delay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->mValue.getFloat();
+        float delay = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fBarterGoldResetDelay")->mValue.getFloat();
 
         // Gold is restocked every 24h
         if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getLastRestockTime() + delay)
@@ -508,34 +508,34 @@ namespace MWGui
 
         int services = mPtr.getClass().getServices(mPtr);
 
-        bool travel = (mPtr.getTypeName() == typeid(ESM::NPC).name() && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
-                || (mPtr.getTypeName() == typeid(ESM::Creature).name() && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
+        bool travel = (mPtr.getTypeName() == typeid(ESM3::NPC).name() && !mPtr.get<ESM3::NPC>()->mBase->getTransport().empty())
+                || (mPtr.getTypeName() == typeid(ESM3::Creature).name() && !mPtr.get<ESM3::Creature>()->mBase->getTransport().empty());
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if (mPtr.getTypeName() == typeid(ESM3::NPC).name())
             mTopicsList->addItem(gmst.find("sPersuasion")->mValue.getString());
 
-        if (services & ESM::NPC::AllItems)
+        if (services & ESM3::NPC::AllItems)
             mTopicsList->addItem(gmst.find("sBarter")->mValue.getString());
 
-        if (services & ESM::NPC::Spells)
+        if (services & ESM3::NPC::Spells)
             mTopicsList->addItem(gmst.find("sSpells")->mValue.getString());
 
         if (travel)
             mTopicsList->addItem(gmst.find("sTravel")->mValue.getString());
 
-        if (services & ESM::NPC::Spellmaking)
+        if (services & ESM3::NPC::Spellmaking)
             mTopicsList->addItem(gmst.find("sSpellmakingMenuTitle")->mValue.getString());
 
-        if (services & ESM::NPC::Enchanting)
+        if (services & ESM3::NPC::Enchanting)
             mTopicsList->addItem(gmst.find("sEnchanting")->mValue.getString());
 
-        if (services & ESM::NPC::Training)
+        if (services & ESM3::NPC::Training)
             mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->mValue.getString());
 
-        if (services & ESM::NPC::Repair)
+        if (services & ESM3::NPC::Repair)
             mTopicsList->addItem(gmst.find("sRepair")->mValue.getString());
 
         if (isCompanion())
@@ -606,7 +606,7 @@ namespace MWGui
             Goodbye* link = new Goodbye();
             link->eventActivated += MyGUI::newDelegate(this, &DialogueWindow::onGoodbyeActivated);
             mLinks.push_back(link);
-            std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
+            std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("sGoodbye")->mValue.getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
                                                                               textColours.answerPressed,
                                                                               TypesetBook::InteractiveId(link));

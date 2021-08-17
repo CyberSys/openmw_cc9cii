@@ -2,7 +2,7 @@
 #define MWGUI_CLASS_H
 
 #include <components/esm/attr.hpp>
-#include <components/esm/loadclas.hpp>
+#include <components/esm3/clas.hpp>
 #include "widgets.hpp"
 #include "windowbase.hpp"
 
@@ -150,7 +150,7 @@ namespace MWGui
 
         bool exit() override;
 
-        ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
+        ESM3::Class::Specialization getSpecializationId() const { return mSpecializationId; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -172,7 +172,7 @@ namespace MWGui
     private:
         MyGUI::TextBox *mSpecialization0, *mSpecialization1, *mSpecialization2;
 
-        ESM::Class::Specialization mSpecializationId;
+        ESM3::Class::Specialization mSpecializationId;
     };
 
     class SelectAttributeDialog : public WindowModal
@@ -214,7 +214,7 @@ namespace MWGui
 
         bool exit() override;
 
-        ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+        ESM3::Skill::SkillEnum getSkillId() const { return mSkillId; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -238,7 +238,7 @@ namespace MWGui
         Widgets::MWSkillPtr mMagicSkill[9];
         Widgets::MWSkillPtr mStealthSkill[9];
 
-        ESM::Skill::SkillEnum mSkillId;
+        ESM3::Skill::SkillEnum mSkillId;
     };
 
     class DescriptionDialog : public WindowModal
@@ -272,10 +272,10 @@ namespace MWGui
 
         std::string getName() const;
         std::string getDescription() const;
-        ESM::Class::Specialization getSpecializationId() const;
+        ESM3::Class::Specialization getSpecializationId() const;
         std::vector<int> getFavoriteAttributes() const;
-        std::vector<ESM::Skill::SkillEnum> getMajorSkills() const;
-        std::vector<ESM::Skill::SkillEnum> getMinorSkills() const;
+        std::vector<ESM3::Skill::SkillEnum> getMajorSkills() const;
+        std::vector<ESM3::Skill::SkillEnum> getMinorSkills() const;
 
         void setNextButtonShow(bool shown);
 
@@ -324,7 +324,7 @@ namespace MWGui
         SelectSkillDialog                *mSkillDialog;
         DescriptionDialog                *mDescDialog;
 
-        ESM::Class::Specialization       mSpecializationId;
+        ESM3::Class::Specialization       mSpecializationId;
 
         Widgets::MWAttributePtr              mAffectedAttribute;
         Widgets::MWSkillPtr              mAffectedSkill;

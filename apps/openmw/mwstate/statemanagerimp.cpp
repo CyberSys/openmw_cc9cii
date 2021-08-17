@@ -3,9 +3,9 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/cellid.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/reader.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/cell.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -63,13 +63,13 @@ void MWState::StateManager::cleanup (bool force)
     MWBase::Environment::get().getLuaManager()->clear();
 }
 
-std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::ESMReader& reader)
+std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM3::Reader& reader)
     const
 {
     const std::vector<std::string>& current =
         MWBase::Environment::get().getWorld()->getContentFiles();
 
-    const std::vector<ESM::Header::MasterData>& prev = reader.getGameFiles();
+    const std::vector<ESM::MasterData>& prev = reader.getGameFiles();
 
     std::map<int, int> map;
 
@@ -191,13 +191,13 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         if (!character)
         {
             MWWorld::ConstPtr player = MWMechanics::getPlayer();
-            std::string name = player.get<ESM::NPC>()->mBase->mName;
+            std::string name = player.get<ESM3::NPC>()->mBase->mName;
 
             character = mCharacterManager.createCharacter(name);
             mCharacterManager.setCurrentCharacter(character);
         }
 
-        ESM::SavedGame profile;
+        ESM3::SavedGame profile;
 
         MWBase::World& world = *MWBase::Environment::get().getWorld();
 
@@ -205,12 +205,12 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         profile.mContentFiles = world.getContentFiles();
 
-        profile.mPlayerName = player.get<ESM::NPC>()->mBase->mName;
+        profile.mPlayerName = player.get<ESM3::NPC>()->mBase->mName;
         profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
 
-        std::string classId = player.get<ESM::NPC>()->mBase->mClass;
-        if (world.getStore().get<ESM::Class>().isDynamic(classId))
-            profile.mPlayerClassName = world.getStore().get<ESM::Class>().find(classId)->mName;
+        std::string classId = player.get<ESM3::NPC>()->mBase->mClass;
+        if (world.getStore().get<ESM3::Class>().isDynamic(classId))
+            profile.mPlayerClassName = world.getStore().get<ESM3::Class>().find(classId)->mName;
         else
             profile.mPlayerClassId = classId;
 
@@ -241,7 +241,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         for (const std::string& contentFile : MWBase::Environment::get().getWorld()->getContentFiles())
             writer.addMaster(contentFile, 0); // not using the size information anyway -> use value of 0
 
-        writer.setFormat (ESM::SavedGame::sCurrentFormat);
+        writer.setFormat (ESM3::SavedGame::sCurrentFormat);
 
         // all unused
         writer.setVersion(0);
@@ -269,9 +269,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         Loading::ScopedLoad load(&listener);
 
-        writer.startRecord (ESM::REC_SAVE);
+        writer.startRecord (ESM3::REC_SAVE);
         slot->mProfile.save (writer);
-        writer.endRecord (ESM::REC_SAVE);
+        writer.endRecord (ESM3::REC_SAVE);
 
         MWBase::Environment::get().getJournal()->write (writer, listener);
         MWBase::Environment::get().getDialogueManager()->write (writer, listener);
@@ -381,10 +381,10 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         Log(Debug::Info) << "Reading save file " << boost::filesystem::path(filepath).filename().string();
 
-        ESM::ESMReader reader;
+        ESM3::Reader reader;
         reader.open (filepath);
 
-        if (reader.getFormat() > ESM::SavedGame::sCurrentFormat)
+        if (reader.getFormat() > ESM3::SavedGame::sCurrentFormat)
             throw std::runtime_error("This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade to the newest OpenMW version to load this file.");
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
@@ -403,14 +403,14 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         int currentPercent = 0;
         while (reader.hasMoreRecs())
         {
-            ESM::NAME n = reader.getRecName();
-            reader.getRecHeader();
+            reader.getRecordHeader();
+            std::uint32_t typeId = reader.hdr().typeId;
 
-            switch (n.intval)
+            switch (typeId)
             {
                 case ESM::REC_SAVE:
                     {
-                        ESM::SavedGame profile;
+                        ESM3::SavedGame profile;
                         profile.load(reader);
                         if (!verifyProfile(profile))
                         {
@@ -427,12 +427,12 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_JOUR_LEGACY:
                 case ESM::REC_QUES:
 
-                    MWBase::Environment::get().getJournal()->readRecord (reader, n.intval);
+                    MWBase::Environment::get().getJournal()->readRecord (reader, typeId);
                     break;
 
                 case ESM::REC_DIAS:
 
-                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.intval);
+                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, typeId);
                     break;
 
                 case ESM::REC_ALCH:
@@ -447,26 +447,30 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_GLOB:
                 case ESM::REC_PLAY:
                 case ESM::REC_CSTA:
-                case ESM::REC_WTHR:
+                case ESM::REC_WTHR: // weather
                 case ESM::REC_DYNA:
                 case ESM::REC_ACTC:
-                case ESM::REC_PROJ:
+                case ESM::REC_PROJ: // projectile
                 case ESM::REC_MPRJ:
-                case ESM::REC_ENAB:
+                case ESM::REC_ENAB: // teleport/levitation state
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
                 case ESM::REC_CREA:
                 case ESM::REC_CONT:
-                    MWBase::Environment::get().getWorld()->readRecord(reader, n.intval, contentFileMap);
+                    MWBase::Environment::get().getWorld()->readRecord(reader, typeId, contentFileMap);
                     break;
 
                 case ESM::REC_CAM_:
-                    reader.getHNT(firstPersonCam, "FIRS");
+                    reader.getSubRecordHeader();
+                    if (reader.subRecordHeader().typeId == ESM3::SUB_FIRS)
+                        reader.get(firstPersonCam);
+                    else
+                        reader.skipSubRecordData();
                     break;
 
                 case ESM::REC_GSCR:
 
-                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.intval, contentFileMap);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, typeId, contentFileMap);
                     break;
 
                 case ESM::REC_GMAP:
@@ -474,28 +478,29 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_ASPL:
                 case ESM::REC_MARK:
 
-                    MWBase::Environment::get().getWindowManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getWindowManager()->readRecord(reader, typeId);
                     break;
 
                 case ESM::REC_DCOU:
                 case ESM::REC_STLN:
 
-                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, typeId);
                     break;
 
                 case ESM::REC_INPU:
-                    MWBase::Environment::get().getInputManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getInputManager()->readRecord(reader, typeId);
                     break;
 
                 case ESM::REC_LUAM:
-                    MWBase::Environment::get().getLuaManager()->readRecord(reader, n.intval);
+                    MWBase::Environment::get().getLuaManager()->readRecord(reader, typeId);
                     break;
 
                 default:
 
                     // ignore invalid records
-                    Log(Debug::Warning) << "Warning: Ignoring unknown record: " << n.toString();
-                    reader.skipRecord();
+                    Log(Debug::Warning) << "Warning: Ignoring unknown record: " << ESM::printName(typeId)
+                        << " " << reader.getFileOffset();
+                    reader.skipRecordData();
             }
             int progressPercent = static_cast<int>(float(reader.getFileOffset())/total*100);
             if (progressPercent > currentPercent)
@@ -527,7 +532,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         if (ptr.isInCell())
         {
-            const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
+            const ESM3::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
             // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
             MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false, false);
@@ -630,7 +635,7 @@ void MWState::StateManager::update (float duration)
     }
 }
 
-bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
+bool MWState::StateManager::verifyProfile(const ESM3::SavedGame& profile) const
 {
     const std::vector<std::string>& selectedContentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
     bool notFound = false;

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/spel.hpp>
 
 #include "spells.hpp"
 
@@ -38,10 +38,10 @@ namespace MWMechanics
     {
         switch(mType)
         {
-            case ESM::REC_CREA:
-                return ::withBaseRecord<ESM::Creature>(mId, function);
-            case ESM::REC_NPC_:
-                return ::withBaseRecord<ESM::NPC>(mId, function);
+            case ESM3::REC_CREA:
+                return ::withBaseRecord<ESM3::Creature>(mId, function);
+            case ESM3::REC_NPC_:
+                return ::withBaseRecord<ESM3::NPC>(mId, function);
             default:
                 throw std::logic_error("failed to update base record for " + mId);
         }
@@ -51,21 +51,21 @@ namespace MWMechanics
     {
         switch(mType)
         {
-            case ESM::REC_CREA:
-                return getSpellList<ESM::Creature>(mId);
-            case ESM::REC_NPC_:
-                return getSpellList<ESM::NPC>(mId);
+            case ESM3::REC_CREA:
+                return getSpellList<ESM3::Creature>(mId);
+            case ESM3::REC_NPC_:
+                return getSpellList<ESM3::NPC>(mId);
             default:
                 throw std::logic_error("failed to get spell list for " + mId);
         }
     }
 
-    const ESM::Spell* SpellList::getSpell(const std::string& id)
+    const ESM3::Spell* SpellList::getSpell(const std::string& id)
     {
-        return MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(id);
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find(id);
     }
 
-    void SpellList::add (const ESM::Spell* spell)
+    void SpellList::add (const ESM3::Spell* spell)
     {
         auto& id = spell->mId;
         bool changed = withBaseRecord([&] (auto& spells)
@@ -85,7 +85,7 @@ namespace MWMechanics
         }
     }
 
-    void SpellList::remove (const ESM::Spell* spell)
+    void SpellList::remove (const ESM3::Spell* spell)
     {
         auto& id = spell->mId;
         bool changed = withBaseRecord([&] (auto& spells)

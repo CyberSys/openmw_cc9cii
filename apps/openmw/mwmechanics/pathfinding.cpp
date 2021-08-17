@@ -22,7 +22,7 @@
 namespace
 {
     // Chooses a reachable end pathgrid point.  start is assumed reachable.
-    std::pair<int, bool> getClosestReachablePoint(const ESM::Pathgrid* grid,
+    std::pair<int, bool> getClosestReachablePoint(const ESM3::Pathgrid* grid,
                                                   const MWMechanics::PathgridGraph *graph,
                                                   const osg::Vec3f& pos, int start)
     {
@@ -227,7 +227,7 @@ namespace MWMechanics
         //       nodes are the same
         if(startNode == endNode.first)
         {
-            ESM::Pathgrid::Point temp(pathgrid->mPoints[startNode]);
+            ESM3::Pathgrid::Point temp(pathgrid->mPoints[startNode]);
             converter.toWorld(temp);
             *out++ = makeOsgVec3(temp);
         }
@@ -239,14 +239,14 @@ namespace MWMechanics
             // Especially useful for wandering actors, if the nearest node is blocked for some reason.
             if (path.size() > 1)
             {
-                ESM::Pathgrid::Point secondNode = *(++path.begin());
+                ESM3::Pathgrid::Point secondNode = *(++path.begin());
                 osg::Vec3f firstNodeVec3f = makeOsgVec3(pathgrid->mPoints[startNode]);
                 osg::Vec3f secondNodeVec3f = makeOsgVec3(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
                 osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
                 if (toSecondNodeVec3f * toStartPointVec3f > 0)
                 {
-                    ESM::Pathgrid::Point temp(secondNode);
+                    ESM3::Pathgrid::Point temp(secondNode);
                     converter.toWorld(temp);
                     // Add Z offset since path node can overlap with other objects.
                     // Also ignore doors in raytesting.
@@ -260,7 +260,7 @@ namespace MWMechanics
 
             // convert supplied path to world coordinates
             std::transform(path.begin(), path.end(), out,
-                [&] (ESM::Pathgrid::Point& point)
+                [&] (ESM3::Pathgrid::Point& point)
                 {
                     converter.toWorld(point);
                     return makeOsgVec3(point);

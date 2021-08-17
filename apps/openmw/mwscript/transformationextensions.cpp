@@ -2,7 +2,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include <components/compiler/opcodes.hpp>
 
@@ -299,11 +299,11 @@ namespace MWScript
                             float terrainHeight = -std::numeric_limits<float>::max();
                             if (ptr.getCell()->isExterior())
                                 terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(curPos);
- 
+
                             if (pos < terrainHeight)
                                 pos = terrainHeight;
                         }
- 
+
                         newPos[2] = pos;
                     }
                     else
@@ -379,7 +379,7 @@ namespace MWScript
                     catch(std::exception&)
                     {
                         // cell not found, move to exterior instead (vanilla PositionCell compatibility)
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        const ESM3::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         int cx,cy;
                         MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
@@ -491,7 +491,7 @@ namespace MWScript
                     }
                     catch(std::exception&)
                     {
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        const ESM3::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         int cx,cy;
                         MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);

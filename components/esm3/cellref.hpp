@@ -16,21 +16,21 @@ namespace ESM3
     class Reader;
 
     const int UnbreakableLock = std::numeric_limits<int>::max();
-    extern std::uint32_t GroundcoverIndex;
+    extern int GroundcoverIndex;
 
     struct RefNum
     {
         std::uint32_t mIndex;
-        std::uint32_t mContentFile;
+        std::int32_t mContentFile;
 
-        void load (Reader& reader, bool wide = false, const std::string& tag = "FRMR");
+        void load (Reader& reader, bool wide = false, std::uint32_t tag = ESM::FourCC<'F', 'R', 'M', 'R'>::value);
 
         void save (ESM::ESMWriter& esm, bool wide = false, const std::string& tag = "FRMR") const;
 
-        inline bool hasContentFile() const { return mContentFile < 0xffffffff; }
+        inline bool hasContentFile() const { return mContentFile >= 0; }
 
-        inline bool isSet() const { return mIndex != 0 || mContentFile != 0xffffffff; }
-        inline void unset() { *this = {0, 0xffffffff}; }
+        inline bool isSet() const { return mIndex != 0 || mContentFile != -1; }
+        inline void unset() { *this = {0, -1}; }
 
         // Note: this method should not be used for objects with invalid RefNum
         // (for example, for objects from disabled plugins in savegames).

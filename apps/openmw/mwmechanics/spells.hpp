@@ -11,7 +11,7 @@
 #include "magiceffects.hpp"
 #include "spelllist.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct SpellState;
 }
@@ -29,30 +29,30 @@ namespace MWMechanics
     class Spells
     {
             std::shared_ptr<SpellList> mSpellList;
-            std::map<const ESM::Spell*, SpellParams> mSpells;
+            std::map<const ESM3::Spell*, SpellParams> mSpells;
 
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
-            std::map<const ESM::Spell*, MWWorld::TimeStamp> mUsedPowers;
+            std::map<const ESM3::Spell*, MWWorld::TimeStamp> mUsedPowers;
 
             mutable bool mSpellsChanged;
             mutable MagicEffects mEffects;
-            mutable std::map<const ESM::Spell*, MagicEffects> mSourcedEffects;
+            mutable std::map<const ESM3::Spell*, MagicEffects> mSourcedEffects;
             void rebuildEffects() const;
 
-            bool hasDisease(const ESM::Spell::SpellType type) const;
+            bool hasDisease(const ESM3::Spell::SpellType type) const;
 
-            using SpellFilter = bool (*)(const ESM::Spell*);
+            using SpellFilter = bool (*)(const ESM3::Spell*);
             void purge(const SpellFilter& filter);
 
-            void addSpell(const ESM::Spell* spell);
-            void removeSpell(const ESM::Spell* spell);
+            void addSpell(const ESM3::Spell* spell);
+            void removeSpell(const ESM3::Spell* spell);
             void removeAllSpells();
 
             friend class SpellList;
         public:
-            using TIterator = std::map<const ESM::Spell*, SpellParams>::const_iterator;
+            using TIterator = std::map<const ESM3::Spell*, SpellParams>::const_iterator;
 
             Spells();
 
@@ -62,13 +62,13 @@ namespace MWMechanics
 
             ~Spells();
 
-            static bool hasCorprusEffect(const ESM::Spell *spell);
+            static bool hasCorprusEffect(const ESM3::Spell *spell);
 
             void purgeEffect(int effectId);
             void purgeEffect(int effectId, const std::string & sourceId);
 
-            bool canUsePower (const ESM::Spell* spell) const;
-            void usePower (const ESM::Spell* spell);
+            bool canUsePower (const ESM3::Spell* spell) const;
+            void usePower (const ESM3::Spell* spell);
 
             void purgeCommonDisease();
             void purgeBlightDisease();
@@ -80,12 +80,12 @@ namespace MWMechanics
             TIterator end() const;
 
             bool hasSpell(const std::string& spell) const;
-            bool hasSpell(const ESM::Spell* spell) const;
+            bool hasSpell(const ESM3::Spell* spell) const;
 
             void add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
-            void add (const ESM::Spell* spell);
+            void add (const ESM3::Spell* spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
             void remove (const std::string& spell);
@@ -115,8 +115,8 @@ namespace MWMechanics
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
 
-            void readState (const ESM::SpellState& state, CreatureStats* creatureStats);
-            void writeState (ESM::SpellState& state) const;
+            void readState (const ESM3::SpellState& state, CreatureStats* creatureStats);
+            void writeState (ESM3::SpellState& state) const;
 
             bool setSpells(const std::string& id);
 

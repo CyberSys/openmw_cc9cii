@@ -32,8 +32,12 @@ namespace MyGUI
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
     struct CellId;
 }
 
@@ -257,7 +261,7 @@ namespace MWBase
 
             virtual void enableRest() = 0;
             virtual bool getRestEnabled() = 0;
-            virtual bool getJournalAllowed() = 0; 
+            virtual bool getJournalAllowed() = 0;
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;
@@ -286,7 +290,7 @@ namespace MWBase
             virtual void clear() = 0;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
-            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
+            virtual void readRecord (ESM3::Reader& reader, uint32_t type) = 0;
             virtual int countSavedGameRecords() const = 0;
 
             /// Does the current stack of GUI-windows permit saving?

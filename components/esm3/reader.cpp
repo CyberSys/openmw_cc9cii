@@ -1,8 +1,8 @@
 #include "reader.hpp"
 
-#ifdef NDEBUG // FIXME: debugging only
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG // FIXME: debugging only
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 #include <stdexcept>
@@ -81,11 +81,21 @@ void Reader::restoreContext(const ReaderContext &rc)
     if (mCtx.filename != rc.filename)
         openRaw(rc.filename);
 
+    //bool reSeek = mCtx.filePos != rc.subHdrCached ? rc.filePos - sizeof(SubRecordHeader) : rc.filePos;
+
     // Copy the data
     mCtx = rc;
 
+    if (mCtx.subHdrCached)
+    {
+        mCtx.subHdrCached = false;
+        mCtx.recordRead -= sizeof(SubRecordHeader) + mCtx.subRecordHeader.dataSize;
+        mCtx.filePos -= sizeof(SubRecordHeader);
+    }
+
     // Make sure we seek to the right place
-    mStream->seekg(mCtx.filePos);
+    //if (reSeek)
+        mStream->seekg(mCtx.filePos);
 }
 
 void Reader::clearCtx()
@@ -96,6 +106,8 @@ void Reader::clearCtx()
    mCtx.fileRead = 0;
    mCtx.fileRead = 0;
    mCtx.recordRead = 0;
+   mCtx.subHdrTypeRead = false;
+   mCtx.subHdrCached = false;
 }
 
 bool Reader::getRecordHeader()
@@ -118,20 +130,39 @@ bool Reader::getRecordHeader()
 
 bool Reader::getSubRecordHeader()
 {
+    if (mCtx.subHdrCached)
+    {
+        mCtx.subHdrCached = false;
+        return true;
+    }
+
     bool result = false;
+
+    //mCtx.filePos = mStream->tellg(); // FIXME: temp testing only
 
     assert(mCtx.recordRead <= mCtx.recordHeader.dataSize && "Read more from the stream than the record size.");
     if (mCtx.recordHeader.dataSize - mCtx.recordRead >= sizeof(SubRecordHeader))
     {
-        result = getExact(mCtx.subRecordHeader);
-        assert (mStream->gcount() == sizeof(mCtx.subRecordHeader));
+        // not happy about it but there are too many instances of existing code that rely on this
+        if (mCtx.subHdrTypeRead)
+        {
+            get(mCtx.subRecordHeader.dataSize);
+            result = (mStream->gcount() == sizeof(mCtx.subRecordHeader.dataSize));
+        }
+        else
+        {
+            result = getExact(mCtx.subRecordHeader);
+            //assert (mStream->gcount() == sizeof(mCtx.subRecordHeader));
+        }
+
+        mCtx.subHdrTypeRead = false;
 
         // NOTE: Fragile code below! Assumes sub-record data will be read or skipped in full.
         //       It aims to avoid updating mCtx.recordRead each time anything is read.
         mCtx.recordRead += (sizeof(SubRecordHeader) + mCtx.subRecordHeader.dataSize);
 
         assert(mCtx.subRecordHeader.typeId > MKTAG('A', 'A', 'A', '0') &&
-               mCtx.subRecordHeader.typeId < MKTAG('Z', 'Z', 'Z', '_') &&
+               mCtx.subRecordHeader.typeId < MKTAG('Z', 'Z', '_', '_') && // "ID__"
                "Unlikely sub-record type detected");
 
         // clamp any overrun (only works if the offending sub-record is the last one)
@@ -145,17 +176,39 @@ bool Reader::getSubRecordHeader()
     return result;
 }
 
+std::uint32_t Reader::getNextSubRecordType()
+{
+    if (!mCtx.subHdrTypeRead && !mCtx.subHdrCached)
+    {
+        // return null if there aren't any nore sub-records
+        if (mCtx.recordHeader.dataSize - mCtx.recordRead < sizeof(SubRecordHeader))
+            return 0;
+
+        // read the sub-record type only
+        get(mCtx.subRecordHeader, 4);
+        mCtx.subHdrTypeRead = true;
+    }
+
+    return mCtx.subRecordHeader.typeId;
+}
+
 void Reader::skipRecordData()
 {
     assert (mCtx.recordRead <= mCtx.recordHeader.dataSize && "Skipping after reading more than available");
-    mStream->ignore(mCtx.recordHeader.dataSize - mCtx.recordRead);
+    std::size_t recordRead = mCtx.recordRead;
+    if (mCtx.subHdrCached)
+    {
+        mCtx.subHdrCached = false;
+        recordRead -= mCtx.subRecordHeader.dataSize;
+    }
+
+    mStream->ignore(mCtx.recordHeader.dataSize - recordRead);
     mCtx.recordRead = mCtx.recordHeader.dataSize; // for getSubRecordHeader()
 }
 
-void Reader::unreadSubRecordHeader()
+void Reader::cacheSubRecordHeader()
 {
-    mStream->seekg(0-sizeof(SubRecordHeader), std::ios_base::cur);
-    mCtx.recordRead -= (sizeof(SubRecordHeader) + mCtx.subRecordHeader.dataSize);
+    mCtx.subHdrCached = true;
 }
 
 [[noreturn]] void Reader::fail(const std::string &msg)

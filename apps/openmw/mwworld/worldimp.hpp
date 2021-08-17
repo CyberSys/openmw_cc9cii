@@ -78,7 +78,7 @@ namespace MWWorld
         private:
             Resource::ResourceSystem* mResourceSystem;
 
-            std::vector<ESM::ESMReader> mEsm;
+            std::vector<ESM::Reader*> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
@@ -205,14 +205,14 @@ namespace MWWorld
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const override;
 
-            void readRecord (ESM::ESMReader& reader, uint32_t type,
+            void readRecord (ESM3::Reader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) override;
 
             CellStore *getExterior (int x, int y) override;
 
             CellStore *getInterior (const std::string& name) override;
 
-            CellStore *getCell (const ESM::CellId& id) override;
+            CellStore *getCell (const ESM3::CellId& id) override;
 
             bool isCellActive(CellStore* cell) const override;
 
@@ -238,7 +238,7 @@ namespace MWWorld
 
             const MWWorld::ESMStore& getStore() const override;
 
-            std::vector<ESM::ESMReader>& getEsmReader() override;
+            std::vector<ESM::Reader*>& getEsmReader() override;
 
             LocalScripts& getLocalScripts() override;
 
@@ -275,7 +275,7 @@ namespace MWWorld
             ///
             /// \note If cell==0, the cell the player is currently in will be used instead to
             /// generate a name.
-            std::string getCellName(const ESM::Cell* cell) const override;
+            std::string getCellName(const ESM3::Cell* cell) const override;
 
             void removeRefScript (MWWorld::RefData *ref) override;
             //< Remove the script attached to ref from mLocalScripts
@@ -291,7 +291,7 @@ namespace MWWorld
             Ptr searchPtrViaActorId (int actorId) override;
             ///< Search is limited to the active cells.
 
-            Ptr searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum) override;
+            Ptr searchPtrViaRefNum (const std::string& id, const ESM3::RefNum& refNum) override;
 
             MWWorld::Ptr findContainer (const MWWorld::ConstPtr& ptr) override;
             ///< Return a pointer to a liveCellRef which contains \a ptr.
@@ -347,10 +347,10 @@ namespace MWWorld
             ///< Move to exterior cell.
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) override;
+            void changeToCell (const ESM3::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) override;
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            const ESM::Cell *getExterior (const std::string& cellName) const override;
+            const ESM3::Cell *getExterior (const std::string& cellName) const override;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
             void markCellAsUnchanged() override;
@@ -430,63 +430,63 @@ namespace MWWorld
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
-            const ESM::Potion *createRecord (const ESM::Potion& record) override;
+            const ESM3::Potion *createRecord (const ESM3::Potion& record) override;
             ///< Create a new record (of type potion) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Spell *createRecord (const ESM::Spell& record) override;
+            const ESM3::Spell *createRecord (const ESM3::Spell& record) override;
             ///< Create a new record (of type spell) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Class *createRecord (const ESM::Class& record) override;
+            const ESM3::Class *createRecord (const ESM3::Class& record) override;
             ///< Create a new record (of type class) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Cell *createRecord (const ESM::Cell& record) override;
+            const ESM3::Cell *createRecord (const ESM3::Cell& record) override;
             ///< Create a new record (of type cell) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::NPC *createRecord(const ESM::NPC &record) override;
+            const ESM3::NPC *createRecord(const ESM3::NPC &record) override;
             ///< Create a new record (of type npc) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Armor *createRecord (const ESM::Armor& record) override;
+            const ESM3::Armor *createRecord (const ESM3::Armor& record) override;
             ///< Create a new record (of type armor) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Weapon *createRecord (const ESM::Weapon& record) override;
+            const ESM3::Weapon *createRecord (const ESM3::Weapon& record) override;
             ///< Create a new record (of type weapon) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Clothing *createRecord (const ESM::Clothing& record) override;
+            const ESM3::Clothing *createRecord (const ESM3::Clothing& record) override;
             ///< Create a new record (of type clothing) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Enchantment *createRecord (const ESM::Enchantment& record) override;
+            const ESM3::Enchantment *createRecord (const ESM3::Enchantment& record) override;
             ///< Create a new record (of type enchantment) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::Book *createRecord (const ESM::Book& record) override;
+            const ESM3::Book *createRecord (const ESM3::Book& record) override;
             ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
-            const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record) override;
+            const ESM3::CreatureLevList *createOverrideRecord (const ESM3::CreatureLevList& record) override;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record) override;
+            const ESM3::ItemLevList *createOverrideRecord (const ESM3::ItemLevList& record) override;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            const ESM::Creature *createOverrideRecord (const ESM::Creature& record) override;
+            const ESM3::Creature *createOverrideRecord (const ESM3::Creature& record) override;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            const ESM::NPC *createOverrideRecord (const ESM::NPC& record) override;
+            const ESM3::NPC *createOverrideRecord (const ESM3::NPC& record) override;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            const ESM::Container *createOverrideRecord (const ESM::Container& record) override;
+            const ESM3::Container *createOverrideRecord (const ESM3::Container& record) override;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
@@ -679,7 +679,7 @@ namespace MWWorld
 
             void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
 
-            void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
+            void explodeSpell(const osg::Vec3f& origin, const ESM3::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
                                       ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
                                       const bool fromProjectile=false) override;
 
@@ -719,7 +719,7 @@ namespace MWWorld
             std::string exportSceneGraph(const MWWorld::Ptr& ptr) override;
 
             /// Preload VFX associated with this effect list
-            void preloadEffects(const ESM::EffectList* effectList) override;
+            void preloadEffects(const ESM3::EffectList* effectList) override;
 
             DetourNavigator::Navigator* getNavigator() const override;
 

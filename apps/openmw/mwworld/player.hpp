@@ -9,14 +9,18 @@
 #include "../mwmechanics/drawstate.hpp"
 #include "../mwmechanics/stat.hpp"
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 #include <components/esm/attr.hpp>
 
 namespace ESM
 {
-    struct NPC;
     class ESMWriter;
-    class ESMReader;
+}
+
+namespace ESM3
+{
+    struct NPC;
+    class Reader;
 }
 
 namespace Loading
@@ -32,7 +36,7 @@ namespace MWWorld
     /// \brief NPC object representing the player and additional player data
     class Player
     {
-        LiveCellRef<ESM::NPC>   mPlayer;
+        LiveCellRef<ESM3::NPC>   mPlayer;
         MWWorld::CellStore      *mCellStore;
         std::string             mSign;
 
@@ -53,7 +57,7 @@ namespace MWWorld
         PreviousItems mPreviousItems;
 
         // Saved stats prior to becoming a werewolf
-        MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
+        MWMechanics::SkillValue mSaveSkills[ESM3::Skill::Length];
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
         bool mAttackingOrSpell;
@@ -61,7 +65,7 @@ namespace MWWorld
 
     public:
 
-        Player(const ESM::NPC *player);
+        Player(const ESM3::NPC *player);
 
         void saveStats();
         void restoreStats();
@@ -77,7 +81,7 @@ namespace MWWorld
         void setLastKnownExteriorPosition (const osg::Vec3f& position) { mLastKnownExteriorPosition = position; }
         osg::Vec3f getLastKnownExteriorPosition() const { return mLastKnownExteriorPosition; }
 
-        void set (const ESM::NPC *player);
+        void set (const ESM3::NPC *player);
 
         void setCell (MWWorld::CellStore *cellStore);
 
@@ -126,7 +130,7 @@ namespace MWWorld
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord (ESM::ESMReader& reader, uint32_t type);
+        bool readRecord (ESM3::Reader& reader, uint32_t type);
 
         int getNewCrimeId();  // get new id for witnesses
         void recordCrimeId(); // record the paid crime id when bounty is 0

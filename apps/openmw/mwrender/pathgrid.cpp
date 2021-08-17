@@ -6,7 +6,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Group>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/pgrd.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/misc/coordinateconverter.hpp>
@@ -103,8 +103,8 @@ void Pathgrid::togglePathgrid()
 void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
-    const ESM::Pathgrid *pathgrid =
-        world->getStore().get<ESM::Pathgrid>().search(*store->getCell());
+    const ESM3::Pathgrid *pathgrid =
+        world->getStore().get<ESM3::Pathgrid>().search(*store->getCell());
     if (!pathgrid) return;
 
     osg::Vec3f cellPathGridPos(0, 0, 0);

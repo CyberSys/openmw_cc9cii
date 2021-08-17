@@ -1504,8 +1504,8 @@ namespace MWRender
         {
             if (isCreature)
             {
-                MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
-                if(ref->mBase->mFlags & ESM::Creature::Bipedal)
+                MWWorld::LiveCellRef<ESM3::Creature> *ref = mPtr.get<ESM3::Creature>();
+                if(ref->mBase->mFlags & ESM3::Creature::Bipedal)
                 {
                     defaultSkeleton = Settings::Manager::getString("xbaseanim", "Models");
                     inject = true;
@@ -1514,16 +1514,16 @@ namespace MWRender
             else
             {
                 inject = true;
-                MWWorld::LiveCellRef<ESM::NPC> *ref = mPtr.get<ESM::NPC>();
+                MWWorld::LiveCellRef<ESM3::NPC> *ref = mPtr.get<ESM3::NPC>();
                 if (!ref->mBase->mModel.empty())
                 {
                     // If NPC has a custom animation model attached, we should inject bones from default skeleton for given race and gender as well
                     // Since it is a quite rare case, there should not be a noticable performance loss
                     // Note: consider that player and werewolves have no custom animation files attached for now
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    const ESM::Race *race = store.get<ESM::Race>().find(ref->mBase->mRace);
+                    const ESM3::Race *race = store.get<ESM3::Race>().find(ref->mBase->mRace);
 
-                    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+                    bool isBeast = (race->mData.mFlags & ESM3::Race::Beast) != 0;
                     bool isFemale = !ref->mBase->isMale();
 
                     defaultSkeleton = SceneUtil::getActorSkeleton(false, isFemale, isBeast, false);
@@ -1594,7 +1594,7 @@ namespace MWRender
         return mObjectRoot.get();
     }
 
-    void Animation::addSpellCastGlow(const ESM::MagicEffect *effect, float glowDuration)
+    void Animation::addSpellCastGlow(const ESM3::MagicEffect *effect, float glowDuration)
     {
         osg::Vec4f glowColor(1,1,1,1);
         glowColor.x() = effect->mData.mRed / 255.f;
@@ -1616,7 +1616,7 @@ namespace MWRender
         }
     }
 
-    void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *esmLight)
+    void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM3::Light *esmLight)
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
@@ -1931,8 +1931,8 @@ namespace MWRender
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
         }
-        if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
-            addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
+        if (ptr.getTypeName() == typeid(ESM3::Light).name() && allowLight)
+            addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM3::Light>()->mBase);
 
         if (!allowLight && mObjectRoot)
         {
@@ -1960,11 +1960,11 @@ namespace MWRender
 
     bool ObjectAnimation::canBeHarvested() const
     {
-        if (mPtr.getTypeName() != typeid(ESM::Container).name())
+        if (mPtr.getTypeName() != typeid(ESM3::Container).name())
             return false;
 
-        const MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
-        if (!(ref->mBase->mFlags & ESM::Container::Organic))
+        const MWWorld::LiveCellRef<ESM3::Container>* ref = mPtr.get<ESM3::Container>();
+        if (!(ref->mBase->mFlags & ESM3::Container::Organic))
             return false;
 
         return SceneUtil::hasUserDescription(mObjectRoot, Constants::HerbalismLabel);

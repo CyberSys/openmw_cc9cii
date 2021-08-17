@@ -2,7 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/luascripts.hpp>
 
@@ -20,32 +20,48 @@ namespace MWLua
             saveLuaBinaryData(esm, event.mEventData);
     }
 
-    void loadEvents(sol::state& lua, ESM::ESMReader& esm, GlobalEventQueue& globalEvents, LocalEventQueue& localEvents,
+    void loadEvents(sol::state& lua, ESM3::Reader& esm, GlobalEventQueue& globalEvents, LocalEventQueue& localEvents,
                     const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer)
     {
-        while (esm.isNextSub("LUAE"))
+        while (esm.getSubRecordHeader())
         {
-            std::string name = esm.getHString();
-            ObjectId dest;
-            dest.load(esm, true);
-            std::string data = loadLuaBinaryData(esm);
-            try
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                data = LuaUtil::serialize(LuaUtil::deserialize(lua, data, serializer), serializer);
+                case ESM3::SUB_LUAE:
+                {
+                    std::string name;
+                    esm.getZString(name);
+
+                    ObjectId dest;
+                    dest.load(esm, true);
+
+                    esm.getSubRecordHeader();
+                    std::string data = loadLuaBinaryData(esm);
+                    try
+                    {
+                        data = LuaUtil::serialize(LuaUtil::deserialize(lua, data, serializer), serializer);
+                    }
+                    catch (std::exception& e)
+                    {
+                        Log(Debug::Error) << "loadEvent: invalid event data: " << e.what();
+                    }
+                    if (dest.isSet())
+                    {
+                        auto it = contentFileMapping.find(dest.mContentFile);
+                        if (it != contentFileMapping.end())
+                            dest.mContentFile = it->second;
+                        localEvents.push_back({dest, std::move(name), std::move(data)});
+                    }
+                    else
+                        globalEvents.push_back({std::move(name), std::move(data)});
+
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData(); // should really fail() here
+                    return;
             }
-            catch (std::exception& e)
-            {
-                Log(Debug::Error) << "loadEvent: invalid event data: " << e.what();
-            }
-            if (dest.isSet())
-            {
-                auto it = contentFileMapping.find(dest.mContentFile);
-                if (it != contentFileMapping.end())
-                    dest.mContentFile = it->second;
-                localEvents.push_back({dest, std::move(name), std::move(data)});
-            }
-            else
-                globalEvents.push_back({std::move(name), std::move(data)});
         }
     }
 

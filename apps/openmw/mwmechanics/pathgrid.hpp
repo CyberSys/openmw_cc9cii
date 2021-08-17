@@ -3,9 +3,9 @@
 
 #include <deque>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/pgrd.hpp>
 
-namespace ESM
+namespace ESM3
 {
     struct Cell;
 }
@@ -24,26 +24,26 @@ namespace MWMechanics
 
             bool load(const MWWorld::CellStore *cell);
 
-            const ESM::Pathgrid* getPathgrid() const;
+            const ESM3::Pathgrid* getPathgrid() const;
 
             // returns true if end point is strongly connected (i.e. reachable
             // from start point) both start and end are pathgrid point indexes
             bool isPointConnected(const int start, const int end) const;
 
             // get neighbouring nodes for index node and put them to "nodes" vector
-            void getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const;
+            void getNeighbouringPoints(const int index, ESM3::Pathgrid::PointList &nodes) const;
 
             // the input parameters are pathgrid point indexes
             // the output list is in local (internal cells) or world (external
             // cells) coordinates
             //
             // NOTE: if start equals end an empty path is returned
-            std::deque<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
+            std::deque<ESM3::Pathgrid::Point> aStarSearch(const int start, const int end) const;
 
         private:
 
-            const ESM::Cell *mCell;
-            const ESM::Pathgrid *mPathgrid;
+            const ESM3::Cell *mCell;
+            const ESM3::Pathgrid *mPathgrid;
 
             struct ConnectedPoint // edge
             {

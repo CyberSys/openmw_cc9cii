@@ -1,8 +1,8 @@
 #include "controlswitch.hpp"
 
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/controlsstate.hpp>
+#include <components/esm3/reader.hpp>
+#include <components/esm3/controlsstate.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -64,7 +64,7 @@ namespace MWInput
 
     void ControlSwitch::write(ESM::ESMWriter& writer, Loading::Listener& /*progress*/)
     {
-        ESM::ControlsState controls;
+        ESM3::ControlsState controls;
         controls.mViewSwitchDisabled = !mSwitches["playerviewswitch"];
         controls.mControlsDisabled = !mSwitches["playercontrols"];
         controls.mJumpingDisabled = !mSwitches["playerjumping"];
@@ -78,9 +78,9 @@ namespace MWInput
         writer.endRecord (ESM::REC_INPU);
     }
 
-    void ControlSwitch::readRecord(ESM::ESMReader& reader, uint32_t type)
+    void ControlSwitch::readRecord(ESM3::Reader& reader, uint32_t type)
     {
-        ESM::ControlsState controls;
+        ESM3::ControlsState controls;
         controls.load(reader);
 
         set("playerviewswitch", !controls.mViewSwitchDisabled);

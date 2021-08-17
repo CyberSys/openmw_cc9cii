@@ -3,7 +3,7 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/stringops.hpp>
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/mgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -38,7 +38,7 @@ namespace MWMechanics
                             rebuild = true;
 
                             // Note: it we expire a Corprus effect, we should remove the whole spell.
-                            if (effectIt->mEffectId == ESM::MagicEffect::Corprus)
+                            if (effectIt->mEffectId == ESM3::MagicEffect::Corprus)
                             {
                                 iter = mSpells.erase (iter);
                                 interrupt = true;
@@ -158,7 +158,7 @@ namespace MWMechanics
         {
             // addSpell() is called with effects for a range.
             // but a spell may have effects with different ranges (e.g. Touch & Target)
-            // so, if we see new effects for same spell assume additional 
+            // so, if we see new effects for same spell assume additional
             // spell effects and add to existing effects of spell
             mergeEffects(params.mEffects, it->second.mEffects);
             it->second = params;
@@ -225,8 +225,8 @@ namespace MWMechanics
             // if spellOnly is true, dispell only spells. Leave potions, enchanted items etc.
             if (spellOnly)
             {
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
-                if (!spell || spell->mData.mType != ESM::Spell::ST_Spell)
+                const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().search(spellId);
+                if (!spell || spell->mData.mType != ESM3::Spell::ST_Spell)
                 {
                     ++it;
                     continue;
@@ -297,7 +297,7 @@ namespace MWMechanics
             for (std::vector<ActiveEffect>::iterator effectIt = iter->second.mEffects.begin();
                  effectIt != iter->second.mEffects.end();++effectIt)
             {
-                if (effectIt->mEffectId == ESM::MagicEffect::Corprus)
+                if (effectIt->mEffectId == ESM3::MagicEffect::Corprus)
                 {
                     hasCorprusEffect = true;
                     break;
@@ -320,12 +320,12 @@ namespace MWMechanics
         mSpellsChanged = true;
     }
 
-    void ActiveSpells::writeState(ESM::ActiveSpells &state) const
+    void ActiveSpells::writeState(ESM3::ActiveSpells &state) const
     {
         for (TContainer::const_iterator it = mSpells.begin(); it != mSpells.end(); ++it)
         {
-            // Stupid copying of almost identical structures. ESM::TimeStamp <-> MWWorld::TimeStamp
-            ESM::ActiveSpells::ActiveSpellParams params;
+            // Stupid copying of almost identical structures. ESM3::TimeStamp <-> MWWorld::TimeStamp
+            ESM3::ActiveSpells::ActiveSpellParams params;
             params.mEffects = it->second.mEffects;
             params.mCasterActorId = it->second.mCasterActorId;
             params.mDisplayName = it->second.mDisplayName;
@@ -334,11 +334,11 @@ namespace MWMechanics
         }
     }
 
-    void ActiveSpells::readState(const ESM::ActiveSpells &state)
+    void ActiveSpells::readState(const ESM3::ActiveSpells &state)
     {
-        for (ESM::ActiveSpells::TContainer::const_iterator it = state.mSpells.begin(); it != state.mSpells.end(); ++it)
+        for (ESM3::ActiveSpells::TContainer::const_iterator it = state.mSpells.begin(); it != state.mSpells.end(); ++it)
         {
-            // Stupid copying of almost identical structures. ESM::TimeStamp <-> MWWorld::TimeStamp
+            // Stupid copying of almost identical structures. ESM3::TimeStamp <-> MWWorld::TimeStamp
             ActiveSpellParams params;
             params.mEffects = it->second.mEffects;
             params.mCasterActorId = it->second.mCasterActorId;

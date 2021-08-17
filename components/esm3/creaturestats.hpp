@@ -11,9 +11,9 @@
 
 #include "../esm/attr.hpp"
 #include "spellstate.hpp"
-#include "../esm/activespells.hpp"
-#include "../esm/magiceffects.hpp"
-#include "../esm/aisequence.hpp"
+#include "activespells.hpp"
+#include "magiceffects.hpp"
+#include "aisequence.hpp"
 
 namespace ESM
 {
@@ -36,14 +36,14 @@ namespace ESM3
         StatState<float> mAttributes[ESM::Attribute::Length];
         StatState<float> mDynamic[3];
 
-        ESM::MagicEffects mMagicEffects;
+        ESM3::MagicEffects mMagicEffects;
 
-        ESM::AiSequence::AiSequence mAiSequence;
+        ESM3::AiSequence::AiSequence mAiSequence;
 
         bool mHasAiSettings;
         StatState<int> mAiSettings[4];
 
-        std::map<ESM::SummonKey, int> mSummonedCreatureMap;
+        std::map<ESM3::SummonKey, int> mSummonedCreatureMap;
         std::vector<int> mSummonGraveyard;
 
         ESM::TimeStamp mTradeTime;
@@ -91,7 +91,7 @@ namespace ESM3
 
         std::map<std::string, CorprusStats> mCorprusSpells;
         SpellState mSpells;
-        ESM::ActiveSpells mActiveSpells;
+        ESM3::ActiveSpells mActiveSpells;
 
         /// Initialize to default state
         void blank();

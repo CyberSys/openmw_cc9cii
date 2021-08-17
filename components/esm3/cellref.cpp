@@ -1,8 +1,8 @@
 #include "cellref.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 
@@ -13,13 +13,14 @@
 
 namespace ESM3
 {
-    std::uint32_t GroundcoverIndex = 0xfffffffe;
+    int GroundcoverIndex = std::numeric_limits<int>::max();
 
-    void RefNum::load (Reader& reader, bool wide, const std::string& tag)
+    void RefNum::load (Reader& reader, bool wide, std::uint32_t tag)
     {
         const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
-        if (ESM::printName(subHdr.typeId) != tag)
-            reader.fail("Expected subrecord " + tag + " but got " + ESM::printName(subHdr.typeId));
+        if (subHdr.typeId != tag)
+            reader.fail("Expected subrecord " + ESM::printName(tag)
+                        + " but got " + ESM::printName(subHdr.typeId));
 
         if (wide)
             reader.get(*this, 8);
@@ -47,16 +48,21 @@ namespace ESM3
         loadData(reader, isDeleted);
     }
 
+    // NOTE: assumes sub-record header was read
     void CellRef::loadId (Reader& reader, bool wideRefNum)
     {
+        // FIXME: NAM0, if occurs, comes before FRMR but the logic below has it coming in between
+        //        FRMR sub-record and its data which is clearly wrong
+        //        (should be moved to Cell::getNextRef())
+#if 0
         // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a
         // marker indicating that the following refs are part of a "temp refs" section. A temp
         // ref is not being tracked by the moved references system.  Its only purpose is a
         // performance optimization for "immovable" things. We don't need this, and it's
         // problematic anyway, because any item can theoretically be moved by a script.
-        if (reader.subRecordHeader().typeId == ESM3::SUB_NAM0)
+        if (reader.getNextSubRecordType() == ESM3::SUB_NAM0 && reader.getSubRecordHeader())
             reader.skipSubRecordData();
-
+#endif
         blank();
 
         mRefNum.load (reader, wideRefNum); // get the reference id for FRMR
@@ -69,7 +75,7 @@ namespace ESM3
         {
             Log(Debug::Warning)
                 << "Warning: got CellRef with empty RefId in "
-                << reader.getName() << " 0x" << std::hex << reader.getFileOffset();
+                << reader.getFileName() << " 0x" << std::hex << reader.getFileOffset();
         }
     }
 
@@ -127,7 +133,7 @@ namespace ESM3
                     break;
                 }
                 default:
-                    //reader.cacheSubName();
+                    reader.cacheSubRecordHeader(); // blech
                     isLoaded = true;
                     break;
             }

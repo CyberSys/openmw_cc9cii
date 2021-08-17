@@ -7,9 +7,9 @@
 #include <set>
 #include <vector>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/spel.hpp>
 
-namespace ESM
+namespace ESM3
 {
     struct SpellState;
 }
@@ -43,12 +43,12 @@ namespace MWMechanics
             SpellList(const std::string& id, int type);
 
             /// Get spell from ID, throws exception if not found
-            static const ESM::Spell* getSpell(const std::string& id);
+            static const ESM3::Spell* getSpell(const std::string& id);
 
-            void add (const ESM::Spell* spell);
+            void add (const ESM3::Spell* spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
-            void remove (const ESM::Spell* spell);
+            void remove (const ESM3::Spell* spell);
 
             void removeAll(const std::vector<std::string>& spells);
 

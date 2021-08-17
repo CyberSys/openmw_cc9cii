@@ -2,11 +2,11 @@
 #define MWGUI_REVIEW_H
 
 #include <components/esm/attr.hpp>
-#include <components/esm/loadclas.hpp>
+#include <components/esm3/clas.hpp>
 #include "windowbase.hpp"
 #include "widgets.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Spell;
 }
@@ -30,7 +30,7 @@ namespace MWGui
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
-        void setClass(const ESM::Class& class_);
+        void setClass(const ESM3::Class& class_);
         void setBirthSign (const std::string &signId);
 
         void setHealth(const MWMechanics::DynamicStat<float>& value);
@@ -40,7 +40,7 @@ namespace MWGui
         void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value);
 
         void configureSkills(const SkillList& major, const SkillList& minor);
-        void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value);
+        void setSkillValue(ESM3::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value);
 
         void onOpen() override;
 
@@ -79,7 +79,7 @@ namespace MWGui
         void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addItem(const ESM::Spell* spell, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        void addItem(const ESM3::Spell* spell, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateSkillArea();
 
         MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
@@ -93,7 +93,7 @@ namespace MWGui
         std::map<int, MWMechanics::SkillValue > mSkillValues;
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         std::string mName, mRaceId, mBirthSignId;
-        ESM::Class mKlass;
+        ESM3::Class mKlass;
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
 
         bool mUpdateSkillArea;

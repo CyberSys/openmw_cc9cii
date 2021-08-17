@@ -4,7 +4,7 @@
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/gmst.hpp>
 #include <components/misc/convert.hpp>
 
 #include "../mwbase/world.hpp"
@@ -167,7 +167,7 @@ namespace MWPhysics
         {
             osg::Vec3f stormDirection = worldData.mStormDirection;
             float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
-            static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fStromWalkMult")->mValue.getFloat();
+            static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fStromWalkMult")->mValue.getFloat();
             velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
         }
 

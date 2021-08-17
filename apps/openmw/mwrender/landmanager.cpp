@@ -18,17 +18,17 @@ LandManager::LandManager(int loadFlags)
     mCache = new CacheType;
 }
 
-osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
+osg::ref_ptr<ESM3Terrain::LandObject> LandManager::getLand(int x, int y)
 {
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(std::make_pair(x,y));
     if (obj)
-        return static_cast<ESMTerrain::LandObject*>(obj.get());
+        return static_cast<ESM3Terrain::LandObject*>(obj.get());
     else
     {
-        const ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(x,y);
+        const ESM3::Land* land = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Land>().search(x,y);
         if (!land)
             return nullptr;
-        osg::ref_ptr<ESMTerrain::LandObject> landObj (new ESMTerrain::LandObject(land, mLoadFlags));
+        osg::ref_ptr<ESM3Terrain::LandObject> landObj (new ESM3Terrain::LandObject(land, mLoadFlags));
         mCache->addEntryToObjectCache(std::make_pair(x,y), landObj.get());
         return landObj;
     }

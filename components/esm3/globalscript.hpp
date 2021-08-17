@@ -23,7 +23,7 @@ namespace ESM3
         std::string mTargetId; // for targeted scripts
         RefNum mTargetRef;
 
-        //void load (Reader& esm);
+        void load (Reader& esm);
         void save (ESM::ESMWriter& esm) const;
     };
 }

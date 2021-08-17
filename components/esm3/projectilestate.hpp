@@ -18,8 +18,8 @@ namespace ESM3
     {
         std::string mId;
 
-        Vector3 mPosition;
-        Quaternion mOrientation;
+        ESM::Vector3 mPosition;
+        ESM::Quaternion mOrientation;
 
         int mActorId;
 
@@ -39,7 +39,7 @@ namespace ESM3
     struct ProjectileState : public BaseProjectileState
     {
         std::string mBowId;
-        Vector3 mVelocity;
+        ESM::Vector3 mVelocity;
         float mAttackStrength;
 
         void load (Reader& esm);

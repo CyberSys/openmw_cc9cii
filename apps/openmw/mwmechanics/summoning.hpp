@@ -5,7 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 #include "magiceffects.hpp"
 
@@ -17,7 +17,7 @@ namespace MWMechanics
 
     std::string getSummonedCreature(int effectId);
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<const ESM::SummonKey, int>& summon);
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<const ESM3::SummonKey, int>& summon);
 
     struct UpdateSummonedCreatures : public EffectSourceVisitor
     {
@@ -34,7 +34,7 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mActor;
 
-        std::set<ESM::SummonKey> mActiveEffects;
+        std::set<ESM3::SummonKey> mActiveEffects;
     };
 
 }

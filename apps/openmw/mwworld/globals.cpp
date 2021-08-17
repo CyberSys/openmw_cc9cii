@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "esmstore.hpp"
@@ -34,20 +34,20 @@ namespace MWWorld
     {
         mVariables.clear();
 
-        const MWWorld::Store<ESM::Global>& globals = store.get<ESM::Global>();
+        const MWWorld::Store<ESM3::Global>& globals = store.get<ESM3::Global>();
 
-        for (const ESM::Global& esmGlobal : globals)
+        for (const ESM3::Global& esmGlobal : globals)
         {
             mVariables.insert (std::make_pair (Misc::StringUtils::lowerCase (esmGlobal.mId), esmGlobal));
         }
     }
 
-    const ESM::Variant& Globals::operator[] (const std::string& name) const
+    const ESM3::Variant& Globals::operator[] (const std::string& name) const
     {
         return find (Misc::StringUtils::lowerCase (name))->second.mValue;
     }
 
-    ESM::Variant& Globals::operator[] (const std::string& name)
+    ESM3::Variant& Globals::operator[] (const std::string& name)
     {
         return find (Misc::StringUtils::lowerCase (name))->second.mValue;
     }
@@ -84,11 +84,11 @@ namespace MWWorld
         }
     }
 
-    bool Globals::readRecord (ESM::ESMReader& reader,  uint32_t type)
+    bool Globals::readRecord (ESM3::Reader& reader,  uint32_t type)
     {
-        if (type==ESM::REC_GLOB)
+        if (type==ESM3::REC_GLOB)
         {
-            ESM::Global global;
+            ESM3::Global global;
             bool isDeleted = false;
 
             // This readRecord() method is used when reading a saved game.

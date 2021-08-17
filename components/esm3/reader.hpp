@@ -6,9 +6,6 @@
 #include <vector>
 #include <sstream>
 
-#include <components/to_utf8/to_utf8.hpp>
-#include <components/files/constrainedfilestream.hpp>
-
 #include "common.hpp"
 #include "tes3.hpp"
 #include "../esm/reader.hpp"
@@ -35,6 +32,10 @@ namespace ESM3
         RecordHeader    recordHeader;     // header of the current record or group being processed
         SubRecordHeader subRecordHeader;  // header of the current sub record being processed
         std::uint32_t   recordRead;       // bytes read from the sub records, incl. the current one
+
+        // for usage patterns mainly in state management
+        bool            subHdrTypeRead;   // if true don't read it again
+        bool            subHdrCached;     // if true don't read it again
     };
 
     class Reader : public ESM::Reader
@@ -70,7 +71,7 @@ namespace ESM3
 
         Reader(Files::IStreamPtr esmStream, const std::string& filename);
         Reader(); // public as ESM3::Land and ESMTool uses it
-        ~Reader() {}
+        ~Reader() { close(); }
 
         void open(const std::string &filename); // FIXME: redundant but ESMTool uses it
         void openRaw(const std::string &filename); // FIXME: should be private but ESMTool uses it
@@ -92,7 +93,8 @@ namespace ESM3
         inline int getFormat() const final { return mHeader.mFormat; };
         inline const std::string getDesc() const final { return mHeader.mData.desc; }
 
-        std::string getName() const { return mCtx.filename; }; // used by ESM::CellRef for debugging
+        // used by ESM3::CellRef and others for debugging
+        inline std::string getFileName() const final { return mCtx.filename; };
         const ESM3::Header& getHeader() const { return mHeader; } // used by ESSImporter
         inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
         inline unsigned int numRecords() const { return mHeader.mData.records; }
@@ -131,7 +133,9 @@ namespace ESM3
 
         // Read x bytes of header. The caller can then decide whether to process or skip the data.
         bool getSubRecordHeader();
-        void unreadSubRecordHeader(); // only used by ESSImporter
+        void cacheSubRecordHeader(); // NOTE: try not to rely on this
+
+        std::uint32_t getNextSubRecordType();
 
         // Skip the data part of a subrecord
         // Note: assumes the header was read correctly and nothing else was read

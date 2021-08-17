@@ -388,8 +388,8 @@ namespace MWGui
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
     {
-        const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        const ESM3::Spell* spell =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find(spellId);
 
         std::string spellName = spell->mName;
         if (spellName != mSpellName && mSpellVisible)
@@ -407,8 +407,8 @@ namespace MWGui
         mSpellBox->setUserString("Spell", spellId);
 
         // use the icon of the first effect
-        const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+        const ESM3::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
@@ -608,7 +608,7 @@ namespace MWGui
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
         mEnemyHealth->setProgressPosition(static_cast<size_t>(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100));
 
-        static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarFade")->mValue.getFloat();
+        static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fNPCHealthBarFade")->mValue.getFloat();
         if (fNPCHealthBarFade > 0.f)
             mEnemyHealth->setAlpha(std::max(0.f, std::min(1.f, mEnemyHealthTimer/fNPCHealthBarFade)));
 
@@ -617,7 +617,7 @@ namespace MWGui
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
     {
         mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
-        mEnemyHealthTimer = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarTime")->mValue.getFloat();
+        mEnemyHealthTimer = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fNPCHealthBarTime")->mValue.getFloat();
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);

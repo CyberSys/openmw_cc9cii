@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 
 #include <components/detournavigator/navmeshtilescache.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 
 #include <algorithm>
 #include <random>
@@ -122,8 +122,8 @@ namespace
         result.mMaxHeight = result.mMinHeight + 1.0;
         result.mShift = osg::Vec3f(distribution(random), distribution(random), distribution(random));
         result.mScale = distribution(random);
-        result.mLength = static_cast<std::uint8_t>(ESM::Land::LAND_SIZE);
-        std::generate_n(std::back_inserter(result.mHeights), ESM::Land::LAND_NUM_VERTS, [&]
+        result.mLength = static_cast<std::uint8_t>(ESM3::Land::LAND_SIZE);
+        std::generate_n(std::back_inserter(result.mHeights), ESM3::Land::LAND_NUM_VERTS, [&]
         {
             return distribution(random);
         });

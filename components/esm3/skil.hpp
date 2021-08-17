@@ -30,6 +30,7 @@ namespace ESM3
 #pragma pack(push, 1)
         struct SKDTstruct
         {
+            // TODO: These used to be signed int - there are existing code that relies on that
             std::uint32_t mAttribute;      // see defs.hpp
             std::uint32_t mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
             float mUseValue[4];            // How much skill improves through use. Meaning

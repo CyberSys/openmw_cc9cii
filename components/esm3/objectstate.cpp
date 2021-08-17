@@ -11,48 +11,67 @@
 //             InventoryState::load() and NpcState::load()
 void ESM3::ObjectState::load (Reader& esm)
 {
-
     mVersion = esm.getFormat();
-#if 0
+
     bool isDeleted;
     mRef.loadData(esm, isDeleted);
 
     mHasLocals = 0;
-    esm.getHNOT (mHasLocals, "HLOC");
-
-    if (mHasLocals)
-        mLocals.load (esm);
-
-    mLuaScripts.load(esm);
-
     mEnabled = 1;
-    esm.getHNOT (mEnabled, "ENAB");
-
     mCount = 1;
-    esm.getHNOT (mCount, "COUN");
-
     mPosition = mRef.mPos;
-    esm.getHNOT (mPosition, "POS_", 24);
-
-    if (esm.isNextSub("LROT"))
-        esm.skipHSub(); // local rotation, no longer used
-
     mFlags = 0;
-    esm.getHNOT (mFlags, "FLAG");
-
-    // obsolete
-    int unused;
-    esm.getHNOT(unused, "LTIM");
-
-    mAnimationState.load(esm);
-
-    // NOTE: mAnimationState.load() will have attempted to read the sub-record header
-    //assert(esm.subRecordHeader().typeId == ESM3::SUB_HCUS && "ObjectState: unexpected sub record found");
-
     // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
     mHasCustomState = true;
-    esm.getHNOT (mHasCustomState, "HCUS");
-#endif
+
+    bool subDataRemaining = false;
+    while (subDataRemaining || esm.getSubRecordHeader())
+    {
+        subDataRemaining = false;
+        const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+        switch (subHdr.typeId)
+        {
+            case ESM3::SUB_HLOC:
+            {
+                esm.get(mHasLocals);
+
+                if (mHasLocals)
+                    subDataRemaining = mLocals.load (esm);
+                break;
+            }
+            case ESM3::SUB_LUAS:
+            {
+                esm.cacheSubRecordHeader();
+                mLuaScripts.load(esm);
+                break;
+            }
+            case ESM3::SUB_ANIS:
+            {
+                esm.cacheSubRecordHeader();
+                mAnimationState.load(esm);
+                break;
+            }
+            case ESM3::SUB_ENAB: esm.get(mEnabled); break;
+            case ESM3::SUB_COUN: esm.get(mCount); break;
+            case ESM3::SUB_FLAG: esm.get(mFlags); break;
+            case ESM3::SUB_HCUS: esm.get(mHasCustomState); break;
+            case ESM3::SUB_POS_:
+            {
+                assert(subHdr.dataSize == 24 || sizeof(mPosition) == 24);
+                esm.get(mPosition);
+                break;
+            }
+            case ESM3::SUB_LROT: // local rotation, no longer used
+            case ESM3::SUB_LTIM: // obsolete, unused
+            {
+                esm.skipSubRecordData();
+                break;
+            }
+            default:
+                esm.cacheSubRecordHeader();
+                return;
+        }
+    }
 }
 
 void ESM3::ObjectState::save (ESM::ESMWriter& esm, bool inInventory) const

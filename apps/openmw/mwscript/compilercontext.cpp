@@ -2,7 +2,7 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/dial.hpp>
 
 #include <components/compiler/locals.hpp>
 
@@ -36,8 +36,8 @@ namespace MWScript
         std::string script;
         bool reference = false;
 
-        if (const ESM::Script *scriptRecord =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (id))
+        if (const ESM3::Script *scriptRecord =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Script>().search (id))
         {
             script = scriptRecord->mId;
         }
@@ -64,27 +64,27 @@ namespace MWScript
             MWBase::Environment::get().getWorld()->getStore();
 
         return
-            store.get<ESM::Activator>().search (name) ||
-            store.get<ESM::Potion>().search (name) ||
-            store.get<ESM::Apparatus>().search (name) ||
-            store.get<ESM::Armor>().search (name) ||
-            store.get<ESM::Book>().search (name) ||
-            store.get<ESM::Clothing>().search (name) ||
-            store.get<ESM::Container>().search (name) ||
-            store.get<ESM::Creature>().search (name) ||
-            store.get<ESM::Door>().search (name) ||
-            store.get<ESM::Ingredient>().search (name) ||
-            store.get<ESM::CreatureLevList>().search (name) ||
-            store.get<ESM::ItemLevList>().search (name) ||
-            store.get<ESM::Light>().search (name) ||
-            store.get<ESM::Lockpick>().search (name) ||
-            store.get<ESM::Miscellaneous>().search (name) ||
-            store.get<ESM::NPC>().search (name) ||
-            store.get<ESM::Probe>().search (name) ||
-            store.get<ESM::Repair>().search (name) ||
-            store.get<ESM::Static>().search (name) ||
-            store.get<ESM::Weapon>().search (name) ||
-            store.get<ESM::Script>().search (name);
+            store.get<ESM3::Activator>().search (name) ||
+            store.get<ESM3::Potion>().search (name) ||
+            store.get<ESM3::Apparatus>().search (name) ||
+            store.get<ESM3::Armor>().search (name) ||
+            store.get<ESM3::Book>().search (name) ||
+            store.get<ESM3::Clothing>().search (name) ||
+            store.get<ESM3::Container>().search (name) ||
+            store.get<ESM3::Creature>().search (name) ||
+            store.get<ESM3::Door>().search (name) ||
+            store.get<ESM3::Ingredient>().search (name) ||
+            store.get<ESM3::CreatureLevList>().search (name) ||
+            store.get<ESM3::ItemLevList>().search (name) ||
+            store.get<ESM3::Light>().search (name) ||
+            store.get<ESM3::Lockpick>().search (name) ||
+            store.get<ESM3::Miscellaneous>().search (name) ||
+            store.get<ESM3::NPC>().search (name) ||
+            store.get<ESM3::Probe>().search (name) ||
+            store.get<ESM3::Repair>().search (name) ||
+            store.get<ESM3::Static>().search (name) ||
+            store.get<ESM3::Weapon>().search (name) ||
+            store.get<ESM3::Script>().search (name);
     }
 
     bool CompilerContext::isJournalId (const std::string& name) const
@@ -92,8 +92,8 @@ namespace MWScript
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        const ESM::Dialogue *topic = store.get<ESM::Dialogue>().search (name);
+        const ESM3::Dialogue *topic = store.get<ESM3::Dialogue>().search (name);
 
-        return topic && topic->mType==ESM::Dialogue::Journal;
+        return topic && topic->mType==ESM3::Dialogue::Journal;
     }
 }

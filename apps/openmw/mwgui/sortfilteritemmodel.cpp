@@ -2,19 +2,19 @@
 
 #include <components/misc/stringops.hpp>
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadmisc.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadench.hpp>
+#include <components/esm3/alch.hpp>
+#include <components/esm3/appa.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/book.hpp>
+#include <components/esm3/clot.hpp>
+#include <components/esm3/ingr.hpp>
+#include <components/esm3/lock.hpp>
+#include <components/esm3/ligh.hpp>
+#include <components/esm3/misc.hpp>
+#include <components/esm3/prob.hpp>
+#include <components/esm3/repa.hpp>
+#include <components/esm3/weap.hpp>
+#include <components/esm3/ench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -31,18 +31,18 @@ namespace
     {
         // this defines the sorting order of types. types that are first in the vector appear before other types.
         std::vector<std::string> mapping;
-        mapping.emplace_back(typeid(ESM::Weapon).name() );
-        mapping.emplace_back(typeid(ESM::Armor).name() );
-        mapping.emplace_back(typeid(ESM::Clothing).name() );
-        mapping.emplace_back(typeid(ESM::Potion).name() );
-        mapping.emplace_back(typeid(ESM::Ingredient).name() );
-        mapping.emplace_back(typeid(ESM::Apparatus).name() );
-        mapping.emplace_back(typeid(ESM::Book).name() );
-        mapping.emplace_back(typeid(ESM::Light).name() );
-        mapping.emplace_back(typeid(ESM::Miscellaneous).name() );
-        mapping.emplace_back(typeid(ESM::Lockpick).name() );
-        mapping.emplace_back(typeid(ESM::Repair).name() );
-        mapping.emplace_back(typeid(ESM::Probe).name() );
+        mapping.emplace_back(typeid(ESM3::Weapon).name() );
+        mapping.emplace_back(typeid(ESM3::Armor).name() );
+        mapping.emplace_back(typeid(ESM3::Clothing).name() );
+        mapping.emplace_back(typeid(ESM3::Potion).name() );
+        mapping.emplace_back(typeid(ESM3::Ingredient).name() );
+        mapping.emplace_back(typeid(ESM3::Apparatus).name() );
+        mapping.emplace_back(typeid(ESM3::Book).name() );
+        mapping.emplace_back(typeid(ESM3::Light).name() );
+        mapping.emplace_back(typeid(ESM3::Miscellaneous).name() );
+        mapping.emplace_back(typeid(ESM3::Lockpick).name() );
+        mapping.emplace_back(typeid(ESM3::Repair).name() );
+        mapping.emplace_back(typeid(ESM3::Probe).name() );
 
         assert( std::find(mapping.begin(), mapping.end(), type1) != mapping.end() );
         assert( std::find(mapping.begin(), mapping.end(), type2) != mapping.end() );
@@ -87,10 +87,10 @@ namespace
 
             if (!leftName.empty())
             {
-                const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(leftName);
+                const ESM3::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Enchantment>().search(leftName);
                 if (ench)
                 {
-                    if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
+                    if (ench->mData.mType == ESM3::Enchantment::ConstantEffect)
                         leftChargePercent = 101;
                     else
                         leftChargePercent = static_cast<int>(left.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
@@ -99,10 +99,10 @@ namespace
 
             if (!rightName.empty())
             {
-                const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(rightName);
+                const ESM3::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Enchantment>().search(rightName);
                 if (ench)
                 {
-                    if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
+                    if (ench->mData.mType == ESM3::Enchantment::ConstantEffect)
                         rightChargePercent = 101;
                     else
                         rightChargePercent = static_cast<int>(right.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
@@ -179,22 +179,22 @@ namespace MWGui
         MWWorld::Ptr base = item.mBase;
 
         int category = 0;
-        if (base.getTypeName() == typeid(ESM::Armor).name()
-                || base.getTypeName() == typeid(ESM::Clothing).name())
+        if (base.getTypeName() == typeid(ESM3::Armor).name()
+                || base.getTypeName() == typeid(ESM3::Clothing).name())
             category = Category_Apparel;
-        else if (base.getTypeName() == typeid(ESM::Weapon).name())
+        else if (base.getTypeName() == typeid(ESM3::Weapon).name())
             category = Category_Weapon;
-        else if (base.getTypeName() == typeid(ESM::Ingredient).name()
-                     || base.getTypeName() == typeid(ESM::Potion).name())
+        else if (base.getTypeName() == typeid(ESM3::Ingredient).name()
+                     || base.getTypeName() == typeid(ESM3::Potion).name())
             category = Category_Magic;
-        else if (base.getTypeName() == typeid(ESM::Miscellaneous).name()
-                 || base.getTypeName() == typeid(ESM::Ingredient).name()
-                 || base.getTypeName() == typeid(ESM::Repair).name()
-                 || base.getTypeName() == typeid(ESM::Lockpick).name()
-                 || base.getTypeName() == typeid(ESM::Light).name()
-                 || base.getTypeName() == typeid(ESM::Apparatus).name()
-                 || base.getTypeName() == typeid(ESM::Book).name()
-                 || base.getTypeName() == typeid(ESM::Probe).name())
+        else if (base.getTypeName() == typeid(ESM3::Miscellaneous).name()
+                 || base.getTypeName() == typeid(ESM3::Ingredient).name()
+                 || base.getTypeName() == typeid(ESM3::Repair).name()
+                 || base.getTypeName() == typeid(ESM3::Lockpick).name()
+                 || base.getTypeName() == typeid(ESM3::Light).name()
+                 || base.getTypeName() == typeid(ESM3::Apparatus).name()
+                 || base.getTypeName() == typeid(ESM3::Book).name()
+                 || base.getTypeName() == typeid(ESM3::Probe).name())
             category = Category_Misc;
 
         if (item.mFlags & ItemStack::Flag_Enchanted)
@@ -205,7 +205,7 @@ namespace MWGui
 
         if (mFilter & Filter_OnlyIngredients)
         {
-            if (base.getTypeName() != typeid(ESM::Ingredient).name())
+            if (base.getTypeName() != typeid(ESM3::Ingredient).name())
                 return false;
 
             if (!mNameFilter.empty() && !mEffectFilter.empty())
@@ -220,7 +220,7 @@ namespace MWGui
             if (!mEffectFilter.empty())
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                const auto alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
+                const auto alchemySkill = player.getClass().getSkill(player, ESM3::Skill::Alchemy);
 
                 const auto effects = MWMechanics::Alchemy::effectsDescription(base, alchemySkill);
 
@@ -238,19 +238,19 @@ namespace MWGui
 
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
-        if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
-                                                     || base.getCellRef().getSoul() == "" || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(base.getCellRef().getSoul())))
+        if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM3::Miscellaneous).name()
+                                                     || base.getCellRef().getSoul() == "" || !MWBase::Environment::get().getWorld()->getStore().get<ESM3::Creature>().search(base.getCellRef().getSoul())))
             return false;
-        if ((mFilter & Filter_OnlyRepairTools) && (base.getTypeName() != typeid(ESM::Repair).name()))
+        if ((mFilter & Filter_OnlyRepairTools) && (base.getTypeName() != typeid(ESM3::Repair).name()))
             return false;
         if ((mFilter & Filter_OnlyEnchantable) && (item.mFlags & ItemStack::Flag_Enchanted
-                                               || (base.getTypeName() != typeid(ESM::Armor).name()
-                                                   && base.getTypeName() != typeid(ESM::Clothing).name()
-                                                   && base.getTypeName() != typeid(ESM::Weapon).name()
-                                                   && base.getTypeName() != typeid(ESM::Book).name())))
+                                               || (base.getTypeName() != typeid(ESM3::Armor).name()
+                                                   && base.getTypeName() != typeid(ESM3::Clothing).name()
+                                                   && base.getTypeName() != typeid(ESM3::Weapon).name()
+                                                   && base.getTypeName() != typeid(ESM3::Book).name())))
             return false;
-        if ((mFilter & Filter_OnlyEnchantable) && base.getTypeName() == typeid(ESM::Book).name()
-                && !base.get<ESM::Book>()->mBase->mData.mIsScroll)
+        if ((mFilter & Filter_OnlyEnchantable) && base.getTypeName() == typeid(ESM3::Book).name()
+                && !base.get<ESM3::Book>()->mBase->mData.mIsScroll)
             return false;
 
         if ((mFilter & Filter_OnlyUsableItems) && base.getClass().getScript(base).empty())
@@ -263,8 +263,8 @@ namespace MWGui
         if ((mFilter & Filter_OnlyRepairable) && (
                     !base.getClass().hasItemHealth(base)
                     || (base.getClass().getItemHealth(base) == base.getClass().getItemMaxHealth(base))
-                    || (base.getTypeName() != typeid(ESM::Weapon).name()
-                        && base.getTypeName() != typeid(ESM::Armor).name())))
+                    || (base.getTypeName() != typeid(ESM3::Weapon).name()
+                        && base.getTypeName() != typeid(ESM3::Armor).name())))
             return false;
 
         if (mFilter & Filter_OnlyRechargable)
@@ -273,7 +273,7 @@ namespace MWGui
                 return false;
 
             std::string enchId = base.getClass().getEnchantment(base);
-            const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
+            const ESM3::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Enchantment>().search(enchId);
             if (!ench)
             {
                 Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId();

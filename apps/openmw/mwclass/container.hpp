@@ -17,8 +17,8 @@ namespace MWClass
     {
         MWWorld::ContainerStore mStore;
     public:
-        ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
-        ContainerCustomData(const ESM::InventoryState& inventory);
+        ContainerCustomData(const ESM3::Container& container, MWWorld::CellStore* cell);
+        ContainerCustomData(const ESM3::InventoryState& inventory);
 
         ContainerCustomData& asContainerCustomData() override;
         const ContainerCustomData& asContainerCustomData() const override;
@@ -74,11 +74,11 @@ namespace MWClass
 
             bool canLock(const MWWorld::ConstPtr &ptr) const override;
 
-            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state)
                 const override;
             ///< Read additional state from \a state into \a ptr.
 
-            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
             static void registerSelf();

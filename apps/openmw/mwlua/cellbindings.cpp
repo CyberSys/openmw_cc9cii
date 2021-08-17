@@ -1,6 +1,6 @@
 #include "luabindings.hpp"
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include "../mwworld/cellstore.hpp"
 
@@ -15,7 +15,7 @@ namespace MWLua
         cellT[sol::meta_function::equal_to] = [](const CellT& a, const CellT& b) { return a.mStore == b.mStore; };
         cellT[sol::meta_function::to_string] = [](const CellT& c)
         {
-            const ESM::Cell* cell = c.mStore->getCell();
+            const ESM3::Cell* cell = c.mStore->getCell();
             std::stringstream res;
             if (cell->isExterior())
                 res << "exterior(" << cell->getGridX() << ", " << cell->getGridY() << ")";
@@ -39,7 +39,7 @@ namespace MWLua
             MWWorld::CellStore* cell = ptr.getCell();
             return cell == c.mStore || (cell->isExterior() && c.mStore->isExterior());
         };
-        
+
         if constexpr (std::is_same_v<CellT, GCell>)
         {  // only for global scripts
             cellT["selectObjects"] = [context](const CellT& cell, const Queries::Query& query)

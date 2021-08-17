@@ -16,7 +16,7 @@ namespace MWWorld
     class Ptr;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct Cell;
     namespace AiSequence
@@ -85,7 +85,7 @@ namespace MWMechanics
             /// Check if package use movement with variable speed
             bool useVariableSpeed() const { return mOptions.mUseVariableSpeed; }
 
-            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
+            virtual void writeState (ESM3::AiSequence::AiSequence& sequence) const {}
 
             /// Simulates the passing of time
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}

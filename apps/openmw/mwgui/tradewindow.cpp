@@ -262,8 +262,8 @@ namespace MWGui
     {
         TradeItemModel* playerItemModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         // were there any items traded at all?
         const std::vector<ItemStack>& playerBought = playerItemModel->getItemsBorrowedToUs();

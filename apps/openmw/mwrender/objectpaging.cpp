@@ -9,7 +9,7 @@
 #include <osg/Material>
 #include <osgUtil/IncrementalCompileOperation>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
@@ -39,11 +39,11 @@ namespace MWRender
     {
         switch (type)
         {
-          case ESM::REC_STAT:
-          case ESM::REC_ACTI:
-          case ESM::REC_DOOR:
+          case ESM3::REC_STAT:
+          case ESM3::REC_ACTI:
+          case ESM3::REC_DOOR:
             return true;
-          case ESM::REC_CONT:
+          case ESM3::REC_CONT:
             return !far;
 
         default:
@@ -55,14 +55,14 @@ namespace MWRender
     {
         switch (type)
         {
-          case ESM::REC_STAT:
-            return store.get<ESM::Static>().searchStatic(id)->mModel;
-          case ESM::REC_ACTI:
-            return store.get<ESM::Activator>().searchStatic(id)->mModel;
-          case ESM::REC_DOOR:
-            return store.get<ESM::Door>().searchStatic(id)->mModel;
-          case ESM::REC_CONT:
-            return store.get<ESM::Container>().searchStatic(id)->mModel;
+          case ESM3::REC_STAT:
+            return store.get<ESM3::Static>().searchStatic(id)->mModel;
+          case ESM3::REC_ACTI:
+            return store.get<ESM3::Activator>().searchStatic(id)->mModel;
+          case ESM3::REC_DOOR:
+            return store.get<ESM3::Door>().searchStatic(id)->mModel;
+          case ESM3::REC_CONT:
+            return store.get<ESM3::Container>().searchStatic(id)->mModel;
           default:
             return std::string();
         }
@@ -262,7 +262,7 @@ namespace MWRender
         RefnumSet(){}
         RefnumSet(const RefnumSet& copy, const osg::CopyOp&) : mRefnums(copy.mRefnums) {}
         META_Object(MWRender, RefnumSet)
-        std::set<ESM::RefNum> mRefnums;
+        std::set<ESM3::RefNum> mRefnums;
     };
 
     class AnalyzeVisitor : public osg::NodeVisitor
@@ -372,8 +372,8 @@ namespace MWRender
     class AddRefnumMarkerVisitor : public osg::NodeVisitor
     {
     public:
-        AddRefnumMarkerVisitor(const ESM::RefNum &refnum) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mRefnum(refnum) {}
-        ESM::RefNum mRefnum;
+        AddRefnumMarkerVisitor(const ESM3::RefNum &refnum) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mRefnum(refnum) {}
+        ESM3::RefNum mRefnum;
         void apply(osg::Geometry &node) override
         {
             osg::ref_ptr<RefnumMarker> marker (new RefnumMarker);
@@ -401,30 +401,30 @@ namespace MWRender
     {
         osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size/2.f), std::floor(center.y() - size/2.f));
 
-        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0)*ESM::Land::REAL_SIZE;
+        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0)*ESM3::Land::REAL_SIZE;
         osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
 
-        std::map<ESM::RefNum, ESM::CellRef> refs;
-        std::vector<ESM::ESMReader> esm;
+        std::map<ESM3::RefNum, ESM3::CellRef> refs;
+        std::vector<ESM3::Reader> esm;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
             {
-                const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
+                const ESM3::Cell* cell = store.get<ESM3::Cell>().searchStatic(cellX, cellY);
                 if (!cell) continue;
                 for (size_t i=0; i<cell->mContextList.size(); ++i)
                 {
                     try
                     {
-                        unsigned int index = cell->mContextList[i].index;
+                        unsigned int index = cell->mContextList[i].modIndex;
                         if (esm.size()<=index)
                             esm.resize(index+1);
                         cell->restore(esm[index], i);
-                        ESM::CellRef ref;
+                        ESM3::CellRef ref;
                         ref.mRefNum.unset();
-                        ESM::MovedCellRef cMRef;
+                        ESM3::MovedCellRef cMRef;
                         cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
                         bool moved = false;
@@ -469,7 +469,7 @@ namespace MWRender
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
         struct InstanceList
         {
-            std::vector<const ESM::CellRef*> mInstances;
+            std::vector<const ESM3::CellRef*> mInstances;
             AnalyzeVisitor::Result mAnalyzeResult;
             bool mNeedCompile = false;
         };
@@ -490,12 +490,12 @@ namespace MWRender
             minSize *= mMinSizeMergeFactor;
         for (const auto& pair : refs)
         {
-            const ESM::CellRef& ref = pair.second;
+            const ESM3::CellRef& ref = pair.second;
 
             osg::Vec3f pos = ref.mPos.asVec3();
             if (size < 1.f)
             {
-                osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
+                osg::Vec3f cellPos = pos / ESM3::Land::REAL_SIZE;
                 if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
                  || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (maxBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
                     continue;
@@ -518,7 +518,7 @@ namespace MWRender
             if (model.empty()) continue;
             model = "meshes/" + model;
 
-            if (activeGrid && type != ESM::REC_STAT)
+            if (activeGrid && type != ESM3::REC_STAT)
             {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
                 std::string kfname = Misc::StringUtils::lowerCase(model);
@@ -591,7 +591,7 @@ namespace MWRender
             unsigned int numinstances = 0;
             for (auto cref : pair.second.mInstances)
             {
-                const ESM::CellRef& ref = *cref;
+                const ESM3::CellRef& ref = *cref;
                 osg::Vec3f pos = ref.mPos.asVec3();
 
                 if (!activeGrid && minSizeMerged != minSize && cnode->getBound().radius2() * cref->mScale*cref->mScale < (viewPoint-pos).length2()*minSizeMerged*minSizeMerged)
@@ -711,7 +711,7 @@ namespace MWRender
         bool intersects(ChunkId id, osg::Vec3f pos)
         {
             if (mActiveGridOnly && !std::get<2>(id)) return false;
-            pos /= ESM::Land::REAL_SIZE;
+            pos /= ESM3::Land::REAL_SIZE;
             clampToCell(pos);
             osg::Vec2f center = std::get<0>(id);
             float halfSize = std::get<1>(id)/2;
@@ -732,7 +732,7 @@ namespace MWRender
         bool mActiveGridOnly = false;
     };
 
-    bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
+    bool ObjectPaging::enableObject(int type, const ESM3::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
     {
         if (!typeFilter(type, false))
             return false;
@@ -754,7 +754,7 @@ namespace MWRender
         return true;
     }
 
-    bool ObjectPaging::blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell)
+    bool ObjectPaging::blacklistObject(int type, const ESM3::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell)
     {
         if (!typeFilter(type, false))
             return false;
@@ -802,7 +802,7 @@ namespace MWRender
 
     struct GetRefnumsFunctor
     {
-        GetRefnumsFunctor(std::set<ESM::RefNum>& output) : mOutput(output) {}
+        GetRefnumsFunctor(std::set<ESM3::RefNum>& output) : mOutput(output) {}
         void operator()(MWRender::ChunkId chunkId, osg::Object* obj)
         {
             if (!std::get<2>(chunkId)) return;
@@ -819,10 +819,10 @@ namespace MWRender
             }
         }
         osg::Vec4i mActiveGrid;
-        std::set<ESM::RefNum>& mOutput;
+        std::set<ESM3::RefNum>& mOutput;
     };
 
-    void ObjectPaging::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    void ObjectPaging::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM3::RefNum> &out)
     {
         GetRefnumsFunctor grf(out);
         grf.mActiveGrid = activeGrid;

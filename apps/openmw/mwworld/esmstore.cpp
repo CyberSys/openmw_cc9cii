@@ -7,7 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/misc/algorithm.hpp>
 
@@ -17,23 +17,23 @@ namespace
 {
     struct Ref
     {
-        ESM::RefNum mRefNum;
+        ESM3::RefNum mRefNum;
         std::size_t mRefID;
 
-        Ref(ESM::RefNum refNum, std::size_t refID) : mRefNum(refNum), mRefID(refID) {}
+        Ref(ESM3::RefNum refNum, std::size_t refID) : mRefNum(refNum), mRefID(refID) {}
     };
 
     constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
 
-    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM::ESMReader>& readers)
+    void readRefs(const ESM3::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, std::vector<ESM3::Reader>& readers)
     {
         for (size_t i = 0; i < cell.mContextList.size(); i++)
         {
-            size_t index = cell.mContextList[i].index;
+            size_t index = cell.mContextList[i].modIndex;
             if (readers.size() <= index)
                 readers.resize(index + 1);
             cell.restore(readers[index], i);
-            ESM::CellRef ref;
+            ESM3::CellRef ref;
             ref.mRefNum.unset();
             bool deleted = false;
             while(cell.getNextRef(readers[index], ref, deleted))
@@ -59,7 +59,7 @@ namespace
         }
     }
 
-    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const std::map<std::string, ESM::NPC>& npcs)
+    std::vector<ESM3::NPC> getNPCsToReplace(const MWWorld::Store<ESM3::Faction>& factions, const MWWorld::Store<ESM3::Class>& classes, const std::map<std::string, ESM3::NPC>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         std::string defaultCls;
@@ -71,17 +71,17 @@ namespace
 
         // Validate NPCs for non-existing class and faction.
         // We will replace invalid entries by fixed ones
-        std::vector<ESM::NPC> npcsToReplace;
+        std::vector<ESM3::NPC> npcsToReplace;
 
         for (const auto& npcIter : npcs)
         {
-            ESM::NPC npc = npcIter.second;
+            ESM3::NPC npc = npcIter.second;
             bool changed = false;
 
             const std::string npcFaction = npc.mFaction;
             if (!npcFaction.empty())
             {
-                const ESM::Faction *fact = factions.search(npcFaction);
+                const ESM3::Faction *fact = factions.search(npcFaction);
                 if (!fact)
                 {
                     Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '" << npc.mFaction << "', ignoring it.";
@@ -94,7 +94,7 @@ namespace
             std::string npcClass = npc.mClass;
             if (!npcClass.empty())
             {
-                const ESM::Class *cls = classes.search(npcClass);
+                const ESM3::Class *cls = classes.search(npcClass);
                 if (!cls)
                 {
                     Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
@@ -113,7 +113,7 @@ namespace
     // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no longer exists however.
     // So instead of removing the item altogether, we're only removing the script.
     template<class T>
-    void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, std::map<std::string, T>& items)
+    void removeMissingScripts(const MWWorld::Store<ESM3::Script>& scripts, std::map<std::string, T>& items)
     {
         for(auto& [id, item] : items)
         {
@@ -131,42 +131,48 @@ namespace MWWorld
 
 static bool isCacheableRecord(int id)
 {
-    if (id == ESM::REC_ACTI || id == ESM::REC_ALCH || id == ESM::REC_APPA || id == ESM::REC_ARMO ||
-        id == ESM::REC_BOOK || id == ESM::REC_CLOT || id == ESM::REC_CONT || id == ESM::REC_CREA ||
-        id == ESM::REC_DOOR || id == ESM::REC_INGR || id == ESM::REC_LEVC || id == ESM::REC_LEVI ||
-        id == ESM::REC_LIGH || id == ESM::REC_LOCK || id == ESM::REC_MISC || id == ESM::REC_NPC_ ||
-        id == ESM::REC_PROB || id == ESM::REC_REPA || id == ESM::REC_STAT || id == ESM::REC_WEAP ||
-        id == ESM::REC_BODY)
+    if (id == ESM3::REC_ACTI || id == ESM3::REC_ALCH || id == ESM3::REC_APPA || id == ESM3::REC_ARMO ||
+        id == ESM3::REC_BOOK || id == ESM3::REC_CLOT || id == ESM3::REC_CONT || id == ESM3::REC_CREA ||
+        id == ESM3::REC_DOOR || id == ESM3::REC_INGR || id == ESM3::REC_LEVC || id == ESM3::REC_LEVI ||
+        id == ESM3::REC_LIGH || id == ESM3::REC_LOCK || id == ESM3::REC_MISC || id == ESM3::REC_NPC_ ||
+        id == ESM3::REC_PROB || id == ESM3::REC_REPA || id == ESM3::REC_STAT || id == ESM3::REC_WEAP ||
+        id == ESM3::REC_BODY)
     {
         return true;
     }
     return false;
 }
 
-void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
+void ESMStore::load(ESM::Reader &esm, Loading::Listener* listener)
 {
     listener->setProgressRange(1000);
 
-    ESM::Dialogue *dialogue = nullptr;
+    // FIXME: add ESM4 code here
+
+    // NOTE: everything below uses ESM3::Reader
+    // FIXME: dynamic_cast is probably safer
+    ESM3::Reader& reader = static_cast<ESM3::Reader&>(esm);
+
+    ESM3::Dialogue *dialogue = nullptr;
 
     // Land texture loading needs to use a separate internal store for each plugin.
     // We set the number of plugins here to avoid continual resizes during loading,
     // and so we can properly verify if valid plugin indices are being passed to the
     // LandTexture Store retrieval methods.
-    mLandTextures.resize(esm.getGlobalReaderList()->size());
+    mLandTextures.resize(esm.getGlobalReaderList()->size()); // FIXME: need to change the logic here - we don't need all content files for land textures
 
     /// \todo Move this to somewhere else. ESMReader?
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty accelerate
     //  refnumber mangling, as required for handling moved references.
-    const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
-    std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
+    const std::vector<ESM::MasterData> &masters = esm.getGameFiles();
+    std::vector<ESM::Reader*> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
-        const ESM::Header::MasterData &mast = masters[j];
+        const ESM::MasterData &mast = masters[j];
         std::string fname = mast.name;
         int index = ~0;
-        for (int i = 0; i < esm.getIndex(); i++) {
-            const std::string candidate = allPlugins->at(i).getContext().filename;
+        for (unsigned int i = 0; i < reader.getModIndex(); i++) {
+            const std::string candidate = allPlugins->at(i)->getFileName();
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
@@ -176,61 +182,61 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         if (index == (int)~0) {
             // Tried to load a parent file that has not been loaded yet. This is bad,
             //  the launcher should have taken care of this.
-            std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
+            std::string fstring = "File " + esm.getFileName() + " asks for parent file " + masters[j].name
                 + ", but it has not been loaded yet. Please check your load order.";
-            esm.fail(fstring);
+            reader.fail(fstring);
         }
-        esm.addParentFileIndex(index);
+        reader.addParentFileIndex(index);
     }
 
     // Loop through all records
     while(esm.hasMoreRecs())
     {
-        ESM::NAME n = esm.getRecName();
-        esm.getRecHeader();
+        reader.getRecordHeader();
+        std::uint32_t typeId = reader.hdr().typeId;
 
         // Look up the record type.
-        std::map<int, StoreBase *>::iterator it = mStores.find(n.intval);
+        std::map<int, StoreBase *>::iterator it = mStores.find(typeId);
 
         if (it == mStores.end()) {
-            if (n.intval == ESM::REC_INFO) {
+            if (typeId == ESM3::REC_INFO) {
                 if (dialogue)
                 {
-                    dialogue->readInfo(esm, esm.getIndex() != 0);
+                    dialogue->readInfo(reader, reader.getModIndex() != 0);
                 }
                 else
                 {
                     Log(Debug::Error) << "Error: info record without dialog";
-                    esm.skipRecord();
+                    reader.skipRecordData();
                 }
-            } else if (n.intval == ESM::REC_MGEF) {
-                mMagicEffects.load (esm);
-            } else if (n.intval == ESM::REC_SKIL) {
-                mSkills.load (esm);
+            } else if (typeId == ESM::REC_MGEF) {
+                mMagicEffects.load (reader);
+            } else if (typeId == ESM::REC_SKIL) {
+                mSkills.load (reader);
             }
-            else if (n.intval==ESM::REC_FILT || n.intval == ESM::REC_DBGP)
+            else if (typeId==ESM3::REC_FILT || typeId == ESM3::REC_DBGP)
             {
                 // ignore project file only records
-                esm.skipRecord();
+                reader.skipRecordData();
             }
             else {
-                throw std::runtime_error("Unknown record: " + n.toString());
+                throw std::runtime_error("Unknown record: " + ESM::printName(typeId));
             }
         } else {
-            RecordId id = it->second->load(esm);
+            RecordId id = it->second->load(reader);
             if (id.mIsDeleted)
             {
                 it->second->eraseStatic(id.mId);
                 continue;
             }
 
-            if (n.intval==ESM::REC_DIAL) {
-                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id.mId));
+            if (typeId == ESM3::REC_DIAL) {
+                dialogue = const_cast<ESM3::Dialogue*>(mDialogs.find(id.mId));
             } else {
                 dialogue = nullptr;
             }
         }
-        listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
+        listener->setProgress(static_cast<size_t>(reader.getFileOffset() / (float)reader.getFileSize() * 1000));
     }
 }
 
@@ -273,7 +279,7 @@ void ESMStore::countRecords()
         return;
     std::vector<Ref> refs;
     std::vector<std::string> refIDs;
-    std::vector<ESM::ESMReader> readers;
+    std::vector<ESM3::Reader> readers;
     for(auto it = mCells.intBegin(); it != mCells.intEnd(); ++it)
         readRefs(*it, refs, refIDs, readers);
     for(auto it = mCells.extBegin(); it != mCells.extEnd(); ++it)
@@ -304,17 +310,17 @@ int ESMStore::getRefCount(const std::string& id) const
 
 void ESMStore::validate()
 {
-    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(mFactions, mClasses, mNpcs.mStatic);
+    std::vector<ESM3::NPC> npcsToReplace = getNPCsToReplace(mFactions, mClasses, mNpcs.mStatic);
 
-    for (const ESM::NPC &npc : npcsToReplace)
+    for (const ESM3::NPC &npc : npcsToReplace)
     {
         mNpcs.eraseStatic(npc.mId);
         mNpcs.insertStatic(npc);
     }
 
     // Validate spell effects for invalid arguments
-    std::vector<ESM::Spell> spellsToReplace;
-    for (ESM::Spell spell : mSpells)
+    std::vector<ESM3::Spell> spellsToReplace;
+    for (ESM3::Spell spell : mSpells)
     {
         if (spell.mEffects.mList.empty())
             continue;
@@ -323,7 +329,7 @@ void ESMStore::validate()
         auto iter = spell.mEffects.mList.begin();
         while (iter != spell.mEffects.mList.end())
         {
-            const ESM::MagicEffect* mgef = mMagicEffects.search(iter->mEffectID);
+            const ESM3::MagicEffect* mgef = mMagicEffects.search(iter->mEffectID);
             if (!mgef)
             {
                 Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an invalid effect (index " << iter->mEffectID << ") present. Dropping the effect.";
@@ -332,22 +338,22 @@ void ESMStore::validate()
                 continue;
             }
 
-            if (mgef->mData.mFlags & ESM::MagicEffect::TargetSkill)
+            if (mgef->mData.mFlags & ESM3::MagicEffect::TargetSkill)
             {
                 if (iter->mAttribute != -1)
                 {
                     iter->mAttribute = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
+                    Log(Debug::Verbose) << ESM3::MagicEffect::effectIdToString(iter->mEffectID) <<
                         " effect of spell '" << spell.mId << "' has an attribute argument present. Dropping the argument.";
                     changed = true;
                 }
             }
-            else if (mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+            else if (mgef->mData.mFlags & ESM3::MagicEffect::TargetAttribute)
             {
                 if (iter->mSkill != -1)
                 {
                     iter->mSkill = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
+                    Log(Debug::Verbose) << ESM3::MagicEffect::effectIdToString(iter->mEffectID) <<
                         " effect of spell '" << spell.mId << "' has a skill argument present. Dropping the argument.";
                     changed = true;
                 }
@@ -356,7 +362,7 @@ void ESMStore::validate()
             {
                 iter->mSkill = -1;
                 iter->mAttribute = -1;
-                Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
+                Log(Debug::Verbose) << ESM3::MagicEffect::effectIdToString(iter->mEffectID) <<
                     " effect of spell '" << spell.mId << "' has argument(s) present. Dropping the argument(s).";
                 changed = true;
             }
@@ -368,7 +374,7 @@ void ESMStore::validate()
             spellsToReplace.emplace_back(spell);
     }
 
-    for (const ESM::Spell &spell : spellsToReplace)
+    for (const ESM3::Spell &spell : spellsToReplace)
     {
         mSpells.eraseStatic(spell.mId);
         mSpells.insertStatic(spell);
@@ -377,9 +383,9 @@ void ESMStore::validate()
 
 void ESMStore::validateDynamic()
 {
-    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(mFactions, mClasses, mNpcs.mDynamic);
+    std::vector<ESM3::NPC> npcsToReplace = getNPCsToReplace(mFactions, mClasses, mNpcs.mDynamic);
 
-    for (const ESM::NPC &npc : npcsToReplace)
+    for (const ESM3::NPC &npc : npcsToReplace)
         mNpcs.insert(npc);
 
     removeMissingScripts(mScripts, mArmors.mDynamic);
@@ -451,31 +457,33 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         mContainers.write (writer, progress);
     }
 
-    bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
+    bool ESMStore::readRecord (ESM3::Reader& reader, uint32_t type)
     {
         switch (type)
         {
-            case ESM::REC_ALCH:
-            case ESM::REC_ARMO:
-            case ESM::REC_BOOK:
-            case ESM::REC_CLAS:
-            case ESM::REC_CLOT:
-            case ESM::REC_ENCH:
-            case ESM::REC_SPEL:
-            case ESM::REC_WEAP:
-            case ESM::REC_LEVI:
-            case ESM::REC_LEVC:
+            case ESM3::REC_ALCH:
+            case ESM3::REC_ARMO:
+            case ESM3::REC_BOOK:
+            case ESM3::REC_CLAS:
+            case ESM3::REC_CLOT:
+            case ESM3::REC_ENCH:
+            case ESM3::REC_SPEL:
+            case ESM3::REC_WEAP:
+            case ESM3::REC_LEVI:
+            case ESM3::REC_LEVC:
                 mStores[type]->read (reader);
                 return true;
-            case ESM::REC_NPC_:
-            case ESM::REC_CREA:
-            case ESM::REC_CONT:
+
+            case ESM3::REC_NPC_:
+            case ESM3::REC_CREA:
+            case ESM3::REC_CONT:
                 mStores[type]->read (reader, true);
                 return true;
 
             case ESM::REC_DYNA:
-                reader.getSubNameIs("COUN");
-                reader.getHT(mDynamicCount);
+                reader.getSubRecordHeader();
+                assert(reader.subRecordHeader().typeId == ESM3::SUB_COUN);
+                reader.get(mDynamicCount);
                 return true;
 
             default:
@@ -488,7 +496,7 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     {
         setUp();
 
-        const ESM::NPC *player = mNpcs.find ("player");
+        const ESM3::NPC *player = mNpcs.find ("player");
 
         if (!mRaces.find (player->mRace) ||
             !mClasses.find (player->mClass))

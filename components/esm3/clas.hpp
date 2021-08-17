@@ -59,6 +59,7 @@ struct Class
     static const char *sGmstSpecializationIds[3];
 
 #pragma pack(push, 1)
+    // TODO: These used to be signed int - there are existing code that relies on that
     struct CLDTstruct
     {
         std::uint32_t mAttribute[2];   // Attributes that get class bonus

@@ -3,7 +3,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/globalscript.hpp>
+#include <components/esm3/globalscript.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -16,11 +16,11 @@
 
 namespace
 {
-    struct ScriptCreatingVisitor : public boost::static_visitor<ESM::GlobalScript>
+    struct ScriptCreatingVisitor : public boost::static_visitor<ESM3::GlobalScript>
     {
-        ESM::GlobalScript operator()(const MWWorld::Ptr &ptr) const
+        ESM3::GlobalScript operator()(const MWWorld::Ptr &ptr) const
         {
-            ESM::GlobalScript script;
+            ESM3::GlobalScript script;
             script.mTargetRef.unset();
             script.mRunning = false;
             if (!ptr.isEmpty())
@@ -36,9 +36,9 @@ namespace
             return script;
         }
 
-        ESM::GlobalScript operator()(const std::pair<ESM::RefNum, std::string> &pair) const
+        ESM3::GlobalScript operator()(const std::pair<ESM3::RefNum, std::string> &pair) const
         {
-            ESM::GlobalScript script;
+            ESM3::GlobalScript script;
             script.mTargetId = pair.second;
             script.mTargetRef = pair.first;
             script.mRunning = false;
@@ -53,7 +53,7 @@ namespace
             return &ptr;
         }
 
-        const MWWorld::Ptr* operator()(const std::pair<ESM::RefNum, std::string> &pair) const
+        const MWWorld::Ptr* operator()(const std::pair<ESM3::RefNum, std::string> &pair) const
         {
             return nullptr;
         }
@@ -66,7 +66,7 @@ namespace
             return ptr;
         }
 
-        MWWorld::Ptr operator()(const std::pair<ESM::RefNum, std::string> &pair) const
+        MWWorld::Ptr operator()(const std::pair<ESM3::RefNum, std::string> &pair) const
         {
             if (pair.second.empty())
                 return MWWorld::Ptr();
@@ -87,7 +87,7 @@ namespace
             return ptr == mPtr;
         }
 
-        bool operator()(const std::pair<ESM::RefNum, std::string> &pair) const
+        bool operator()(const std::pair<ESM3::RefNum, std::string> &pair) const
         {
             return false;
         }
@@ -102,7 +102,7 @@ namespace
             return ptr.mRef->mRef.getRefId();
         }
 
-        std::string operator()(const std::pair<ESM::RefNum, std::string>& pair) const
+        std::string operator()(const std::pair<ESM3::RefNum, std::string>& pair) const
         {
             return pair.second;
         }
@@ -141,7 +141,7 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().search(name))
+            if (const ESM3::Script *script = mStore.get<ESM3::Script>().search(name))
             {
                 auto desc = std::make_shared<GlobalScriptDesc>();
                 MWWorld::Ptr ptr = target;
@@ -206,9 +206,9 @@ namespace MWScript
 
         scripts.emplace_back("main");
 
-        for (MWWorld::Store<ESM::StartScript>::iterator iter =
-            mStore.get<ESM::StartScript>().begin();
-            iter != mStore.get<ESM::StartScript>().end(); ++iter)
+        for (MWWorld::Store<ESM3::StartScript>::iterator iter =
+            mStore.get<ESM3::StartScript>().begin();
+            iter != mStore.get<ESM3::StartScript>().end(); ++iter)
         {
             scripts.push_back (iter->mId);
         }
@@ -239,7 +239,7 @@ namespace MWScript
     {
         for (const auto& iter : mScripts)
         {
-            ESM::GlobalScript script = boost::apply_visitor (ScriptCreatingVisitor(), iter.second->mTarget);
+            ESM3::GlobalScript script = boost::apply_visitor (ScriptCreatingVisitor(), iter.second->mTarget);
 
             script.mId = iter.first;
 
@@ -253,11 +253,11 @@ namespace MWScript
         }
     }
 
-    bool GlobalScripts::readRecord (ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
+    bool GlobalScripts::readRecord (ESM3::Reader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
     {
         if (type==ESM::REC_GSCR)
         {
-            ESM::GlobalScript script;
+            ESM3::GlobalScript script;
             script.load (reader);
 
             if (script.mTargetRef.hasContentFile())
@@ -271,7 +271,7 @@ namespace MWScript
 
             if (iter==mScripts.end())
             {
-                if (const ESM::Script *scriptRecord = mStore.get<ESM::Script>().search (script.mId))
+                if (const ESM3::Script *scriptRecord = mStore.get<ESM3::Script>().search (script.mId))
                 {
                     try
                     {
@@ -313,7 +313,7 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            const ESM::Script *script = mStore.get<ESM::Script>().find (name);
+            const ESM3::Script *script = mStore.get<ESM3::Script>().find (name);
 
             auto desc = std::make_shared<GlobalScriptDesc>();
             desc->mLocals.configure (*script);

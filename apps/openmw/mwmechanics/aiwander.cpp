@@ -4,7 +4,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
@@ -452,7 +452,7 @@ namespace MWMechanics
     {
         const osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
         auto cell = actor.getCell()->getCell();
-        for (const ESM::Pathgrid::Point& node : storage.mAllowedNodes)
+        for (const ESM3::Pathgrid::Point& node : storage.mAllowedNodes)
         {
             osg::Vec3f point(node.mX, node.mY, node.mZ);
             Misc::CoordinateConverter(cell).toWorld(point);
@@ -548,7 +548,7 @@ namespace MWMechanics
     void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {
         unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size());
-        ESM::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
+        ESM3::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
 
         ToWorldCoordinates(dest, actor.getCell()->getCell());
 
@@ -565,7 +565,7 @@ namespace MWMechanics
             mHasDestination = true;
             mUsePathgrid = true;
             // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
-            ESM::Pathgrid::Point temp = storage.mAllowedNodes[randNode];
+            ESM3::Pathgrid::Point temp = storage.mAllowedNodes[randNode];
             storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);
             // check if mCurrentNode was taken out of mAllowedNodes
             if (storage.mTrimCurrentNode && storage.mAllowedNodes.size() > 1)
@@ -581,12 +581,12 @@ namespace MWMechanics
             storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);
     }
 
-    void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
+    void AiWander::ToWorldCoordinates(ESM3::Pathgrid::Point& point, const ESM3::Cell * cell)
     {
         Misc::CoordinateConverter(cell).toWorld(point);
     }
 
-    void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
+    void AiWander::trimAllowedNodes(std::vector<ESM3::Pathgrid::Point>& nodes,
                                     const PathFinder& pathfinder)
     {
         // TODO: how to add these back in once the door opens?
@@ -654,7 +654,7 @@ namespace MWMechanics
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
             static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
+                .get<ESM3::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
 
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
             unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
@@ -682,8 +682,8 @@ namespace MWMechanics
             return;
 
         int index = Misc::Rng::rollDice(storage.mAllowedNodes.size());
-        ESM::Pathgrid::Point dest = storage.mAllowedNodes[index];
-        ESM::Pathgrid::Point worldDest = dest;
+        ESM3::Pathgrid::Point dest = storage.mAllowedNodes[index];
+        ESM3::Pathgrid::Point worldDest = dest;
         ToWorldCoordinates(worldDest, actor.getCell()->getCell());
 
         bool isPathGridOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::makeOsgVec3(worldDest), 60);
@@ -691,7 +691,7 @@ namespace MWMechanics
         // add offset only if the selected pathgrid is occupied by another actor
         if (isPathGridOccupied)
         {
-            ESM::Pathgrid::PointList points;
+            ESM3::Pathgrid::PointList points;
             getNeighbouringNodes(dest, actor.getCell(), points);
 
             // there are no neighbouring nodes, nowhere to move
@@ -704,7 +704,7 @@ namespace MWMechanics
             for (int i = 0; i < initialSize; i++)
             {
                 int randomIndex = Misc::Rng::rollDice(points.size());
-                ESM::Pathgrid::Point connDest = points[randomIndex];
+                ESM3::Pathgrid::Point connDest = points[randomIndex];
 
                 // add an offset towards random neighboring node
                 osg::Vec3f dir = PathFinder::makeOsgVec3(connDest) - PathFinder::makeOsgVec3(dest);
@@ -749,21 +749,21 @@ namespace MWMechanics
         actor.getClass().adjustPosition(actor, false);
     }
 
-    void AiWander::getNeighbouringNodes(ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
+    void AiWander::getNeighbouringNodes(ESM3::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM3::Pathgrid::PointList& points)
     {
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
+        const ESM3::Pathgrid *pathgrid =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Pathgrid>().search(*currentCell->getCell());
 
         int index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
 
         getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
     }
 
-    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM3::Cell* cell, AiWanderStorage& storage)
     {
         // infrequently used, therefore no benefit in caching it as a member
-        const ESM::Pathgrid *
-            pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
+        const ESM3::Pathgrid *
+            pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Pathgrid>().search(*cell);
         const MWWorld::CellStore* cellStore = actor.getCell();
 
         storage.mAllowedNodes.clear();
@@ -820,7 +820,7 @@ namespace MWMechanics
     // additional points for NPC to wander to are:
     // 1. NPC's initial location
     // 2. Partway along the path between the point and its connected points.
-    void AiWander::AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage)
+    void AiWander::AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM3::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage)
     {
         storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(npcPos));
         for (auto& edge : pathGrid->mEdges)
@@ -832,7 +832,7 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage)
+    void AiWander::AddPointBetweenPathGridPoints(const ESM3::Pathgrid::Point& start, const ESM3::Pathgrid::Point& end, AiWanderStorage& storage)
     {
         osg::Vec3f vectorStart = PathFinder::makeOsgVec3(start);
         osg::Vec3f delta = PathFinder::makeOsgVec3(end) - vectorStart;
@@ -865,7 +865,7 @@ namespace MWMechanics
         storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + index);
     }
 
-    void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiWander::writeState(ESM3::AiSequence::AiSequence &sequence) const
     {
         float remainingDuration;
         if (mRemainingDuration > 0 && mRemainingDuration < 24)
@@ -873,7 +873,7 @@ namespace MWMechanics
         else
             remainingDuration = mDuration;
 
-        std::unique_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
+        std::unique_ptr<ESM3::AiSequence::AiWander> wander(new ESM3::AiSequence::AiWander());
         wander->mData.mDistance = mDistance;
         wander->mData.mDuration = mDuration;
         wander->mData.mTimeOfDay = mTimeOfDay;
@@ -886,13 +886,13 @@ namespace MWMechanics
         if (mStoredInitialActorPosition)
             wander->mInitialActorPosition = mInitialActorPosition;
 
-        ESM::AiSequence::AiPackageContainer package;
-        package.mType = ESM::AiSequence::Ai_Wander;
+        ESM3::AiSequence::AiPackageContainer package;
+        package.mType = ESM3::AiSequence::Ai_Wander;
         package.mPackage = wander.release();
         sequence.mPackages.push_back(package);
     }
 
-    AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
+    AiWander::AiWander (const ESM3::AiSequence::AiWander* wander)
         : TypedAiPackage<AiWander>(makeDefaultOptions().withRepeat(wander->mData.mShouldRepeat != 0))
         , mDistance(std::max(static_cast<short>(0), wander->mData.mDistance))
         , mDuration(std::max(static_cast<short>(0), wander->mData.mDuration))

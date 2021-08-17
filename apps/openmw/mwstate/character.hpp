@@ -3,14 +3,14 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include <components/esm/savedgame.hpp>
+#include <components/esm3/savedgame.hpp>
 
 namespace MWState
 {
     struct Slot
     {
         boost::filesystem::path mPath;
-        ESM::SavedGame mProfile;
+        ESM3::SavedGame mProfile;
         std::time_t mTimeStamp;
     };
 
@@ -29,7 +29,7 @@ namespace MWState
 
             void addSlot (const boost::filesystem::path& path, const std::string& game);
 
-            void addSlot (const ESM::SavedGame& profile);
+            void addSlot (const ESM3::SavedGame& profile);
 
         public:
 
@@ -38,7 +38,7 @@ namespace MWState
             void cleanup();
             ///< Delete the directory we used, if it is empty
 
-            const Slot *createSlot (const ESM::SavedGame& profile);
+            const Slot *createSlot (const ESM3::SavedGame& profile);
             ///< Create new slot.
             ///
             /// \attention The ownership of the slot is not transferred.
@@ -48,7 +48,7 @@ namespace MWState
             /// \attention The \a slot pointer will be invalidated by this call.
             void deleteSlot (const Slot *slot);
 
-            const Slot *updateSlot (const Slot *slot, const ESM::SavedGame& profile);
+            const Slot *updateSlot (const Slot *slot, const ESM3::SavedGame& profile);
             /// \note Slot must belong to this character.
             ///
             /// \attention The \a slot pointer will be invalidated by this call.
@@ -60,7 +60,7 @@ namespace MWState
 
             const boost::filesystem::path& getPath() const;
 
-            ESM::SavedGame getSignature() const;
+            ESM3::SavedGame getSignature() const;
             ///< Return signature information for this character.
             ///
             /// \attention This function must not be called if there are no slots.

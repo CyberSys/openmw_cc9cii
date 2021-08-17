@@ -3,9 +3,9 @@
 #include <iterator>
 
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/queststate.hpp>
-#include <components/esm/journalentry.hpp>
+#include <components/esm3/reader.hpp>
+#include <components/esm3/queststate.hpp>
+#include <components/esm3/journalentry.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -50,13 +50,13 @@ namespace MWDialogue
 
     bool Journal::isThere (const std::string& topicId, const std::string& infoId) const
     {
-        if (const ESM::Dialogue *dialogue =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search (topicId))
+        if (const ESM3::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().search (topicId))
         {
             if (infoId.empty())
                 return true;
 
-            for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
+            for (ESM3::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
                 iter!=dialogue->mInfo.end(); ++iter)
                 if (iter->mId == infoId)
                     return true;
@@ -190,32 +190,32 @@ namespace MWDialogue
         {
             const Quest& quest = iter->second;
 
-            ESM::QuestState state;
+            ESM3::QuestState state;
             quest.write (state);
-            writer.startRecord (ESM::REC_QUES);
+            writer.startRecord (ESM3::REC_QUES);
             state.save (writer);
-            writer.endRecord (ESM::REC_QUES);
+            writer.endRecord (ESM3::REC_QUES);
 
             for (Topic::TEntryIter entryIter (quest.begin()); entryIter!=quest.end(); ++entryIter)
             {
-                ESM::JournalEntry entry;
-                entry.mType = ESM::JournalEntry::Type_Quest;
+                ESM3::JournalEntry entry;
+                entry.mType = ESM3::JournalEntry::Type_Quest;
                 entry.mTopic = quest.getTopic();
                 entryIter->write (entry);
-                writer.startRecord (ESM::REC_JOUR);
+                writer.startRecord (ESM3::REC_JOUR);
                 entry.save (writer);
-                writer.endRecord (ESM::REC_JOUR);
+                writer.endRecord (ESM3::REC_JOUR);
             }
         }
 
         for (TEntryIter iter (mJournal.begin()); iter!=mJournal.end(); ++iter)
         {
-            ESM::JournalEntry entry;
-            entry.mType = ESM::JournalEntry::Type_Journal;
+            ESM3::JournalEntry entry;
+            entry.mType = ESM3::JournalEntry::Type_Journal;
             iter->write (entry);
-            writer.startRecord (ESM::REC_JOUR);
+            writer.startRecord (ESM3::REC_JOUR);
             entry.save (writer);
-            writer.endRecord (ESM::REC_JOUR);
+            writer.endRecord (ESM3::REC_JOUR);
         }
 
         for (TTopicIter iter (mTopics.begin()); iter!=mTopics.end(); ++iter)
@@ -224,46 +224,46 @@ namespace MWDialogue
 
             for (Topic::TEntryIter entryIter (topic.begin()); entryIter!=topic.end(); ++entryIter)
             {
-                ESM::JournalEntry entry;
-                entry.mType = ESM::JournalEntry::Type_Topic;
+                ESM3::JournalEntry entry;
+                entry.mType = ESM3::JournalEntry::Type_Topic;
                 entry.mTopic = topic.getTopic();
                 entryIter->write (entry);
-                writer.startRecord (ESM::REC_JOUR);
+                writer.startRecord (ESM3::REC_JOUR);
                 entry.save (writer);
-                writer.endRecord (ESM::REC_JOUR);
+                writer.endRecord (ESM3::REC_JOUR);
             }
         }
     }
 
-    void Journal::readRecord (ESM::ESMReader& reader, uint32_t type)
+    void Journal::readRecord (ESM3::Reader& reader, uint32_t type)
     {
-        if (type==ESM::REC_JOUR || type==ESM::REC_JOUR_LEGACY)
+        if (type==ESM3::REC_JOUR || type==ESM::REC_JOUR_LEGACY)
         {
-            ESM::JournalEntry record;
+            ESM3::JournalEntry record;
             record.load (reader);
 
             if (isThere (record.mTopic, record.mInfo))
                 switch (record.mType)
                 {
-                    case ESM::JournalEntry::Type_Quest:
+                    case ESM3::JournalEntry::Type_Quest:
 
                         getQuest (record.mTopic).insertEntry (record);
                         break;
 
-                    case ESM::JournalEntry::Type_Journal:
+                    case ESM3::JournalEntry::Type_Journal:
 
                         mJournal.push_back (record);
                         break;
 
-                    case ESM::JournalEntry::Type_Topic:
+                    case ESM3::JournalEntry::Type_Topic:
 
                         getTopic (record.mTopic).insertEntry (record);
                         break;
                 }
         }
-        else if (type==ESM::REC_QUES)
+        else if (type==ESM3::REC_QUES)
         {
-            ESM::QuestState record;
+            ESM3::QuestState record;
             record.load (reader);
 
             if (isThere (record.mTopic))

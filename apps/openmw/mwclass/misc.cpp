@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-#include <components/esm/loadmisc.hpp>
+#include <components/esm3/misc.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -39,7 +39,7 @@ namespace MWClass
 
     std::string Miscellaneous::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -50,7 +50,7 @@ namespace MWClass
 
     std::string Miscellaneous::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -64,14 +64,14 @@ namespace MWClass
 
     std::string Miscellaneous::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
 
         return ref->mBase->mScript;
     }
 
     int Miscellaneous::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
 
         int value = ref->mBase->mData.mValue;
         if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
@@ -79,7 +79,7 @@ namespace MWClass
 
         if (ptr.getCellRef().getSoul() != "")
         {
-            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
+            const ESM3::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Creature>().search(ref->mRef.getSoul());
             if (creature)
             {
                 int soul = creature->mData.mSoul;
@@ -106,7 +106,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Miscellaneous);
 
-        registerClass (typeid (ESM::Miscellaneous).name(), instance);
+        registerClass (typeid (ESM3::Miscellaneous).name(), instance);
     }
 
     std::string Miscellaneous::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -125,14 +125,14 @@ namespace MWClass
 
     std::string Miscellaneous::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
 
         return ref->mBase->mIcon;
     }
 
     MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
 
@@ -188,15 +188,15 @@ namespace MWClass
             // Really, I have no idea why moving ref out of conditional
             // scope causes list::push_back throwing std::bad_alloc
             MWWorld::ManualRef newRef(store, base);
-            const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-                newRef.getPtr().get<ESM::Miscellaneous>();
+            const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref =
+                newRef.getPtr().get<ESM3::Miscellaneous>();
 
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
             newPtr.getCellRef().setGoldValue(goldAmount);
             newPtr.getRefData().setCount(1);
         } else {
-            const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-                ptr.get<ESM::Miscellaneous>();
+            const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref =
+                ptr.get<ESM3::Miscellaneous>();
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
             newPtr.getRefData().setCount(count);
         }
@@ -207,7 +207,7 @@ namespace MWClass
 
     std::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
+        if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM3::Creature>().search(ptr.getCellRef().getSoul()))
             return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
         else
             return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
@@ -215,20 +215,20 @@ namespace MWClass
 
     bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = item.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = item.get<ESM3::Miscellaneous>();
 
-        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc) && !isGold(item);
+        return !ref->mBase->mData.mIsKey && (npcServices & ESM3::NPC::Misc) && !isGold(item);
     }
 
     float Miscellaneous::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
         return ref->mBase->mData.mWeight;
     }
 
     bool Miscellaneous::isKey(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM3::Miscellaneous> *ref = ptr.get<ESM3::Miscellaneous>();
         return ref->mBase->mData.mIsKey != 0;
     }
 

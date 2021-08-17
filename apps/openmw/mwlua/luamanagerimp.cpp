@@ -2,7 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/luascripts.hpp>
 
@@ -176,7 +176,7 @@ namespace MWLua
         for (std::unique_ptr<Action>& action : mActionQueue)
             action->apply(mWorldView);
         mActionQueue.clear();
-        
+
         if (mTeleportPlayerAction)
             mTeleportPlayerAction->apply(mWorldView);
         mTeleportPlayerAction.reset();
@@ -322,10 +322,10 @@ namespace MWLua
         writer.endRecord(ESM::REC_LUAM);
     }
 
-    void LuaManager::readRecord(ESM::ESMReader& reader, uint32_t type)
+    void LuaManager::readRecord(ESM3::Reader& reader, uint32_t type)
     {
         if (type != ESM::REC_LUAM)
-            throw std::runtime_error("ESM::REC_LUAM is expected");
+            throw std::runtime_error("ESM3::REC_LUAM is expected");
 
         mWorldView.load(reader);
         ESM::LuaScripts globalScripts;

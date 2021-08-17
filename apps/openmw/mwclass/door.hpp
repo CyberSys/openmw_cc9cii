@@ -1,7 +1,7 @@
 #ifndef GAME_MWCLASS_DOOR_H
 #define GAME_MWCLASS_DOOR_H
 
-#include <components/esm/loaddoor.hpp>
+#include <components/esm3/door.hpp>
 
 #include "../mwworld/class.hpp"
 
@@ -35,7 +35,7 @@ namespace MWClass
             MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            static std::string getDestination (const MWWorld::LiveCellRef<ESM::Door>& door);
+            static std::string getDestination (const MWWorld::LiveCellRef<ESM3::Door>& door);
             ///< @return destination cell name or token
 
             bool canLock(const MWWorld::ConstPtr &ptr) const override;
@@ -55,10 +55,10 @@ namespace MWClass
             void setDoorState (const MWWorld::Ptr &ptr, MWWorld::DoorState state) const override;
 
 
-            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const override;
             ///< Read additional state from \a state into \a ptr.
 
-            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
     };
 }

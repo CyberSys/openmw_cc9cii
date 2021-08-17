@@ -11,7 +11,7 @@
 #include "movement.hpp"
 #include "aitimer.hpp"
 
-namespace ESM
+namespace ESM3
 {
     namespace AiSequence
     {
@@ -53,7 +53,7 @@ namespace MWMechanics
         bool mLOS;
         float mUpdateLOSTimer;
         float mFleeBlindRunTimer;
-        ESM::Pathgrid::Point mFleeDest;
+        ESM3::Pathgrid::Point mFleeDest;
 
         bool mUseCustomDestination;
         osg::Vec3f mCustomDestination;
@@ -85,7 +85,7 @@ namespace MWMechanics
         void updateCombatMove(float duration);
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
-            const ESM::Weapon* weapon, bool distantCombat);
+            const ESM3::Weapon* weapon, bool distantCombat);
         void updateAttack(CharacterController& characterController);
         void stopAttack();
 
@@ -102,7 +102,7 @@ namespace MWMechanics
             /** \param actor Actor to fight **/
             explicit AiCombat(const MWWorld::Ptr& actor);
 
-            explicit AiCombat (const ESM::AiSequence::AiCombat* combat);
+            explicit AiCombat (const ESM3::AiSequence::AiCombat* combat);
 
             void init();
 
@@ -122,7 +122,7 @@ namespace MWMechanics
             ///Returns target ID
             MWWorld::Ptr getTarget() const override;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
+            void writeState(ESM3::AiSequence::AiSequence &sequence) const override;
 
         private:
             /// Returns true if combat should end

@@ -4,7 +4,7 @@
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 namespace MWRender
 {
@@ -48,7 +48,7 @@ namespace MWRender
             float mScale;
             std::string mModel;
 
-            GroundcoverEntry(const ESM::CellRef& ref, const std::string& model):
+            GroundcoverEntry(const ESM3::CellRef& ref, const std::string& model):
                 mPos(ref.mPos), mScale(ref.mScale), mModel(model)
             {}
         };

@@ -33,7 +33,7 @@ namespace ESM3
         typedef std::pair<int, int> CellId;
         std::set<CellId> mMarkers;
 
-        //void load (Reader& esm);
+        void load (Reader& esm);
         void save (ESM::ESMWriter& esm) const;
     };
 }

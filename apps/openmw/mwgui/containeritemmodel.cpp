@@ -209,12 +209,12 @@ bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count)
 
     MWWorld::Ptr target = mItemSources[0].first;
 
-    if (target.getTypeName() != typeid(ESM::Container).name())
+    if (target.getTypeName() != typeid(ESM3::Container).name())
         return true;
 
     // check container organic flag
-    MWWorld::LiveCellRef<ESM::Container>* ref = target.get<ESM::Container>();
-    if (ref->mBase->mFlags & ESM::Container::Organic)
+    MWWorld::LiveCellRef<ESM3::Container>* ref = target.get<ESM3::Container>();
+    if (ref->mBase->mFlags & ESM3::Container::Organic)
     {
         MWBase::Environment::get().getWindowManager()->
             messageBox("#{sContentsMessage2}");

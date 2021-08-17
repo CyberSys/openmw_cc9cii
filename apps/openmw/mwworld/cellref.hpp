@@ -1,9 +1,9 @@
 #ifndef OPENMW_MWWORLD_CELLREF_H
 #define OPENMW_MWWORLD_CELLREF_H
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
-namespace ESM
+namespace ESM3
 {
     struct ObjectState;
 }
@@ -16,18 +16,18 @@ namespace MWWorld
     {
     public:
 
-        CellRef (const ESM::CellRef& ref)
+        CellRef (const ESM3::CellRef& ref)
             : mCellRef(ref)
         {
             mChanged = false;
         }
 
         // Note: Currently unused for items in containers
-        const ESM::RefNum& getRefNum() const;
+        const ESM3::RefNum& getRefNum() const;
 
         // Returns RefNum.
         // If RefNum is not set, assigns a generated one and changes the "lastAssignedRefNum" counter.
-        const ESM::RefNum& getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum);
+        const ESM3::RefNum& getOrAssignRefNum(ESM3::RefNum& lastAssignedRefNum);
 
         // Set RefNum to its default state.
         void unsetRefNum();
@@ -118,14 +118,14 @@ namespace MWWorld
         void setGoldValue(int value);
 
         // Write the content of this CellRef into the given ObjectState
-        void writeState (ESM::ObjectState& state) const;
+        void writeState (ESM3::ObjectState& state) const;
 
         // Has this CellRef changed since it was originally loaded?
         bool hasChanged() const;
 
     private:
         bool mChanged;
-        ESM::CellRef mCellRef;
+        ESM3::CellRef mCellRef;
     };
 
 }

@@ -3,34 +3,42 @@
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
-#if 0
 void ESM3::DialogueState::load (Reader& esm)
 {
-    while (esm.isNextSub ("TOPI"))
-        mKnownTopics.push_back (esm.getHString());
-
-    while (esm.isNextSub ("FACT"))
+    while (esm.getNextSubRecordType() == ESM3::SUB_TOPI && esm.getSubRecordHeader())
     {
-        std::string faction = esm.getHString();
+        std::string topic;
+        esm.getString(topic); // NOTE: string not null terminated
+        mKnownTopics.push_back (topic);
+    }
 
-        while (esm.isNextSub("REA2"))
+    while (esm.getNextSubRecordType() == ESM3::SUB_FACT && esm.getSubRecordHeader())
+    {
+        std::string faction;
+        esm.getString(faction); // NOTE: string not null terminated
+
+        while (esm.getNextSubRecordType() == ESM3::SUB_REA2 && esm.getSubRecordHeader())
         {
-            std::string faction2 = esm.getHString();
+            std::string faction2;
+            esm.getString(faction2); // NOTE: string not null terminated
+
             int reaction;
-            esm.getHNT(reaction, "INTV");
+            esm.getSubRecordHeader();
+            assert(esm.subRecordHeader().typeId == ESM3::SUB_INTV);
+            esm.get(reaction);
             mChangedFactionReaction[faction][faction2] = reaction;
         }
 
         // no longer used
-        while (esm.isNextSub ("REAC"))
+        while (esm.getNextSubRecordType() == ESM3::SUB_REAC && esm.getSubRecordHeader())
         {
-            esm.skipHSub();
-            esm.getSubName();
-            esm.skipHSub();
+            esm.skipSubRecordData();
+            esm.getSubRecordHeader();
+            esm.skipSubRecordData();
         }
     }
 }
-#endif
+
 void ESM3::DialogueState::save (ESM::ESMWriter& esm) const
 {
     for (std::vector<std::string>::const_iterator iter (mKnownTopics.begin());

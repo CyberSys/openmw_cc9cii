@@ -224,11 +224,11 @@ namespace MWGui
                 {
                     ToolTipInfo info;
 
-                    const ESM::Spell *spell =
-                        MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(focus->getUserString("Spell"));
+                    const ESM3::Spell *spell =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find(focus->getUserString("Spell"));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
-                    for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)
+                    for (const ESM3::ENAMstruct& spellEffect : spell->mEffects.mList)
                     {
                         Widgets::SpellEffectParams params;
                         params.mEffectID = spellEffect.mEffectID;
@@ -239,7 +239,7 @@ namespace MWGui
                         params.mMagnMax = spellEffect.mMagnMax;
                         params.mRange = spellEffect.mRange;
                         params.mArea = spellEffect.mArea;
-                        params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
+                        params.mIsConstant = (spell->mData.mType == ESM3::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);
                     }
@@ -410,20 +410,20 @@ namespace MWGui
         if (text.size() > 0 && text[0] == '\n')
             text.erase(0, 1);
 
-        const ESM::Enchantment* enchant = nullptr;
+        const ESM3::Enchantment* enchant = nullptr;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (info.enchant != "")
         {
-            enchant = store.get<ESM::Enchantment>().search(info.enchant);
+            enchant = store.get<ESM3::Enchantment>().search(info.enchant);
             if (enchant)
             {
-                if (enchant->mData.mType == ESM::Enchantment::CastOnce)
+                if (enchant->mData.mType == ESM3::Enchantment::CastOnce)
                     text += "\n#{sItemCastOnce}";
-                else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
+                else if (enchant->mData.mType == ESM3::Enchantment::WhenStrikes)
                     text += "\n#{sItemCastWhenStrikes}";
-                else if (enchant->mData.mType == ESM::Enchantment::WhenUsed)
+                else if (enchant->mData.mType == ESM3::Enchantment::WhenUsed)
                     text += "\n#{sItemCastWhenUsed}";
-                else if (enchant->mData.mType == ESM::Enchantment::ConstantEffect)
+                else if (enchant->mData.mType == ESM3::Enchantment::ConstantEffect)
                     text += "\n#{sItemCastConstant}";
             }
         }
@@ -511,13 +511,13 @@ namespace MWGui
             enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
             std::vector<MyGUI::Widget*> enchantEffectItems;
-            int flag = (enchant->mData.mType == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
+            int flag = (enchant->mData.mType == ESM3::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
             enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, flag);
             totalSize.height += coord.top-6;
             totalSize.width = std::max(totalSize.width, coord.width);
 
-            if (enchant->mData.mType == ESM::Enchantment::WhenStrikes
-                || enchant->mData.mType == ESM::Enchantment::WhenUsed)
+            if (enchant->mData.mType == ESM3::Enchantment::WhenStrikes
+                || enchant->mData.mType == ESM3::Enchantment::WhenUsed)
             {
                 int maxCharge = enchant->mData.mCharge;
                 int charge = (info.remainingEnchantCharge == -1) ? maxCharge : info.remainingEnchantCharge;
@@ -653,7 +653,7 @@ namespace MWGui
         if (soul.empty())
             return std::string();
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Creature *creature = store.get<ESM::Creature>().search(soul);
+        const ESM3::Creature *creature = store.get<ESM3::Creature>().search(soul);
         if (!creature)
             return std::string();
         if (creature->mName.empty())
@@ -669,7 +669,7 @@ namespace MWGui
         if (!factionId.empty())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Faction *fact = store.get<ESM::Faction>().search(factionId);
+            const ESM3::Faction *fact = store.get<ESM3::Faction>().search(factionId);
             if (fact != nullptr)
             {
                 ret += getMiscString(fact->mName.empty() ? factionId : fact->mName, "Owner Faction");
@@ -779,14 +779,14 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-        const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
+        const std::string &skillNameId = ESM3::Skill::sSkillNameIds[skillId];
+        const ESM3::Skill* skill = store.get<ESM3::Skill>().find(skillId);
         assert(skill);
 
         const ESM::Attribute* attr =
             store.get<ESM::Attribute>().find(skill->mData.mAttribute);
         assert(attr);
-        std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
+        std::string icon = "icons\\k\\" + ESM3::Skill::sIconNames[skillId];
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
@@ -817,20 +817,20 @@ namespace MWGui
         widget->setUserString("Caption_Caption", name);
         std::string specText;
         // get all skills of this specialisation
-        const MWWorld::Store<ESM::Skill> &skills =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
+        const MWWorld::Store<ESM3::Skill> &skills =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Skill>();
 
         bool isFirst = true;
         for (auto& skillPair : skills)
         {
-            if (skillPair.second.mData.mSpecialization == specId)
+            if ((int)skillPair.second.mData.mSpecialization == specId) // NOTE: mSpecialisation used to be int
             {
                 if (isFirst)
                     isFirst = false;
                 else
                     specText += "\n";
 
-                specText += std::string("#{") + ESM::Skill::sSkillNameIds[skillPair.first] + "}";
+                specText += std::string("#{") + ESM3::Skill::sSkillNameIds[skillPair.first] + "}";
             }
         }
         widget->setUserString("Caption_ColumnText", specText);
@@ -843,7 +843,7 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        const ESM::BirthSign *sign = store.get<ESM::BirthSign>().find(birthsignId);
+        const ESM3::BirthSign *sign = store.get<ESM3::BirthSign>().find(birthsignId);
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
@@ -857,18 +857,18 @@ namespace MWGui
 
         for (const std::string& spellId : sign->mPowers.mList)
         {
-            const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
+            const ESM3::Spell *spell = store.get<ESM3::Spell>().search(spellId);
             if (!spell)
                 continue; // Skip spells which cannot be found
-            ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
-            if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Ability && type != ESM::Spell::ST_Power)
+            ESM3::Spell::SpellType type = static_cast<ESM3::Spell::SpellType>(spell->mData.mType);
+            if (type != ESM3::Spell::ST_Spell && type != ESM3::Spell::ST_Ability && type != ESM3::Spell::ST_Power)
                 continue; // We only want spell, ability and powers.
 
-            if (type == ESM::Spell::ST_Ability)
+            if (type == ESM3::Spell::ST_Ability)
                 abilities.push_back(spellId);
-            else if (type == ESM::Spell::ST_Power)
+            else if (type == ESM3::Spell::ST_Power)
                 powers.push_back(spellId);
-            else if (type == ESM::Spell::ST_Spell)
+            else if (type == ESM3::Spell::ST_Spell)
                 spells.push_back(spellId);
         }
 
@@ -893,7 +893,7 @@ namespace MWGui
                     addHeader = false;
                 }
 
-                const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
+                const ESM3::Spell *spell = store.get<ESM3::Spell>().find(spellId);
                 text += "\n#{fontcolourhtml=normal}" + spell->mName;
             }
         }
@@ -901,7 +901,7 @@ namespace MWGui
         widget->setUserString("Caption_BirthSignText", text);
     }
 
-    void ToolTips::createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace)
+    void ToolTips::createRaceToolTip(MyGUI::Widget* widget, const ESM3::Race* playerRace)
     {
         widget->setUserString("Caption_CenteredCaption", playerRace->mName);
         widget->setUserString("Caption_CenteredCaptionText", playerRace->mDescription);
@@ -909,7 +909,7 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "RaceToolTip");
     }
 
-    void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass)
+    void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM3::Class& playerClass)
     {
         if (playerClass.mName == "")
             return;
@@ -932,9 +932,9 @@ namespace MWGui
 
     void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
     {
-        const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(id);
-        const std::string &name = ESM::MagicEffect::effectIdToString (id);
+        const ESM3::MagicEffect* effect =
+            MWBase::Environment::get().getWorld ()->getStore ().get<ESM3::MagicEffect>().find(id);
+        const std::string &name = ESM3::MagicEffect::effectIdToString (id);
 
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');

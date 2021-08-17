@@ -4,7 +4,7 @@
 
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -190,7 +190,7 @@ namespace MWInput
         mControlSwitch->write(writer, progress);
     }
 
-    void InputManager::readRecord(ESM::ESMReader& reader, uint32_t type)
+    void InputManager::readRecord(ESM3::Reader& reader, uint32_t type)
     {
         if (type == ESM::REC_INPU)
         {

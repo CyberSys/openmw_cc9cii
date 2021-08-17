@@ -3,7 +3,7 @@
 
 #include "actor.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct GameSetting;
 }
@@ -21,19 +21,19 @@ namespace MWClass
             // cached GMSTs
             struct GMST
             {
-                const ESM::GameSetting *fMinWalkSpeedCreature;
-                const ESM::GameSetting *fMaxWalkSpeedCreature;
-                const ESM::GameSetting *fEncumberedMoveEffect;
-                const ESM::GameSetting *fSneakSpeedMultiplier;
-                const ESM::GameSetting *fAthleticsRunBonus;
-                const ESM::GameSetting *fBaseRunMultiplier;
-                const ESM::GameSetting *fMinFlySpeed;
-                const ESM::GameSetting *fMaxFlySpeed;
-                const ESM::GameSetting *fSwimRunBase;
-                const ESM::GameSetting *fSwimRunAthleticsMult;
-                const ESM::GameSetting *fKnockDownMult;
-                const ESM::GameSetting *iKnockDownOddsMult;
-                const ESM::GameSetting *iKnockDownOddsBase;
+                const ESM3::GameSetting *fMinWalkSpeedCreature;
+                const ESM3::GameSetting *fMaxWalkSpeedCreature;
+                const ESM3::GameSetting *fEncumberedMoveEffect;
+                const ESM3::GameSetting *fSneakSpeedMultiplier;
+                const ESM3::GameSetting *fAthleticsRunBonus;
+                const ESM3::GameSetting *fBaseRunMultiplier;
+                const ESM3::GameSetting *fMinFlySpeed;
+                const ESM3::GameSetting *fMaxFlySpeed;
+                const ESM3::GameSetting *fSwimRunBase;
+                const ESM3::GameSetting *fSwimRunAthleticsMult;
+                const ESM3::GameSetting *fKnockDownMult;
+                const ESM3::GameSetting *iKnockDownOddsMult;
+                const ESM3::GameSetting *iKnockDownOddsBase;
             };
 
             static const GMST& getGmst();
@@ -113,10 +113,10 @@ namespace MWClass
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             int getBloodTexture (const MWWorld::ConstPtr& ptr) const override;
 
-            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const override;
             ///< Read additional state from \a state into \a ptr.
 
-            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
             int getBaseGold(const MWWorld::ConstPtr& ptr) const override;

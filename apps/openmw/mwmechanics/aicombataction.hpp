@@ -15,7 +15,7 @@ namespace MWMechanics
         virtual void prepare(const MWWorld::Ptr& actor) = 0;
         virtual float getCombatRange (bool& isRanged) const = 0;
         virtual float getActionCooldown() { return 0.f; }
-        virtual const ESM::Weapon* getWeapon() const { return nullptr; }
+        virtual const ESM3::Weapon* getWeapon() const { return nullptr; }
         virtual bool isAttackingOrSpell() const { return true; }
         virtual bool isFleeing() const { return false; }
     };
@@ -82,7 +82,7 @@ namespace MWMechanics
         /// Equips the given weapon.
         void prepare(const MWWorld::Ptr& actor) override;
         float getCombatRange (bool& isRanged) const override;
-        const ESM::Weapon* getWeapon() const override;
+        const ESM3::Weapon* getWeapon() const override;
     };
 
     std::shared_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);

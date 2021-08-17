@@ -27,6 +27,7 @@ namespace ESM3
         signed char mSkill, mAttribute; // -1 if N/A
 
         // Other spell parameters
+        // TODO: These used to be signed int - not sure if there's code that relies on that
         std::uint32_t mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)
         std::uint32_t mArea, mDuration, mMagnMin, mMagnMax;
     };
@@ -36,13 +37,13 @@ namespace ESM3
     struct EffectList
     {
         std::vector<ENAMstruct> mList;
-#if 0
+
         /// Load one effect, assumes subrecord name was already read
         void add(Reader& reader);
 
         /// Load all effects
         void load(Reader& reader); // was used by ENCH and ALCH
-#endif
+
         void save(ESM::ESMWriter& esm) const;
     };
 

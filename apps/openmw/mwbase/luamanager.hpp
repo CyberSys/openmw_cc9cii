@@ -15,9 +15,13 @@ namespace Loading
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
     struct LuaScripts;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace MWBase
@@ -63,7 +67,7 @@ namespace MWBase
         virtual void saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data) = 0;
 
         // Loading from a save
-        virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
+        virtual void readRecord(ESM3::Reader& reader, uint32_t type) = 0;
         virtual void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) = 0;
 
         // Should be called before loading. The map is used to fix refnums if the order of content files was changed.

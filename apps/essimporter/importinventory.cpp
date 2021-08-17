@@ -129,7 +129,7 @@ namespace ESSImport
 
                     // Not keen to modify CellRef::loadData() so we do this hack to "unread"
                     // the sub-record header.
-                    esm.unreadSubRecordHeader(); // prepare for loading ESM3::CellRef::loadData()
+                    esm.cacheSubRecordHeader(); // prepare for loading ESM3::CellRef::loadData()
                     bool isDeleted = false;
                     // for XSOL and XCHG seen so far, but probably others too
                     if (currentIndex > 0)

@@ -152,7 +152,7 @@ namespace ESSImport
                     // class only once.
                     if (doOnce)
                     {
-                        esm.unreadSubRecordHeader(); // prepare for continuing in CellRef::load()
+                        esm.cacheSubRecordHeader(); // prepare for continuing in CellRef::load()
                         finished = true;
                         break;
                     }
@@ -161,7 +161,7 @@ namespace ESSImport
 
                     // Not keen to modify CellRef::loadData() so we do this hack to "unread"
                     // the sub-record header.
-                    esm.unreadSubRecordHeader(); // prepare for loading ESM3::CellRef::loadData()
+                    esm.cacheSubRecordHeader(); // prepare for loading ESM3::CellRef::loadData()
                     bool isDeleted = false;
                     subDataRemaining = ESM3::CellRef::loadData(esm, isDeleted);
 

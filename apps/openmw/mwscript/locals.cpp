@@ -1,9 +1,9 @@
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
-#include <components/esm/loadscpt.hpp>
-#include <components/esm/variant.hpp>
-#include <components/esm/locals.hpp>
+#include <components/esm3/scpt.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/esm3/locals.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/compiler/locals.hpp>
 
@@ -19,8 +19,8 @@ namespace MWScript
     {
         if (!mInitialised)
         {
-            const ESM::Script *script = MWBase::Environment::get().getWorld()->getStore().
-                get<ESM::Script>().find (scriptName);
+            const ESM3::Script *script = MWBase::Environment::get().getWorld()->getStore().
+                get<ESM3::Script>().find (scriptName);
 
             configure (*script);
         }
@@ -28,7 +28,7 @@ namespace MWScript
 
     Locals::Locals() : mInitialised (false) {}
 
-    bool Locals::configure (const ESM::Script& script)
+    bool Locals::configure (const ESM3::Script& script)
     {
         if (mInitialised)
             return false;
@@ -149,7 +149,7 @@ namespace MWScript
         return false;
     }
 
-    bool Locals::write (ESM::Locals& locals, const std::string& script) const
+    bool Locals::write (ESM3::Locals& locals, const std::string& script) const
     {
         if (!mInitialised)
             return false;
@@ -172,7 +172,7 @@ namespace MWScript
 
             for (int i2=0; i2<static_cast<int> (names.size()); ++i2)
             {
-                ESM::Variant value;
+                ESM3::Variant value;
 
                 switch (i)
                 {
@@ -188,7 +188,7 @@ namespace MWScript
         return true;
     }
 
-    void Locals::read (const ESM::Locals& locals, const std::string& script)
+    void Locals::read (const ESM3::Locals& locals, const std::string& script)
     {
         ensure (script);
 
@@ -205,7 +205,7 @@ namespace MWScript
                 ++numlongs;
         }
 
-        for (std::vector<std::pair<std::string, ESM::Variant> >::const_iterator iter
+        for (std::vector<std::pair<std::string, ESM3::Variant> >::const_iterator iter
             = locals.mVariables.begin(); iter!=locals.mVariables.end(); ++iter,++index)
         {
             if (iter->first.empty())

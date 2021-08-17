@@ -4,7 +4,7 @@
 #include <set>
 
 #include <components/esm/attr.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
 #include "../mwmechanics/stat.hpp"
 
@@ -20,7 +20,7 @@ namespace MWGui
         virtual void setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value) {}
         virtual void setValue(const std::string& id, const std::string& value) {}
         virtual void setValue(const std::string& id, int value) {}
-        virtual void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) {}
+        virtual void setValue(const ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) {}
         virtual void configureSkills(const std::vector<int>& major, const std::vector<int>& minor) {}
     };
 
@@ -29,7 +29,7 @@ namespace MWGui
         MWWorld::Ptr mWatched;
 
         MWMechanics::AttributeValue mWatchedAttributes[ESM::Attribute::Length];
-        MWMechanics::SkillValue mWatchedSkills[ESM::Skill::Length];
+        MWMechanics::SkillValue mWatchedSkills[ESM3::Skill::Length];
 
         MWMechanics::DynamicStat<float> mWatchedHealth;
         MWMechanics::DynamicStat<float> mWatchedMagicka;
@@ -51,7 +51,7 @@ namespace MWGui
         void setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setValue(const std::string& id, const std::string& value);
         void setValue(const std::string& id, int value);
-        void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value);
+        void setValue(const ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value);
         void configureSkills(const std::vector<int>& major, const std::vector<int>& minor);
 
     public:

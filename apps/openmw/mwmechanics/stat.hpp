@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace ESM
+namespace ESM3
 {
     template<typename T>
     struct StatState;
@@ -49,8 +49,8 @@ namespace MWMechanics
             void setModifier (const T& modifier);
             void setCurrentModifier (const T& modifier);
 
-            void writeState (ESM::StatState<T>& state) const;
-            void readState (const ESM::StatState<T>& state);
+            void writeState (ESM3::StatState<T>& state) const;
+            void readState (const ESM3::StatState<T>& state);
     };
 
     template<typename T>
@@ -102,8 +102,8 @@ namespace MWMechanics
             void setModifier (const T& modifier, bool allowCurrentToDecreaseBelowZero=false);
             void setCurrentModifier (const T& modifier, bool allowCurrentToDecreaseBelowZero = false);
 
-            void writeState (ESM::StatState<T>& state) const;
-            void readState (const ESM::StatState<T>& state);
+            void writeState (ESM3::StatState<T>& state) const;
+            void readState (const ESM3::StatState<T>& state);
     };
 
     template<typename T>
@@ -145,8 +145,8 @@ namespace MWMechanics
 
         float getDamage() const;
 
-        void writeState (ESM::StatState<float>& state) const;
-        void readState (const ESM::StatState<float>& state);
+        void writeState (ESM3::StatState<float>& state) const;
+        void readState (const ESM3::StatState<float>& state);
     };
 
     class SkillValue : public AttributeValue
@@ -157,8 +157,8 @@ namespace MWMechanics
         float getProgress() const;
         void setProgress(float progress);
 
-        void writeState (ESM::StatState<float>& state) const;
-        void readState (const ESM::StatState<float>& state);
+        void writeState (ESM3::StatState<float>& state) const;
+        void readState (const ESM3::StatState<float>& state);
     };
 
     inline bool operator== (const AttributeValue& left, const AttributeValue& right)

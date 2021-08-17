@@ -1,5 +1,11 @@
 #include "spellstate.hpp"
 
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
+
+#include <cassert>
+
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -7,84 +13,147 @@ namespace ESM3
 {
     void SpellState::load(Reader& esm)
     {
-#if 0
-        while (esm.isNextSub("SPEL"))
+        mSelectedSpell = "";
+
+        bool finished = false;
+        bool subDataRemaining = false;
+        while (!finished && (subDataRemaining || esm.getSubRecordHeader()))
         {
-            std::string id = esm.getHString();
-
-            SpellParams state;
-            while (esm.isNextSub("INDX"))
+            subDataRemaining = false;
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                int index;
-                esm.getHT(index);
-
-                float magnitude;
-                esm.getHNT(magnitude, "RAND");
-
-                state.mEffectRands[index] = magnitude;
-            }
-
-            while (esm.isNextSub("PURG")) {
-                int index;
-                esm.getHT(index);
-                state.mPurgedEffects.insert(index);
-            }
-
-            mSpells[id] = state;
-        }
-
-        // Obsolete
-        while (esm.isNextSub("PERM"))
-        {
-            std::string spellId = esm.getHString();
-            std::vector<PermanentSpellEffectInfo> permEffectList;
-
-            while (true)
-            {
-                ESM_Context restorePoint = esm.getContext();
-
-                if (!esm.isNextSub("EFID"))
-                    break;
-
-                PermanentSpellEffectInfo info;
-                esm.getHT(info.mId);
-                if (esm.isNextSub("BASE"))
+                case ESM3::SUB_SPEL:
                 {
-                    esm.restoreContext(restorePoint);
-                    return;
+                    std::string id;
+                    esm.getString(id); // NOTE: string not null terminated
+
+                    SpellParams state;
+
+                    while (esm.getSubRecordHeader())
+                    {
+                        subDataRemaining = true;
+                        const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
+                        if (subHdr2.typeId == ESM3::SUB_INDX)
+                        {
+                            int index;
+                            esm.get(index);
+
+                            float magnitude;
+                            esm.getSubRecordHeader();
+                            assert(esm.subRecordHeader().typeId == ESM3::SUB_RAND);
+                            esm.get(magnitude);
+
+                            state.mEffectRands[index] = magnitude;
+                        }
+                        else
+                        {
+                            subDataRemaining = true;
+                            break;
+                        }
+                    }
+
+                    while (subDataRemaining || esm.getSubRecordHeader())
+                    {
+                        subDataRemaining = true;
+                        const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
+                        if (subHdr2.typeId == ESM3::SUB_PURG)
+                        {
+                            int index;
+                            esm.get(index);
+                            state.mPurgedEffects.insert(index);
+                        }
+                        else
+                        {
+                            subDataRemaining = true;
+                            break;
+                        }
+                    }
+
+                    mSpells[id] = state;
+                    break;
                 }
-                else
-                    esm.getHNT(info.mArg, "ARG_");
+                case ESM3::SUB_PERM: // Obsolete
+                {
+                    std::string spellId;
+                    esm.getZString(spellId);
+                    std::vector<PermanentSpellEffectInfo> permEffectList;
 
-                esm.getHNT(info.mMagnitude, "MAGN");
-                permEffectList.push_back(info);
+                    while (true)
+                    {
+                        // FIXME: how to test? Prob need an old version save file
+                        ReaderContext restorePoint = esm.getContext();
+
+                        if (esm.getNextSubRecordType() != ESM3::SUB_EFID)
+                            break;
+
+                        PermanentSpellEffectInfo info;
+                        esm.getSubRecordHeader();
+                        esm.get(info.mId);
+                        if (esm.getNextSubRecordType() == ESM3::SUB_BASE)
+                        {
+                            esm.restoreContext(restorePoint);
+                            return;
+                        }
+                        else
+                        {
+                            esm.getSubRecordHeader();
+                            assert(esm.subRecordHeader().typeId == ESM3::SUB_ARG_);
+                            esm.get(info.mArg);
+                        }
+
+                        esm.getSubRecordHeader();
+                        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAGN);
+                        esm.get(info.mMagnitude);
+
+                        permEffectList.push_back(info);
+                    }
+
+                    mPermanentSpellEffects[spellId] = permEffectList;
+                    break;
+                }
+                case ESM3::SUB_CORP: // Obsolete
+                {
+                    std::string id;
+                    esm.getZString(id);
+
+                    CorprusStats stats;
+                    esm.getSubRecordHeader();
+                    assert(esm.subRecordHeader().typeId == ESM3::SUB_WORS);
+                    esm.get(stats.mWorsenings);
+
+                    esm.getSubRecordHeader();
+                    assert(esm.subRecordHeader().typeId == ESM3::SUB_TIME);
+                    esm.get(stats.mNextWorsening);
+
+                    mCorprusSpells[id] = stats;
+                    break;
+                }
+                case ESM3::SUB_USED:
+                {
+                    std::string id;
+                    esm.getZString(id);
+                    ESM::TimeStamp time;
+
+                    esm.getSubRecordHeader();
+                    assert(esm.subRecordHeader().typeId == ESM3::SUB_TIME);
+                    esm.get(time);
+
+                    mUsedPowers[id] = time;
+                    break;
+                }
+                case ESM3::SUB_SLCT:
+                {
+                    esm.getZString(mSelectedSpell);
+                    finished = true;
+                    break;
+                }
+                default:
+                    finished = true;
+                    esm.cacheSubRecordHeader();
+                    break;
             }
-            mPermanentSpellEffects[spellId] = permEffectList;
         }
-
-        // Obsolete
-        while (esm.isNextSub("CORP"))
-        {
-            std::string id = esm.getHString();
-
-            CorprusStats stats;
-            esm.getHNT(stats.mWorsenings, "WORS");
-            esm.getHNT(stats.mNextWorsening, "TIME");
-
-            mCorprusSpells[id] = stats;
-        }
-
-        while (esm.isNextSub("USED"))
-        {
-            std::string id = esm.getHString();
-            TimeStamp time;
-            esm.getHNT(time, "TIME");
-
-            mUsedPowers[id] = time;
-        }
-
-        mSelectedSpell = esm.getHNOString("SLCT");
-#endif
     }
 
     void SpellState::save(ESM::ESMWriter& esm) const

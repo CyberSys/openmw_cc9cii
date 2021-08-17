@@ -10,7 +10,7 @@ namespace MWMechanics
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         if(stats.getDrawState() == MWMechanics::DrawState_Spell)
         {
-            *weaptype = ESM::Weapon::Spell;
+            *weaptype = ESM3::Weapon::Spell;
             return inv.end();
         }
 
@@ -18,17 +18,17 @@ namespace MWMechanics
         {
             MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             if(weapon == inv.end())
-                *weaptype = ESM::Weapon::HandToHand;
+                *weaptype = ESM3::Weapon::HandToHand;
             else
             {
                 const std::string &type = weapon->getTypeName();
-                if(type == typeid(ESM::Weapon).name())
+                if(type == typeid(ESM3::Weapon).name())
                 {
-                    const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                    const MWWorld::LiveCellRef<ESM3::Weapon> *ref = weapon->get<ESM3::Weapon>();
                     *weaptype = ref->mBase->mData.mType;
                 }
-                else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
-                    *weaptype = ESM::Weapon::PickProbe;
+                else if (type == typeid(ESM3::Lockpick).name() || type == typeid(ESM3::Probe).name())
+                    *weaptype = ESM3::Weapon::PickProbe;
             }
 
             return weapon;
@@ -37,9 +37,9 @@ namespace MWMechanics
         return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     }
 
-    const ESM::WeaponType* getWeaponType(const int weaponType)
+    const ESM3::WeaponType* getWeaponType(const int weaponType)
     {
-        std::map<int, ESM::WeaponType>::const_iterator found = sWeaponTypeList.find(weaponType);
+        std::map<int, ESM3::WeaponType>::const_iterator found = sWeaponTypeList.find(weaponType);
         if (found == sWeaponTypeList.end())
         {
             // Use one-handed short blades as fallback

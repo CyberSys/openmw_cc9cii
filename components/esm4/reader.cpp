@@ -110,6 +110,7 @@ Reader::Reader(Files::IStreamPtr esmStream, const std::string& filename)
 
 Reader::~Reader()
 {
+    close();
 }
 
 // Since the record data may have been compressed, it is not always possible to use seek() to

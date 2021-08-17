@@ -1,7 +1,7 @@
 #include "door.hpp"
 
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/doorstate.hpp>
+#include <components/esm3/door.hpp>
+#include <components/esm3/doorstate.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -88,7 +88,7 @@ namespace MWClass
 
     std::string Door::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM3::Door> *ref = ptr.get<ESM3::Door>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -99,7 +99,7 @@ namespace MWClass
 
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM3::Door> *ref = ptr.get<ESM3::Door>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -108,7 +108,7 @@ namespace MWClass
     std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        MWWorld::LiveCellRef<ESM3::Door> *ref = ptr.get<ESM3::Door>();
 
         const std::string &openSound = ref->mBase->mOpenSound;
         const std::string &closeSound = ref->mBase->mCloseSound;
@@ -140,8 +140,8 @@ namespace MWClass
             if(animation)
             {
                 const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
-                const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
+                int index = ESM3::MagicEffect::effectStringToId("sEffectTelekinesis");
+                const ESM3::MagicEffect *effect = store.get<ESM3::MagicEffect>().find(index);
 
                 animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
             }
@@ -255,7 +255,7 @@ namespace MWClass
 
     std::string Door::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM3::Door> *ref = ptr.get<ESM3::Door>();
 
         return ref->mBase->mScript;
     }
@@ -264,12 +264,12 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Door);
 
-        registerClass (typeid (ESM::Door).name(), instance);
+        registerClass (typeid (ESM3::Door).name(), instance);
     }
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM3::Door> *ref = ptr.get<ESM3::Door>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
@@ -283,7 +283,7 @@ namespace MWClass
         }
 
         int lockLevel = ptr.getCellRef().getLockLevel();
-        if (lockLevel > 0 && lockLevel != ESM::UnbreakableLock)
+        if (lockLevel > 0 && lockLevel != ESM3::UnbreakableLock)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
         else if (ptr.getCellRef().getLockLevel() < 0)
             text += "\n#{sUnlocked}";
@@ -300,7 +300,7 @@ namespace MWClass
         return info;
     }
 
-    std::string Door::getDestination (const MWWorld::LiveCellRef<ESM::Door>& door)
+    std::string Door::getDestination (const MWWorld::LiveCellRef<ESM3::Door>& door)
     {
         std::string dest = door.mRef.getDestCell();
         if (dest.empty())
@@ -309,7 +309,7 @@ namespace MWClass
             int x,y;
             auto world = MWBase::Environment::get().getWorld();
             world->positionToIndex (door.mRef.getDoorDest().pos[0], door.mRef.getDoorDest().pos[1], x, y);
-            const ESM::Cell* cell = world->getStore().get<ESM::Cell>().search(x,y);
+            const ESM3::Cell* cell = world->getStore().get<ESM3::Cell>().search(x,y);
             dest = world->getCellName(cell);
         }
 
@@ -318,7 +318,7 @@ namespace MWClass
 
     MWWorld::Ptr Door::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM3::Door> *ref = ptr.get<ESM3::Door>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
@@ -349,18 +349,18 @@ namespace MWClass
         customData.mDoorState = state;
     }
 
-    void Door::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
+    void Door::readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const
     {
         if (!state.mHasCustomState)
             return;
 
         ensureCustomData(ptr);
         DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
-        const ESM::DoorState& doorState = state.asDoorState();
+        const ESM3::DoorState& doorState = state.asDoorState();
         customData.mDoorState = MWWorld::DoorState(doorState.mDoorState);
     }
 
-    void Door::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
+    void Door::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const
     {
         if (!ptr.getRefData().getCustomData())
         {
@@ -369,7 +369,7 @@ namespace MWClass
         }
 
         const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
-        ESM::DoorState& doorState = state.asDoorState();
+        ESM3::DoorState& doorState = state.asDoorState();
         doorState.mDoorState = int(customData.mDoorState);
     }
 

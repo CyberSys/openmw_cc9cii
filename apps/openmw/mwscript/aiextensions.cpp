@@ -151,7 +151,7 @@ namespace MWScript
                     if (cellID.empty())
                         throw std::runtime_error("AiEscortCell: no cell ID given");
 
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().find(cellID);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::Cell>().find(cellID);
 
                     MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);

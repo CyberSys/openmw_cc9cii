@@ -2,7 +2,7 @@
 
 #include <osg/MatrixTransform>
 
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/crea.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -28,13 +28,13 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
                                      const std::string& model, Resource::ResourceSystem* resourceSystem)
   : ActorAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
 {
-    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM3::Creature> *ref = mPtr.get<ESM3::Creature>();
 
     if(!model.empty())
     {
         setObjectRoot(model, false, false, true);
 
-        if((ref->mBase->mFlags&ESM::Creature::Bipedal))
+        if((ref->mBase->mFlags&ESM3::Creature::Bipedal))
             addAnimSource(Settings::Manager::getString("xbaseanim", "Models"), model);
         addAnimSource(model, model);
     }
@@ -46,13 +46,13 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
     , mShowWeapons(false)
     , mShowCarriedLeft(false)
 {
-    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM3::Creature> *ref = mPtr.get<ESM3::Creature>();
 
     if(!model.empty())
     {
         setObjectRoot(model, true, false, true);
 
-        if((ref->mBase->mFlags&ESM::Creature::Bipedal))
+        if((ref->mBase->mFlags&ESM3::Creature::Bipedal))
         {
             addAnimSource(Settings::Manager::getString("xbaseanim", "Models"), model);
         }
@@ -119,9 +119,9 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     std::string itemModel = item.getClass().getModel(item);
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
     {
-        if(item.getTypeName() == typeid(ESM::Weapon).name())
+        if(item.getTypeName() == typeid(ESM3::Weapon).name())
         {
-            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            int type = item.get<ESM3::Weapon>()->mBase->mData.mType;
             bonename = MWMechanics::getWeaponType(type)->mAttachBone;
             if (bonename != "Weapon Bone")
             {
@@ -137,17 +137,17 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     else
     {
         bonename = "Shield Bone";
-        if (item.getTypeName() == typeid(ESM::Armor).name())
+        if (item.getTypeName() == typeid(ESM3::Armor).name())
         {
             // Shield body part model should be used if possible.
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            for (const auto& part : item.get<ESM::Armor>()->mBase->mParts.mParts)
+            for (const auto& part : item.get<ESM3::Armor>()->mBase->mParts.mParts)
             {
                 // Assume all creatures use the male mesh.
-                if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
+                if (part.mPart != ESM3::PRT_Shield || part.mMale.empty())
                     continue;
-                const ESM::BodyPart *bodypart = store.get<ESM::BodyPart>().search(part.mMale);
-                if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
+                const ESM3::BodyPart *bodypart = store.get<ESM3::BodyPart>().search(part.mMale);
+                if (bodypart && bodypart->mData.mType == ESM3::BodyPart::MT_Armor && !bodypart->mModel.empty())
                 {
                     itemModel = "meshes\\" + bodypart->mModel;
                     break;
@@ -174,12 +174,12 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         // Crossbows start out with a bolt attached
         // FIXME: code duplicated from NpcAnimation
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight &&
-                item.getTypeName() == typeid(ESM::Weapon).name() &&
-                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                item.getTypeName() == typeid(ESM3::Weapon).name() &&
+                item.get<ESM3::Weapon>()->mBase->mData.mType == ESM3::Weapon::MarksmanCrossbow)
         {
-            const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow);
+            const ESM3::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM3::Weapon::MarksmanCrossbow);
             MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-            if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == weaponInfo->mAmmoType)
+            if (ammo != inv.end() && ammo->get<ESM3::Weapon>()->mBase->mData.mType == weaponInfo->mAmmoType)
                 attachArrow();
             else
                 mAmmunition.reset();
@@ -246,10 +246,10 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM3::Weapon).name())
         return nullptr;
 
-    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    int type = weapon->get<ESM3::Weapon>()->mBase->mData.mType;
     int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
 
     // Try to find and attachment bone in actor's skeleton, otherwise fall back to the ArrowBone in weapon's mesh

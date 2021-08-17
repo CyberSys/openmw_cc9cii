@@ -15,7 +15,7 @@ namespace osg
     class Camera;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct GlobalMap;
 }
@@ -64,8 +64,8 @@ namespace MWRender
          */
         void markForRemoval(osg::Camera* camera);
 
-        void write (ESM::GlobalMap& map);
-        void read (ESM::GlobalMap& map);
+        void write (ESM3::GlobalMap& map);
+        void read (ESM3::GlobalMap& map);
 
         osg::ref_ptr<osg::Texture2D> getBaseTexture();
         osg::ref_ptr<osg::Texture2D> getOverlayTexture();

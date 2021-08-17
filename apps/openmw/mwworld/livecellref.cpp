@@ -1,7 +1,7 @@
 #include "livecellref.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -11,12 +11,12 @@
 #include "class.hpp"
 #include "esmstore.hpp"
 
-MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::CellRef &cref)
+MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM3::CellRef &cref)
   : mClass(&Class::get(type)), mRef(cref), mData(cref)
 {
 }
 
-void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
+void MWWorld::LiveCellRefBase::loadImp (const ESM3::ObjectState& state)
 {
     mRef = state.mRef;
     mData = RefData (state, mData.isDeletedByContentFile());
@@ -29,7 +29,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         // Make sure we still have a script. It could have been coming from a content file that is no longer active.
         if (!scriptId.empty())
         {
-            if (const ESM::Script* script = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (scriptId))
+            if (const ESM3::Script* script = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Script>().search (scriptId))
             {
                 try
                 {
@@ -48,7 +48,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 
     mClass->readAdditionalState (ptr, state);
 
-    if (!mRef.getSoul().empty() && !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(mRef.getSoul()))
+    if (!mRef.getSoul().empty() && !MWBase::Environment::get().getWorld()->getStore().get<ESM3::Creature>().search(mRef.getSoul()))
     {
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
         mRef.setSoul(std::string());
@@ -57,7 +57,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
     MWBase::Environment::get().getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
 }
 
-void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
+void MWWorld::LiveCellRefBase::saveImp (ESM3::ObjectState& state) const
 {
     mRef.writeState(state);
 
@@ -69,7 +69,7 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
     mClass->writeAdditionalState (ptr, state);
 }
 
-bool MWWorld::LiveCellRefBase::checkStateImp (const ESM::ObjectState& state)
+bool MWWorld::LiveCellRefBase::checkStateImp (const ESM3::ObjectState& state)
 {
     return true;
 }

@@ -40,6 +40,10 @@ namespace ESM3
 #pragma pack(push, 1)
         struct SPDTstruct
         {
+            // NOTE: These should to be uint32_t but we have existing code that compares to
+            //       enums which are considered by some compilers as signed int values
+            //       (C++03 standard says implementation defined) - so may need to convert
+            //       them back to int
             std::uint32_t mType; // SpellType
             std::uint32_t mCost; // Mana cost
             std::uint32_t mFlags; // Flags

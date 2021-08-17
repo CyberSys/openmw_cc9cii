@@ -24,7 +24,7 @@ namespace ESM3
         // must be lower case faction IDs
         std::map<std::string, std::map<std::string, int> > mChangedFactionReaction;
 
-        //void load (Reader& esm);
+        void load (Reader& esm);
         void save (ESM::ESMWriter& esm) const;
     };
 }

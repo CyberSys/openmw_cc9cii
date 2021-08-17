@@ -1,6 +1,6 @@
 #include "aitravel.hpp"
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -42,7 +42,7 @@ namespace MWMechanics
     {
     }
 
-    AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
+    AiTravel::AiTravel(const ESM3::AiSequence::AiTravel *travel)
         : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
     {
         // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
@@ -103,16 +103,16 @@ namespace MWMechanics
         reset();
     }
 
-    void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiTravel::writeState(ESM3::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiTravel> travel(new ESM::AiSequence::AiTravel());
+        std::unique_ptr<ESM3::AiSequence::AiTravel> travel(new ESM3::AiSequence::AiTravel());
         travel->mData.mX = mX;
         travel->mData.mY = mY;
         travel->mData.mZ = mZ;
         travel->mHidden = mHidden;
 
-        ESM::AiSequence::AiPackageContainer package;
-        package.mType = ESM::AiSequence::Ai_Travel;
+        ESM3::AiSequence::AiPackageContainer package;
+        package.mType = ESM3::AiSequence::Ai_Travel;
         package.mPackage = travel.release();
         sequence.mPackages.push_back(package);
     }
@@ -122,7 +122,7 @@ namespace MWMechanics
     {
     }
 
-    AiInternalTravel::AiInternalTravel(const ESM::AiSequence::AiTravel* travel)
+    AiInternalTravel::AiInternalTravel(const ESM3::AiSequence::AiTravel* travel)
         : AiTravel(travel->mData.mX, travel->mData.mY, travel->mData.mZ, this)
     {
     }

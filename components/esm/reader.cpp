@@ -1,3 +1,5 @@
+#include "reader.hpp"
+
 //#ifdef NDEBUG
 //#undef NDEBUG
 //#endif
@@ -57,19 +59,20 @@ namespace ESM
                 }
                 else
                 {
-                    assert (tmp[newSize - 2] != '\0'
-                            && "ESM4::Reader::getString string is unexpectedly terminated with a null");
-                    tmp[newSize-1] = '\0'; // for Utf8Encoder::getLength()
+                    // NOTE: script text of some mods have terminating null;
+                    //       unfortunately we just have to deal with it
+                    //if (tmp[newSize - 2] != '\0')
+                    tmp[newSize - 1] = '\0'; // for Utf8Encoder::getLength()
                 }
 
                 encoder->toUtf8(tmp, str, newSize - 1);
-                // FIXME: the encoder converts “keep” as â€œkeepâ€ which increases the length,
-                //        which results in below resize() truncating the string
+                // NOTE: the encoder converts “keep” as â€œkeepâ€ which increases the length,
+                //       which results in below resize() truncating the string
                 if (str.size() == newSize)   // ascii
                     str.resize(newSize - 1); // don't want the null terminator
                 else
                 {
-                    // WARN: this is a horrible hack but fortunately there's only a few like this
+                    // this is a horrible hack but fortunately there's only a few like this
                     std::string tmp2(str.data());
                     str.swap(tmp2);
                 }
@@ -93,12 +96,14 @@ namespace ESM
                     assert (ch == '\0'
                             && "ESM4::Reader::getString string is not terminated with a null");
                 }
+#if 0
                 else
                 {
+                    // NOTE: normal ESMs don't but omwsave has locals or spells with null terminator
                     assert (str[newSize - 1] != '\0'
                             && "ESM4::Reader::getString string is unexpectedly terminated with a null");
                 }
-
+#endif
                 return true;
             }
         }

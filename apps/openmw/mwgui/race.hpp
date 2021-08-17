@@ -12,7 +12,7 @@ namespace MWRender
     class RaceSelectionPreview;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct NPC;
 }
@@ -40,7 +40,7 @@ namespace MWGui
             GM_Female
         };
 
-        const ESM::NPC &getResult() const;
+        const ESM3::NPC &getResult() const;
         const std::string &getRaceId() const { return mCurrentRaceId; }
         Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
 

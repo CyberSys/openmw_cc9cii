@@ -142,7 +142,7 @@ namespace MWGui
         mPreviewImage->setRenderItemTexture(mPreviewTexture.get());
         mPreviewImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
-        const ESM::NPC& proto = mPreview->getPrototype();
+        const ESM3::NPC& proto = mPreview->getPrototype();
         setRaceId(proto.mRace);
         setGender(proto.isMale() ? GM_Male : GM_Female);
         recountParts();
@@ -287,18 +287,18 @@ namespace MWGui
     void RaceDialog::getBodyParts (int part, std::vector<std::string>& out)
     {
         out.clear();
-        const MWWorld::Store<ESM::BodyPart> &store =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+        const MWWorld::Store<ESM3::BodyPart> &store =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::BodyPart>();
 
-        for (const ESM::BodyPart& bodypart : store)
+        for (const ESM3::BodyPart& bodypart : store)
         {
-            if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
+            if (bodypart.mData.mFlags & ESM3::BodyPart::BPF_NotPlayable)
                 continue;
-            if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
+            if (bodypart.mData.mType != ESM3::BodyPart::MT_Skin)
                 continue;
-            if (bodypart.mData.mPart != static_cast<ESM::BodyPart::MeshPart>(part))
+            if (bodypart.mData.mPart != static_cast<ESM3::BodyPart::MeshPart>(part))
                 continue;
-            if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            if (mGenderIndex != (bodypart.mData.mFlags & ESM3::BodyPart::BPF_Female))
                 continue;
             bool firstPerson = (bodypart.mId.size() >= 3)
                     && bodypart.mId[bodypart.mId.size()-3] == '1'
@@ -313,8 +313,8 @@ namespace MWGui
 
     void RaceDialog::recountParts()
     {
-        getBodyParts(ESM::BodyPart::MP_Hair, mAvailableHairs);
-        getBodyParts(ESM::BodyPart::MP_Head, mAvailableHeads);
+        getBodyParts(ESM3::BodyPart::MP_Hair, mAvailableHairs);
+        getBodyParts(ESM3::BodyPart::MP_Head, mAvailableHeads);
 
         mFaceIndex = 0;
         mHairIndex = 0;
@@ -324,7 +324,7 @@ namespace MWGui
 
     void RaceDialog::updatePreview()
     {
-        ESM::NPC record = mPreview->getPrototype();
+        ESM3::NPC record = mPreview->getPrototype();
         record.mRace = mCurrentRaceId;
         record.setIsMale(mGenderIndex == 0);
 
@@ -348,13 +348,13 @@ namespace MWGui
     {
         mRaceList->removeAllItems();
 
-        const MWWorld::Store<ESM::Race> &races =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
+        const MWWorld::Store<ESM3::Race> &races =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>();
 
         std::vector<std::pair<std::string, std::string> > items; // ID, name
-        for (const ESM::Race& race : races)
+        for (const ESM3::Race& race : races)
         {
-            bool playable = race.mData.mFlags & ESM::Race::Playable;
+            bool playable = race.mData.mFlags & ESM3::Race::Playable;
             if (!playable) // Only display playable races
                 continue;
 
@@ -388,12 +388,12 @@ namespace MWGui
         MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
+        const ESM3::Race *race = store.get<ESM3::Race>().find(mCurrentRaceId);
         int count = sizeof(race->mData.mBonus)/sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
         for (int i = 0; i < count; ++i)
         {
             int skillId = race->mData.mBonus[i].mSkill;
-            if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
+            if (skillId < 0 || skillId > ESM3::Skill::Length) // Skip unknown skill indexes
                 continue;
 
             skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
@@ -424,7 +424,7 @@ namespace MWGui
         MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
+        const ESM3::Race *race = store.get<ESM3::Race>().find(mCurrentRaceId);
 
         int i = 0;
         for (const std::string& spellpower : race->mPowers.mList)
@@ -441,7 +441,7 @@ namespace MWGui
         }
     }
 
-    const ESM::NPC& RaceDialog::getResult() const
+    const ESM3::NPC& RaceDialog::getResult() const
     {
         return mPreview->getPrototype();
     }

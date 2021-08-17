@@ -48,8 +48,8 @@ namespace MWGui
     {
         int price;
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
@@ -112,11 +112,11 @@ namespace MWGui
         mPtr = actor;
         clearDestinations();
 
-        std::vector<ESM::Transport::Dest> transport;
+        std::vector<ESM3::Transport::Dest> transport;
         if (mPtr.getClass().isNpc())
-            transport = mPtr.get<ESM::NPC>()->mBase->getTransport();
-        else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
-            transport = mPtr.get<ESM::Creature>()->mBase->getTransport();
+            transport = mPtr.get<ESM3::NPC>()->mBase->getTransport();
+        else if (mPtr.getTypeName() == typeid(ESM3::Creature).name())
+            transport = mPtr.get<ESM3::Creature>()->mBase->getTransport();
 
         for(unsigned int i = 0;i<transport.size();i++)
         {
@@ -175,7 +175,7 @@ namespace MWGui
         {
             ESM::Position playerPos = player.getRefData().getPosition();
             float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->mValue.getFloat());
+            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fTravelTimeMult")->mValue.getFloat());
             MWBase::Environment::get().getMechanicsManager ()->rest (hours, true);
             MWBase::Environment::get().getWorld()->advanceTime(hours);
         }

@@ -7,7 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/loadscpt.hpp>
+#include <components/esm3/scpt.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -44,7 +44,7 @@ namespace MWScript
         mParser.reset();
         mErrorHandler.reset();
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+        if (const ESM3::Script *script = mStore.get<ESM3::Script>().find (name))
         {
             mErrorHandler.setContext(name);
 
@@ -150,7 +150,7 @@ namespace MWScript
         int count = 0;
         int success = 0;
 
-        for (auto& script : mStore.get<ESM::Script>())
+        for (auto& script : mStore.get<ESM3::Script>())
         {
             if (!std::binary_search (mScriptBlacklist.begin(), mScriptBlacklist.end(),
                 Misc::StringUtils::lowerCase(script.mId)))
@@ -183,7 +183,7 @@ namespace MWScript
                 return iter->second;
         }
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().search (name2))
+        if (const ESM3::Script *script = mStore.get<ESM3::Script>().search (name2))
         {
             Compiler::Locals locals;
 

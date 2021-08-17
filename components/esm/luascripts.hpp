@@ -4,9 +4,13 @@
 #include <vector>
 #include <string>
 
+namespace ESM3
+{
+    class Reader;
+}
+
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
 
     // Storage structure for LuaUtil::ScriptsContainer. This is not a top-level record.
@@ -37,15 +41,15 @@ namespace ESM
     {
         std::vector<LuaScript> mScripts;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (ESM3::Reader& esm);
+        void save (ESMWriter& esm) const;
     };
 
     // Saves binary string `data` (can contain '\0') as record LUAD.
     void saveLuaBinaryData(ESM::ESMWriter& esm, const std::string& data);
 
     // Loads LUAD as binary string. If next subrecord is not LUAD, then returns an empty string.
-    std::string loadLuaBinaryData(ESM::ESMReader& esm);
+    std::string loadLuaBinaryData(ESM3::Reader& esm);
 
 }
 

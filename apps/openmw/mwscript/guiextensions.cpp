@@ -121,8 +121,8 @@ namespace MWScript
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
                 // http://www.uesp.net/wiki/Tes3Mod:ShowMap
 
-                const MWWorld::Store<ESM::Cell> &cells =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
+                const MWWorld::Store<ESM3::Cell> &cells =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::Cell>();
 
                 MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
@@ -142,10 +142,10 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                const MWWorld::Store<ESM::Cell> &cells =
-                    MWBase::Environment::get().getWorld ()->getStore().get<ESM::Cell>();
+                const MWWorld::Store<ESM3::Cell> &cells =
+                    MWBase::Environment::get().getWorld ()->getStore().get<ESM3::Cell>();
 
-                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
+                MWWorld::Store<ESM3::Cell>::iterator it = cells.extBegin();
                 for (; it != cells.extEnd(); ++it)
                 {
                     std::string name = it->mName;

@@ -28,7 +28,7 @@ namespace MWMechanics
                             const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
                             float magnitude, float /*remainingTime*/, float /*totalTime*/) override
         {
-            if (key.mId == ESM::MagicEffect::SpellAbsorption)
+            if (key.mId == ESM3::MagicEffect::SpellAbsorption)
             {
                 if (mProbability == 0.f)
                     mProbability = magnitude / 100;
@@ -50,7 +50,7 @@ namespace MWMechanics
             return false;
 
         CreatureStats& stats = target.getClass().getCreatureStats(target);
-        if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() <= 0.f)
+        if (stats.getMagicEffects().get(ESM3::MagicEffect::SpellAbsorption).getMagnitude() <= 0.f)
             return false;
 
         GetAbsorptionProbability check;
@@ -64,11 +64,11 @@ namespace MWMechanics
             return false;
 
         const auto& esmStore = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find("VFX_Absorb");
+        const ESM3::Static* absorbStatic = esmStore.get<ESM3::Static>().find("VFX_Absorb");
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
         if (animation && !absorbStatic->mModel.empty())
-            animation->addEffect( "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, std::string());
-        const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
+            animation->addEffect( "meshes\\" + absorbStatic->mModel, ESM3::MagicEffect::SpellAbsorption, false, std::string());
+        const ESM3::Spell* spell = esmStore.get<ESM3::Spell>().search(spellId);
         int spellCost = 0;
         if (spell)
         {
@@ -76,7 +76,7 @@ namespace MWMechanics
         }
         else
         {
-            const ESM::Enchantment* enchantment = esmStore.get<ESM::Enchantment>().search(spellId);
+            const ESM3::Enchantment* enchantment = esmStore.get<ESM3::Enchantment>().search(spellId);
             if (enchantment)
                 spellCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), caster);
         }

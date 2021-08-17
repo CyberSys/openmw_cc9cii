@@ -15,10 +15,14 @@
 
 namespace ESM
 {
+    class ESMWriter;
+}
+
+namespace ESM3
+{
     struct Region;
     struct RegionWeatherState;
-    class ESMWriter;
-    class ESMReader;
+    class Reader;
 }
 
 namespace MWRender
@@ -220,10 +224,10 @@ namespace MWWorld
     class RegionWeather
     {
     public:
-        explicit RegionWeather(const ESM::Region& region);
-        explicit RegionWeather(const ESM::RegionWeatherState& state);
+        explicit RegionWeather(const ESM3::Region& region);
+        explicit RegionWeather(const ESM3::RegionWeatherState& state);
 
-        operator ESM::RegionWeatherState() const;
+        operator ESM3::RegionWeatherState() const;
 
         void setChances(const std::vector<char>& chances);
 
@@ -309,7 +313,7 @@ namespace MWWorld
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
-        bool readRecord(ESM::ESMReader& reader, uint32_t type);
+        bool readRecord(ESM3::Reader& reader, uint32_t type);
 
         void clear();
 

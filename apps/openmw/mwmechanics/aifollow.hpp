@@ -9,7 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace ESM
+namespace ESM3
 {
 namespace AiSequence
 {
@@ -49,7 +49,7 @@ namespace MWMechanics
             /// Follow Actor indefinitively
             AiFollow(const MWWorld::Ptr& actor, bool commanded=false);
 
-            AiFollow(const ESM::AiSequence::AiFollow* follow);
+            AiFollow(const ESM3::AiSequence::AiFollow* follow);
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
@@ -67,7 +67,7 @@ namespace MWMechanics
             /// Returns the actor being followed
             std::string getFollowedActor();
 
-            void writeState (ESM::AiSequence::AiSequence& sequence) const override;
+            void writeState (ESM3::AiSequence::AiSequence& sequence) const override;
 
             bool isCommanded() const;
 

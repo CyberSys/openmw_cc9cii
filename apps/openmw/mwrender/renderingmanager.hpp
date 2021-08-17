@@ -39,7 +39,7 @@ namespace osgViewer
     class Viewer;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct Cell;
     struct RefNum;
@@ -128,8 +128,8 @@ namespace MWRender
         void setSunDirection(const osg::Vec3f& direction);
         void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular);
 
-        void configureAmbient(const ESM::Cell* cell);
-        void configureFog(const ESM::Cell* cell);
+        void configureAmbient(const ESM3::Cell* cell);
+        void configureFog(const ESM3::Cell* cell);
         void configureFog(float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f& colour);
 
         void addCell(const MWWorld::CellStore* store);
@@ -158,7 +158,7 @@ namespace MWRender
             osg::Vec3f mHitNormalWorld;
             osg::Vec3f mHitPointWorld;
             MWWorld::Ptr mHitObject;
-            ESM::RefNum mHitRefnum;
+            ESM3::RefNum mHitRefnum;
             float mRatio;
         };
 
@@ -237,7 +237,7 @@ namespace MWRender
         bool pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
         void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
         bool pagingUnlockCache();
-        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
+        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM3::RefNum> &out);
 
         void updateProjectionMatrix();
 

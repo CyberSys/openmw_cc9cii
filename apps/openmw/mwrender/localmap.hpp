@@ -14,7 +14,7 @@ namespace MWWorld
     class CellStore;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct FogTexture;
 }
@@ -119,8 +119,8 @@ namespace MWRender
             ~MapSegment() = default;
 
             void initFogOfWar();
-            void loadFogOfWar(const ESM::FogTexture& fog);
-            void saveFogOfWar(ESM::FogTexture& fog) const;
+            void loadFogOfWar(const ESM3::FogTexture& fog);
+            void saveFogOfWar(ESM3::FogTexture& fog) const;
             void createFogOfWarTexture();
 
             osg::ref_ptr<osg::Texture2D> mMapTexture;

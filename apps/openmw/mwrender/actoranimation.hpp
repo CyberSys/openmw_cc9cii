@@ -58,7 +58,7 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         PartHolderPtr mHolsteredShield;
 
     private:
-        void addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM::Light* esmLight);
+        void addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM3::Light* esmLight);
         void removeHiddenItemLight(const MWWorld::ConstPtr& item);
         void resetControllers(osg::Node* node);
 

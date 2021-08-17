@@ -4,7 +4,7 @@
 #include <osg/Object>
 
 #include <components/resource/resourcemanager.hpp>
-#include <components/esmterrain/storage.hpp>
+#include <components/esm3terrain/storage.hpp>
 
 namespace ESM
 {
@@ -20,7 +20,7 @@ namespace MWRender
         LandManager(int loadFlags);
 
         /// @note Will return nullptr if not found.
-        osg::ref_ptr<ESMTerrain::LandObject> getLand(int x, int y);
+        osg::ref_ptr<ESM3Terrain::LandObject> getLand(int x, int y);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

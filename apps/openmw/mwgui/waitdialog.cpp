@@ -187,15 +187,15 @@ namespace MWGui
             std::string regionstr = player.getCell()->getCell()->mRegion;
             if (!regionstr.empty())
             {
-                const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);
+                const ESM3::Region *region = world->getStore().get<ESM3::Region>().find (regionstr);
                 if (!region->mSleepList.empty())
                 {
                     // figure out if player will be woken while sleeping
                     int x = Misc::Rng::rollDice(hoursToWait);
-                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->mValue.getFloat();
+                    float fSleepRandMod = world->getStore().get<ESM3::GameSetting>().find("fSleepRandMod")->mValue.getFloat();
                     if (x < fSleepRandMod * hoursToWait)
                     {
-                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->mValue.getFloat();
+                        float fSleepRestMod = world->getStore().get<ESM3::GameSetting>().find("fSleepRestMod")->mValue.getFloat();
                         int interruptAtHoursRemaining = int(fSleepRestMod * hoursToWait);
                         if (interruptAtHoursRemaining != 0)
                         {
@@ -259,8 +259,8 @@ namespace MWGui
         const MWMechanics::NpcStats &pcstats = player.getClass().getNpcStats(player);
 
         // trigger levelup if possible
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
         if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->mValue.getInteger())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);

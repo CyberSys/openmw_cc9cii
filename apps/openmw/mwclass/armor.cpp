@@ -1,8 +1,8 @@
 #include "armor.hpp"
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/skil.hpp>
+#include <components/esm3/gmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -36,7 +36,7 @@ namespace MWClass
 
     std::string Armor::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -47,7 +47,7 @@ namespace MWClass
 
     std::string Armor::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -66,21 +66,21 @@ namespace MWClass
 
     int Armor::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return ref->mBase->mData.mHealth;
     }
 
     std::string Armor::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return ref->mBase->mScript;
     }
 
     std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         std::vector<int> slots_;
 
@@ -88,17 +88,17 @@ namespace MWClass
 
         static const int sMapping[size][2] =
         {
-            { ESM::Armor::Helmet, MWWorld::InventoryStore::Slot_Helmet },
-            { ESM::Armor::Cuirass, MWWorld::InventoryStore::Slot_Cuirass },
-            { ESM::Armor::LPauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
-            { ESM::Armor::RPauldron, MWWorld::InventoryStore::Slot_RightPauldron },
-            { ESM::Armor::Greaves, MWWorld::InventoryStore::Slot_Greaves },
-            { ESM::Armor::Boots, MWWorld::InventoryStore::Slot_Boots },
-            { ESM::Armor::LGauntlet, MWWorld::InventoryStore::Slot_LeftGauntlet },
-            { ESM::Armor::RGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet },
-            { ESM::Armor::Shield, MWWorld::InventoryStore::Slot_CarriedLeft },
-            { ESM::Armor::LBracer, MWWorld::InventoryStore::Slot_LeftGauntlet },
-            { ESM::Armor::RBracer, MWWorld::InventoryStore::Slot_RightGauntlet }
+            { ESM3::Armor::Helmet, MWWorld::InventoryStore::Slot_Helmet },
+            { ESM3::Armor::Cuirass, MWWorld::InventoryStore::Slot_Cuirass },
+            { ESM3::Armor::LPauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
+            { ESM3::Armor::RPauldron, MWWorld::InventoryStore::Slot_RightPauldron },
+            { ESM3::Armor::Greaves, MWWorld::InventoryStore::Slot_Greaves },
+            { ESM3::Armor::Boots, MWWorld::InventoryStore::Slot_Boots },
+            { ESM3::Armor::LGauntlet, MWWorld::InventoryStore::Slot_LeftGauntlet },
+            { ESM3::Armor::RGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet },
+            { ESM3::Armor::Shield, MWWorld::InventoryStore::Slot_CarriedLeft },
+            { ESM3::Armor::LBracer, MWWorld::InventoryStore::Slot_LeftGauntlet },
+            { ESM3::Armor::RBracer, MWWorld::InventoryStore::Slot_RightGauntlet }
         };
 
         for (int i=0; i<size; ++i)
@@ -113,48 +113,48 @@ namespace MWClass
 
     int Armor::getEquipmentSkill (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         std::string typeGmst;
 
         switch (ref->mBase->mData.mType)
         {
-            case ESM::Armor::Helmet: typeGmst = "iHelmWeight"; break;
-            case ESM::Armor::Cuirass: typeGmst = "iCuirassWeight"; break;
-            case ESM::Armor::LPauldron:
-            case ESM::Armor::RPauldron: typeGmst = "iPauldronWeight"; break;
-            case ESM::Armor::Greaves: typeGmst = "iGreavesWeight"; break;
-            case ESM::Armor::Boots: typeGmst = "iBootsWeight"; break;
-            case ESM::Armor::LGauntlet:
-            case ESM::Armor::RGauntlet: typeGmst = "iGauntletWeight"; break;
-            case ESM::Armor::Shield: typeGmst = "iShieldWeight"; break;
-            case ESM::Armor::LBracer:
-            case ESM::Armor::RBracer: typeGmst = "iGauntletWeight"; break;
+            case ESM3::Armor::Helmet: typeGmst = "iHelmWeight"; break;
+            case ESM3::Armor::Cuirass: typeGmst = "iCuirassWeight"; break;
+            case ESM3::Armor::LPauldron:
+            case ESM3::Armor::RPauldron: typeGmst = "iPauldronWeight"; break;
+            case ESM3::Armor::Greaves: typeGmst = "iGreavesWeight"; break;
+            case ESM3::Armor::Boots: typeGmst = "iBootsWeight"; break;
+            case ESM3::Armor::LGauntlet:
+            case ESM3::Armor::RGauntlet: typeGmst = "iGauntletWeight"; break;
+            case ESM3::Armor::Shield: typeGmst = "iShieldWeight"; break;
+            case ESM3::Armor::LBracer:
+            case ESM3::Armor::RBracer: typeGmst = "iGauntletWeight"; break;
         }
 
         if (typeGmst.empty())
             return -1;
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         float iWeight = floor(gmst.find(typeGmst)->mValue.getFloat());
 
         float epsilon = 0.0005f;
 
         if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fLightMaxMod")->mValue.getFloat() + epsilon)
-            return ESM::Skill::LightArmor;
+            return ESM3::Skill::LightArmor;
 
         if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fMedMaxMod")->mValue.getFloat() + epsilon)
-            return ESM::Skill::MediumArmor;
+            return ESM3::Skill::MediumArmor;
 
         else
-            return ESM::Skill::HeavyArmor;
+            return ESM3::Skill::HeavyArmor;
     }
 
     int Armor::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return ref->mBase->mData.mValue;
     }
@@ -163,15 +163,15 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Armor);
 
-        registerClass (typeid (ESM::Armor).name(), instance);
+        registerClass (typeid (ESM3::Armor).name(), instance);
     }
 
     std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
-        if (es == ESM::Skill::LightArmor)
+        if (es == ESM3::Skill::LightArmor)
             return std::string("Item Armor Light Up");
-        else if (es == ESM::Skill::MediumArmor)
+        else if (es == ESM3::Skill::MediumArmor)
             return std::string("Item Armor Medium Up");
         else
             return std::string("Item Armor Heavy Up");
@@ -180,9 +180,9 @@ namespace MWClass
     std::string Armor::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
-        if (es == ESM::Skill::LightArmor)
+        if (es == ESM3::Skill::LightArmor)
             return std::string("Item Armor Light Down");
-        else if (es == ESM::Skill::MediumArmor)
+        else if (es == ESM3::Skill::MediumArmor)
             return std::string("Item Armor Medium Down");
         else
             return std::string("Item Armor Heavy Down");
@@ -190,14 +190,14 @@ namespace MWClass
 
     std::string Armor::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return ref->mBase->mIcon;
     }
 
     MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -211,10 +211,10 @@ namespace MWClass
             typeText = "";
         else
         {
-            int armorType = getEquipmentSkill(ptr);       
-            if (armorType == ESM::Skill::LightArmor)
+            int armorType = getEquipmentSkill(ptr);
+            if (armorType == ESM3::Skill::LightArmor)
                 typeText = "#{sLight}";
-            else if (armorType == ESM::Skill::MediumArmor)
+            else if (armorType == ESM3::Skill::MediumArmor)
                 typeText = "#{sMedium}";
             else
                 typeText = "#{sHeavy}";
@@ -248,33 +248,33 @@ namespace MWClass
 
     std::string Armor::getEnchantment (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return ref->mBase->mEnchant;
     }
 
     std::string Armor::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
-        ESM::Armor newItem = *ref->mBase;
+        ESM3::Armor newItem = *ref->mBase;
         newItem.mId="";
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
-        const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        const ESM3::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
     }
 
     float Armor::getEffectiveArmorRating(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &actor) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         int armorSkillType = getEquipmentSkill(ptr);
         float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
 
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        int iBaseArmorSkill = world->getStore().get<ESM::GameSetting>().find("iBaseArmorSkill")->mValue.getInteger();
+        int iBaseArmorSkill = world->getStore().get<ESM3::GameSetting>().find("iBaseArmorSkill")->mValue.getInteger();
 
         if(ref->mBase->mData.mWeight == 0)
             return ref->mBase->mData.mArmor;
@@ -297,19 +297,19 @@ namespace MWClass
 
         if (npc.getClass().isNpc())
         {
-            std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+            std::string npcRace = npc.get<ESM3::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-            if(race->mData.mFlags & ESM::Race::Beast)
+            const ESM3::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM3::Race::Beast)
             {
-                std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
+                std::vector<ESM3::PartReference> parts = ptr.get<ESM3::Armor>()->mBase->mParts.mParts;
 
-                for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                for(std::vector<ESM3::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                 {
-                    if((*itr).mPart == ESM::PRT_Head)
+                    if((*itr).mPart == ESM3::PRT_Head)
                         return std::make_pair(0, "#{sNotifyMessage13}");
-                    if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                    if((*itr).mPart == ESM3::PRT_LFoot || (*itr).mPart == ESM3::PRT_RFoot)
                         return std::make_pair(0, "#{sNotifyMessage14}");
                 }
             }
@@ -322,10 +322,10 @@ namespace MWClass
             if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
             {
                 MWWorld::ConstContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if(weapon != invStore.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
+                if(weapon != invStore.end() && weapon->getTypeName() == typeid(ESM3::Weapon).name())
                 {
-                    const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                    if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM::WeaponType::TwoHanded)
+                    const MWWorld::LiveCellRef<ESM3::Weapon> *ref = weapon->get<ESM3::Weapon>();
+                    if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM3::WeaponType::TwoHanded)
                         return std::make_pair(3,"");
                 }
 
@@ -346,27 +346,27 @@ namespace MWClass
 
     MWWorld::Ptr Armor::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     int Armor::getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
 
         return ref->mBase->mData.mEnchant;
     }
 
     bool Armor::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return (npcServices & ESM::NPC::Armor)
-                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
+        return (npcServices & ESM3::NPC::Armor)
+                || ((npcServices & ESM3::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Armor::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM3::Armor> *ref = ptr.get<ESM3::Armor>();
         return ref->mBase->mData.mWeight;
     }
 }

@@ -5,7 +5,7 @@
 
 #include <MyGUI_ImageBox.h>
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/mgef.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
@@ -68,15 +68,15 @@ namespace MWGui
         for (auto& effectInfoPair : effects)
         {
             const int effectId = effectInfoPair.first;
-            const ESM::MagicEffect* effect =
-                MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectId);
+            const ESM3::MagicEffect* effect =
+                MWBase::Environment::get().getWorld ()->getStore ().get<ESM3::MagicEffect>().find(effectId);
 
             float remainingDuration = 0;
             float totalDuration = 0;
 
             std::string sourcesDescription;
 
-            static const float fadeTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMagicStartIconBlink")->mValue.getFloat();
+            static const float fadeTime = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fMagicStartIconBlink")->mValue.getFloat();
 
             std::vector<MagicEffectInfo>& effectInfos = effectInfoPair.second;
             bool addNewLine = false;
@@ -99,38 +99,38 @@ namespace MWGui
 
                 sourcesDescription += effectInfo.mSource;
 
-                if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                if (effect->mData.mFlags & ESM3::MagicEffect::TargetSkill)
                     sourcesDescription += " (" +
                             MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                                ESM::Skill::sSkillNameIds[effectInfo.mKey.mArg], "") + ")";
-                if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+                                ESM3::Skill::sSkillNameIds[effectInfo.mKey.mArg], "") + ")";
+                if (effect->mData.mFlags & ESM3::MagicEffect::TargetAttribute)
                     sourcesDescription += " (" +
                             MWBase::Environment::get().getWindowManager()->getGameSettingString(
                                 ESM::Attribute::sGmstAttributeIds[effectInfo.mKey.mArg], "") + ")";
 
-                ESM::MagicEffect::MagnitudeDisplayType displayType = effect->getMagnitudeDisplayType();
-                if (displayType == ESM::MagicEffect::MDT_TimesInt)
+                ESM3::MagicEffect::MagnitudeDisplayType displayType = effect->getMagnitudeDisplayType();
+                if (displayType == ESM3::MagicEffect::MDT_TimesInt)
                 {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
                     std::stringstream formatter;
                     formatter << std::fixed << std::setprecision(1) << " " << (effectInfo.mMagnitude / 10.0f) << timesInt;
                     sourcesDescription += formatter.str();
                 }
-                else if ( displayType != ESM::MagicEffect::MDT_None )
+                else if ( displayType != ESM3::MagicEffect::MDT_None )
                 {
                     sourcesDescription += ": " + MyGUI::utility::toString(effectInfo.mMagnitude);
 
-                    if ( displayType == ESM::MagicEffect::MDT_Percentage )
+                    if ( displayType == ESM3::MagicEffect::MDT_Percentage )
                         sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
-                    else if ( displayType == ESM::MagicEffect::MDT_Feet )
+                    else if ( displayType == ESM3::MagicEffect::MDT_Feet )
                         sourcesDescription += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", "");
-                    else if ( displayType == ESM::MagicEffect::MDT_Level )
+                    else if ( displayType == ESM3::MagicEffect::MDT_Level )
                     {
                         sourcesDescription += " " + ((effectInfo.mMagnitude > 1) ?
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", "") :
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", "") );
                     }
-                    else // ESM::MagicEffect::MDT_Points
+                    else // ESM3::MagicEffect::MDT_Points
                     {
                         sourcesDescription += " " + ((effectInfo.mMagnitude > 1) ?
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "") :
@@ -154,7 +154,7 @@ namespace MWGui
 
                     image->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
-                    std::string name = ESM::MagicEffect::effectIdToString (effectId);
+                    std::string name = ESM3::MagicEffect::effectIdToString (effectId);
 
                     ToolTipInfo tooltipInfo;
                     tooltipInfo.caption = "#{" + name + "}";

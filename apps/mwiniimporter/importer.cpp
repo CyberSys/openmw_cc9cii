@@ -939,7 +939,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
         {
             dependencies.push_back(gameFile.name);
         }
-        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), dependencies);
+        unsortedFiles.emplace_back(boost::filesystem::path(reader.getFileName()).filename().string(), dependencies);
         reader.close();
     }
 

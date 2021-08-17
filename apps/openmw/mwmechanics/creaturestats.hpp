@@ -13,9 +13,9 @@
 #include "drawstate.hpp"
 
 #include <components/esm/attr.hpp>
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/magiceffects.hpp>
 
-namespace ESM
+namespace ESM3
 {
     struct CreatureStats;
 }
@@ -87,7 +87,7 @@ namespace MWMechanics
         float mSideMovementAngle;
 
     private:
-        std::map<ESM::SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+        std::map<ESM3::SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
 
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
@@ -236,7 +236,7 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<ESM::SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::map<ESM3::SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
         std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag
@@ -270,12 +270,12 @@ namespace MWMechanics
         // TODO: Put it somewhere else?
         std::set<int> mBoundItems;
 
-        void writeState (ESM::CreatureStats& state) const;
+        void writeState (ESM3::CreatureStats& state) const;
 
-        void readState (const ESM::CreatureStats& state);
+        void readState (const ESM3::CreatureStats& state);
 
         static void writeActorIdCounter (ESM::ESMWriter& esm);
-        static void readActorIdCounter (ESM::ESMReader& esm);
+        static void readActorIdCounter (ESM3::Reader& esm);
 
         void setLastRestockTime(MWWorld::TimeStamp tradeTime);
         MWWorld::TimeStamp getLastRestockTime() const;

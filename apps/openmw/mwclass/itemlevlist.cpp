@@ -1,6 +1,6 @@
 #include "itemlevlist.hpp"
 
-#include <components/esm/loadlevlist.hpp>
+#include <components/esm3/levlist.hpp>
 
 namespace MWClass
 {
@@ -19,6 +19,6 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new ItemLevList);
 
-        registerClass (typeid (ESM::ItemLevList).name(), instance);
+        registerClass (typeid (ESM3::ItemLevList).name(), instance);
     }
 }

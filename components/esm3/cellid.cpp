@@ -8,10 +8,10 @@ const std::string ESM3::CellId::sDefaultWorldspace = "sys::default";
 
 void ESM3::CellId::load (Reader& reader)
 {
-    if (reader.subRecordHeader().typeId == ESM3::SUB_SPAC)
-        reader.getZString(mWorldspace);
+    if (reader.getNextSubRecordType() == ESM3::SUB_SPAC && reader.getSubRecordHeader())
+        reader.getString(mWorldspace); // NOTE: string not null terminated
 
-    if (reader.getSubRecordHeader() && reader.subRecordHeader().typeId == ESM3::SUB_CIDX)
+    if (reader.getNextSubRecordType() == ESM3::SUB_CIDX && reader.getSubRecordHeader())
     {
         reader.get(mIndex, 8);
         mPaged = true;

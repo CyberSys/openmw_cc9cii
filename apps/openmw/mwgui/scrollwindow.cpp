@@ -2,7 +2,7 @@
 
 #include <MyGUI_ScrollView.h>
 
-#include <components/esm/loadbook.hpp>
+#include <components/esm3/book.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -48,7 +48,7 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
         bool showTakeButton = scroll.getContainerStore() != &player.getClass().getContainerStore(player);
 
-        MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
+        MWWorld::LiveCellRef<ESM3::Book> *ref = mScroll.get<ESM3::Book>();
 
         Formatting::BookFormatter formatter;
         formatter.markupToWidget(mTextView, ref->mBase->mText, 390, mTextView->getHeight());

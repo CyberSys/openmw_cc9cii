@@ -29,7 +29,7 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
     }
 
-    bool SpellBuyingWindow::sortSpells (const ESM::Spell* left, const ESM::Spell* right)
+    bool SpellBuyingWindow::sortSpells (const ESM3::Spell* left, const ESM3::Spell* right)
     {
         std::string leftName = Misc::StringUtils::lowerCase(left->mName);
         std::string rightName = Misc::StringUtils::lowerCase(right->mName);
@@ -37,12 +37,12 @@ namespace MWGui
         return leftName.compare(rightName) < 0;
     }
 
-    void SpellBuyingWindow::addSpell(const ESM::Spell& spell)
+    void SpellBuyingWindow::addSpell(const ESM3::Spell& spell)
     {
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        int price = std::max(1, static_cast<int>(spell.mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
+        int price = std::max(1, static_cast<int>(spell.mData.mCost*store.get<ESM3::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -97,20 +97,20 @@ namespace MWGui
 
         MWMechanics::Spells& merchantSpells = actor.getClass().getCreatureStats (actor).getSpells();
 
-        std::vector<const ESM::Spell*> spellsToSort;
+        std::vector<const ESM3::Spell*> spellsToSort;
 
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
-            const ESM::Spell* spell = iter->first;
+            const ESM3::Spell* spell = iter->first;
 
-            if (spell->mData.mType!=ESM::Spell::ST_Spell)
+            if (spell->mData.mType!=ESM3::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
 
             if (actor.getClass().isNpc())
             {
-                const ESM::Race* race =
-                        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(
-                        actor.get<ESM::NPC>()->mBase->mRace);
+                const ESM3::Race* race =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>().find(
+                        actor.get<ESM3::NPC>()->mBase->mRace);
                 if (race->mPowers.exists(spell->mId))
                     continue;
             }
@@ -123,7 +123,7 @@ namespace MWGui
 
         std::stable_sort(spellsToSort.begin(), spellsToSort.end(), sortSpells);
 
-        for (const ESM::Spell* spell : spellsToSort)
+        for (const ESM3::Spell* spell : spellsToSort)
         {
             addSpell(*spell);
         }

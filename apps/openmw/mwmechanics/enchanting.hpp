@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadench.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/ench.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -20,13 +20,13 @@ namespace MWMechanics
 
             bool mSelfEnchanting;
 
-            ESM::EffectList mEffectList;
+            ESM3::EffectList mEffectList;
 
             std::string mNewItemName;
             std::string mObjectType;
             int mWeaponType;
 
-            const ESM::Enchantment* getRecord(const ESM::Enchantment& newEnchantment) const;
+            const ESM3::Enchantment* getRecord(const ESM3::Enchantment& newEnchantment) const;
 
         public:
             Enchanting();
@@ -36,7 +36,7 @@ namespace MWMechanics
             MWWorld::Ptr getOldItem() { return mOldItemPtr; }
             MWWorld::Ptr getGem() { return mSoulGemPtr; }
             void setNewItemName(const std::string& s);
-            void setEffect(const ESM::EffectList& effectList);
+            void setEffect(const ESM3::EffectList& effectList);
             void setSoulGem(const MWWorld::Ptr& soulGem);
             bool create(); //Return true if created, false if failed.
             void nextCastStyle(); //Set enchant type to next possible type (for mOldItemPtr object)

@@ -10,7 +10,7 @@
 
 #include <array>
 
-namespace ESM
+namespace ESM3
 {
     struct NPC;
     struct BodyPart;
@@ -31,10 +31,10 @@ class NpcAnimation : public ActorAnimation, public WeaponAnimation, public MWWor
 {
 public:
     void equipmentChanged() override;
-    void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew) override;
+    void permanentEffectAdded(const ESM3::MagicEffect *magicEffect, bool isNew) override;
 
 public:
-    typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
+    typedef std::map<ESM3::PartReferenceType,std::string> PartBoneMap;
 
     enum ViewMode {
         VM_Normal,
@@ -46,10 +46,10 @@ private:
     static const PartBoneMap sPartList;
 
     // Bounded Parts
-    PartHolderPtr mObjectParts[ESM::PRT_Count];
-    std::array<MWSound::Sound*, ESM::PRT_Count> mSounds;
+    PartHolderPtr mObjectParts[ESM3::PRT_Count];
+    std::array<MWSound::Sound*, ESM3::PRT_Count> mSounds;
 
-    const ESM::NPC *mNpc;
+    const ESM3::NPC *mNpc;
     std::string    mHeadModel;
     std::string    mHairModel;
     ViewMode       mViewMode;
@@ -64,8 +64,8 @@ private:
     };
     NpcType mNpcType;
 
-    int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
-    int mPartPriorities[ESM::PRT_Count];
+    int mPartslots[ESM3::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[ESM3::PRT_Count];
 
     osg::Vec3f mFirstPersonOffset;
     // Field of view to use when rendering first person meshes
@@ -86,21 +86,21 @@ private:
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
                                         const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
 
-    void removeIndividualPart(ESM::PartReferenceType type);
-    void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
+    void removeIndividualPart(ESM3::PartReferenceType type);
+    void reserveIndividualPart(ESM3::PartReferenceType type, int group, int priority);
 
-    bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh,
+    bool addOrReplaceIndividualPart(ESM3::PartReferenceType type, int group, int priority, const std::string &mesh,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
     void removePartGroup(int group);
-    void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
+    void addPartGroup(int group, int priority, const std::vector<ESM3::PartReference> &parts,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
 
     void setRenderBin();
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
 
-    static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
-    static bool isFemalePart(const ESM::BodyPart* bodypart);
+    static bool isFirstPersonPart(const ESM3::BodyPart* bodypart);
+    static bool isFemalePart(const ESM3::BodyPart* bodypart);
     static NpcType getNpcType(const MWWorld::Ptr& ptr);
 
 protected:
@@ -171,7 +171,7 @@ public:
 
     /// Get a list of body parts that may be used by an NPC of given race and gender.
     /// @note This is a fixed size list, one list item for each ESM::PartReferenceType, may contain nullptr body parts.
-    static const std::vector<const ESM::BodyPart*>& getBodyParts(const std::string& raceId, bool female, bool firstperson, bool werewolf);
+    static const std::vector<const ESM3::BodyPart*>& getBodyParts(const std::string& raceId, bool female, bool firstperson, bool werewolf);
 };
 
 }

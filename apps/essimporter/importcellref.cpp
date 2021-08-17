@@ -83,7 +83,7 @@ namespace ESSImport
                     break;
                 }
                 default:
-                    esm.unreadSubRecordHeader(); // prepare for continuing in ConvertCell::read()
+                    esm.cacheSubRecordHeader(); // prepare for continuing in ConvertCell::read()
                     finished = true;
                     break;
             }

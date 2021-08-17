@@ -9,8 +9,13 @@
 
 namespace ESM
 {
-    class ESMReader;
+    class Reader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
     struct CellId;
     struct Cell;
     struct RefNum;
@@ -30,7 +35,7 @@ namespace MWWorld
     {
             typedef std::vector<std::pair<std::string, CellStore *> > IdCache;
             const MWWorld::ESMStore& mStore;
-            std::vector<ESM::ESMReader>& mReader;
+            std::vector<ESM::Reader*>& mReader;
             mutable std::map<std::string, CellStore> mInteriors;
             mutable std::map<std::pair<int, int>, CellStore> mExteriors;
             IdCache mIdCache;
@@ -39,11 +44,11 @@ namespace MWWorld
             Cells (const Cells&);
             Cells& operator= (const Cells&);
 
-            CellStore *getCellStore (const ESM::Cell *cell);
+            CellStore *getCellStore (const ESM3::Cell *cell);
 
             Ptr getPtrAndCache (const std::string& name, CellStore& cellStore);
 
-            Ptr getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum);
+            Ptr getPtr(CellStore& cellStore, const std::string& id, const ESM3::RefNum& refNum);
 
             void writeCell (ESM::ESMWriter& writer, CellStore& cell) const;
 
@@ -51,13 +56,13 @@ namespace MWWorld
 
             void clear();
 
-            Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader);
+            Cells (const MWWorld::ESMStore& store, std::vector<ESM::Reader*>& reader);
 
             CellStore *getExterior (int x, int y);
 
             CellStore *getInterior (const std::string& name);
 
-            CellStore *getCell (const ESM::CellId& id);
+            CellStore *getCell (const ESM3::CellId& id);
 
             Ptr getPtr (const std::string& name, CellStore& cellStore, bool searchInContainers = false);
             ///< \param searchInContainers Only affect loaded cells.
@@ -66,7 +71,7 @@ namespace MWWorld
             /// @note name must be lower case
             Ptr getPtr (const std::string& name);
 
-            Ptr getPtr(const std::string& id, const ESM::RefNum& refNum);
+            Ptr getPtr(const std::string& id, const ESM3::RefNum& refNum);
 
             void rest (double hours);
             void recharge (float duration);
@@ -87,7 +92,7 @@ namespace MWWorld
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            bool readRecord (ESM::ESMReader& reader, uint32_t type,
+            bool readRecord (ESM::Reader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap);
     };
 }

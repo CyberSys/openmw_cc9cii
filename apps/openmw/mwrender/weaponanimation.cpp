@@ -66,12 +66,12 @@ void WeaponAnimation::attachArrow(const MWWorld::Ptr& actor)
     MWWorld::ConstContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weaponSlot == inv.end())
         return;
-    if (weaponSlot->getTypeName() != typeid(ESM::Weapon).name())
+    if (weaponSlot->getTypeName() != typeid(ESM3::Weapon).name())
         return;
 
-    int type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
-    ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
-    if (weapclass == ESM::WeaponType::Thrown)
+    int type = weaponSlot->get<ESM3::Weapon>()->mBase->mData.mType;
+    ESM3::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+    if (weapclass == ESM3::WeaponType::Thrown)
     {
         std::string soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
         if(!soundid.empty())
@@ -81,7 +81,7 @@ void WeaponAnimation::attachArrow(const MWWorld::Ptr& actor)
         }
         showWeapon(true);
     }
-    else if (weapclass == ESM::WeaponType::Ranged)
+    else if (weapclass == ESM3::WeaponType::Ranged)
     {
         osg::Group* parent = getArrowBone();
         if (!parent)
@@ -109,19 +109,19 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
         return;
-    if (weapon->getTypeName() != typeid(ESM::Weapon).name())
+    if (weapon->getTypeName() != typeid(ESM3::Weapon).name())
         return;
 
     // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.
     osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
             * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
 
-    const MWWorld::Store<ESM::GameSetting> &gmst =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+    const MWWorld::Store<ESM3::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
     MWMechanics::applyFatigueLoss(actor, *weapon, attackStrength);
 
-    if (MWMechanics::getWeaponType(weapon->get<ESM::Weapon>()->mBase->mData.mType)->mWeaponClass == ESM::WeaponType::Thrown)
+    if (MWMechanics::getWeaponType(weapon->get<ESM3::Weapon>()->mBase->mData.mType)->mWeaponClass == ESM3::WeaponType::Thrown)
     {
         // Thrown weapons get detached now
         osg::Node* weaponNode = getWeaponNode();

@@ -14,7 +14,7 @@
 
 #include <variant>
 
-namespace ESM
+namespace ESM3
 {
     struct Cell;
     struct Pathgrid;
@@ -139,9 +139,9 @@ namespace DetourNavigator
 
         virtual bool removeHeightfield(const osg::Vec2i& cellPosition) = 0;
 
-        virtual void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) = 0;
+        virtual void addPathgrid(const ESM3::Cell& cell, const ESM3::Pathgrid& pathgrid) = 0;
 
-        virtual void removePathgrid(const ESM::Pathgrid& pathgrid) = 0;
+        virtual void removePathgrid(const ESM3::Pathgrid& pathgrid) = 0;
 
         /**
          * @brief update starts background navmesh update using current scene state.

@@ -20,7 +20,7 @@ void ESM::ObjectState::load (ESMReader &esm)
     if (mHasLocals)
         mLocals.load (esm);
 
-    mLuaScripts.load(esm);
+    //mLuaScripts.load(esm); // using ESM3 verion now comment so that this compiles
 
     mEnabled = 1;
     esm.getHNOT (mEnabled, "ENAB");

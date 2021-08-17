@@ -35,7 +35,7 @@ namespace MWMechanics
         MWWorld::CellStore *cell = actor.getCell();
 
         // Check all the doors in this cell
-        const MWWorld::CellRefList<ESM::Door>& doors = cell->getReadOnlyDoors();
+        const MWWorld::CellRefList<ESM3::Door>& doors = cell->getReadOnlyDoors();
         osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
         pos.z() = 0;
 
@@ -46,7 +46,7 @@ namespace MWMechanics
             osg::Vec3f doorPos(ref.mData.getPosition().asVec3());
 
             // FIXME: cast
-            const MWWorld::Ptr doorPtr = MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell());
+            const MWWorld::Ptr doorPtr = MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM3::Door> &>(ref), actor.getCell());
 
             const auto doorState = doorPtr.getClass().getDoorState(doorPtr);
             float doorRot = ref.mData.getPosition().rot[2] - doorPtr.getCellRef().getPosition().rot[2];

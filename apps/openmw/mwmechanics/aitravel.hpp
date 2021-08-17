@@ -3,7 +3,7 @@
 
 #include "typedaipackage.hpp"
 
-namespace ESM
+namespace ESM3
 {
 namespace AiSequence
 {
@@ -25,12 +25,12 @@ namespace MWMechanics
 
             AiTravel(float x, float y, float z);
 
-            explicit AiTravel(const ESM::AiSequence::AiTravel* travel);
+            explicit AiTravel(const ESM3::AiSequence::AiTravel* travel);
 
             /// Simulates the passing of time
             void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
+            void writeState(ESM3::AiSequence::AiSequence &sequence) const override;
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
@@ -58,7 +58,7 @@ namespace MWMechanics
     {
         AiInternalTravel(float x, float y, float z);
 
-        explicit AiInternalTravel(const ESM::AiSequence::AiTravel* travel);
+        explicit AiInternalTravel(const ESM3::AiSequence::AiTravel* travel);
 
         static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::InternalTravel; }
 

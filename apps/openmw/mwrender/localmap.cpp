@@ -12,8 +12,8 @@
 #include <osgDB/ReadFile>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/fogstate.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/fogstate.hpp>
+#include <components/esm3/cell.hpp>
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -131,7 +131,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 
         if (segment.mFogOfWarImage && segment.mHasFogState)
         {
-            std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
+            std::unique_ptr<ESM3::FogState> fog (new ESM3::FogState());
             fog->mFogTextures.emplace_back();
 
             segment.saveFogOfWar(fog->mFogTextures.back());
@@ -143,7 +143,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
     {
         auto segments = divideIntoSegments(mBounds, mMapWorldSize);
 
-        std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
+        std::unique_ptr<ESM3::FogState> fog (new ESM3::FogState());
 
         fog->mBounds.mMinX = mBounds.xMin();
         fog->mBounds.mMaxX = mBounds.xMax();
@@ -236,7 +236,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
-    // override sun for local map 
+    // override sun for local map
     SceneUtil::configureStateSetSunOverride(static_cast<SceneUtil::LightManager*>(mSceneRoot.get()), light, stateset);
 
     camera->addChild(lightSource);
@@ -417,7 +417,7 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
     }
 
     // Do NOT change padding! This will break older savegames.
-    // If the padding really needs to be changed, then it must be saved in the ESM::FogState and
+    // If the padding really needs to be changed, then it must be saved in the ESM3::FogState and
     // assume the old (500) value as default for older savegames.
     const float padding = 500.0f;
 
@@ -436,7 +436,7 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
     std::vector<std::pair<int, int>> segmentMappings;
     if (cell->getFog())
     {
-        ESM::FogState* fog = cell->getFog();
+        ESM3::FogState* fog = cell->getFog();
 
         if (std::abs(mAngle - fog->mNorthMarkerAngle) < osg::DegreesToRadians(5.f))
         {
@@ -519,7 +519,7 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
                 {
                     if(segmentMappings[index] == coords)
                     {
-                        ESM::FogState* fog = cell->getFog();
+                        ESM3::FogState* fog = cell->getFog();
                         segment.loadFogOfWar(fog->mFogTextures[index]);
                         loaded = true;
                         break;
@@ -704,7 +704,7 @@ void LocalMap::MapSegment::initFogOfWar()
     mFogOfWarTexture->setImage(mFogOfWarImage);
 }
 
-void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
+void LocalMap::MapSegment::loadFogOfWar(const ESM3::FogTexture &esm)
 {
     const std::vector<char>& data = esm.mImageData;
     if (data.empty())
@@ -738,7 +738,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     mHasFogState = true;
 }
 
-void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
+void LocalMap::MapSegment::saveFogOfWar(ESM3::FogTexture &fog) const
 {
     if (!mFogOfWarImage)
         return;

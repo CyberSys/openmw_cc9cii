@@ -6,7 +6,11 @@
 namespace ESM
 {
     class ESMWriter;
-    class ESMReader;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace MWLua
@@ -48,7 +52,7 @@ namespace MWLua
         MWWorld::CellStore* findNamedCell(const std::string& name);
         MWWorld::CellStore* findExteriorCell(int x, int y);
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
         void save(ESM::ESMWriter& esm) const;
 
     private:

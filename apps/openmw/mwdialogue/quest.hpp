@@ -3,7 +3,7 @@
 
 #include "topic.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct QuestState;
 }
@@ -22,7 +22,7 @@ namespace MWDialogue
 
             Quest (const std::string& topic);
 
-            Quest (const ESM::QuestState& state);
+            Quest (const ESM3::QuestState& state);
 
             std::string getName() const override;
             ///< May be an empty string
@@ -39,7 +39,7 @@ namespace MWDialogue
             ///
             /// \note Redundant entries are ignored, but the index is still adjusted.
 
-            void write (ESM::QuestState& state) const;
+            void write (ESM3::QuestState& state) const;
     };
 }
 

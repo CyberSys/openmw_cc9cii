@@ -344,7 +344,7 @@ namespace MWGui
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectKey.mId;
-            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectKey.mId);
+            const ESM3::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(effectKey.mId);
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                 params.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)

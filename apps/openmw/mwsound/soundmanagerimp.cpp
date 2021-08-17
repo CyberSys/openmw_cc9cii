@@ -161,10 +161,10 @@ namespace MWSound
     StreamPtr SoundManager::playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->mValue.getFloat();
-        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->mValue.getFloat();
-        static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMinDistance")->mValue.getFloat();
-        static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->mValue.getFloat();
+        static const float fAudioMinDistanceMult = world->getStore().get<ESM3::GameSetting>().find("fAudioMinDistanceMult")->mValue.getFloat();
+        static const float fAudioMaxDistanceMult = world->getStore().get<ESM3::GameSetting>().find("fAudioMaxDistanceMult")->mValue.getFloat();
+        static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM3::GameSetting>().find("fAudioVoiceDefaultMinDistance")->mValue.getFloat();
+        static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM3::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->mValue.getFloat();
         static float minDistance = std::max(fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult, 1.0f);
         static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
 
@@ -759,7 +759,7 @@ namespace MWSound
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->getCell();
+        const ESM3::Cell *cell = player.getCell()->getCell();
 
         if (!cell->isExterior())
             return;
@@ -774,7 +774,7 @@ namespace MWSound
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
-        const ESM::Cell *curcell = player.getCell()->getCell();
+        const ESM3::Cell *curcell = player.getCell()->getCell();
         const auto update = mWaterSoundUpdater.update(player, *world);
 
         WaterSoundAction action;
@@ -803,7 +803,7 @@ namespace MWSound
     }
 
     std::pair<SoundManager::WaterSoundAction, Sound_Buffer*> SoundManager::getWaterSoundAction(
-            const WaterSoundUpdate& update, const ESM::Cell* cell) const
+            const WaterSoundUpdate& update, const ESM3::Cell* cell) const
     {
         if (mNearWaterSound)
         {

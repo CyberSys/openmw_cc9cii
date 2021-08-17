@@ -4,7 +4,7 @@
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
-void ESM3::Locals::load (Reader& reader)
+bool ESM3::Locals::load (Reader& reader)
 {
     while (reader.getSubRecordHeader())
     {
@@ -14,7 +14,7 @@ void ESM3::Locals::load (Reader& reader)
             case ESM3::SUB_LOCA:
             {
                 std::string id;
-                reader.getString(id); // NOTE: not null terminated
+                reader.getString(id); // NOTE: not null terminated, unless omwsave :-(
 
                 Variant value;
                 value.read (reader, Variant::Format_Local);
@@ -23,10 +23,11 @@ void ESM3::Locals::load (Reader& reader)
                 break;
             }
             default:
-                reader.fail("Unknown subrecord");
-                break;
+                return true; // indicate that sub-record header was read
         }
     }
+
+    return false;
 }
 
 void ESM3::Locals::save (ESM::ESMWriter& esm) const
