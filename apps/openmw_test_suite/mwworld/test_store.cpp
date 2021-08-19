@@ -4,7 +4,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -28,19 +28,17 @@ struct ContentFileTest : public ::testing::Test
         readContentFiles();
 
         // load the content files
-        std::vector<ESM::ESMReader> readerList;
-        readerList.resize(mContentFiles.size());
+        mReaderList.resize(mContentFiles.size());
 
         int index=0;
         for (const auto & mContentFile : mContentFiles)
         {
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(nullptr);
-            lEsm.setIndex(index);
-            lEsm.setGlobalReaderList(&readerList);
-            lEsm.open(mContentFile.string());
-            readerList[index] = lEsm;
-            mEsmStore.load(readerList[index], &dummyListener);
+            ESM::Reader* reader = ESM::Reader::getReader(mContentFile.string());
+            reader->setEncoder(nullptr);
+            reader->setModIndex(index);
+            reader->setGlobalReaderList(&mReaderList);
+            mReaderList[index] = reader;
+            mEsmStore.load(*mReaderList[index], &dummyListener);
 
             ++index;
         }
@@ -50,6 +48,8 @@ struct ContentFileTest : public ::testing::Test
 
     void TearDown() override
     {
+        for (size_t i = 0; i < mReaderList.size(); ++i)
+            delete mReaderList[i];
     }
 
     // read absolute path to content files from openmw.cfg
@@ -95,6 +95,7 @@ protected:
     Files::ConfigurationManager mConfigurationManager;
     MWWorld::ESMStore mEsmStore;
     std::vector<boost::filesystem::path> mContentFiles;
+    std::vector<ESM::Reader*> mReaderList;
 };
 
 /// Print results of the dialogue merging process, i.e. the resulting linked list.
@@ -111,7 +112,7 @@ TEST_F(ContentFileTest, dialogue_merging_test)
     boost::filesystem::ofstream stream;
     stream.open(file);
 
-    const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
+    const MWWorld::Store<ESM3::Dialogue>& dialStore = mEsmStore.get<ESM3::Dialogue>();
     for (const auto & dial : dialStore)
     {
         stream << "Dialogue: " << dial.mId << std::endl;
@@ -128,40 +129,40 @@ TEST_F(ContentFileTest, dialogue_merging_test)
 
 // Note: here we don't test records that don't use string names (e.g. Land, Pathgrid, Cell)
 #define RUN_TEST_FOR_TYPES(func, arg1, arg2) \
-    func<ESM::Activator>(arg1, arg2); \
-    func<ESM::Apparatus>(arg1, arg2); \
-    func<ESM::Armor>(arg1, arg2); \
-    func<ESM::BirthSign>(arg1, arg2); \
-    func<ESM::BodyPart>(arg1, arg2); \
-    func<ESM::Book>(arg1, arg2); \
-    func<ESM::Class>(arg1, arg2); \
-    func<ESM::Clothing>(arg1, arg2); \
-    func<ESM::Container>(arg1, arg2); \
-    func<ESM::Creature>(arg1, arg2); \
-    func<ESM::CreatureLevList>(arg1, arg2); \
-    func<ESM::Dialogue>(arg1, arg2); \
-    func<ESM::Door>(arg1, arg2); \
-    func<ESM::Enchantment>(arg1, arg2); \
-    func<ESM::Faction>(arg1, arg2); \
-    func<ESM::GameSetting>(arg1, arg2); \
-    func<ESM::Global>(arg1, arg2); \
-    func<ESM::Ingredient>(arg1, arg2); \
-    func<ESM::ItemLevList>(arg1, arg2); \
-    func<ESM::Light>(arg1, arg2); \
-    func<ESM::Lockpick>(arg1, arg2); \
-    func<ESM::Miscellaneous>(arg1, arg2); \
-    func<ESM::NPC>(arg1, arg2); \
-    func<ESM::Potion>(arg1, arg2); \
-    func<ESM::Probe>(arg1, arg2); \
-    func<ESM::Race>(arg1, arg2); \
-    func<ESM::Region>(arg1, arg2); \
-    func<ESM::Repair>(arg1, arg2); \
-    func<ESM::Script>(arg1, arg2); \
-    func<ESM::Sound>(arg1, arg2); \
-    func<ESM::SoundGenerator>(arg1, arg2); \
-    func<ESM::Spell>(arg1, arg2); \
-    func<ESM::StartScript>(arg1, arg2); \
-    func<ESM::Weapon>(arg1, arg2);
+    func<ESM3::Activator>(arg1, arg2); \
+    func<ESM3::Apparatus>(arg1, arg2); \
+    func<ESM3::Armor>(arg1, arg2); \
+    func<ESM3::BirthSign>(arg1, arg2); \
+    func<ESM3::BodyPart>(arg1, arg2); \
+    func<ESM3::Book>(arg1, arg2); \
+    func<ESM3::Class>(arg1, arg2); \
+    func<ESM3::Clothing>(arg1, arg2); \
+    func<ESM3::Container>(arg1, arg2); \
+    func<ESM3::Creature>(arg1, arg2); \
+    func<ESM3::CreatureLevList>(arg1, arg2); \
+    func<ESM3::Dialogue>(arg1, arg2); \
+    func<ESM3::Door>(arg1, arg2); \
+    func<ESM3::Enchantment>(arg1, arg2); \
+    func<ESM3::Faction>(arg1, arg2); \
+    func<ESM3::GameSetting>(arg1, arg2); \
+    func<ESM3::Global>(arg1, arg2); \
+    func<ESM3::Ingredient>(arg1, arg2); \
+    func<ESM3::ItemLevList>(arg1, arg2); \
+    func<ESM3::Light>(arg1, arg2); \
+    func<ESM3::Lockpick>(arg1, arg2); \
+    func<ESM3::Miscellaneous>(arg1, arg2); \
+    func<ESM3::NPC>(arg1, arg2); \
+    func<ESM3::Potion>(arg1, arg2); \
+    func<ESM3::Probe>(arg1, arg2); \
+    func<ESM3::Race>(arg1, arg2); \
+    func<ESM3::Region>(arg1, arg2); \
+    func<ESM3::Repair>(arg1, arg2); \
+    func<ESM3::Script>(arg1, arg2); \
+    func<ESM3::Sound>(arg1, arg2); \
+    func<ESM3::SoundGenerator>(arg1, arg2); \
+    func<ESM3::Spell>(arg1, arg2); \
+    func<ESM3::StartScript>(arg1, arg2); \
+    func<ESM3::Weapon>(arg1, arg2);
 
 template <typename T>
 void printRecords(MWWorld::ESMStore& esmStore, std::ostream& outStream)
@@ -219,6 +220,13 @@ struct StoreTest : public ::testing::Test
 {
 protected:
     MWWorld::ESMStore mEsmStore;
+    std::vector<ESM::Reader*> mReaderList;
+
+    void TearDown() override
+    {
+        for (size_t i = 0; i < mReaderList.size(); ++i)
+            delete mReaderList[i];
+    }
 };
 
 
@@ -243,29 +251,26 @@ TEST_F(StoreTest, delete_test)
 {
     const std::string recordId = "foobar";
 
-    typedef ESM::Apparatus RecordType;
+    typedef ESM3::Apparatus RecordType;
 
     RecordType record;
     record.blank();
     record.mId = recordId;
 
-    ESM::ESMReader reader;
-    std::vector<ESM::ESMReader> readerList;
-    readerList.push_back(reader);
-    reader.setGlobalReaderList(&readerList);
-
     // master file inserts a record
     Files::IStreamPtr file = getEsmFile(record, false);
-    reader.open(file, "filename");
-    mEsmStore.load(reader, &dummyListener);
+    ESM3::Reader* reader = new ESM3::Reader(file, "filename");
+    mReaderList.push_back(reader);
+    reader->setGlobalReaderList(&mReaderList);
+    mEsmStore.load(*reader, &dummyListener);
     mEsmStore.setUp();
 
     ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
 
     // now a plugin deletes it
     file = getEsmFile(record, true);
-    reader.open(file, "filename");
-    mEsmStore.load(reader, &dummyListener);
+    reader->open(file, "filename");
+    mEsmStore.load(*reader, &dummyListener);
     mEsmStore.setUp();
 
     ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 0);
@@ -273,8 +278,8 @@ TEST_F(StoreTest, delete_test)
     // now another plugin inserts it again
     // expected behaviour is the record to reappear rather than staying deleted
     file = getEsmFile(record, false);
-    reader.open(file, "filename");
-    mEsmStore.load(reader, &dummyListener);
+    reader->open(file, "filename");
+    mEsmStore.load(*reader, &dummyListener);
     mEsmStore.setUp();
 
     ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
@@ -286,29 +291,27 @@ TEST_F(StoreTest, overwrite_test)
     const std::string recordId = "foobar";
     const std::string recordIdUpper = "Foobar";
 
-    typedef ESM::Apparatus RecordType;
+    typedef ESM3::Apparatus RecordType;
 
     RecordType record;
     record.blank();
     record.mId = recordId;
 
-    ESM::ESMReader reader;
-    std::vector<ESM::ESMReader> readerList;
-    readerList.push_back(reader);
-    reader.setGlobalReaderList(&readerList);
-
     // master file inserts a record
     Files::IStreamPtr file = getEsmFile(record, false);
-    reader.open(file, "filename");
-    mEsmStore.load(reader, &dummyListener);
+    ESM3::Reader* reader = new ESM3::Reader(file, "filename");
+    mReaderList.push_back(reader);
+    reader->setGlobalReaderList(&mReaderList);
+    reader->open(file, "filename");
+    mEsmStore.load(*reader, &dummyListener);
     mEsmStore.setUp();
 
     // now a plugin overwrites it with changed data
     record.mId = recordIdUpper; // change id to uppercase, to test case smashing while we're at it
     record.mModel = "the_new_model";
     file = getEsmFile(record, false);
-    reader.open(file, "filename");
-    mEsmStore.load(reader, &dummyListener);
+    reader->open(file, "filename");
+    mEsmStore.load(*reader, &dummyListener);
     mEsmStore.setUp();
 
     // verify that changes were actually applied

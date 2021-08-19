@@ -54,10 +54,6 @@ namespace ESM3
         /// parse the header.
         void openRaw(Files::IStreamPtr _esm, const std::string &name);
 
-        /// Load ES file from a new stream, parses the header. Closes the
-        /// currently open file first, if any.
-        void open(Files::IStreamPtr _esm, const std::string &name);
-
         void clearCtx();
 
         [[noreturn]] void reportSubSizeMismatch(size_t want, size_t got) {
@@ -75,6 +71,10 @@ namespace ESM3
 
         void open(const std::string &filename); // FIXME: redundant but ESMTool uses it
         void openRaw(const std::string &filename); // FIXME: should be private but ESMTool uses it
+
+        /// Load ES file from a new stream, parses the header. Closes the
+        /// currently open file first, if any.
+        void open(Files::IStreamPtr _esm, const std::string &name); // FIXME: should be private but StoreTest uses it
 
         /** Close the file, resets all information. After calling close()
             the structure may be reused to load a new file.

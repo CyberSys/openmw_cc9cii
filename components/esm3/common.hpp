@@ -341,6 +341,7 @@ namespace ESM3
         SUB_HIDD = MKTAG('H','I','D','D'), // ai sequence
         SUB_TAID = MKTAG('T','A','I','D'), // ai sequence
         SUB_CELL = MKTAG('C','E','L','L'), // ai sequence
+        SUB_STAR = MKTAG('S','T','A','R'), // ai sequence
         SUB_EFID = MKTAG('E','F','I','D'), // magic effects
         SUB_PERM = MKTAG('P','E','R','M'), // spell state
         SUB_SLCT = MKTAG('S','L','C','T'), // spell state
@@ -398,6 +399,7 @@ namespace ESM3
         SUB_VEL_ = MKTAG('V','E','L','_'), // projectile state
         SUB_BOW_ = MKTAG('B','O','W','_'), // projectile state
         SUB_STR_ = MKTAG('S','T','R','_'), // projectile state
+        SUB_LUAW = MKTAG('L','U','A','W'),
 
         SUB_AIDT = MKTAG('A','I','D','T'),
         SUB_AI_A = MKTAG('A','I','_','A'),

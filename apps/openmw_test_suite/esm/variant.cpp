@@ -1,7 +1,10 @@
-#include <components/esm/variant.hpp>
+#include <components/esm3/variant.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/esmreader.hpp>
-#include <components/esm/loadglob.hpp>
+#include <components/esm3/reader.hpp>
+#include <components/esm3/glob.hpp>
+#include <components/esm3/gmst.hpp>
+#include <components/esm3/info.hpp>
+#include <components/esm3/globalscript.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -11,16 +14,16 @@
 namespace
 {
     using namespace testing;
-    using namespace ESM;
+    using namespace ESM3;
 
-    Variant makeVariant(VarType type)
+    Variant makeVariant(ESM::VarType type)
     {
         Variant v;
         v.setType(type);
         return v;
     }
 
-    Variant makeVariant(VarType type, int value)
+    Variant makeVariant(ESM::VarType type, int value)
     {
         Variant v;
         v.setType(type);
@@ -97,37 +100,37 @@ namespace
         std::make_tuple(Variant(int{42}), "variant long: 42"),
         std::make_tuple(Variant(float{2.7f}), "variant float: 2.7"),
         std::make_tuple(Variant(std::string("foo")), "variant string: \"foo\""),
-        std::make_tuple(makeVariant(VT_Unknown), "variant unknown"),
-        std::make_tuple(makeVariant(VT_Short, 42), "variant short: 42"),
-        std::make_tuple(makeVariant(VT_Int, 42), "variant int: 42")
+        std::make_tuple(makeVariant(ESM::VT_Unknown), "variant unknown"),
+        std::make_tuple(makeVariant(ESM::VT_Short, 42), "variant short: 42"),
+        std::make_tuple(makeVariant(ESM::VT_Int, 42), "variant int: 42")
     ));
 
     struct ESMVariantGetTypeTest : Test {};
 
     TEST(ESMVariantGetTypeTest, default_constructed_should_return_none)
     {
-        ASSERT_EQ(Variant().getType(), VT_None);
+        ASSERT_EQ(Variant().getType(), ESM::VT_None);
     }
 
     TEST(ESMVariantGetTypeTest, for_constructed_from_int_should_return_long)
     {
-        ASSERT_EQ(Variant(int{}).getType(), VT_Long);
+        ASSERT_EQ(Variant(int{}).getType(), ESM::VT_Long);
     }
 
     TEST(ESMVariantGetTypeTest, for_constructed_from_float_should_return_float)
     {
-        ASSERT_EQ(Variant(float{}).getType(), VT_Float);
+        ASSERT_EQ(Variant(float{}).getType(), ESM::VT_Float);
     }
 
     TEST(ESMVariantGetTypeTest, for_constructed_from_lvalue_string_should_return_string)
     {
         const std::string string;
-        ASSERT_EQ(Variant(string).getType(), VT_String);
+        ASSERT_EQ(Variant(string).getType(), ESM::VT_String);
     }
 
     TEST(ESMVariantGetTypeTest, for_constructed_from_rvalue_string_should_return_string)
     {
-        ASSERT_EQ(Variant(std::string{}).getType(), VT_String);
+        ASSERT_EQ(Variant(std::string{}).getType(), ESM::VT_String);
     }
 
     struct ESMVariantGetIntegerTest : Test {};
@@ -204,70 +207,70 @@ namespace
     TEST(ESMVariantSetTypeTest, for_unknown_should_reset_data)
     {
         Variant variant(int{42});
-        variant.setType(VT_Unknown);
+        variant.setType(ESM::VT_Unknown);
         ASSERT_THROW(variant.getInteger(), std::runtime_error);
     }
 
     TEST(ESMVariantSetTypeTest, for_none_should_reset_data)
     {
         Variant variant(int{42});
-        variant.setType(VT_None);
+        variant.setType(ESM::VT_None);
         ASSERT_THROW(variant.getInteger(), std::runtime_error);
     }
 
     TEST(ESMVariantSetTypeTest, for_same_type_should_not_change_value)
     {
         Variant variant(int{42});
-        variant.setType(VT_Long);
+        variant.setType(ESM::VT_Long);
         ASSERT_EQ(variant.getInteger(), 42);
     }
 
     TEST(ESMVariantSetTypeTest, for_float_replaced_by_int_should_cast_float_to_int)
     {
         Variant variant(float{2.7f});
-        variant.setType(VT_Int);
+        variant.setType(ESM::VT_Int);
         ASSERT_EQ(variant.getInteger(), 2);
     }
 
     TEST(ESMVariantSetTypeTest, for_string_replaced_by_int_should_set_default_initialized_data)
     {
         Variant variant(std::string("foo"));
-        variant.setType(VT_Int);
+        variant.setType(ESM::VT_Int);
         ASSERT_EQ(variant.getInteger(), 0);
     }
 
     TEST(ESMVariantSetTypeTest, for_default_constructed_replaced_by_float_should_set_default_initialized_value)
     {
         Variant variant;
-        variant.setType(VT_Float);
+        variant.setType(ESM::VT_Float);
         ASSERT_EQ(variant.getInteger(), 0.0f);
     }
 
     TEST(ESMVariantSetTypeTest, for_float_replaced_by_short_should_cast_data_to_int)
     {
         Variant variant(float{2.7f});
-        variant.setType(VT_Short);
+        variant.setType(ESM::VT_Short);
         ASSERT_EQ(variant.getInteger(), 2);
     }
 
     TEST(ESMVariantSetTypeTest, for_float_replaced_by_long_should_cast_data_to_int)
     {
         Variant variant(float{2.7f});
-        variant.setType(VT_Long);
+        variant.setType(ESM::VT_Long);
         ASSERT_EQ(variant.getInteger(), 2);
     }
 
     TEST(ESMVariantSetTypeTest, for_int_replaced_by_float_should_cast_data_to_float)
     {
         Variant variant(int{42});
-        variant.setType(VT_Float);
+        variant.setType(ESM::VT_Float);
         ASSERT_EQ(variant.getFloat(), 42.0f);
     }
 
     TEST(ESMVariantSetTypeTest, for_int_replaced_by_string_should_set_default_initialized_data)
     {
         Variant variant(int{42});
-        variant.setType(VT_String);
+        variant.setType(ESM::VT_String);
         ASSERT_EQ(variant.getString(), "");
     }
 
@@ -280,7 +283,7 @@ namespace
     TEST(ESMVariantSetIntegerTest, for_unknown_should_throw_exception)
     {
         Variant variant;
-        variant.setType(VT_Unknown);
+        variant.setType(ESM::VT_Unknown);
         ASSERT_THROW(variant.setInteger(42), std::runtime_error);
     }
 
@@ -294,7 +297,7 @@ namespace
     TEST(ESMVariantSetIntegerTest, for_int_should_change_value)
     {
         Variant variant;
-        variant.setType(VT_Int);
+        variant.setType(ESM::VT_Int);
         variant.setInteger(42);
         ASSERT_EQ(variant.getInteger(), 42);
     }
@@ -302,7 +305,7 @@ namespace
     TEST(ESMVariantSetIntegerTest, for_short_should_change_value)
     {
         Variant variant;
-        variant.setType(VT_Short);
+        variant.setType(ESM::VT_Short);
         variant.setInteger(42);
         ASSERT_EQ(variant.getInteger(), 42);
     }
@@ -329,7 +332,7 @@ namespace
     TEST(ESMVariantSetFloatTest, for_unknown_should_throw_exception)
     {
         Variant variant;
-        variant.setType(VT_Unknown);
+        variant.setType(ESM::VT_Unknown);
         ASSERT_THROW(variant.setFloat(2.7f), std::runtime_error);
     }
 
@@ -343,7 +346,7 @@ namespace
     TEST(ESMVariantSetFloatTest, for_int_should_change_value)
     {
         Variant variant;
-        variant.setType(VT_Int);
+        variant.setType(ESM::VT_Int);
         variant.setFloat(2.7f);
         ASSERT_EQ(variant.getInteger(), 2);
     }
@@ -351,7 +354,7 @@ namespace
     TEST(ESMVariantSetFloatTest, for_short_should_change_value)
     {
         Variant variant;
-        variant.setType(VT_Short);
+        variant.setType(ESM::VT_Short);
         variant.setFloat(2.7f);
         ASSERT_EQ(variant.getInteger(), 2);
     }
@@ -378,7 +381,7 @@ namespace
     TEST(ESMVariantSetStringTest, for_unknown_should_throw_exception)
     {
         Variant variant;
-        variant.setType(VT_Unknown);
+        variant.setType(ESM::VT_Unknown);
         ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
@@ -391,14 +394,14 @@ namespace
     TEST(ESMVariantSetStringTest, for_int_should_throw_exception)
     {
         Variant variant;
-        variant.setType(VT_Int);
+        variant.setType(ESM::VT_Int);
         ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_short_should_throw_exception)
     {
         Variant variant;
-        variant.setType(VT_Short);
+        variant.setType(ESM::VT_Short);
         ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
@@ -427,7 +430,56 @@ namespace
         std::ostringstream out;
         ESM::ESMWriter writer;
         writer.save(out);
-        variant.write(writer, format);
+        switch (format)
+        {
+            case Variant::Format_Gmst:
+            {
+                writer.startRecord("GMST");
+                ESM3::GameSetting gmst;
+                gmst.mId = "gmst_test";
+                gmst.mValue = variant;
+                gmst.save(writer, false);
+                writer.endRecord("GMST");
+                break;
+            }
+            case Variant::Format_Global:
+            {
+                writer.startRecord("GLOB");
+                ESM3::Global glob;
+                glob.mId = "glob_test";
+                glob.mValue = variant;
+                glob.save(writer, false);
+                writer.endRecord("GLOB");
+                break;
+            }
+            case Variant::Format_Info:
+            {
+                writer.startRecord("INFO");
+                ESM3::DialInfo info;
+                info.mId = "info_test";
+                ESM3::DialInfo::SelectStruct ss;
+                ss.mSelectRule = "me";
+                ss.mValue = variant;
+                info.mSelects.push_back(ss);
+                info.save(writer, false);
+                writer.endRecord("INFO");
+                break;
+            }
+            case Variant::Format_Local:
+            {
+                writer.startRecord("GSCR");
+                ESM3::GlobalScript script;
+                script.mId = "script_test";
+                script.mRunning = 0;
+                script.mTargetRef.unset();
+                script.mLocals.mVariables.push_back(std::make_pair("test_var", variant));
+                script.save(writer);
+                writer.endRecord("GSCR");
+                break;
+            }
+            default:
+                break;
+        }
         writer.close();
         return out.str();
     }
@@ -435,9 +487,55 @@ namespace
     Variant read(const Variant::Format format, const std::string& data)
     {
         Variant result;
-        ESM::ESMReader reader;
-        reader.open(std::make_shared<std::istringstream>(data), "");
-        result.read(reader, format);
+        ESM3::Reader* reader = new ESM3::Reader(std::make_shared<std::istringstream>(data), "");
+        reader->getRecordHeader();
+        switch (format)
+        {
+            case Variant::Format_Gmst:
+            {
+                reader->getSubRecordHeader(); // NAME
+                std::string id;
+                reader->getZString(id);
+                break;
+            }
+            case Variant::Format_Global:
+            {
+                reader->getSubRecordHeader(); // NAME
+                std::string id;
+                reader->getZString(id);
+                // FIXME: we need to read the sub-record header before reading the variant
+                reader->getSubRecordHeader(); // FNAM
+                break;
+            }
+            case Variant::Format_Info:
+            {
+                reader->getSubRecordHeader(); // INAM
+                std::string id;
+                reader->getZString(id);
+                reader->getSubRecordHeader(); // PNAM
+                reader->skipSubRecordData();
+                reader->getSubRecordHeader(); // NNAM
+                reader->skipSubRecordData();
+                reader->getSubRecordHeader(); // DATA
+                reader->skipSubRecordData();
+                reader->getSubRecordHeader(); // SCVR
+                reader->skipSubRecordData();  // mSelectRule
+                break;
+            }
+            case Variant::Format_Local:
+            {
+                reader->getSubRecordHeader(); // NAME
+                std::string id;
+                reader->getString(id); // NOTE: string not null terminated
+                reader->getSubRecordHeader(); // LOCA
+                reader->skipSubRecordData();  // "test_var"
+                break;
+            }
+            default:
+                break;
+        }
+
+        result.read(*reader, format);
         return result;
     }
 
@@ -458,15 +556,17 @@ namespace
     }
 
     INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMTest, Values(
-        WriteToESMTestCase {Variant(), Variant::Format_Gmst, 324},
-        WriteToESMTestCase {Variant(int{42}), Variant::Format_Global, 345},
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Global, 345},
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Info, 336},
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Local, 336},
-        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Global, 345},
-        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Local, 334},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Info, 336},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Local, 336}
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Gmst, /*336*/370},
+        WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Gmst, /*335*/369},
+        WriteToESMTestCase {makeVariant(ESM::VT_Int, 42), Variant::Format_Gmst, /*336*/370},
+        WriteToESMTestCase {Variant(int{42}), Variant::Format_Global, /*345*/379},
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Global, /*345*/379},
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Info, /*336*/418},
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Local, /*336*/387},
+        WriteToESMTestCase {makeVariant(ESM::VT_Short, 42), Variant::Format_Global, /*345*/379},
+        WriteToESMTestCase {makeVariant(ESM::VT_Short, 42), Variant::Format_Local, /*334*/385},
+        WriteToESMTestCase {makeVariant(ESM::VT_Int, 42), Variant::Format_Info, /*336*/418},
+        WriteToESMTestCase {makeVariant(ESM::VT_Int, 42), Variant::Format_Local, /*336*/387}
     ));
 
     struct ESMVariantToESMNoneTest : TestWithParam<WriteToESMTestCase> {};
@@ -479,9 +579,7 @@ namespace
     }
 
     INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMNoneTest, Values(
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Gmst, 336},
-        WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Gmst, 335},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Gmst, 336}
+        WriteToESMTestCase {Variant(), Variant::Format_Gmst, 358}
     ));
 
     struct ESMVariantWriteToESMFailTest : TestWithParam<WriteToESMTestCase> {};
@@ -505,9 +603,9 @@ namespace
         WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Global},
         WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Info},
         WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Local},
-        WriteToESMTestCase {makeVariant(VT_Unknown), Variant::Format_Global},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Global},
-        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Gmst},
-        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Info}
+        WriteToESMTestCase {makeVariant(ESM::VT_Unknown), Variant::Format_Global},
+        WriteToESMTestCase {makeVariant(ESM::VT_Int, 42), Variant::Format_Global},
+        WriteToESMTestCase {makeVariant(ESM::VT_Short, 42), Variant::Format_Gmst},
+        WriteToESMTestCase {makeVariant(ESM::VT_Short, 42), Variant::Format_Info}
     ));
 }

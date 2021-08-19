@@ -28,7 +28,7 @@ namespace ESM3
                     esm.get(key.mType);
 
                     esm.getSubRecordHeader();
-                    assert(esm.subRecordHeadder().typeId == ESM3::SUB_ID__);
+                    assert(esm.subRecordHeader().typeId == ESM3::SUB_ID__);
                     esm.getZString(key.mId);
 
                     mKeys.push_back(key);

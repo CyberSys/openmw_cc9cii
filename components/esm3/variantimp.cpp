@@ -28,7 +28,6 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
         reader.fail ("local variables of type string not supported");
 
     // GMST
-    //out = esm.getHString();
     assert(reader.subRecordHeader().typeId == ESM3::SUB_STRV);
     reader.getString(out); // NOTE: string not null terminated
 }
@@ -59,9 +58,8 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
     if (format == Variant::Format_Global)
     {
         float value;
-        //esm.getHNT (value, "FLTV");
         reader.getSubRecordHeader();
-        assert(reader.subRecordHeader().typeId == ESM3::SUB_INTV);
+        assert(reader.subRecordHeader().typeId == ESM3::SUB_FLTV);
         reader.get(value);
 
         if (type == ESM::VT_Short)
@@ -85,7 +83,6 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
             reader.fail (stream.str());
         }
 
-        //esm.getHT(out);
         reader.get(out);
     }
     else if (format == Variant::Format_Local)
@@ -93,13 +90,11 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
         if (type == ESM::VT_Short)
         {
             short value;
-            //esm.getHT(value);
             reader.get(value);
             out = value;
         }
         else if (type == ESM::VT_Int)
         {
-            //esm.getHT(out);
             reader.get(out);
         }
         else
@@ -154,14 +149,12 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
 
     if (format == Variant::Format_Global)
     {
-        //esm.getHNT(out, "FLTV");
         reader.getSubRecordHeader();
         assert(reader.subRecordHeader().typeId == ESM3::SUB_FLTV);
         reader.get(out);
     }
     else if (format == Variant::Format_Gmst || format == Variant::Format_Info || format == Variant::Format_Local)
     {
-        //esm.getHT(out);
         reader.get(out);
     }
 }

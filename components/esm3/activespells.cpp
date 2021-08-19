@@ -31,7 +31,6 @@ namespace ESM3
 
                 esm.getSubRecordHeader();
                 assert(esm.subRecordHeader().typeId == ESM3::SUB_DISP);
-                params.mDisplayName;
                 esm.getZString(params.mDisplayName);
 
                 // spell casting timestamp, no longer used
