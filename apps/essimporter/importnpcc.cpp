@@ -1,8 +1,8 @@
 #include "importnpcc.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 
@@ -12,10 +12,8 @@ namespace ESSImport
 {
     void NPCC::load(ESM3::Reader& esm)
     {
-        bool subDataRemaining = false;
-        while (subDataRemaining || esm.getSubRecordHeader())
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -40,7 +38,7 @@ namespace ESSImport
                     // NOTE: it is assumed that all inventory related sub-records are grouped
                     //       so we off-load the loading here (i.e. XIDX, SCRI, XHLT occur for
                     //       that inventory item, and WIDX for equipped items)
-                    subDataRemaining = mInventory.load(esm);
+                    mInventory.load(esm);
                     break;
                 }
                 case ESM3::SUB_MODL: // (do these below ever occur in a savefile?)
@@ -62,7 +60,7 @@ namespace ESSImport
                     break;
                 }
                 default:
-                    esm.fail("Unknown subrecord");
+                    esm.fail("NPCC: Unknown subrecord");
             }
         }
     }

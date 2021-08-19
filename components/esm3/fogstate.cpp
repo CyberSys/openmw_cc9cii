@@ -57,14 +57,14 @@ void convertFogOfWar(std::vector<char>& imageData)
 
 void ESM3::FogState::load (Reader& esm)
 {
-    if (esm.getNextSubRecordType() == ESM3::SUB_BOUN && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_BOUN))
         esm.get(mBounds);
 
-    if (esm.getNextSubRecordType() == ESM3::SUB_ANGL && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_ANGL))
         esm.get(mNorthMarkerAngle);
 
     int dataFormat = esm.getFormat();
-    while (esm.getNextSubRecordType() == ESM3::SUB_FTEX && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_FTEX))
     {
         FogTexture tex;
 

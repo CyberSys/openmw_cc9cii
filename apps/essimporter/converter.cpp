@@ -102,13 +102,11 @@ namespace ESSImport
 
     void ConvertFMAP::read(ESM3::Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAPH);
+        esm.getSubRecordHeader(ESM3::SUB_MAPH);
         MAPH maph;
         esm.get(maph);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAPD);
+        esm.getSubRecordHeader(ESM3::SUB_MAPD);
         std::vector<char> data;
         data.resize(esm.subRecordHeader().dataSize);
         esm.get(data[0], data.size());
@@ -227,7 +225,7 @@ namespace ESSImport
         unsigned char nam8[32];
         // exterior has 1 NAM8, interior can have multiple ones, and have an extra 4 byte flag at the start
         // (probably offset of that specific fog texture?)
-        do
+        while (esm.getSubRecordHeader())
         {
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
@@ -308,8 +306,7 @@ namespace ESSImport
                         notepos[1] += Constants::CellSizeInUnits * cell.mData.mY;
                     }
 
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_MPNT);
+                    esm.getSubRecordHeader(ESM3::SUB_MPNT);
                     // TODO: what encoding is this in?
                     std::string note;
                     esm.getZString(note);
@@ -322,16 +319,15 @@ namespace ESSImport
                     break;
                 }
                 default:
-                    //NOTE: can't call skipSubRecordHeader() here since we've not read the
-                    //       sub-record header yet
                     if (esm.hasMoreSubs())
                         std::cerr << "Warning: Unexpected sub-record "
                                   << ESM::printName(esm.subRecordHeader().typeId)
                                   << " while loading cell refs" << std::endl;
+                    else
+                        esm.skipSubRecordData();
                     break;
             }
         }
-        while (esm.getSubRecordHeader());
 
         newcell.mRefs = cellrefs;
 
@@ -345,7 +341,7 @@ namespace ESSImport
     {
         ESM3::Cell esmcell = cell.mCell;
         esm.startRecord(ESM::REC_CSTA);
-        ESM::CellState csta;
+        ESM3::CellState csta;
         csta.mHasFogOfWar = 0;
 
         // FIXME: this ugly bit of code is here to workaround co-existance of new reader
@@ -356,10 +352,6 @@ namespace ESSImport
         csta.mId.mIndex.mY = newId.mIndex.mY;
         csta.mId.mPaged = newId.mPaged;
 
-        // FIXME: temp testing only
-        //if (newId.mWorldspace == "abebaal egg mine")
-            //std::cout << "newId " << std::endl;
-
         csta.mId.save(esm);
         // TODO csta.mLastRespawn;
         // shouldn't be needed if we respawn on global schedule like in original MW
@@ -369,10 +361,6 @@ namespace ESSImport
         for (const auto & cellref : cell.mRefs)
         {
             ESM3::CellRef out (cellref);
-
-            // FIXME: temp testing
-            //if (cellref.mIndexedRefId == "Kwama Queen00000000")
-                //std::cout << "queen " << cellref.mIndexedRefId << std::endl;
 
             // TODO: use mContext->mCreatures/mNpcs
 
@@ -506,7 +494,7 @@ namespace ESSImport
         {
             if (!pnam.isMagic())
             {
-                ESM::ProjectileState out;
+                ESM3::ProjectileState out;
                 convertBaseState(out, pnam);
 
                 out.mBowId = pnam.mBowId.toString();
@@ -519,7 +507,7 @@ namespace ESSImport
             }
             else
             {
-                ESM::MagicBoltState out;
+                ESM3::MagicBoltState out;
                 convertBaseState(out, pnam);
 
                 auto it = std::find_if(mContext->mActiveSpells.begin(), mContext->mActiveSpells.end(),
@@ -541,7 +529,7 @@ namespace ESSImport
         }
     }
 
-    void ConvertPROJ::convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam)
+    void ConvertPROJ::convertBaseState(ESM3::BaseProjectileState& base, const PROJ::PNAM& pnam)
     {
         base.mId = pnam.mArrowId.toString();
         base.mPosition = pnam.mPosition;

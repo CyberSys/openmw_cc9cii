@@ -1,10 +1,5 @@
 #include "cell.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
 #include <string>
 #include <limits>
 #include <list>
@@ -84,8 +79,8 @@ namespace ESM3
                 case ESM3::SUB_DATA:
                 {
                     reader.getSubRecordHeader();
-                    assert (subHdr.dataSize == 12 && "CELL incorrect data size");
-                    assert (subHdr.dataSize == sizeof(mData) && "CELL incorrect data size");
+                    if (subHdr.dataSize != sizeof(mData) || subHdr.dataSize != 12)
+                        reader.fail("CELL incorrect data size");
                     reader.get(mData);
                     hasData = true;
                     break;
@@ -159,8 +154,8 @@ namespace ESM3
                 }
                 case ESM3::SUB_AMBI:
                 {
-                    assert (subHdr.dataSize == 16 && "AMBI incorrect data size");
-                    assert (subHdr.dataSize == sizeof(mAmbi) && "AMBI incorrect data size");
+                    if (subHdr.dataSize != sizeof(mAmbi) || subHdr.dataSize != 16)
+                        reader.fail("AMBI incorrect data size");
                     reader.get(mAmbi);
                     mHasAmbi = true;
                     break;
@@ -279,12 +274,11 @@ namespace ESM3
                     MovedCellRef movedCellRef;
                     reader.get(movedCellRef.mRefNum.mIndex);
                     // assumed that "CNDT" follows "MVRF"
-                    reader.getSubRecordHeader();
-                    assert(reader.subRecordHeader().typeId == ESM3::SUB_CNDT && "Unexpected sub-record following MVRF");
+                    reader.getSubRecordHeader(ESM3::SUB_CNDT);
                     reader.get(movedCellRef.mTarget);
                     skipDeleted = true;
 
-                    if (reader.getNextSubRecordType() == ESM3::SUB_CNDT && reader.getSubRecordHeader())
+                    if (reader.getNextSubRecordHeader(ESM3::SUB_CNDT))
                         reader.get(movedCellRef.mTarget);
                     CellRef skippedCellRef;
                     if (reader.getNextSubRecordType() != ESM3::SUB_FRMR)
@@ -359,8 +353,7 @@ namespace ESM3
     {
         reader.get(mref.mRefNum.mIndex);
         // assumed that "CNDT" follows "MVRF"
-        reader.getSubRecordHeader();
-        assert (reader.subRecordHeader().typeId == ESM3::SUB_CNDT && "Unexpected sub-record following MVRF");
+        reader.getSubRecordHeader(ESM3::SUB_CNDT);
         reader.get(mref.mTarget);
 
         adjustRefNum (mref.mRefNum, reader);

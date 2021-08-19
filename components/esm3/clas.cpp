@@ -1,9 +1,5 @@
 #include "clas.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
 #include <stdexcept>
 #include <cassert>
 

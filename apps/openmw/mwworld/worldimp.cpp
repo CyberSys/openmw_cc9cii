@@ -381,12 +381,10 @@ namespace MWWorld
                 return;
             case ESM::REC_ENAB:
             {
-                reader.getSubRecordHeader();
-                assert(reader.subRecordHeader().typeId == ESM3::SUB_TELE);
+                reader.getSubRecordHeader(ESM3::SUB_TELE);
                 reader.get(mTeleportEnabled);
 
-                reader.getSubRecordHeader();
-                assert(reader.subRecordHeader().typeId == ESM3::SUB_LEVT);
+                reader.getSubRecordHeader(ESM3::SUB_LEVT);
                 reader.get(mLevitationEnabled);
                 return;
             }

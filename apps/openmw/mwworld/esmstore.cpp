@@ -481,8 +481,7 @@ void ESMStore::removeMissingObjects(Store<T>& store)
                 return true;
 
             case ESM::REC_DYNA:
-                reader.getSubRecordHeader();
-                assert(reader.subRecordHeader().typeId == ESM3::SUB_COUN);
+                reader.getSubRecordHeader(ESM3::SUB_COUN);
                 reader.get(mDynamicCount);
                 return true;
 

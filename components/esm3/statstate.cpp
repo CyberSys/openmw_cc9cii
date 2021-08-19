@@ -1,11 +1,5 @@
 #include "statstate.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -21,27 +15,26 @@ namespace ESM3
         if (intFallback)
         {
             int base = 0;
-            esm.getSubRecordHeader();
-            assert(esm.subRecordHeader().typeId == ESM3::SUB_STBA);
+            esm.getSubRecordHeader(ESM3::SUB_STBA);
             esm.get(base);
             mBase = static_cast<T>(base);
 
             int mod = 0;
-            if (esm.getNextSubRecordType() == ESM3::SUB_STMO && esm.getSubRecordHeader())
+            if (esm.getNextSubRecordHeader(ESM3::SUB_STMO))
             {
                 esm.get(mod);
                 mMod = static_cast<T>(mod);
             }
 
             int current = 0;
-            if (esm.getNextSubRecordType() == ESM3::SUB_STCU && esm.getSubRecordHeader())
+            if (esm.getNextSubRecordHeader(ESM3::SUB_STCU))
             {
                 esm.get(current);
                 mCurrent = static_cast<T>(current);
             }
 
             int oldDamage = 0;
-            if (esm.getNextSubRecordType() == ESM3::SUB_STDA && esm.getSubRecordHeader())
+            if (esm.getNextSubRecordHeader(ESM3::SUB_STDA))
             {
                 esm.get(oldDamage);
                 mDamage = static_cast<float>(oldDamage);
@@ -50,30 +43,29 @@ namespace ESM3
         else
         {
             mBase = 0;
-            esm.getSubRecordHeader();
-            assert(esm.subRecordHeader().typeId == ESM3::SUB_STBA);
+            esm.getSubRecordHeader(ESM3::SUB_STBA);
             esm.get(mBase);
 
             mMod = 0;
-            if (esm.getNextSubRecordType() == ESM3::SUB_STMO && esm.getSubRecordHeader())
+            if (esm.getNextSubRecordHeader(ESM3::SUB_STMO))
                 esm.get(mMod);
 
             mCurrent = 0;
-            if (esm.getNextSubRecordType() == ESM3::SUB_STCU && esm.getSubRecordHeader())
+            if (esm.getNextSubRecordHeader(ESM3::SUB_STCU))
                 esm.get(mCurrent);
 
             mDamage = 0;
-            if (esm.getNextSubRecordType() == ESM3::SUB_STDF && esm.getSubRecordHeader())
+            if (esm.getNextSubRecordHeader(ESM3::SUB_STDF))
                 esm.get(mDamage);
 
             mProgress = 0;
         }
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_STDF && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_STDF))
             esm.get(mDamage);
 
         mProgress = 0;
-        if (esm.getNextSubRecordType() == ESM3::SUB_STPR && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_STPR))
         esm.get(mProgress);
     }
 

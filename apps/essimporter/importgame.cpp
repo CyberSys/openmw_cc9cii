@@ -1,8 +1,8 @@
 #include "importgame.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 

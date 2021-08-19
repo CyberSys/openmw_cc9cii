@@ -1,11 +1,5 @@
 #include "projectilestate.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -13,17 +7,13 @@ namespace ESM3
 {
     void BaseProjectileState::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_ID__);
+        esm.getSubRecordHeader(ESM3::SUB_ID__);
         esm.getString(mId); // FIXME: check if string null terminated
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_VEC3);
+        esm.getSubRecordHeader(ESM3::SUB_VEC3);
         esm.get(mPosition);
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_QUAT);
+        esm.getSubRecordHeader(ESM3::SUB_QUAT);
         esm.get(mOrientation);
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_ACTO);
+        esm.getSubRecordHeader(ESM3::SUB_ACTO);
         esm.get(mActorId);
     }
 
@@ -39,19 +29,17 @@ namespace ESM3
     {
         BaseProjectileState::load(esm);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_SPEL);
+        esm.getSubRecordHeader(ESM3::SUB_SPEL);
         esm.getString(mSpellId); // FIXME: check string null terminated
-        if (esm.getNextSubRecordType() == ESM3::SUB_SRCN && esm.getSubRecordHeader()) // for backwards compatibility
+        if (esm.getNextSubRecordHeader(ESM3::SUB_SRCN))
             esm.skipSubRecordData();
         ESM3::EffectList().load(esm); // for backwards compatibility
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_SPED);
+        esm.getSubRecordHeader(ESM3::SUB_SPED);
         esm.get(mSpeed);
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_STCK && esm.getSubRecordHeader()) // for backwards compatibility
+        if (esm.getNextSubRecordHeader(ESM3::SUB_STCK))
             esm.skipSubRecordData();
-        if (esm.getNextSubRecordType() == ESM3::SUB_SOUN && esm.getSubRecordHeader()) // for backwards compatibility
+        if (esm.getNextSubRecordHeader(ESM3::SUB_SOUN))
             esm.skipSubRecordData();
     }
 
@@ -67,11 +55,9 @@ namespace ESM3
     {
         BaseProjectileState::load(esm);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_BOW_);
+        esm.getSubRecordHeader(ESM3::SUB_BOW_);
         esm.getString(mBowId); // FIXME: check if string null terminated
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_VEL_);
+        esm.getSubRecordHeader(ESM3::SUB_VEL_);
         esm.get(mVelocity);
 
         mAttackStrength = 1.f;

@@ -1,7 +1,5 @@
 #include "quickkeys.hpp"
 
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -27,8 +25,7 @@ namespace ESM3
                     QuickKey key;
                     esm.get(key.mType);
 
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_ID__);
+                    esm.getSubRecordHeader(ESM3::SUB_ID__);
                     esm.getZString(key.mId);
 
                     mKeys.push_back(key);

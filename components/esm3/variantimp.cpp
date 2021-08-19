@@ -1,10 +1,5 @@
 #include "variantimp.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
 #include <stdexcept>
 #include <cmath>
 
@@ -28,7 +23,8 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
         reader.fail ("local variables of type string not supported");
 
     // GMST
-    assert(reader.subRecordHeader().typeId == ESM3::SUB_STRV);
+    if(reader.subRecordHeader().typeId != ESM3::SUB_STRV)
+        reader.fail("Expected STRV but got " + ESM::printName(reader.subRecordHeader().typeId));
     reader.getString(out); // NOTE: string not null terminated
 }
 
@@ -58,8 +54,7 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
     if (format == Variant::Format_Global)
     {
         float value;
-        reader.getSubRecordHeader();
-        assert(reader.subRecordHeader().typeId == ESM3::SUB_FLTV);
+        reader.getSubRecordHeader(ESM3::SUB_FLTV);
         reader.get(value);
 
         if (type == ESM::VT_Short)
@@ -149,8 +144,7 @@ void ESM3::readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarT
 
     if (format == Variant::Format_Global)
     {
-        reader.getSubRecordHeader();
-        assert(reader.subRecordHeader().typeId == ESM3::SUB_FLTV);
+        reader.getSubRecordHeader(ESM3::SUB_FLTV);
         reader.get(out);
     }
     else if (format == Variant::Format_Gmst || format == Variant::Format_Info || format == Variant::Format_Local)

@@ -18,8 +18,7 @@ namespace ESM3
                     int id, base;
                     esm.get(id);
 
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_BASE);
+                    esm.getSubRecordHeader(ESM3::SUB_BASE);
                     esm.get(base);
 
                     mEffects.insert(std::make_pair(id, base));

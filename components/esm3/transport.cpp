@@ -1,11 +1,5 @@
 #include "transport.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include <components/debug/debuglog.hpp>
 
 #include "common.hpp"
@@ -21,7 +15,8 @@ namespace ESM3
         if (subHdr.typeId == ESM3::SUB_DODT)
         {
             Dest dodt;
-            assert (subHdr.dataSize == 24 && "Transport pos size mismatch");
+            if (subHdr.dataSize != sizeof(dodt.mPos) || subHdr.dataSize != 24)
+                reader.fail("Transport pos incorrect data size");
             reader.get(dodt.mPos);
             mList.push_back(dodt);
         }

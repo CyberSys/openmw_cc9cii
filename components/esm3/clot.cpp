@@ -1,9 +1,5 @@
 #include "clot.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
 #include <cassert>
 
 #include "common.hpp"

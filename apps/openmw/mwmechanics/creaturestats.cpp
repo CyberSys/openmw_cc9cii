@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <climits>
-#include <cassert>
 
 #include <components/esm3/creaturestats.hpp>
 #include <components/esm3/reader.hpp>
@@ -693,8 +692,7 @@ namespace MWMechanics
 
     void CreatureStats::readActorIdCounter (ESM3::Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
+        esm.getSubRecordHeader(ESM3::SUB_COUN);
         esm.get(sActorId);
     }
 

@@ -32,7 +32,8 @@ namespace ESM3
                 case ESM3::SUB_ITEX: reader.getZString(mIcon); break;
                 case ESM3::SUB_AADT:
                 {
-                    assert (subHdr.dataSize == sizeof(mData) && "APPA data size mismatch");
+                    if (subHdr.dataSize != sizeof(mData))
+                        reader.fail("APPA data size mismatch");
                     reader.get(mData);
                     hasData = true;
                     break;

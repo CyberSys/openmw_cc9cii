@@ -1,5 +1,7 @@
 #include "creaturestats.hpp"
 
+#include <cassert>
+
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -139,20 +141,14 @@ void ESM3::CreatureStats::load (Reader& esm)
                 std::string source = "";
                 int effectIndex = -1;
                 int actorId;
-                esm.getSubRecordHeader();
-                if (esm.subRecordHeader().typeId == ESM3::SUB_SOUR)
-                {
+
+                if (esm.getNextSubRecordHeader(ESM3::SUB_SOUR))
                     esm.getZString(source);
-                    esm.getSubRecordHeader();
-                }
 
-                if (esm.subRecordHeader().typeId == ESM3::SUB_EIND)
-                {
+                if (esm.getNextSubRecordHeader(ESM3::SUB_EIND))
                     esm.get(effectIndex);
-                    esm.getSubRecordHeader();
-                }
 
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_ACID);
+                esm.getSubRecordHeader(ESM3::SUB_ACID);
                 esm.get(actorId);
 
                 mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
@@ -172,11 +168,9 @@ void ESM3::CreatureStats::load (Reader& esm)
                 esm.getZString(id);
 
                 CorprusStats stats;
-                esm.getSubRecordHeader();
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_WORS);
+                esm.getSubRecordHeader(ESM3::SUB_WORS);
                 esm.get(stats.mWorsenings);
-                esm.getSubRecordHeader();
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_TIME);
+                esm.getSubRecordHeader(ESM3::SUB_TIME);
                 esm.get(stats.mNextWorsening);
 
                 mCorprusSpells[id] = stats;

@@ -1,5 +1,6 @@
 #include "actors.hpp"
 
+#include <cassert>
 #include <optional>
 
 #include <components/esm3/reader.hpp>
@@ -2734,7 +2735,7 @@ namespace MWMechanics
     //        e.g. StolenItems::load()
     void Actors::readRecord (ESM3::Reader& reader, uint32_t type)
     {
-        assert(esm.hdr().typeId == ESM::REC_DCOU);
+        assert(reader.hdr().typeId == ESM::REC_DCOU);
 
         while (reader.getSubRecordHeader())
         {
@@ -2747,8 +2748,7 @@ namespace MWMechanics
                     reader.getString(refId); // NOTE: string not null terminated
 
                     int count;
-                    reader.getSubRecordHeader(); // assume COUN always follows ID__
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
+                    reader.getSubRecordHeader(ESM3::SUB_COUN); // assume COUN always follows ID__
                     reader.get(count);
 
                     mDeathCount[refId] = count;

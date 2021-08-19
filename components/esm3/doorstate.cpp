@@ -12,7 +12,7 @@ namespace ESM3
         ObjectState::load(esm);
 
         mDoorState = 0;
-        if (esm.getNextSubRecordType() == ESM3::SUB_ANIM && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_ANIM))
             esm.get(mDoorState);
 
         if (mDoorState < 0 || mDoorState > 2)

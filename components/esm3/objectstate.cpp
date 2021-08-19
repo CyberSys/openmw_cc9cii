@@ -24,10 +24,8 @@ void ESM3::ObjectState::load (Reader& esm)
     // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
     mHasCustomState = true;
 
-    bool subDataRemaining = false;
-    while (subDataRemaining || esm.getSubRecordHeader())
+    while (esm.getSubRecordHeader())
     {
-        subDataRemaining = false;
         const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
         switch (subHdr.typeId)
         {
@@ -36,7 +34,7 @@ void ESM3::ObjectState::load (Reader& esm)
                 esm.get(mHasLocals);
 
                 if (mHasLocals)
-                    subDataRemaining = mLocals.load (esm);
+                    mLocals.load (esm);
                 break;
             }
             case ESM3::SUB_LUAS:
@@ -57,7 +55,8 @@ void ESM3::ObjectState::load (Reader& esm)
             case ESM3::SUB_HCUS: esm.get(mHasCustomState); break;
             case ESM3::SUB_POS_:
             {
-                assert(subHdr.dataSize == 24 || sizeof(mPosition) == 24);
+                if (subHdr.dataSize != 24 && sizeof(mPosition) != 24)
+                    esm.fail("ObjectState: Position data incorrect size");
                 esm.get(mPosition);
                 break;
             }

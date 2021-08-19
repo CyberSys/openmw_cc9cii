@@ -2,7 +2,6 @@
 #define ESM3_READER_H
 
 #include <cstdint>
-#include <cassert>
 #include <vector>
 #include <sstream>
 
@@ -128,14 +127,23 @@ namespace ESM3
 
         // Used by Variant and Cell
         // NOTE: mCtx.recordRead is updated when sub-record header is read
-        inline bool hasMoreSubs() { return mCtx.recordRead < mCtx.recordHeader.dataSize; }
+        inline bool hasMoreSubs() { return mCtx.subHdrCached || mCtx.recordRead < mCtx.recordHeader.dataSize; }
 
 
         // Read x bytes of header. The caller can then decide whether to process or skip the data.
         bool getSubRecordHeader();
         void cacheSubRecordHeader(); // NOTE: try not to rely on this
 
+        // Convenience method
         std::uint32_t getNextSubRecordType();
+
+        // Convenience method, mainly for state management
+        inline bool getNextSubRecordHeader(std::uint32_t type) {
+            return getNextSubRecordType() == type && getSubRecordHeader();
+        }
+
+        // Convenience method, mainly for state management
+        bool getSubRecordHeader(std::uint32_t type);
 
         // Skip the data part of a subrecord
         // Note: assumes the header was read correctly and nothing else was read

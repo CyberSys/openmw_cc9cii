@@ -1,9 +1,5 @@
 #include "importscpt.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
-
 #include <cassert>
 
 #include <components/esm3/reader.hpp>
@@ -14,15 +10,14 @@ namespace ESSImport
     {
         assert(esm.hdr().typeId == ESM3::REC_SCPT);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_SCHD);
+        esm.getSubRecordHeader(ESM3::SUB_SCHD);
         esm.get(mSCHD);
 
         esm.getSubRecordHeader(); // mSCRI expects this
-        bool subDataRemaining = mSCRI.load(esm);
+        mSCRI.load(esm);
 
         mRefNum = -1;
-        if (subDataRemaining || esm.getSubRecordHeader())
+        if (esm.getSubRecordHeader())
         {
             if (esm.subRecordHeader().typeId == ESM3::SUB_RNAM)
             {

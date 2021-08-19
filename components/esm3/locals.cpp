@@ -4,7 +4,7 @@
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
-bool ESM3::Locals::load (Reader& reader)
+void ESM3::Locals::load (Reader& reader)
 {
     while (reader.getSubRecordHeader())
     {
@@ -23,11 +23,10 @@ bool ESM3::Locals::load (Reader& reader)
                 break;
             }
             default:
-                return true; // indicate that sub-record header was read
+                reader.cacheSubRecordHeader();
+                return;
         }
     }
-
-    return false;
 }
 
 void ESM3::Locals::save (ESM::ESMWriter& esm) const

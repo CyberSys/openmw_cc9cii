@@ -1,11 +1,5 @@
 #include "spellstate.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -16,10 +10,8 @@ namespace ESM3
         mSelectedSpell = "";
 
         bool finished = false;
-        bool subDataRemaining = false;
-        while (!finished && (subDataRemaining || esm.getSubRecordHeader()))
+        while (!finished && esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -30,44 +22,23 @@ namespace ESM3
 
                     SpellParams state;
 
-                    while (esm.getSubRecordHeader())
+                    while (esm.getNextSubRecordHeader(ESM3::SUB_INDX))
                     {
-                        subDataRemaining = true;
-                        const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
-                        if (subHdr2.typeId == ESM3::SUB_INDX)
-                        {
-                            int index;
-                            esm.get(index);
+                        int index;
+                        esm.get(index);
 
-                            float magnitude;
-                            esm.getSubRecordHeader();
-                            assert(esm.subRecordHeader().typeId == ESM3::SUB_RAND);
-                            esm.get(magnitude);
+                        float magnitude;
+                        esm.getSubRecordHeader(ESM3::SUB_RAND);
+                        esm.get(magnitude);
 
-                            state.mEffectRands[index] = magnitude;
-                        }
-                        else
-                        {
-                            subDataRemaining = true;
-                            break;
-                        }
+                        state.mEffectRands[index] = magnitude;
                     }
 
-                    while (subDataRemaining || esm.getSubRecordHeader())
+                    while (esm.getNextSubRecordHeader(ESM3::SUB_PURG))
                     {
-                        subDataRemaining = true;
-                        const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
-                        if (subHdr2.typeId == ESM3::SUB_PURG)
-                        {
-                            int index;
-                            esm.get(index);
-                            state.mPurgedEffects.insert(index);
-                        }
-                        else
-                        {
-                            subDataRemaining = true;
-                            break;
-                        }
+                        int index;
+                        esm.get(index);
+                        state.mPurgedEffects.insert(index);
                     }
 
                     mSpells[id] = state;
@@ -97,13 +68,11 @@ namespace ESM3
                         }
                         else
                         {
-                            esm.getSubRecordHeader();
-                            assert(esm.subRecordHeader().typeId == ESM3::SUB_ARG_);
+                            esm.getSubRecordHeader(ESM3::SUB_ARG_);
                             esm.get(info.mArg);
                         }
 
-                        esm.getSubRecordHeader();
-                        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAGN);
+                        esm.getSubRecordHeader(ESM3::SUB_MAGN);
                         esm.get(info.mMagnitude);
 
                         permEffectList.push_back(info);
@@ -118,12 +87,10 @@ namespace ESM3
                     esm.getZString(id);
 
                     CorprusStats stats;
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_WORS);
+                    esm.getSubRecordHeader(ESM3::SUB_WORS);
                     esm.get(stats.mWorsenings);
 
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_TIME);
+                    esm.getSubRecordHeader(ESM3::SUB_TIME);
                     esm.get(stats.mNextWorsening);
 
                     mCorprusSpells[id] = stats;
@@ -135,8 +102,7 @@ namespace ESM3
                     esm.getZString(id);
                     ESM::TimeStamp time;
 
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_TIME);
+                    esm.getSubRecordHeader(ESM3::SUB_TIME);
                     esm.get(time);
 
                     mUsedPowers[id] = time;

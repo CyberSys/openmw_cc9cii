@@ -2,6 +2,7 @@
 #define OPENMW_ESSIMPORT_CONVERTER_H
 
 #include <limits>
+#include <cassert>
 
 #include <osg/Image>
 #include <osg/ref_ptr>
@@ -15,15 +16,15 @@
 #include <components/esm3/book.hpp>
 #include <components/esm3/clas.hpp>
 #include <components/esm3/glob.hpp>
-#include <components/esm/cellstate.hpp>
+#include <components/esm3/cellstate.hpp>
 #include <components/esm3/fact.hpp>
 #include <components/esm3/dialoguestate.hpp>
 #include <components/esm3/custommarkerstate.hpp>
-#include <components/esm/weatherstate.hpp>
+#include <components/esm3/weatherstate.hpp>
 #include <components/esm3/globalscript.hpp>
-#include <components/esm/queststate.hpp>
-#include <components/esm/stolenitems.hpp>
-#include <components/esm/projectilestate.hpp>
+#include <components/esm3/queststate.hpp>
+#include <components/esm3/stolenitems.hpp>
+#include <components/esm3/projectilestate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -218,8 +219,7 @@ class ConvertNPCC : public Converter
 public:
     void read(ESM3::Reader& esm) override
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertNPCC unexpected record");
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
         std::string id;
         esm.getZString(id);
         NPCC npcc;
@@ -312,8 +312,7 @@ class ConvertCNTC : public Converter
 {
     void read(ESM3::Reader& esm) override
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertCNTC unexpected record");
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
         std::string id;
         esm.getZString(id);
         CNTC cntc;
@@ -327,8 +326,7 @@ class ConvertCREC : public Converter
 public:
     void read(ESM3::Reader& esm) override
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertCREC unexpected record");
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
         std::string id;
         esm.getZString(id);
         CREC crec;
@@ -461,7 +459,7 @@ public:
 
     void write(ESM::ESMWriter &esm) override
     {
-        ESM::StolenItems items;
+        ESM3::StolenItems items;
         for (auto it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
             std::map<std::pair<std::string, bool>, int> owners;
@@ -510,8 +508,7 @@ class ConvertDIAL : public Converter
 public:
     void read(ESM3::Reader& esm) override
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertDIAL unexpected record");
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
         std::string id;
         esm.getZString(id);
         DIAL dial;
@@ -524,7 +521,7 @@ public:
         for (auto it = mDials.begin(); it != mDials.end(); ++it)
         {
             esm.startRecord(ESM::REC_QUES);
-            ESM::QuestState state;
+            ESM3::QuestState state;
             state.mFinished = 0;
             state.mState = it->second.mIndex;
             state.mTopic = Misc::StringUtils::lowerCase(it->first);
@@ -541,8 +538,7 @@ class ConvertQUES : public Converter
 public:
     void read(ESM3::Reader& esm) override
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME && "ConvertQUES unexpected record");
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
         std::string id;// = esm.getHNString("NAME");
         esm.getZString(id);
         QUES quest;
@@ -593,7 +589,7 @@ public:
         if (!mHasGame)
             return;
         esm.startRecord(ESM::REC_WTHR);
-        ESM::WeatherState weather;
+        ESM3::WeatherState weather;
         weather.mTimePassed = 0.0f;
         weather.mFastForward = false;
         weather.mWeatherUpdateTime = mGame.mGMDT.mTimeOfNextTransition - mContext->mHour;
@@ -644,7 +640,7 @@ public:
     void read(ESM3::Reader& esm) override;
     void write(ESM::ESMWriter& esm) override;
 private:
-    void convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam);
+    void convertBaseState(ESM3::BaseProjectileState& base, const PROJ::PNAM& pnam);
     PROJ mProj;
 };
 

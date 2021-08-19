@@ -9,14 +9,14 @@ void ESM3::InventoryState::load (Reader& esm)
 {
     // obsolete
     int index = 0;
-    while (esm.getNextSubRecordType() == ESM3::SUB_IOBJ && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_IOBJ))
     {
         int unused; // no longer used
         esm.get(unused);
 
         ObjectState state;
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_SLOT && esm.getSubRecordHeader()) // obsolete
+        if (esm.getNextSubRecordHeader(ESM3::SUB_SLOT))
         {
             int slot;
             esm.get(slot);
@@ -36,7 +36,7 @@ void ESM3::InventoryState::load (Reader& esm)
      }
 
     int itemsCount = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_ICNT && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_ICNT))
         esm.get(itemsCount);
     for (int i = 0; i < itemsCount; i++)
     {
@@ -53,7 +53,7 @@ void ESM3::InventoryState::load (Reader& esm)
     }
 
     //Next item is Levelled item
-    while (esm.getNextSubRecordType() == ESM3::SUB_LEVM && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_LEVM))
     {
         //Get its name
         std::string id;
@@ -62,12 +62,11 @@ void ESM3::InventoryState::load (Reader& esm)
         std::string parentGroup = "";
 
         //Then get its count
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
+        esm.getSubRecordHeader(ESM3::SUB_COUN);
         esm.get(count);
 
         //Old save formats don't have information about parent group; check for that
-        if (esm.getNextSubRecordType() == ESM3::SUB_LGRP && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_LGRP))
         {
             //Newest saves contain parent group
             esm.getZString(parentGroup);
@@ -76,19 +75,18 @@ void ESM3::InventoryState::load (Reader& esm)
         mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
     }
 
-    while (esm.getNextSubRecordType() == ESM3::SUB_MAGI && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_MAGI))
     {
         std::string id;
         esm.getZString(id);
 
         std::vector<std::pair<float, float> > params;
-        while (esm.getNextSubRecordType() == ESM3::SUB_RAND && esm.getSubRecordHeader())
+        while (esm.getNextSubRecordHeader(ESM3::SUB_RAND))
         {
             float rand, multiplier;
             esm.get(rand);
 
-            esm.getSubRecordHeader();
-            assert(esm.subRecordHeader().typeId == ESM3::SUB_MULT);
+            esm.getSubRecordHeader(ESM3::SUB_MULT);
             esm.get(multiplier);
 
             params.emplace_back(rand, multiplier);
@@ -96,7 +94,7 @@ void ESM3::InventoryState::load (Reader& esm)
         mPermanentMagicEffectMagnitudes[id] = params;
     }
 
-    while (esm.getNextSubRecordType() == ESM3::SUB_EQUI && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_EQUI))
     {
         int equipIndex;
         esm.get(equipIndex);
@@ -105,7 +103,7 @@ void ESM3::InventoryState::load (Reader& esm)
         mEquipmentSlots[equipIndex] = slot;
     }
 
-    if (esm.getNextSubRecordType() == ESM3::SUB_EQIP && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_EQIP))
     {
         int slotsCount = 0;
         esm.get(slotsCount);
@@ -120,7 +118,7 @@ void ESM3::InventoryState::load (Reader& esm)
     }
 
     mSelectedEnchantItem = -1;
-    if (esm.getNextSubRecordType() == ESM3::SUB_SELE && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_SELE))
         esm.get(mSelectedEnchantItem);
 
     // Old saves had restocking levelled items in a special map

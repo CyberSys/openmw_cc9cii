@@ -1,9 +1,5 @@
 #include "importklst.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
-
 #include <cassert>
 
 #include <components/esm3/reader.hpp>
@@ -26,8 +22,7 @@ namespace ESSImport
                     esm.getZString(refId);
 
                     int count;
-                    esm.getSubRecordHeader(); // assume CNAM always follows KNAM
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_CNAM);
+                    esm.getSubRecordHeader(ESM3::SUB_CNAM); // assume CNAM always follows KNAM
                     esm.get(count);
 
                     mKillCounter[refId] = count;

@@ -14,10 +14,8 @@ namespace ESM3
         mRunning = 0;
         mTargetRef.unset();
 
-        bool subDataRemaining = false;
-        while (subDataRemaining || esm.getSubRecordHeader())
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -25,7 +23,7 @@ namespace ESM3
                 {
                     esm.getString(mId); // NOTE: string not null terminated
 
-                    subDataRemaining = mLocals.load (esm);
+                    mLocals.load (esm);
                     break;
                 }
                 case ESM3::SUB_RUN_:

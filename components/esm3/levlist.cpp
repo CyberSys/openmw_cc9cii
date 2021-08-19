@@ -1,11 +1,5 @@
 #include "levlist.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -48,12 +42,10 @@ namespace ESM3
                     {
                         LevelItem &li = mList[i];
 
-                        reader.getSubRecordHeader();
-                        assert(reader.subRecordHeader().typeId == mRecName);
+                        reader.getSubRecordHeader(mRecName);
                         reader.getZString(li.mId); // FIXME: check if null terminated
 
-                        reader.getSubRecordHeader();
-                        assert(reader.subRecordHeader().typeId == ESM3::SUB_INTV);
+                        reader.getSubRecordHeader(ESM3::SUB_INTV);
                         reader.get(li.mLevel);
                     }
 

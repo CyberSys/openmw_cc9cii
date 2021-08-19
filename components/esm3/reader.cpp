@@ -176,6 +176,15 @@ bool Reader::getSubRecordHeader()
     return result;
 }
 
+bool Reader::getSubRecordHeader(std::uint32_t type)
+{
+    bool result = getSubRecordHeader();
+    if (mCtx.subRecordHeader.typeId != type)
+        fail("Expected subrecord " + ESM::printName(type)
+            + " but got " + ESM::printName(mCtx.subRecordHeader.typeId));
+    return result;
+}
+
 std::uint32_t Reader::getNextSubRecordType()
 {
     if (!mCtx.subHdrTypeRead && !mCtx.subHdrCached)

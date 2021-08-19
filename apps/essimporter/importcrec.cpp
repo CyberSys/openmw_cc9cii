@@ -1,5 +1,7 @@
 #include "importcrec.hpp"
 
+#include <cassert>
+
 #include <components/esm3/reader.hpp>
 
 namespace ESSImport
@@ -9,10 +11,8 @@ namespace ESSImport
         mIndex = 0;
         assert(esm.hdr().typeId == ESM3::REC_CREC);
 
-        bool subDataRemaining = false;
-        while (subDataRemaining|| esm.getSubRecordHeader())
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -41,7 +41,7 @@ namespace ESSImport
                 }
                 case ESM3::SUB_NPCO:
                 {
-                    subDataRemaining = mInventory.load(esm);
+                    mInventory.load(esm);
                     break;
                 }
                 default:

@@ -1,11 +1,5 @@
 #include "luascripts.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "../esm3/reader.hpp"
 #include "esmwriter.hpp"
 
@@ -34,7 +28,8 @@ void ESM::saveLuaBinaryData(ESMWriter& esm, const std::string& data)
 // NOTE: assumes that the sub-record header was just read
 std::string ESM::loadLuaBinaryData(ESM3::Reader& esm)
 {
-    assert (esm.subRecordHeader().typeId == ESM3::SUB_LUAD);
+    if (esm.subRecordHeader().typeId != ESM3::SUB_LUAD)
+        esm.fail("Expected LUAD but got " + ESM::printName(esm.subRecordHeader().typeId));
 
     std::string data;
     data.resize(esm.subRecordHeader().dataSize);
@@ -47,10 +42,8 @@ std::string ESM::loadLuaBinaryData(ESM3::Reader& esm)
 // or from ObjectState::load()
 void ESM::LuaScripts::load(ESM3::Reader& esm)
 {
-    bool subDataRemaining = false;
-    while (subDataRemaining || esm.getSubRecordHeader())
+    while (esm.getSubRecordHeader())
     {
-        subDataRemaining = false;
         const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
         switch (subHdr.typeId)
         {
@@ -62,35 +55,18 @@ void ESM::LuaScripts::load(ESM3::Reader& esm)
                 std::string data = loadLuaBinaryData(esm);
                 std::vector<LuaTimer> timers;
 
-                while (esm.getSubRecordHeader())
+                while (esm.getNextSubRecordHeader(ESM3::SUB_LUAT))
                 {
-                    subDataRemaining = false;
-                    const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
-                    if (subHdr2.typeId == ESM3::SUB_LUAT)
-                    {
-                        LuaTimer timer;
-                        esm.get(timer.mUnit);
-                        esm.get(timer.mTime);
-                        esm.getSubRecordHeader();
-                        assert(esm.subRecordHeader().typeId == ESM3::SUB_LUAC);
-                        esm.getZString(timer.mCallbackName);
+                    LuaTimer timer;
+                    esm.get(timer.mUnit);
+                    esm.get(timer.mTime);
+                    esm.getSubRecordHeader(ESM3::SUB_LUAC);
+                    esm.getZString(timer.mCallbackName);
 
-                        esm.getSubRecordHeader();
-                        if (esm.subRecordHeader().typeId == ESM3::SUB_LUAD)
-                            timer.mCallbackArgument = loadLuaBinaryData(esm);
-                        else
-                        {
-                            subDataRemaining = true;
-                            break;
-                        }
+                    if (esm.getNextSubRecordHeader(ESM3::SUB_LUAD))
+                        timer.mCallbackArgument = loadLuaBinaryData(esm);
 
-                        timers.push_back(std::move(timer));
-                    }
-                    else
-                    {
-                        subDataRemaining = true;
-                        break;
-                    }
+                    timers.push_back(std::move(timer));
                 }
 
                 mScripts.push_back({std::move(name), std::move(data), std::move(timers)});

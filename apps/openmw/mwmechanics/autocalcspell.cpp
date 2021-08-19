@@ -222,7 +222,7 @@ namespace MWMechanics
 
             if ((magicEffect->mData.mFlags & ESM3::MagicEffect::TargetSkill))
             {
-                assert (spellEffect.mSkill >= 0 && spellEffect.mSkill < ESM::Skill::Length);
+                assert (spellEffect.mSkill >= 0 && spellEffect.mSkill < ESM3::Skill::Length);
                 if (actorSkills[spellEffect.mSkill] < (unsigned int)iAutoSpellAttSkillMin)
                     return false;
             }

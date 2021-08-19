@@ -1,8 +1,8 @@
 #include "importcellref.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 //#include <iostream>
@@ -37,10 +37,6 @@ namespace ESSImport
                 case ESM3::SUB_NAME:
                 {
                     esm.getZString(mIndexedRefId);
-
-                    // FIXME: temp testing
-                    //if (mIndexedRefId == "Kwama Queen00000000")
-                        //std::cout << "start " << mIndexedRefId << std::endl;
 
                     ActorData::load(esm); // TODO: does this always happen here?
                     break;

@@ -10,11 +10,11 @@ namespace ESM3
         ObjectState::load(esm);
 
         mSpawnActorId = -1;
-        if (esm.getNextSubRecordType() == ESM3::SUB_SPAW && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_SPAW))
             esm.get(mSpawnActorId);
 
         mSpawn = false;
-        if (esm.getNextSubRecordType() == ESM3::SUB_RESP && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_RESP))
             esm.get(mSpawn);
     }
 

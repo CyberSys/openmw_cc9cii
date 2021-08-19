@@ -8,7 +8,7 @@ namespace ESM3
     void EffectList::load(Reader& reader)
     {
         mList.clear();
-        while (reader.getNextSubRecordType() == ESM3::SUB_ENAM && reader.getSubRecordHeader())
+        while (reader.getNextSubRecordHeader(ESM3::SUB_ENAM))
         {
             add(reader);
         }

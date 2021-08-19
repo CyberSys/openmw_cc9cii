@@ -21,22 +21,15 @@ namespace ESM3
             if (esm.subRecordHeader().typeId == ESM3::SUB_ANIS)
             {
                 ScriptedAnimation anim;
-
                 esm.getString(anim.mGroup); // NOTE: string not null terminated
-                esm.getSubRecordHeader();
-                if (esm.subRecordHeader().typeId == ESM3::SUB_TIME)
-                {
+
+                if (esm.getNextSubRecordHeader(ESM3::SUB_TIME))
                     esm.get(anim.mTime);
-                    esm.getSubRecordHeader();
-                }
 
-                if (esm.subRecordHeader().typeId == ESM3::SUB_ABST)
-                {
+                if (esm.getNextSubRecordHeader(ESM3::SUB_ABST))
                     esm.get(anim.mAbsolute);
-                    esm.getSubRecordHeader();
-                }
 
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_COUN);
+                esm.getSubRecordHeader(ESM3::SUB_COUN);
                 // workaround bug in earlier version where size_t was used
                 if (esm.subRecordHeader().dataSize == 8)
                     esm.get(anim.mLoopCount);

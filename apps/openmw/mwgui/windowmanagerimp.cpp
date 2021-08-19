@@ -1,7 +1,6 @@
 #include "windowmanagerimp.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <chrono>
 #include <thread>
 
@@ -1711,8 +1710,7 @@ namespace MWGui
         else if (type == ESM::REC_ASPL)
         {
             // equivalent to SUB_WNAM in REC_REFR
-            reader.getSubRecordHeader();
-            assert(reader.subRecordHeader().typeId == ESM3::SUB_ID__);
+            reader.getSubRecordHeader(ESM3::SUB_ID__);
             std::string spell;
             reader.getString(spell); // NOTE: string not null terminated, unless omwsave :-(
             if (mStore->get<ESM3::Spell>().search(spell))

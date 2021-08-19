@@ -1,7 +1,5 @@
 #include "aisequence.hpp"
 
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -14,23 +12,18 @@ namespace AiSequence
 
     void AiWander::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_DATA);
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
         esm.get(mData);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_STAR);
+        esm.getSubRecordHeader(ESM3::SUB_STAR);
         esm.get(mDurationData); // was mStartTime
 
         mStoredInitialActorPosition = false;
-        esm.getSubRecordHeader();
-        if (esm.subRecordHeader().typeId == ESM3::SUB_POS_)
+        if (esm.getNextSubRecordHeader(ESM3::SUB_POS_))
         {
             mStoredInitialActorPosition = true;
             esm.get(mInitialActorPosition);
         }
-        else
-            esm.cacheSubRecordHeader(); // is there another way?
     }
 
     void AiWander::save(ESM::ESMWriter& esm) const
@@ -43,15 +36,11 @@ namespace AiSequence
 
     void AiTravel::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_DATA);
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
         esm.get(mData);
 
-        esm.getSubRecordHeader();
-        if (esm.subRecordHeader().typeId == ESM3::SUB_HIDD)
+        if (esm.getNextSubRecordHeader(ESM3::SUB_HIDD))
             esm.get(mHidden);
-        else
-            esm.cacheSubRecordHeader(); // is there another way?
     }
 
     void AiTravel::save(ESM::ESMWriter& esm) const
@@ -62,23 +51,20 @@ namespace AiSequence
 
     void AiEscort::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_DATA);
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
         esm.get(mData);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_TARG);
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
         esm.getString(mTargetId); // NOTE: string not null terminated
 
         mTargetActorId = -1;
-        if (esm.getNextSubRecordType() == ESM3::SUB_TAID && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_TAID))
             esm.get(mTargetActorId);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_DURA);
+        esm.getSubRecordHeader(ESM3::SUB_DURA);
         esm.get(mRemainingDuration);
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_CELL && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_CELL))
             esm.getZString(mCellId);
     }
 
@@ -94,35 +80,31 @@ namespace AiSequence
 
     void AiFollow::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_DATA);
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
         esm.get(mData);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_TARG);
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
         esm.getZString(mTargetId);
 
         mTargetActorId = -1;
-        if (esm.getNextSubRecordType() == ESM3::SUB_TAID && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_TAID))
             esm.get(mTargetActorId);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_DURA);
+        esm.getSubRecordHeader(ESM3::SUB_DURA);
         esm.get(mRemainingDuration);
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_CELL && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_CELL))
             esm.getZString(mCellId);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_ALWY);
+        esm.getSubRecordHeader(ESM3::SUB_ALWY);
         esm.get(mAlwaysFollow);
 
         mCommanded = false;
-        if (esm.getNextSubRecordType() == ESM3::SUB_CMND && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_CMND))
             esm.get(mCommanded);
 
         mActive = false;
-        if (esm.getNextSubRecordType() == ESM3::SUB_ACTV && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_ACTV))
             esm.get(mActive);
     }
 
@@ -142,8 +124,7 @@ namespace AiSequence
 
     void AiActivate::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_TARG);
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
         esm.getZString(mTargetId);
     }
 
@@ -154,8 +135,7 @@ namespace AiSequence
 
     void AiCombat::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_TARG);
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
         esm.get(mTargetActorId);
     }
 
@@ -166,8 +146,7 @@ namespace AiSequence
 
     void AiPursue::load(Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_TARG);
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
         esm.get(mTargetActorId);
     }
 
@@ -185,7 +164,7 @@ namespace AiSequence
     void AiSequence::load(Reader& esm)
     {
 
-        while (esm.getNextSubRecordType() == ESM3::SUB_AIPK && esm.getSubRecordHeader())
+        while (esm.getNextSubRecordHeader(ESM3::SUB_AIPK))
         {
             int type;
             esm.get(type);
@@ -249,7 +228,7 @@ namespace AiSequence
             }
         }
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_LAST && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_LAST))
             esm.get(mLastAiPackage);
     }
 

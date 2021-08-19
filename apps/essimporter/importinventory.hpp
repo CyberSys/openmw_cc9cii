@@ -34,7 +34,7 @@ namespace ESSImport
         };
         std::vector<InventoryItem> mItems;
 
-        bool load(ESM3::Reader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

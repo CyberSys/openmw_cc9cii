@@ -1,12 +1,6 @@
-#include <cassert>
-
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "npcstats.hpp"
+
+#include <cassert>
 
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
@@ -15,7 +9,7 @@ ESM3::NpcStats::Faction::Faction() : mExpelled (false), mRank (-1), mReputation 
 
 void ESM3::NpcStats::load (Reader& esm)
 {
-    while (esm.getNextSubRecordType() == ESM3::SUB_FACT && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_FACT))
     {
         std::string id;
         esm.getString(id); // FIXME: check if string is null terminated
@@ -23,23 +17,23 @@ void ESM3::NpcStats::load (Reader& esm)
         Faction faction;
 
         int expelled = 0;
-        if (esm.getNextSubRecordType() == ESM3::SUB_FAEX && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_FAEX))
             esm.get(expelled);
 
         if (expelled)
             faction.mExpelled = true;
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_FARA && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_FARA))
             esm.get(faction.mRank);
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_FARE && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_FARE))
             esm.get(faction.mReputation);
 
         mFactions.insert (std::make_pair (id, faction));
     }
 
     mDisposition = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_DISP && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_DISP))
         esm.get(mDisposition);
 
     bool intFallback = esm.getFormat() < 11;
@@ -75,7 +69,7 @@ void ESM3::NpcStats::load (Reader& esm)
 
     // No longer used
     bool hasWerewolfAttributes = false;
-    if (esm.getNextSubRecordType() == ESM3::SUB_HWAT && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_HWAT))
         esm.get(hasWerewolfAttributes);
 
     if (hasWerewolfAttributes)
@@ -87,44 +81,44 @@ void ESM3::NpcStats::load (Reader& esm)
     }
 
     mIsWerewolf = false;
-    if (esm.getNextSubRecordType() == ESM3::SUB_WOLF && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_WOLF))
         esm.get(mIsWerewolf);
 
     mBounty = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_BOUN && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_BOUN))
         esm.get(mBounty);
 
     mReputation = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_REPU && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_REPU))
         esm.get(mReputation);
 
     mWerewolfKills = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_WKIL && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_WKIL))
         esm.get(mWerewolfKills);
 
     // No longer used
-    if (esm.getNextSubRecordType() == ESM3::SUB_PROF && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_PROF))
         esm.skipSubRecordData(); // int profit
 
     // No longer used
-    if (esm.getNextSubRecordType() == ESM3::SUB_ASTR && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_ASTR))
         esm.skipSubRecordData(); // attackStrength
 
     mLevelProgress = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_LPRO && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_LPRO))
         esm.get(mLevelProgress);
 
     for (int i = 0; i < 8; ++i)
         mSkillIncrease[i] = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_INCR && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_INCR))
         esm.get(mSkillIncrease);
 
     for (int i=0; i<3; ++i)
         mSpecIncreases[i] = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_SPEC && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_SPEC))
         esm.get(mSpecIncreases);
 
-    while (esm.getNextSubRecordType() == ESM3::SUB_USED && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_USED))
     {
         std::string used;
         esm.getString(used); // FIXME: check if string null terminated
@@ -132,21 +126,21 @@ void ESM3::NpcStats::load (Reader& esm)
     }
 
     mTimeToStartDrowning = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_DRTI && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_DRTI))
         esm.get(mTimeToStartDrowning);
 
     // No longer used
     float lastDrowningHit = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_DRLH && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_DRLH))
         esm.get(lastDrowningHit);
 
     // No longer used
     float levelHealthBonus = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_LVLH && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_LVLH))
         esm.get(levelHealthBonus);
 
     mCrimeId = -1;
-    if (esm.getNextSubRecordType() == ESM3::SUB_CRID && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_CRID))
         esm.get(mCrimeId);
 }
 

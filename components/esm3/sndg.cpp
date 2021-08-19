@@ -1,9 +1,5 @@
 #include "sndg.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
 #include "common.hpp"
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
@@ -31,8 +27,8 @@ namespace ESM3
                 }
                 case ESM3::SUB_DATA:
                 {
-                    assert (sizeof(mType) == 4);
-                    assert (subHdr.dataSize == sizeof(mType));
+                    if (subHdr.dataSize != sizeof(mType) || subHdr.dataSize != 4)
+                        reader.fail("SNDG incorrect data size");
                     reader.get(mType);
                     hasData = true;
                     break;

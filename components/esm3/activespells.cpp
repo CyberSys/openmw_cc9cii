@@ -1,11 +1,5 @@
 #include "activespells.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -15,8 +9,7 @@ namespace ESM3
     {
         int format = esm.getFormat();
 
-        bool subDataRemaining = false;
-        while (subDataRemaining || esm.getSubRecordHeader())
+        while (esm.getSubRecordHeader())
         {
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             if (subHdr.typeId == ESM3::SUB_ID__)
@@ -25,67 +18,46 @@ namespace ESM3
                 esm.getZString(spellId);
 
                 ActiveSpellParams params;
-                esm.getSubRecordHeader();
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_CAST);
+                esm.getSubRecordHeader(ESM3::SUB_CAST);
                 esm.get(params.mCasterActorId);
 
-                esm.getSubRecordHeader();
-                assert(esm.subRecordHeader().typeId == ESM3::SUB_DISP);
+                esm.getSubRecordHeader(ESM3::SUB_DISP);
                 esm.getZString(params.mDisplayName);
 
                 // spell casting timestamp, no longer used
-                if (esm.getNextSubRecordType() == ESM3::SUB_TIME && esm.getSubRecordHeader())
+                if (esm.getNextSubRecordHeader(ESM3::SUB_TIME))
                     esm.skipSubRecordData();
 
-                while (esm.getSubRecordHeader())
+                while (esm.getNextSubRecordHeader(ESM3::SUB_MGEF))
                 {
-                    subDataRemaining = false;
-                    const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
-                    if (subHdr2.typeId == ESM3::SUB_MGEF)
+                    ActiveEffect effect;
+                    esm.get(effect.mEffectId);
+                    effect.mArg = -1;
+
+                    if (esm.getNextSubRecordHeader(ESM3::SUB_ARG_))
+                        esm.get(effect.mArg);
+
+                    esm.getSubRecordHeader(ESM3::SUB_MAGN);
+                    esm.get(effect.mMagnitude);
+
+                    esm.getSubRecordHeader(ESM3::SUB_DURA);
+                    esm.get(effect.mDuration);
+
+                    effect.mEffectIndex = -1;
+                    if (esm.getNextSubRecordHeader(ESM3::SUB_EIND))
+                        esm.get(effect.mEffectIndex);
+
+                    if (format < 9)
+                        effect.mTimeLeft = effect.mDuration;
+                    else if (esm.getSubRecordHeader())
                     {
-                        ActiveEffect effect;
-                        esm.get(effect.mEffectId);
-                        effect.mArg = -1;
-
-                        if (esm.getNextSubRecordType() == ESM3::SUB_ARG_ && esm.getSubRecordHeader())
-                            esm.get(effect.mArg);
-
-                        esm.getSubRecordHeader();
-                        assert(esm.subRecordHeader().typeId == ESM3::SUB_MAGN);
-                        esm.get(effect.mMagnitude);
-
-                        esm.getSubRecordHeader();
-                        assert(esm.subRecordHeader().typeId == ESM3::SUB_DURA);
-                        esm.get(effect.mDuration);
-
-                        effect.mEffectIndex = -1;
-                        esm.getSubRecordHeader();
-                        if (esm.subRecordHeader().typeId == ESM3::SUB_EIND)
+                        if (esm.subRecordHeader().typeId == ESM3::SUB_LEFT)
                         {
-                            esm.get(effect.mEffectIndex);
-                            esm.getSubRecordHeader();
+                            esm.get(effect.mTimeLeft);
                         }
-                        else
-                            subDataRemaining = true;
-
-                        if (format < 9)
-                            effect.mTimeLeft = effect.mDuration;
-                        else if (subDataRemaining || esm.getSubRecordHeader())
-                        {
-                            if (esm.subRecordHeader().typeId == ESM3::SUB_LEFT)
-                            {
-                                esm.get(effect.mTimeLeft);
-                                subDataRemaining = false;
-                            }
-                        }
-
-                        params.mEffects.push_back(effect);
                     }
-                    else
-                    {
-                        subDataRemaining = true;
-                        break;
-                    }
+
+                    params.mEffects.push_back(effect);
                 }
 
                 mSpells.insert(std::make_pair(spellId, params));

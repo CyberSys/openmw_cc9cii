@@ -5,14 +5,13 @@
 namespace ESSImport
 {
     // called from SCPT::load(), Inventory::load(), etc, and sub-record header was already read
-    bool SCRI::load(ESM3::Reader& esm)
+    void SCRI::load(ESM3::Reader& esm)
     {
         int numShorts = 0, numLongs = 0, numFloats = 0;
 
-        bool subDataRemaining = true;
-        while (subDataRemaining || esm.getSubRecordHeader())
+        esm.cacheSubRecordHeader(); // "unread" the sub-record header
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -62,10 +61,9 @@ namespace ESSImport
                 }
                 default:
                     // continue loading in SCPT::load(), Inventory::load(), etc
-                    return true;
+                    esm.cacheSubRecordHeader();
+                    return;
             }
         }
-
-        return false;
     }
  }

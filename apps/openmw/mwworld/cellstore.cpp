@@ -209,7 +209,7 @@ namespace
             }
 
             Log(Debug::Warning) << "Warning: Dropping reference to " << state.mRef.mRefID << " " << test << " (invalid content file link)";
-            
+
             return;
         }
 
@@ -842,7 +842,7 @@ namespace MWWorld
     {
         mHasState = true;
 
-        while (reader.getNextSubRecordType() == ESM3::SUB_OBJE && reader.getSubRecordHeader())
+        while (reader.getNextSubRecordHeader(ESM3::SUB_OBJE))
         {
             unsigned int unused; // ACTI, CONT, etc
             reader.get(unused);

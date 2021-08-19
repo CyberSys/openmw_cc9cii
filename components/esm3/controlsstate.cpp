@@ -1,7 +1,5 @@
 #include "controlsstate.hpp"
 
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 

@@ -1,10 +1,6 @@
 #include "glob.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
+//#include <cassert>
 #include <cmath> // std::isnan
 
 #include "common.hpp"
@@ -29,7 +25,7 @@ namespace ESM3
                 case ESM3::SUB_NAME: reader.getZString(mId); break;
                 case ESM3::SUB_FNAM:
                 {
-                    assert(subHdr.dataSize == 1);
+                    //assert(subHdr.dataSize == 1);
 #if 0
                     mValue.read (reader, ESM3::Variant::Format_Global);
 #else
@@ -38,7 +34,7 @@ namespace ESM3
                 }
                 case ESM3::SUB_FLTV:
                 {
-                    assert (type != '\0' && "GLOB value before type");
+                    //assert (type != '\0' && "GLOB value before type");
 
                     float value;
                     reader.get(value);

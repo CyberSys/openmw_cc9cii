@@ -3,8 +3,6 @@
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
-#include <cassert>
-
 namespace ESM3
 {
     // NOTE: equivalent to REC_STLN except SUB_NAME, SUB_FNAM and SUB_ONAM are in lowercase
@@ -31,8 +29,7 @@ namespace ESM3
                     bool isFaction = (subHdr.typeId == ESM3::SUB_FNAM);
                     std::string owner;
                     esm.getString(owner); // NOTE: string not null terminated
-                    esm.getSubRecordHeader();
-                    assert (subHdr.typeId == ESM3::SUB_COUN);
+                    esm.getSubRecordHeader(ESM3::SUB_COUN);
                     int count;
                     esm.get(count);
                     ownerMap.insert(std::make_pair(std::make_pair(owner, isFaction), count));

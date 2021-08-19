@@ -1,24 +1,17 @@
 #include "queststate.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include "common.hpp"
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
 void ESM3::QuestState::load (Reader& esm)
 {
-    esm.getSubRecordHeader();
-    assert(esm.subRecordHeader().typeId == ESM3::SUB_YETO);
+    esm.getSubRecordHeader(ESM3::SUB_YETO);
     esm.getString(mTopic); // NOTE: not null terminated
 
-    if (esm.getNextSubRecordType() == ESM3::SUB_QSTA && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_QSTA))
         esm.get(mState);
-    if (esm.getNextSubRecordType() == ESM3::SUB_QFIN && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_QFIN))
         esm.get(mFinished);
 }
 

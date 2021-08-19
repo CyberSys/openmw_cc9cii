@@ -22,12 +22,9 @@ namespace ESSImport
         mHasACSC = false;
         mHasANIS = false;
 
-        bool subDataRemaining = false;
-        bool finished = false;
         bool doOnce = false;
-        while (!finished && (subDataRemaining || esm.getSubRecordHeader()))
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -136,7 +133,7 @@ namespace ESSImport
                 }
                 case ESM3::SUB_SCRI:
                 {
-                    subDataRemaining = mSCRI.load(esm);
+                    mSCRI.load(esm);
                     break;
                 }
                 case ESM3::SUB_ANIS:
@@ -153,17 +150,14 @@ namespace ESSImport
                     if (doOnce)
                     {
                         esm.cacheSubRecordHeader(); // prepare for continuing in CellRef::load()
-                        finished = true;
-                        break;
+                        return;;
                     }
                     else
                         doOnce = true;
 
-                    // Not keen to modify CellRef::loadData() so we do this hack to "unread"
-                    // the sub-record header.
                     esm.cacheSubRecordHeader(); // prepare for loading ESM3::CellRef::loadData()
                     bool isDeleted = false;
-                    subDataRemaining = ESM3::CellRef::loadData(esm, isDeleted);
+                    ESM3::CellRef::loadData(esm, isDeleted);
 
                     break;
                 }

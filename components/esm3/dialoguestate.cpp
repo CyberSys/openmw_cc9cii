@@ -5,32 +5,31 @@
 
 void ESM3::DialogueState::load (Reader& esm)
 {
-    while (esm.getNextSubRecordType() == ESM3::SUB_TOPI && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_TOPI))
     {
         std::string topic;
         esm.getString(topic); // NOTE: string not null terminated
         mKnownTopics.push_back (topic);
     }
 
-    while (esm.getNextSubRecordType() == ESM3::SUB_FACT && esm.getSubRecordHeader())
+    while (esm.getNextSubRecordHeader(ESM3::SUB_FACT))
     {
         std::string faction;
         esm.getString(faction); // NOTE: string not null terminated
 
-        while (esm.getNextSubRecordType() == ESM3::SUB_REA2 && esm.getSubRecordHeader())
+        while (esm.getNextSubRecordHeader(ESM3::SUB_REA2))
         {
             std::string faction2;
             esm.getString(faction2); // NOTE: string not null terminated
 
             int reaction;
-            esm.getSubRecordHeader();
-            assert(esm.subRecordHeader().typeId == ESM3::SUB_INTV);
+            esm.getSubRecordHeader(ESM3::SUB_INTV);
             esm.get(reaction);
             mChangedFactionReaction[faction][faction2] = reaction;
         }
 
         // no longer used
-        while (esm.getNextSubRecordType() == ESM3::SUB_REAC && esm.getSubRecordHeader())
+        while (esm.getNextSubRecordHeader(ESM3::SUB_REAC))
         {
             esm.skipSubRecordData();
             esm.getSubRecordHeader();

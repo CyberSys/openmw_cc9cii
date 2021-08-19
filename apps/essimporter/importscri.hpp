@@ -21,9 +21,7 @@ namespace ESSImport
         std::vector<int> mLongs;
         std::vector<float> mFloats;
 
-        // returns true if a sub-record header was read (i.e. the caller of
-        // this methods needs to deal with reading/skipping the data)
-        bool load(ESM3::Reader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

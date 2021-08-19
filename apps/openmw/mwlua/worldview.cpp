@@ -1,7 +1,5 @@
 #include "worldview.hpp"
 
-#include <cassert>
-
 #include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm3/cell.hpp>
@@ -78,8 +76,7 @@ namespace MWLua
 
     void WorldView::load(ESM3::Reader& esm)
     {
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_LUAW);
+        esm.getSubRecordHeader(ESM3::SUB_LUAW);
         esm.get(mGameSeconds);
         ObjectId lastAssignedId;
         lastAssignedId.load(esm, true);

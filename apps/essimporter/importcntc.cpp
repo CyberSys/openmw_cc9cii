@@ -1,8 +1,8 @@
 #include "importcntc.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 
@@ -16,10 +16,8 @@ namespace ESSImport
         assert(esm.hdr().typeId == ESM3::REC_CNTC);
 
         mIndex = 0;
-        bool subDataRemaining = false;
-        while (subDataRemaining || esm.getSubRecordHeader())
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -30,11 +28,11 @@ namespace ESSImport
                 }
                 case ESM3::SUB_NPCO:
                 {
-                    subDataRemaining = mInventory.load(esm);
+                    mInventory.load(esm);
                     break;
                 }
                 default:
-                    esm.fail("Unknown subrecord");
+                    esm.fail("CNTC: Unknown subrecord");
             }
         }
     }

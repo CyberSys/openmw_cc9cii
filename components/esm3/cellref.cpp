@@ -1,11 +1,5 @@
 #include "cellref.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
-
 #include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
@@ -60,16 +54,14 @@ namespace ESM3
         // ref is not being tracked by the moved references system.  Its only purpose is a
         // performance optimization for "immovable" things. We don't need this, and it's
         // problematic anyway, because any item can theoretically be moved by a script.
-        if (reader.getNextSubRecordType() == ESM3::SUB_NAM0 && reader.getSubRecordHeader())
+        if (reader.getNextSubRecordHeader(ESM3::SUB_NAM0))
             reader.skipSubRecordData();
 #endif
         blank();
 
         mRefNum.load (reader, wideRefNum); // get the reference id for FRMR
 
-        // assumed that "NAME" follows "FRMR"
-        reader.getSubRecordHeader();
-        assert (reader.subRecordHeader().typeId == ESM3::SUB_NAME && "Unexpected sub-record following FRMR");
+        reader.getSubRecordHeader(ESM3::SUB_NAME); // assumed that "NAME" follows "FRMR"
         reader.getZString(mRefID);
         if (mRefID.empty())
         {
@@ -116,8 +108,8 @@ namespace ESM3
                 case ESM3::SUB_TNAM: reader.getZString(mTrap); break;
                 case ESM3::SUB_DATA:
                 {
-                    assert (subHdr.dataSize == 24 && "REFR incorrect data size");
-                    assert (subHdr.dataSize == sizeof(mPos) && "REFR incorrect data size");
+                    if (subHdr.dataSize != sizeof(mPos) || subHdr.dataSize != 24)
+                        reader.fail("REFR incorrect data size");
                     reader.get(mPos);
                     break;
                 }

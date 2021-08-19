@@ -1,10 +1,6 @@
 #include "cont.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
+//#include <cassert>
 #include <iostream>
 
 #include "common.hpp"
@@ -68,14 +64,14 @@ namespace ESM3
                 case ESM3::SUB_SCRI: reader.getZString(mScript); break;
                 case ESM3::SUB_CNDT:
                 {
-                    assert (subHdr.dataSize == 4 && "CONT weight size mismatch");
+                    //assert (subHdr.dataSize == 4 && "CONT weight size mismatch");
                     reader.get(mWeight);
                     hasWeight = true;
                     break;
                 }
                 case ESM3::SUB_FLAG:
                 {
-                    assert (subHdr.dataSize == 4 && "CONT flag size mismatch");
+                    //assert (subHdr.dataSize == 4 && "CONT flag size mismatch");
                     reader.get(mFlags);
                     if (mFlags & 0xf4)
                         reader.fail("Unknown flags");

@@ -1,9 +1,5 @@
 #include "importplayer.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
-
 #include <cassert>
 
 #include <components/esm3/reader.hpp>
@@ -14,20 +10,17 @@ namespace ESSImport
     void REFR::load(ESM3::Reader& esm)
     {
         assert(esm.hdr().typeId == ESM3::REC_REFR);
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_FRMR);
+        esm.getSubRecordHeader(ESM3::SUB_FRMR);
         esm.get(mRefNum.mIndex);
 
-        esm.getSubRecordHeader();
-        assert(esm.subRecordHeader().typeId == ESM3::SUB_NAME);
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
         esm.getZString(mRefID);
 
         mActorData.load(esm);
 
         if (esm.hasMoreSubs())
         {
-            esm.getSubRecordHeader();
-            assert(esm.subRecordHeader().typeId == ESM3::SUB_DATA);
+            esm.getSubRecordHeader(ESM3::SUB_DATA);
             esm.get(mPos,24);
         }
     }

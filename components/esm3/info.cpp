@@ -1,10 +1,6 @@
 #include "info.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
-#include <cassert>
+//#include <cassert>
 
 #include "common.hpp"
 #include "reader.hpp"
@@ -48,7 +44,7 @@ namespace ESM3
                 }
                 case ESM3::SUB_DATA:
                 {
-                    assert (subHdr.dataSize == 12 && "INFO incorrect data size");
+                    //assert (subHdr.dataSize == 12 && "INFO incorrect data size");
                     reader.get(mData);
                     break;
                 }

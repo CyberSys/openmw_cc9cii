@@ -1,9 +1,5 @@
 #include "crea.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
 #include <cassert>
 
 #include <components/debug/debuglog.hpp>

@@ -1,8 +1,8 @@
 #include "importinventory.hpp"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 #include <stdexcept>
@@ -12,19 +12,18 @@
 
 namespace ESSImport
 {
-    // assumes that the sub-record header was just read
-    bool Inventory::load(ESM3::Reader& esm)
+    // assumes that the NPCO sub-record header was just read
+    void Inventory::load(ESM3::Reader& esm)
     {
         assert(esm.subRecordHeader().typeId == ESM3::SUB_NPCO);
-        bool subDataRemaining = true;
+        bool skipOnce = true;
 
         int baseIndex = -1;
         int currentIndex = -1; // -1 means uninitialised
         bool doOnce = false;
-        //bool finished = false;
-        while (/*!finished && */(subDataRemaining || esm.getSubRecordHeader()))
+        while (skipOnce || esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
+            skipOnce = false;
 
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
@@ -84,9 +83,9 @@ namespace ESSImport
                 case ESM3::SUB_SCRI: // item script; optional
                 {
                     if (currentIndex > 0) // separate stack
-                        subDataRemaining = mItems[currentIndex].mSCRI.load(esm);
+                        mItems[currentIndex].mSCRI.load(esm);
                     else
-                        subDataRemaining = mItems.back().mSCRI.load(esm);
+                        mItems.back().mSCRI.load(esm);
                     break;
                 }
                 case ESM3::SUB_XHLT: // optional
@@ -121,8 +120,8 @@ namespace ESSImport
                 {
                     if (!doOnce)// && currentIndex > 0)
                     {
-                        return true;
-                        break;
+                        esm.cacheSubRecordHeader();
+                        return;
                     }
                     else
                         doOnce = false;
@@ -133,15 +132,13 @@ namespace ESSImport
                     bool isDeleted = false;
                     // for XSOL and XCHG seen so far, but probably others too
                     if (currentIndex > 0)
-                        subDataRemaining = mItems[currentIndex].ESM3::CellRef::loadData(esm, isDeleted);
+                        mItems[currentIndex].ESM3::CellRef::loadData(esm, isDeleted);
                     else
-                        subDataRemaining = mItems.back().ESM3::CellRef::loadData(esm, isDeleted);
+                        mItems.back().ESM3::CellRef::loadData(esm, isDeleted);
 
                     break;
                 }
             }
         }
-
-        return false;
     }
 }

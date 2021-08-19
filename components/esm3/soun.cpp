@@ -27,8 +27,8 @@ namespace ESM3
                 }
                 case ESM3::SUB_DATA:
                 {
-                    assert (sizeof(mData) == 3);
-                    assert (subHdr.dataSize == sizeof(mData));
+                    if (subHdr.dataSize != sizeof(mData) || subHdr.dataSize != 3)
+                        reader.fail("SOUN incorrect data size");
                     reader.get(mData);
                     hasData = true;
                     break;

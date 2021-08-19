@@ -6,16 +6,16 @@
 void ESM3::CellState::load (Reader& esm)
 {
     mWaterLevel = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_WLVL && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_WLVL))
         esm.get(mWaterLevel);
 
     mHasFogOfWar = false;
-    if (esm.getNextSubRecordType() == ESM3::SUB_HFOW && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_HFOW))
         esm.get(mHasFogOfWar);
 
     mLastRespawn.mDay = 0;
     mLastRespawn.mHour = 0;
-    if (esm.getNextSubRecordType() == ESM3::SUB_RESP && esm.getSubRecordHeader())
+    if (esm.getNextSubRecordHeader(ESM3::SUB_RESP))
         esm.get(mLastRespawn);
 }
 

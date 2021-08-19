@@ -1,8 +1,8 @@
 #include "importsplm.h"
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
+//#ifdef NDEBUG
+//#undef NDEBUG
+//#endif
 
 #include <cassert>
 #include <cstring> // memset
@@ -26,10 +26,12 @@ namespace ESSImport
             {
                 case ESM3::SUB_NAME: esm.get(spell.mIndex); break;
                 case ESM3::SUB_SPDT: esm.get(spell.mSPDT);
+#if 0
                      std::cout << "type   " << spell.mSPDT.mType << std::endl;
                      std::cout << "effect " << spell.mSPDT.mId.toString() << std::endl;
                      std::cout << "caster " << spell.mSPDT.mCasterId.toString() << std::endl;
                      std::cout << "source " << spell.mSPDT.mSourceId.toString() << std::endl;
+#endif
                      break;
                 case ESM3::SUB_TNAM: esm.getZString(spell.mTarget); break;
                 case ESM3::SUB_NPDT:

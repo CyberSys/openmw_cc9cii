@@ -21,13 +21,15 @@ void ESM3::Player::load (Reader& esm)
         {
             case ESM3::SUB_LKEP:
             {
-                assert(subHdr.dataSize == 12 && "LKEP incorrect data size");
+                if (subHdr.dataSize != sizeof(mLastKnownExteriorPosition) || subHdr.dataSize != 12)
+                    esm.fail("LKEP incorrect data size");
                 esm.get(mLastKnownExteriorPosition);
                 break;
             }
             case ESM3::SUB_MARK:
             {
-                assert(subHdr.dataSize == 24 && "MARK incorrect data size");
+                if (subHdr.dataSize != sizeof(mMarkedPosition) || subHdr.dataSize != 24)
+                    esm.fail("MARK incorrect data size");
                 esm.get(mMarkedPosition);
                 mMarkedCell.load(esm);
                 break;
@@ -64,10 +66,10 @@ void ESM3::Player::load (Reader& esm)
         std::string boundItemId;
         std::string prevItemId;
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_BOUN && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_BOUN))
             esm.getZString(boundItemId);
 
-        if (esm.getNextSubRecordType() == ESM3::SUB_PREV && esm.getSubRecordHeader())
+        if (esm.getNextSubRecordHeader(ESM3::SUB_PREV))
              esm.getZString(prevItemId);
 
         if (!boundItemId.empty())

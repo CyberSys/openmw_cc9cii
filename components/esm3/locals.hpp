@@ -23,7 +23,7 @@ namespace ESM3
     {
         std::vector<std::pair<std::string, Variant> > mVariables;
 
-        bool load (Reader& esm);
+        void load (Reader& esm);
         void save (ESM::ESMWriter& esm) const;
     };
 }

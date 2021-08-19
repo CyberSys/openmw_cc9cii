@@ -1,7 +1,5 @@
 #include "weatherstate.hpp"
 
-#include <cassert>
-
 #include "reader.hpp"
 #include "../esm/esmwriter.hpp"
 
@@ -26,10 +24,8 @@ namespace ESM3
     // (called from StateManager::loadGame() via WeatherManager::readRecord())
     void WeatherState::load(Reader& esm)
     {
-        bool subDataRemaining = false;
-        while (subDataRemaining || esm.getSubRecordHeader())
+        while (esm.getSubRecordHeader())
         {
-            subDataRemaining = false;
             const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
             switch (subHdr.typeId)
             {
@@ -47,24 +43,14 @@ namespace ESM3
                     esm.getZString(regionID);
 
                     RegionWeatherState region;
-                    esm.getSubRecordHeader();
-                    assert(esm.subRecordHeader().typeId == ESM3::SUB_RGNW);
+                    esm.getSubRecordHeader(ESM3::SUB_RGNW);
                     esm.get(region.mWeather);
 
-                    while (esm.getSubRecordHeader())
+                    while (esm.getNextSubRecordHeader(ESM3::SUB_RGNC))
                     {
-                        const ESM3::SubRecordHeader& subHdr2 = esm.subRecordHeader();
-                        if (subHdr2.typeId == ESM3::SUB_RGNC)
-                        {
-                            char chance;
-                            esm.get(chance);
-                            region.mChances.push_back(chance);
-                        }
-                        else
-                        {
-                            subDataRemaining = true;
-                            break;
-                        }
+                        char chance;
+                        esm.get(chance);
+                        region.mChances.push_back(chance);
                     }
 
                     mRegions.insert(std::make_pair(regionID, region));
