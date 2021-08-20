@@ -1,9 +1,5 @@
 #include "reader.hpp"
 
-//#ifdef NDEBUG
-//#undef NDEBUG
-//#endif
-
 #include <cassert>
 #include <stdexcept>
 

@@ -8,6 +8,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/esm3/reader.hpp>
+#include <components/esm4/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/misc/algorithm.hpp>
 
@@ -147,51 +148,78 @@ void ESMStore::load(ESM::Reader &esm, Loading::Listener* listener)
 {
     listener->setProgressRange(1000);
 
-    // FIXME: add ESM4 code here
+    ESM3::Dialogue* dialogue = nullptr;
 
-    // NOTE: everything below uses ESM3::Reader
-    // FIXME: dynamic_cast is probably safer
-    ESM3::Reader& reader = static_cast<ESM3::Reader&>(esm);
+    if (!esm.isEsm4())
+    {
+        // NOTE: everything in this block uses ESM3::Reader
+        // FIXME: dynamic_cast is probably safer
+        ESM3::Reader& reader = static_cast<ESM3::Reader&>(esm);
 
-    ESM3::Dialogue *dialogue = nullptr;
 
-    // Land texture loading needs to use a separate internal store for each plugin.
-    // We set the number of plugins here to avoid continual resizes during loading,
-    // and so we can properly verify if valid plugin indices are being passed to the
-    // LandTexture Store retrieval methods.
-    mLandTextures.resize(esm.getGlobalReaderList()->size()); // FIXME: need to change the logic here - we don't need all content files for land textures
+        // Land texture loading needs to use a separate internal store for each plugin.
+        // We set the number of plugins here to avoid continual resizes during loading,
+        // and so we can properly verify if valid plugin indices are being passed to the
+        // LandTexture Store retrieval methods.
+        //mLandTextures.resize(esm.getGlobalReaderList()->size()); // FIXME: size should be for MW only
+        mLandTextures.resize(esm.getGlobalReaderList()->size()); // FIXME: need to change the logic here - we don't need all content files for land textures
 
-    /// \todo Move this to somewhere else. ESMReader?
-    // Cache parent esX files by tracking their indices in the global list of
-    //  all files/readers used by the engine. This will greaty accelerate
-    //  refnumber mangling, as required for handling moved references.
-    const std::vector<ESM::MasterData> &masters = esm.getGameFiles();
-    std::vector<ESM::Reader*> *allPlugins = esm.getGlobalReaderList();
-    for (size_t j = 0; j < masters.size(); j++) {
-        const ESM::MasterData &mast = masters[j];
-        std::string fname = mast.name;
-        int index = ~0;
-        for (unsigned int i = 0; i < reader.getModIndex(); i++) {
-            const std::string candidate = allPlugins->at(i)->getFileName();
-            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
-                index = i;
-                break;
+        /// \todo Move this to somewhere else. ESMReader?
+        // Cache parent esX files by tracking their indices in the global list of
+        //  all files/readers used by the engine. This will greaty accelerate
+        //  refnumber mangling, as required for handling moved references.
+        const std::vector<ESM::MasterData>& masters = esm.getGameFiles();
+        std::vector<ESM::Reader*>* allPlugins = esm.getGlobalReaderList();
+        for (size_t j = 0; j < masters.size(); j++) {
+            const ESM::MasterData& mast = masters[j];
+            std::string fname = mast.name;
+            int index = ~0;
+            for (unsigned int i = 0; i < reader.getModIndex(); i++) {
+                const std::string candidate = allPlugins->at(i)->getFileName();
+                std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+                if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
+                    index = i;
+                    break;
+                }
             }
+            if (index == (int)~0) {
+                // Tried to load a parent file that has not been loaded yet. This is bad,
+                //  the launcher should have taken care of this.
+                std::string fstring = "File " + esm.getFileName() + " asks for parent file " + masters[j].name
+                    + ", but it has not been loaded yet. Please check your load order.";
+                reader.fail(fstring);
+            }
+            reader.addParentFileIndex(index);
         }
-        if (index == (int)~0) {
-            // Tried to load a parent file that has not been loaded yet. This is bad,
-            //  the launcher should have taken care of this.
-            std::string fstring = "File " + esm.getFileName() + " asks for parent file " + masters[j].name
-                + ", but it has not been loaded yet. Please check your load order.";
-            reader.fail(fstring);
-        }
-        reader.addParentFileIndex(index);
     }
 
     // Loop through all records
     while(esm.hasMoreRecs())
     {
+        if (esm.isEsm4())
+        {
+            // NOTE: everything in this block uses ESM4::Reader
+            // FIXME: dynamic_cast is probably safer
+            ESM4::Reader& reader = static_cast<ESM4::Reader&>(esm);
+
+            int esmVer = reader.esmVersion();
+            bool isTes4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
+            bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170;
+            bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+            if (isTes4 || isTes5 || isFONV)
+            {
+                reader.exitGroupCheck();
+
+                loadEsm4Group(reader);
+                listener->setProgress(static_cast<size_t>(reader.getFileOffset() / (float)reader.getFileSize() * 1000));
+                continue;
+            }
+        }
+
+        // NOTE: everything in this block uses ESM3::Reader
+        // FIXME: dynamic_cast is probably safer
+        ESM3::Reader& reader = static_cast<ESM3::Reader&>(esm);
+
         reader.getRecordHeader();
         std::uint32_t typeId = reader.hdr().typeId;
 
@@ -238,6 +266,155 @@ void ESMStore::load(ESM::Reader &esm, Loading::Listener* listener)
         }
         listener->setProgress(static_cast<size_t>(reader.getFileOffset() / (float)reader.getFileSize() * 1000));
     }
+}
+
+void ESMStore::loadEsm4Group (ESM4::Reader& reader)
+{
+    reader.getRecordHeader();
+    const ESM4::RecordHeader& hdr = reader.hdr();
+
+    if (hdr.record.typeId != ESM4::REC_GRUP)
+        return loadEsm4Record(reader);
+
+    switch (hdr.group.type)
+    {
+        case ESM4::Grp_RecordType:
+        {
+            // FIXME: rewrite to workaround reliability issue
+            if (hdr.group.label.value == ESM4::REC_NAVI || hdr.group.label.value == ESM4::REC_WRLD ||
+                hdr.group.label.value == ESM4::REC_REGN || hdr.group.label.value == ESM4::REC_STAT ||
+                hdr.group.label.value == ESM4::REC_ANIO || hdr.group.label.value == ESM4::REC_CONT ||
+                hdr.group.label.value == ESM4::REC_MISC || hdr.group.label.value == ESM4::REC_ACTI ||
+                hdr.group.label.value == ESM4::REC_ARMO || hdr.group.label.value == ESM4::REC_NPC_ ||
+                hdr.group.label.value == ESM4::REC_FLOR || hdr.group.label.value == ESM4::REC_GRAS ||
+                hdr.group.label.value == ESM4::REC_TREE || hdr.group.label.value == ESM4::REC_LIGH ||
+                hdr.group.label.value == ESM4::REC_BOOK || hdr.group.label.value == ESM4::REC_FURN ||
+                hdr.group.label.value == ESM4::REC_SOUN || hdr.group.label.value == ESM4::REC_WEAP ||
+                hdr.group.label.value == ESM4::REC_DOOR || hdr.group.label.value == ESM4::REC_AMMO ||
+                hdr.group.label.value == ESM4::REC_CLOT || hdr.group.label.value == ESM4::REC_ALCH ||
+                hdr.group.label.value == ESM4::REC_APPA || hdr.group.label.value == ESM4::REC_INGR ||
+                hdr.group.label.value == ESM4::REC_SGST || hdr.group.label.value == ESM4::REC_SLGM ||
+                hdr.group.label.value == ESM4::REC_KEYM || hdr.group.label.value == ESM4::REC_HAIR ||
+                hdr.group.label.value == ESM4::REC_EYES || hdr.group.label.value == ESM4::REC_CELL ||
+                hdr.group.label.value == ESM4::REC_CREA || hdr.group.label.value == ESM4::REC_LVLC ||
+                hdr.group.label.value == ESM4::REC_LVLI || hdr.group.label.value == ESM4::REC_MATO ||
+                hdr.group.label.value == ESM4::REC_IDLE || hdr.group.label.value == ESM4::REC_LTEX ||
+                hdr.group.label.value == ESM4::REC_RACE || hdr.group.label.value == ESM4::REC_SBSP ||
+                hdr.group.label.value == ESM4::REC_LVLN || hdr.group.label.value == ESM4::REC_IDLM ||
+                hdr.group.label.value == ESM4::REC_MSTT || hdr.group.label.value == ESM4::REC_TXST ||
+                hdr.group.label.value == ESM4::REC_SCRL || hdr.group.label.value == ESM4::REC_ARMA ||
+                hdr.group.label.value == ESM4::REC_HDPT || hdr.group.label.value == ESM4::REC_TERM ||
+                hdr.group.label.value == ESM4::REC_TACT || hdr.group.label.value == ESM4::REC_NOTE ||
+                hdr.group.label.value == ESM4::REC_SCPT || hdr.group.label.value == ESM4::REC_LGTM ||
+                hdr.group.label.value == ESM4::REC_DIAL || hdr.group.label.value == ESM4::REC_INFO ||
+                hdr.group.label.value == ESM4::REC_QUST || hdr.group.label.value == ESM4::REC_PACK ||
+                hdr.group.label.value == ESM4::REC_ASPC || hdr.group.label.value == ESM4::REC_IMOD ||
+                hdr.group.label.value == ESM4::REC_PWAT || hdr.group.label.value == ESM4::REC_SCOL ||
+                hdr.group.label.value == ESM4::REC_MUSC || hdr.group.label.value == ESM4::REC_ALOC ||
+                hdr.group.label.value == ESM4::REC_MSET || hdr.group.label.value == ESM4::REC_DOBJ ||
+                hdr.group.label.value == ESM4::REC_SNDR || hdr.group.label.value == ESM4::REC_OTFT ||
+                hdr.group.label.value == ESM4::REC_BPTD || hdr.group.label.value == ESM4::REC_GLOB
+                )
+            {
+                reader.enterGroup();
+                loadEsm4Group(reader);
+            }
+            else
+            {
+                // Skip groups that are of no interest (for now).
+                //  GMST GLOB CLAS FACT SKIL MGEF SCPT ENCH SPEL BSGN WTHR CLMT DIAL
+                //  QUST PACK CSTY LSCR LVSP WATR EFSH
+
+                // FIXME: The label field of a group is not reliable, so we will need to check here as well
+                //std::cout << "skipping group... " << ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
+                reader.skipGroup();
+                return;
+            }
+
+            break;
+        }
+        case ESM4::Grp_CellChild:
+        case ESM4::Grp_WorldChild:
+        case ESM4::Grp_TopicChild:
+        {
+            reader.enterGroup();
+            if (!reader.hasMoreRecs())
+                return; // may have been an empty group followed by EOF
+
+            loadEsm4Group(reader);
+
+            break;
+        }
+        case ESM4::Grp_CellPersistentChild:
+        {
+            reader.adjustGRUPFormId();  // not needed or even shouldn't be done? (only labels anyway)
+            reader.enterGroup();
+//#if 0
+            // Below test shows that Oblivion.esm does not have any persistent cell child
+            // groups under exterior world sub-block group.  Haven't checked other files yet.
+             if (reader.grp(0).type == ESM4::Grp_CellPersistentChild &&
+                 reader.grp(1).type == ESM4::Grp_CellChild &&
+                 !(reader.grp(2).type == ESM4::Grp_WorldChild || reader.grp(2).type == ESM4::Grp_InteriorSubCell))
+                 std::cout << "Unexpected persistent child group in exterior subcell" << std::endl;
+//#endif
+            if (!reader.hasMoreRecs())
+                return; // may have been an empty group followed by EOF
+
+            loadEsm4Group(reader);
+            break;
+        }
+        case ESM4::Grp_CellTemporaryChild:
+        case ESM4::Grp_CellVisibleDistChild:
+        {
+            // NOTE: preload strategy and persistent records
+            //
+            // Current strategy defers loading of "temporary" or "visible when distant"
+            // references and other records (land and pathgrid) until they are needed.
+            //
+            // The "persistent" records need to be loaded up front, however.  This is to allow,
+            // for example, doors to work.  A door reference will have a FormId of the
+            // destination door FormId.  But we have no way of knowing to which cell the
+            // destination FormId belongs until that cell and that reference is loaded.
+            //
+            // For worldspaces the persistent records are usully (always?) stored in a dummy
+            // cell under a "world child" group.  It may be possible to skip the whole "cell
+            // child" group without scanning for persistent records.  See above short test.
+            reader.skipGroup();
+            break;
+        }
+        case ESM4::Grp_ExteriorCell:
+        case ESM4::Grp_ExteriorSubCell:
+        case ESM4::Grp_InteriorCell:
+        case ESM4::Grp_InteriorSubCell:
+        {
+            reader.enterGroup();
+            loadEsm4Group(reader);
+
+            break;
+        }
+        default:
+            reader.skipGroup();
+            break;
+    }
+
+    return;
+}
+
+void ESMStore::loadEsm4Record (ESM4::Reader& reader)
+{
+    // Assumes that the reader has just read the record header only.
+    const ESM4::RecordHeader& hdr = reader.hdr();
+
+    switch (hdr.record.typeId)
+    {
+
+        // FIXME: removed for now
+
+        default:
+            reader.skipRecordData();
+    }
+
+    return;
 }
 
 void ESMStore::setUp(bool validateRecords)

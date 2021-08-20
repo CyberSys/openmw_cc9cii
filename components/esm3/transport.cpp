@@ -23,7 +23,7 @@ namespace ESM3
         else if (subHdr.typeId == ESM3::SUB_DNAM)
         {
             std::string name;
-            reader.getZString(name);
+            reader.getString(name); // TODO: check string not null terminated
             if (mList.empty())
                 Log(Debug::Warning) << "Encountered DNAM record without DODT record, skipped.";
             else

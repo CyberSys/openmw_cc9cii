@@ -31,9 +31,10 @@ namespace MWLua
                 case ESM3::SUB_LUAE:
                 {
                     std::string name;
-                    esm.getZString(name);
+                    esm.getString(name); // TODO: check string not null terminated
 
                     ObjectId dest;
+                    esm.getSubRecordHeader(); // FRMR
                     dest.load(esm, true);
 
                     esm.getSubRecordHeader();

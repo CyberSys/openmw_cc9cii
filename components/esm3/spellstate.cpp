@@ -47,7 +47,7 @@ namespace ESM3
                 case ESM3::SUB_PERM: // Obsolete
                 {
                     std::string spellId;
-                    esm.getZString(spellId);
+                    esm.getString(spellId); // TODO: check string not null terminated
                     std::vector<PermanentSpellEffectInfo> permEffectList;
 
                     while (true)
@@ -84,7 +84,7 @@ namespace ESM3
                 case ESM3::SUB_CORP: // Obsolete
                 {
                     std::string id;
-                    esm.getZString(id);
+                    esm.getString(id); // TODO: check string not null terminated
 
                     CorprusStats stats;
                     esm.getSubRecordHeader(ESM3::SUB_WORS);
@@ -99,7 +99,7 @@ namespace ESM3
                 case ESM3::SUB_USED:
                 {
                     std::string id;
-                    esm.getZString(id);
+                    esm.getString(id); // TODO: check string not null terminated
                     ESM::TimeStamp time;
 
                     esm.getSubRecordHeader(ESM3::SUB_TIME);
@@ -110,7 +110,7 @@ namespace ESM3
                 }
                 case ESM3::SUB_SLCT:
                 {
-                    esm.getZString(mSelectedSpell);
+                    esm.getString(mSelectedSpell); // TODO: check string not null terminated
                     finished = true;
                     break;
                 }

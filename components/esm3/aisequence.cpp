@@ -65,7 +65,7 @@ namespace AiSequence
         esm.get(mRemainingDuration);
 
         if (esm.getNextSubRecordHeader(ESM3::SUB_CELL))
-            esm.getZString(mCellId);
+            esm.getString(mCellId); // TODO: check string not null terminated
     }
 
     void AiEscort::save(ESM::ESMWriter& esm) const
@@ -84,7 +84,7 @@ namespace AiSequence
         esm.get(mData);
 
         esm.getSubRecordHeader(ESM3::SUB_TARG);
-        esm.getZString(mTargetId);
+        esm.getString(mTargetId); // TODO: check string not null terminated
 
         mTargetActorId = -1;
         if (esm.getNextSubRecordHeader(ESM3::SUB_TAID))
@@ -94,7 +94,7 @@ namespace AiSequence
         esm.get(mRemainingDuration);
 
         if (esm.getNextSubRecordHeader(ESM3::SUB_CELL))
-            esm.getZString(mCellId);
+            esm.getString(mCellId); // TODO: check string not null terminated
 
         esm.getSubRecordHeader(ESM3::SUB_ALWY);
         esm.get(mAlwaysFollow);
@@ -125,7 +125,7 @@ namespace AiSequence
     void AiActivate::load(Reader& esm)
     {
         esm.getSubRecordHeader(ESM3::SUB_TARG);
-        esm.getZString(mTargetId);
+        esm.getString(mTargetId); // TODO: check string not null terminated
     }
 
     void AiActivate::save(ESM::ESMWriter& esm) const

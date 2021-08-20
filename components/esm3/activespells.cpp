@@ -15,14 +15,14 @@ namespace ESM3
             if (subHdr.typeId == ESM3::SUB_ID__)
             {
                 std::string spellId;
-                esm.getZString(spellId);
+                esm.getString(spellId); // TODO: check string not null terminated
 
                 ActiveSpellParams params;
                 esm.getSubRecordHeader(ESM3::SUB_CAST);
                 esm.get(params.mCasterActorId);
 
                 esm.getSubRecordHeader(ESM3::SUB_DISP);
-                esm.getZString(params.mDisplayName);
+                esm.getString(params.mDisplayName); // TODO: check string not null terminated
 
                 // spell casting timestamp, no longer used
                 if (esm.getNextSubRecordHeader(ESM3::SUB_TIME))

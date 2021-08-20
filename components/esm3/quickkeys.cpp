@@ -26,7 +26,7 @@ namespace ESM3
                     esm.get(key.mType);
 
                     esm.getSubRecordHeader(ESM3::SUB_ID__);
-                    esm.getZString(key.mId);
+                    esm.getString(key.mId); // TODO: check  string not null terminated
 
                     mKeys.push_back(key);
                     break;

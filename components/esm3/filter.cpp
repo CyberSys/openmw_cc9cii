@@ -15,9 +15,9 @@ void ESM3::Filter::load (Reader& reader, bool& isDeleted)
         const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM3::SUB_NAME: reader.getZString(mId); break;
-            case ESM3::SUB_FILT: reader.getZString(mFilter); break;
-            case ESM3::SUB_DESC: reader.getZString(mDescription); break;
+            case ESM3::SUB_NAME: reader.getZString(mId); break; // TODO: check string null terminated
+            case ESM3::SUB_FILT: reader.getZString(mFilter); break; // TODO: check string null terminated
+            case ESM3::SUB_DESC: reader.getZString(mDescription); break; // TODO: check string null terminated
             case ESM3::SUB_DELE:
             {
                 reader.skipSubRecordData();

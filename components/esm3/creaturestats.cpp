@@ -143,7 +143,7 @@ void ESM3::CreatureStats::load (Reader& esm)
                 int actorId;
 
                 if (esm.getNextSubRecordHeader(ESM3::SUB_SOUR))
-                    esm.getZString(source);
+                    esm.getString(source); // TODO: check string not null terminated
 
                 if (esm.getNextSubRecordHeader(ESM3::SUB_EIND))
                     esm.get(effectIndex);
@@ -165,7 +165,7 @@ void ESM3::CreatureStats::load (Reader& esm)
             case ESM3::SUB_CORP:
             {
                 std::string id;
-                esm.getZString(id);
+                esm.getString(id); // TODO: check string not null terminated
 
                 CorprusStats stats;
                 esm.getSubRecordHeader(ESM3::SUB_WORS);

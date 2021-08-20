@@ -67,10 +67,10 @@ void ESM3::Player::load (Reader& esm)
         std::string prevItemId;
 
         if (esm.getNextSubRecordHeader(ESM3::SUB_BOUN))
-            esm.getZString(boundItemId);
+            esm.getString(boundItemId); // TODO: check string not null terminated
 
         if (esm.getNextSubRecordHeader(ESM3::SUB_PREV))
-             esm.getZString(prevItemId);
+             esm.getString(prevItemId); // TODO: check string not null terminated
 
         if (!boundItemId.empty())
             mPreviousItems[boundItemId] = prevItemId;

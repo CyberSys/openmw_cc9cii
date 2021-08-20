@@ -50,7 +50,7 @@ void ESM::LuaScripts::load(ESM3::Reader& esm)
             case ESM3::SUB_LUAS:
             {
                 std::string name;
-                esm.getZString(name);
+                esm.getString(name); // TODO: check string not null terminated
 
                 std::string data = loadLuaBinaryData(esm);
                 std::vector<LuaTimer> timers;
@@ -61,7 +61,7 @@ void ESM::LuaScripts::load(ESM3::Reader& esm)
                     esm.get(timer.mUnit);
                     esm.get(timer.mTime);
                     esm.getSubRecordHeader(ESM3::SUB_LUAC);
-                    esm.getZString(timer.mCallbackName);
+                    esm.getString(timer.mCallbackName); // TODO: check string not null terminated
 
                     if (esm.getNextSubRecordHeader(ESM3::SUB_LUAD))
                         timer.mCallbackArgument = loadLuaBinaryData(esm);

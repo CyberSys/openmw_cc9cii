@@ -148,7 +148,7 @@ namespace ESM4
 
         inline int getRecordCount() const final { return mHeader.mData.records; }
         inline const std::string getAuthor() const final { return mHeader.mAuthor; }
-        inline int getFormat() const final { return 0; }; // prob. not relevant for ESM4
+        inline int getFormat() const final { return 0; }; // no savegame yet for ESM4
         inline const std::string getDesc() const final { return mHeader.mDesc; }
 
         inline std::string getFileName() const final { return mCtx.filename; }; // not used

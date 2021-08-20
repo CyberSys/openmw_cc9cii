@@ -57,7 +57,7 @@ void ESM3::InventoryState::load (Reader& esm)
     {
         //Get its name
         std::string id;
-        esm.getZString(id);
+        esm.getString(id); // TODO: check string not null terminated
         int count;
         std::string parentGroup = "";
 
@@ -69,7 +69,7 @@ void ESM3::InventoryState::load (Reader& esm)
         if (esm.getNextSubRecordHeader(ESM3::SUB_LGRP))
         {
             //Newest saves contain parent group
-            esm.getZString(parentGroup);
+            esm.getString(parentGroup); // TODO: check string not null terminated
         }
 
         mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
@@ -78,7 +78,7 @@ void ESM3::InventoryState::load (Reader& esm)
     while (esm.getNextSubRecordHeader(ESM3::SUB_MAGI))
     {
         std::string id;
-        esm.getZString(id);
+        esm.getString(id); // NOTE: string not null terminated
 
         std::vector<std::pair<float, float> > params;
         while (esm.getNextSubRecordHeader(ESM3::SUB_RAND))

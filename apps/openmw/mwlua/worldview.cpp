@@ -79,6 +79,7 @@ namespace MWLua
         esm.getSubRecordHeader(ESM3::SUB_LUAW);
         esm.get(mGameSeconds);
         ObjectId lastAssignedId;
+        esm.getSubRecordHeader(); // FRMR
         lastAssignedId.load(esm, true);
         mObjectRegistry.setLastAssignedId(lastAssignedId);
     }
