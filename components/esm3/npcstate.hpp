@@ -1,12 +1,12 @@
-#ifndef OPENMW_ESM_NPCSTATE_H
-#define OPENMW_ESM_NPCSTATE_H
+#ifndef ESM3_NPCSTATE_H
+#define ESM3_NPCSTATE_H
 
 #include "objectstate.hpp"
 #include "inventorystate.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
 
-namespace ESM
+namespace ESM3
 {
     // format 0, saved games only
 
@@ -19,8 +19,8 @@ namespace ESM
         /// Initialize to default state
         void blank() override;
 
-        void load (ESMReader &esm) override;
-        void save (ESMWriter &esm, bool inInventory = false) const override;
+        void load (Reader& esm) override;
+        void save (ESM::ESMWriter& esm, bool inInventory = false) const override;
 
         NpcState& asNpcState() override
         {

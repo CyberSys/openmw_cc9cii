@@ -1,12 +1,16 @@
-#ifndef OPENMW_ESM_FOGSTATE_H
-#define OPENMW_ESM_FOGSTATE_H
+#ifndef ESM3_FOGSTATE_H
+#define ESM3_FOGSTATE_H
 
 #include <vector>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     struct FogTexture
     {
@@ -30,8 +34,8 @@ namespace ESM
 
         std::vector<FogTexture> mFogTextures;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm, bool interiorCell) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm, bool interiorCell) const;
     };
 }
 

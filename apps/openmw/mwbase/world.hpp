@@ -8,7 +8,7 @@
 #include <set>
 #include <deque>
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 
 #include <osg/Timer>
 
@@ -33,8 +33,13 @@ namespace Loading
 
 namespace ESM
 {
-    class ESMReader;
+    class Reader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
     struct Position;
     struct Cell;
     struct Class;
@@ -103,7 +108,7 @@ namespace MWBase
             {
                 std::string name;
                 float x, y; // world position
-                ESM::CellId dest;
+                ESM3::CellId dest;
             };
 
             World() {}
@@ -120,14 +125,14 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
+            virtual void readRecord (ESM3::Reader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
 
-            virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
+            virtual MWWorld::CellStore *getCell (const ESM3::CellId& id) = 0;
 
             virtual bool isCellActive(MWWorld::CellStore* cell) const = 0;
 
@@ -150,7 +155,7 @@ namespace MWBase
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 
-            virtual std::vector<ESM::ESMReader>& getEsmReader() = 0;
+            virtual std::vector<ESM::Reader*>& getEsmReader() = 0;
 
             virtual MWWorld::LocalScripts& getLocalScripts() = 0;
 
@@ -187,7 +192,7 @@ namespace MWBase
             ///
             /// \note If cell==0, the cell the player is currently in will be used instead to
             /// generate a name.
-            virtual std::string getCellName(const ESM::Cell* cell) const = 0;
+            virtual std::string getCellName(const ESM3::Cell* cell) const = 0;
 
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts
@@ -203,7 +208,7 @@ namespace MWBase
             virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
             ///< Search is limited to the active cells.
 
-            virtual MWWorld::Ptr searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum) = 0;
+            virtual MWWorld::Ptr searchPtrViaRefNum (const std::string& id, const ESM3::RefNum& refNum) = 0;
 
             virtual MWWorld::Ptr findContainer (const MWWorld::ConstPtr& ptr) = 0;
             ///< Return a pointer to a liveCellRef which contains \a ptr.
@@ -252,10 +257,10 @@ namespace MWBase
             ///< Move to exterior cell.
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
+            virtual void changeToCell (const ESM3::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
+            virtual const ESM3::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
             virtual void markCellAsUnchanged() = 0;
@@ -337,63 +342,63 @@ namespace MWBase
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
-            virtual const ESM::Potion *createRecord (const ESM::Potion& record) = 0;
+            virtual const ESM3::Potion *createRecord (const ESM3::Potion& record) = 0;
             ///< Create a new record (of type potion) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Spell *createRecord (const ESM::Spell& record) = 0;
+            virtual const ESM3::Spell *createRecord (const ESM3::Spell& record) = 0;
             ///< Create a new record (of type spell) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Class *createRecord (const ESM::Class& record) = 0;
+            virtual const ESM3::Class *createRecord (const ESM3::Class& record) = 0;
             ///< Create a new record (of type class) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Cell *createRecord (const ESM::Cell& record) = 0;
+            virtual const ESM3::Cell *createRecord (const ESM3::Cell& record) = 0;
             ///< Create a new record (of type cell) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::NPC *createRecord(const ESM::NPC &record) = 0;
+            virtual const ESM3::NPC *createRecord(const ESM3::NPC &record) = 0;
             ///< Create a new record (of type npc) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Armor *createRecord (const ESM::Armor& record) = 0;
+            virtual const ESM3::Armor *createRecord (const ESM3::Armor& record) = 0;
             ///< Create a new record (of type armor) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Weapon *createRecord (const ESM::Weapon& record) = 0;
+            virtual const ESM3::Weapon *createRecord (const ESM3::Weapon& record) = 0;
             ///< Create a new record (of type weapon) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Clothing *createRecord (const ESM::Clothing& record) = 0;
+            virtual const ESM3::Clothing *createRecord (const ESM3::Clothing& record) = 0;
             ///< Create a new record (of type clothing) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Enchantment *createRecord (const ESM::Enchantment& record) = 0;
+            virtual const ESM3::Enchantment *createRecord (const ESM3::Enchantment& record) = 0;
             ///< Create a new record (of type enchantment) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Book *createRecord (const ESM::Book& record) = 0;
+            virtual const ESM3::Book *createRecord (const ESM3::Book& record) = 0;
             ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record) = 0;
+            virtual const ESM3::CreatureLevList *createOverrideRecord (const ESM3::CreatureLevList& record) = 0;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            virtual const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record) = 0;
+            virtual const ESM3::ItemLevList *createOverrideRecord (const ESM3::ItemLevList& record) = 0;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            virtual const ESM::Creature *createOverrideRecord (const ESM::Creature& record) = 0;
+            virtual const ESM3::Creature *createOverrideRecord (const ESM3::Creature& record) = 0;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            virtual const ESM::NPC *createOverrideRecord (const ESM::NPC& record) = 0;
+            virtual const ESM3::NPC *createOverrideRecord (const ESM3::NPC& record) = 0;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            virtual const ESM::Container *createOverrideRecord (const ESM::Container& record) = 0;
+            virtual const ESM3::Container *createOverrideRecord (const ESM3::Container& record) = 0;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
@@ -589,7 +594,7 @@ namespace MWBase
 
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) = 0;
 
-            virtual void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
+            virtual void explodeSpell(const osg::Vec3f& origin, const ESM3::EffectList& effects, const MWWorld::Ptr& caster,
                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id,
                                       const std::string& sourceName, const bool fromProjectile=false) = 0;
 
@@ -637,7 +642,7 @@ namespace MWBase
             virtual std::string exportSceneGraph(const MWWorld::Ptr& ptr) = 0;
 
             /// Preload VFX associated with this effect list
-            virtual void preloadEffects(const ESM::EffectList* effectList) = 0;
+            virtual void preloadEffects(const ESM3::EffectList* effectList) = 0;
 
             virtual DetourNavigator::Navigator* getNavigator() const = 0;
 

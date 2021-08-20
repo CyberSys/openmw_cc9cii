@@ -1,17 +1,21 @@
-#ifndef OPENMW_COMPONENTS_ESM_AISEQUENCE_H
-#define OPENMW_COMPONENTS_ESM_AISEQUENCE_H
+#ifndef ESM3_AISEQUENCE_H
+#define ESM3_AISEQUENCE_H
 
 #include <vector>
 #include <string>
 
-#include "defs.hpp"
+#include "../esm/defs.hpp"
 
-#include "util.hpp"
+#include "../esm/util.hpp"
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     namespace AiSequence
     {
@@ -73,8 +77,8 @@ namespace ESM
 
         /// \todo add more AiWander state
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter &esm) const;
     };
 
     struct AiTravel : AiPackage
@@ -82,8 +86,8 @@ namespace ESM
         AiTravelData mData;
         bool mHidden;
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 
     struct AiEscort : AiPackage
@@ -95,8 +99,8 @@ namespace ESM
         std::string mCellId;
         float mRemainingDuration;
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 
     struct AiFollow : AiPackage
@@ -113,32 +117,32 @@ namespace ESM
 
         bool mActive;
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 
     struct AiActivate : AiPackage
     {
         std::string mTargetId;
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 
     struct AiCombat : AiPackage
     {
         int mTargetActorId;
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 
     struct AiPursue : AiPackage
     {
         int mTargetActorId;
 
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 
     struct AiPackageContainer
@@ -159,8 +163,8 @@ namespace ESM
         std::vector<AiPackageContainer> mPackages;
         int mLastAiPackage;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
 
     private:
         AiSequence(const AiSequence&);

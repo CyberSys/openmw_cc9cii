@@ -6,7 +6,7 @@
 
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/npc_.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -93,8 +93,8 @@ namespace MWRender
 
     class RaceSelectionPreview : public CharacterPreview
     {
-        ESM::NPC                        mBase;
-        MWWorld::LiveCellRef<ESM::NPC>  mRef;
+        ESM3::NPC                        mBase;
+        MWWorld::LiveCellRef<ESM3::NPC>  mRef;
 
     protected:
 
@@ -107,11 +107,11 @@ namespace MWRender
 
         void setAngle(float angleRadians);
 
-        const ESM::NPC &getPrototype() const {
+        const ESM3::NPC &getPrototype() const {
             return mBase;
         }
 
-        void setPrototype(const ESM::NPC &proto);
+        void setPrototype(const ESM3::NPC &proto);
 
     private:
 

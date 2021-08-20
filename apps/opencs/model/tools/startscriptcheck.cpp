@@ -5,8 +5,8 @@
 #include <components/misc/stringops.hpp>
 
 CSMTools::StartScriptCheckStage::StartScriptCheckStage (
-    const CSMWorld::IdCollection<ESM::StartScript>& startScripts,
-    const CSMWorld::IdCollection<ESM::Script>& scripts)
+    const CSMWorld::IdCollection<ESM3::StartScript>& startScripts,
+    const CSMWorld::IdCollection<ESM3::Script>& scripts)
 : mStartScripts (startScripts), mScripts (scripts)
 {
     mIgnoreBaseRecords = false;
@@ -14,7 +14,7 @@ CSMTools::StartScriptCheckStage::StartScriptCheckStage (
 
 void CSMTools::StartScriptCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::StartScript>& record = mStartScripts.getRecord (stage);
+    const CSMWorld::Record<ESM3::StartScript>& record = mStartScripts.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())

@@ -3,7 +3,7 @@
 #include "settingsutils.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/pgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
 namespace DetourNavigator
@@ -118,7 +118,7 @@ namespace DetourNavigator
         return mNavMeshManager.removeHeightfield(cellPosition);
     }
 
-    void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)
+    void NavigatorImpl::addPathgrid(const ESM3::Cell& cell, const ESM3::Pathgrid& pathgrid)
     {
         Misc::CoordinateConverter converter(&cell);
         for (auto edge : pathgrid.mEdges)
@@ -134,7 +134,7 @@ namespace DetourNavigator
         }
     }
 
-    void NavigatorImpl::removePathgrid(const ESM::Pathgrid& pathgrid)
+    void NavigatorImpl::removePathgrid(const ESM3::Pathgrid& pathgrid)
     {
         mNavMeshManager.removeOffMeshConnections(ObjectId(&pathgrid));
     }

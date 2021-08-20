@@ -8,7 +8,7 @@
 
 #include "sound_output.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Sound;
 }
@@ -97,7 +97,7 @@ namespace MWSound
             // NOTE: unused buffers are stored in front-newest order.
             std::deque<Sound_Buffer*> mUnusedBuffers;
 
-            inline Sound_Buffer* insertSound(const std::string& soundId, const ESM::Sound& sound);
+            inline Sound_Buffer* insertSound(const std::string& soundId, const ESM3::Sound& sound);
 
             inline void unloadUnused();
     };

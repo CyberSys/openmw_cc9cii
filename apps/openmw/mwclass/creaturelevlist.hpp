@@ -25,10 +25,10 @@ namespace MWClass
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const override;
             ///< Read additional state from \a state into \a ptr.
 
-            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
             void respawn (const MWWorld::Ptr& ptr) const override;

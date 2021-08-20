@@ -1,44 +1,38 @@
 #include "debugprofile.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-unsigned int ESM::DebugProfile::sRecordId = REC_DBGP;
+unsigned int ESM3::DebugProfile::sRecordId = REC_DBGP;
 
-void ESM::DebugProfile::load (ESMReader& esm, bool &isDeleted)
+void ESM3::DebugProfile::load (Reader& reader, bool& isDeleted)
 {
     isDeleted = false;
 
-    while (esm.hasMoreSubs())
+    while (reader.getSubRecordHeader())
     {
-        esm.getSubName();
-        switch (esm.retSubName().intval)
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        switch (subHdr.typeId)
         {
-            case ESM::SREC_NAME:
-                mId = esm.getHString();
-                break;
-            case ESM::FourCC<'D','E','S','C'>::value:
-                mDescription = esm.getHString();
-                break;
-            case ESM::FourCC<'S','C','R','P'>::value:
-                mScriptText = esm.getHString();
-                break;
-            case ESM::FourCC<'F','L','A','G'>::value:
-                esm.getHT(mFlags);
-                break;
-            case ESM::SREC_DELE:
-                esm.skipHSub();
+            case ESM3::SUB_NAME: reader.getZString(mId); break;
+            case ESM3::SUB_DESC: reader.getZString(mDescription); break;
+            case ESM3::SUB_SCRP: reader.getZString(mScriptText); break;
+            case ESM3::SUB_FLAG: reader.get(mFlags); break;
+            case ESM3::SUB_DELE:
+            {
+                reader.skipSubRecordData();
                 isDeleted = true;
                 break;
+            }
             default:
-                esm.fail("Unknown subrecord");
+                reader.fail("Unknown subrecord");
                 break;
         }
     }
 }
 
-void ESM::DebugProfile::save (ESMWriter& esm, bool isDeleted) const
+void ESM3::DebugProfile::save (ESM::ESMWriter& esm, bool isDeleted) const
 {
     esm.writeHNCString ("NAME", mId);
 
@@ -53,7 +47,7 @@ void ESM::DebugProfile::save (ESMWriter& esm, bool isDeleted) const
     esm.writeHNT ("FLAG", mFlags);
 }
 
-void ESM::DebugProfile::blank()
+void ESM3::DebugProfile::blank()
 {
     mDescription.clear();
     mScriptText.clear();

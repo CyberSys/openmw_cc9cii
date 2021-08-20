@@ -7,7 +7,7 @@
 #include <MyGUI_RenderManager.h>
 
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/quickkeys.hpp>
+#include <components/esm3/quickkeys.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -280,7 +280,7 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mSelected->button->getChildAt(0));
 
         const MWWorld::ESMStore &esmStore = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(spellId);
+        const ESM3::Spell* spell = esmStore.get<ESM3::Spell>().find(spellId);
 
         mSelected->type = Type_Magic;
         mSelected->id = spellId;
@@ -291,7 +291,7 @@ namespace MWGui
         mSelected->button->setUserString("Spell", spellId);
 
         // use the icon of the first effect
-        const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+        const ESM3::MagicEffect* effect = esmStore.get<ESM3::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string path = effect->mIcon;
         int slashPos = path.rfind('\\');
@@ -387,9 +387,9 @@ namespace MWGui
 
             if (key->type == Type_Item)
             {
-                bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
-                bool isTool = item.getTypeName() == typeid(ESM::Probe).name() ||
-                    item.getTypeName() == typeid(ESM::Lockpick).name();
+                bool isWeapon = item.getTypeName() == typeid(ESM3::Weapon).name();
+                bool isTool = item.getTypeName() == typeid(ESM3::Probe).name() ||
+                    item.getTypeName() == typeid(ESM3::Lockpick).name();
 
                 // delay weapon switching if player is busy
                 if (isDelayNeeded && (isWeapon || isTool))
@@ -504,7 +504,7 @@ namespace MWGui
     {
         writer.startRecord(ESM::REC_KEYS);
 
-        ESM::QuickKeys keys;
+        ESM3::QuickKeys keys;
 
         // NB: The quick key with index 9 always has Hand-to-Hand type and must not be saved
         for (int i=0; i<9; ++i)
@@ -513,7 +513,7 @@ namespace MWGui
 
             int type = mKey[i].type;
 
-            ESM::QuickKeys::QuickKey key;
+            ESM3::QuickKeys::QuickKey key;
             key.mType = type;
 
             switch (type)
@@ -542,19 +542,19 @@ namespace MWGui
         writer.endRecord(ESM::REC_KEYS);
     }
 
-    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, uint32_t type)
+    void QuickKeysMenu::readRecord(ESM3::Reader &reader, uint32_t type)
     {
         if (type != ESM::REC_KEYS)
             return;
 
-        ESM::QuickKeys keys;
+        ESM3::QuickKeys keys;
         keys.load(reader);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         int i=0;
-        for (ESM::QuickKeys::QuickKey& quickKey : keys.mKeys)
+        for (ESM3::QuickKeys::QuickKey& quickKey : keys.mKeys)
         {
             // NB: The quick key with index 9 always has Hand-to-Hand type and must not be loaded
             if (i >= 9)
@@ -565,7 +565,7 @@ namespace MWGui
             switch (quickKey.mType)
             {
             case Type_Magic:
-                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(quickKey.mId))
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().search(quickKey.mId))
                     onAssignMagic(quickKey.mId);
                 break;
             case Type_Item:

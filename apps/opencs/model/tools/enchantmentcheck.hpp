@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_ENCHANTMENTCHECK_H
 #define CSM_TOOLS_ENCHANTMENTCHECK_H
 
-#include <components/esm/loadench.hpp>
+#include <components/esm3/ench.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMTools
     /// \brief Make sure that enchantment records are correct
     class EnchantmentCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Enchantment>& mEnchantments;
+            const CSMWorld::IdCollection<ESM3::Enchantment>& mEnchantments;
             bool mIgnoreBaseRecords;
 
         public:
 
-            EnchantmentCheckStage (const CSMWorld::IdCollection<ESM::Enchantment>& enchantments);
+            EnchantmentCheckStage (const CSMWorld::IdCollection<ESM3::Enchantment>& enchantments);
 
             int setup() override;
             ///< \return number of steps

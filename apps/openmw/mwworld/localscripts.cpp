@@ -43,7 +43,7 @@ namespace
         bool operator()(const MWWorld::Ptr& containerPtr)
         {
             // Ignore containers without generated content
-            if (containerPtr.getTypeName() == typeid(ESM::Container).name() &&
+            if (containerPtr.getTypeName() == typeid(ESM3::Container).name() &&
                 containerPtr.getRefData().getCustomData() == nullptr)
                 return true;
 
@@ -87,7 +87,7 @@ bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
 
 void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 {
-    if (const ESM::Script *script = mStore.get<ESM::Script>().search (scriptName))
+    if (const ESM3::Script *script = mStore.get<ESM3::Script>().search (scriptName))
     {
         try
         {
@@ -122,9 +122,9 @@ void MWWorld::LocalScripts::addCell (CellStore *cell)
     cell->forEach(addScriptsVisitor);
 
     AddContainerItemScriptsVisitor addContainerItemScriptsVisitor(*this);
-    cell->forEachType<ESM::NPC>(addContainerItemScriptsVisitor);
-    cell->forEachType<ESM::Creature>(addContainerItemScriptsVisitor);
-    cell->forEachType<ESM::Container>(addContainerItemScriptsVisitor);
+    cell->forEachType<ESM3::NPC>(addContainerItemScriptsVisitor);
+    cell->forEachType<ESM3::Creature>(addContainerItemScriptsVisitor);
+    cell->forEachType<ESM3::Container>(addContainerItemScriptsVisitor);
 }
 
 void MWWorld::LocalScripts::clear()

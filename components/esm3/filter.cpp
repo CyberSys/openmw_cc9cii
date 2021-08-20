@@ -1,42 +1,37 @@
 #include "filter.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-unsigned int ESM::Filter::sRecordId = REC_FILT;
+unsigned int ESM3::Filter::sRecordId = REC_FILT;
 
-void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
+void ESM3::Filter::load (Reader& reader, bool& isDeleted)
 {
     isDeleted = false;
 
-    while (esm.hasMoreSubs())
+    while (reader.getSubRecordHeader())
     {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().intval;
-        switch (name)
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        switch (subHdr.typeId)
         {
-            case ESM::SREC_NAME:
-                mId = esm.getHString();
-                break;
-            case ESM::FourCC<'F','I','L','T'>::value:
-                mFilter = esm.getHString();
-                break;
-            case ESM::FourCC<'D','E','S','C'>::value:
-                mDescription = esm.getHString();
-                break;
-            case ESM::SREC_DELE:
-                esm.skipHSub();
+            case ESM3::SUB_NAME: reader.getZString(mId); break;
+            case ESM3::SUB_FILT: reader.getZString(mFilter); break;
+            case ESM3::SUB_DESC: reader.getZString(mDescription); break;
+            case ESM3::SUB_DELE:
+            {
+                reader.skipSubRecordData();
                 isDeleted = true;
                 break;
+            }
             default:
-                esm.fail("Unknown subrecord");
+                reader.fail("Unknown subrecord");
                 break;
         }
     }
 }
 
-void ESM::Filter::save (ESMWriter& esm, bool isDeleted) const
+void ESM3::Filter::save (ESM::ESMWriter& esm, bool isDeleted) const
 {
     esm.writeHNCString ("NAME", mId);
 
@@ -50,7 +45,7 @@ void ESM::Filter::save (ESMWriter& esm, bool isDeleted) const
     esm.writeHNCString ("DESC", mDescription);
 }
 
-void ESM::Filter::blank()
+void ESM3::Filter::blank()
 {
     mFilter.clear();
     mDescription.clear();

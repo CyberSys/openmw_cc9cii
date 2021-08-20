@@ -1,25 +1,63 @@
-#include "loadgmst.hpp"
+#include "gmst.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int GameSetting::sRecordId = REC_GMST;
 
-    void GameSetting::load (ESMReader &esm, bool &isDeleted)
+    void GameSetting::load (Reader &reader, bool &isDeleted)
     {
         isDeleted = false; // GameSetting record can't be deleted now (may be changed in the future)
 
-        mId = esm.getHNString("NAME");
-        mValue.read (esm, ESM::Variant::Format_Gmst);
+        while (reader.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_NAME:
+                {
+                    reader.getString(mId); // NOTE: string not null terminated
+                    break;
+                }
+                case ESM3::SUB_FLTV:
+                {
+                    float value;
+                    reader.get(value);
+                    mValue = Variant(value);
+                    mValue.setType(ESM::VT_Float);
+                    break;
+                }
+                case ESM3::SUB_INTV:
+                {
+                    std::int32_t value;
+                    reader.get(value);
+                    mValue = Variant(value);
+                    mValue.setType(ESM::VT_Int);
+                    break;
+                }
+                case ESM3::SUB_STRV:
+                {
+                    std::string value;
+                    reader.getString(value); // NOTE: string not null terminated
+                    mValue = Variant(value);
+                    mValue.setType(ESM::VT_String);
+                    break;
+                }
+                case ESM3::SUB_DELE: reader.skipSubRecordData(); break;
+                default:
+                    reader.fail("Unknown subrecord");
+                    break;
+            }
+        }
     }
 
-    void GameSetting::save (ESMWriter &esm, bool /*isDeleted*/) const
+    void GameSetting::save (ESM::ESMWriter &esm, bool /*isDeleted*/) const
     {
         esm.writeHNCString("NAME", mId);
-        mValue.write (esm, ESM::Variant::Format_Gmst);
+        mValue.write (esm, ESM3::Variant::Format_Gmst);
     }
 
     void GameSetting::blank()

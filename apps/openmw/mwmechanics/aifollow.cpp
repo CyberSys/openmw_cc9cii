@@ -1,7 +1,7 @@
 #include "aifollow.hpp"
 
-#include <components/esm/aisequence.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/aisequence.hpp>
+#include <components/esm3/cell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -67,7 +67,7 @@ AiFollow::AiFollow(const MWWorld::Ptr& actor, bool commanded)
     mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
-AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
+AiFollow::AiFollow(const ESM3::AiSequence::AiFollow *follow)
     : TypedAiPackage<AiFollow>(makeDefaultOptions().withShouldCancelPreviousAi(!follow->mCommanded))
     , mAlwaysFollow(follow->mAlwaysFollow)
     // mDuration isn't saved in the save file, so just giving it "1" for now if the package had a duration.
@@ -215,9 +215,9 @@ bool AiFollow::isCommanded() const
     return !mOptions.mShouldCancelPreviousAi;
 }
 
-void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
+void AiFollow::writeState(ESM3::AiSequence::AiSequence &sequence) const
 {
-    std::unique_ptr<ESM::AiSequence::AiFollow> follow(new ESM::AiSequence::AiFollow());
+    std::unique_ptr<ESM3::AiSequence::AiFollow> follow(new ESM3::AiSequence::AiFollow());
     follow->mData.mX = mX;
     follow->mData.mY = mY;
     follow->mData.mZ = mZ;
@@ -229,8 +229,8 @@ void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
     follow->mCommanded = isCommanded();
     follow->mActive = mActive;
 
-    ESM::AiSequence::AiPackageContainer package;
-    package.mType = ESM::AiSequence::Ai_Follow;
+    ESM3::AiSequence::AiPackageContainer package;
+    package.mType = ESM3::AiSequence::Ai_Follow;
     package.mPackage = follow.release();
     sequence.mPackages.push_back(package);
 }

@@ -90,17 +90,17 @@ namespace MWGui
         std::set<int> skills;
         for (int day=0; day<mDays; ++day)
         {
-            int skill = Misc::Rng::rollDice(ESM::Skill::Length);
+            int skill = Misc::Rng::rollDice(ESM3::Skill::Length);
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
-            if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
+            if (skill == ESM3::Skill::Security || skill == ESM3::Skill::Sneak)
                 value.setBase(std::min(100.f, value.getBase()+1));
             else
                 value.setBase(std::max(0.f, value.getBase()-1));
         }
 
-        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         std::string message;
         if (mDays == 1)
@@ -112,10 +112,10 @@ namespace MWGui
 
         for (const int& skill : skills)
         {
-            std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[skill])->mValue.getString();
+            std::string skillName = gmst.find(ESM3::Skill::sSkillNameIds[skill])->mValue.getString();
             int skillValue = player.getClass().getNpcStats(player).getSkill(skill).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
-            if (skill == ESM::Skill::Sneak || skill == ESM::Skill::Security)
+            if (skill == ESM3::Skill::Sneak || skill == ESM3::Skill::Security)
                 skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
             skillMsg = Misc::StringUtils::format(skillMsg, skillName, skillValue);

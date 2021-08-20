@@ -13,7 +13,7 @@
 #include "doorstate.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct ObjectState;
 }
@@ -330,11 +330,11 @@ namespace MWWorld
 
             virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
-            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state)
                 const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state)
                 const;
             ///< Write additional state from \a ptr into \a state.
 

@@ -10,7 +10,7 @@
 #include "aistate.hpp"
 #include "aitimer.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Cell;
     namespace AiSequence
@@ -47,9 +47,9 @@ namespace MWMechanics
 
         // allowed pathgrid nodes based on mDistance from the spawn point
         // in local coordinates of mCell
-        std::vector<ESM::Pathgrid::Point> mAllowedNodes;
+        std::vector<ESM3::Pathgrid::Point> mAllowedNodes;
 
-        ESM::Pathgrid::Point mCurrentNode;
+        ESM3::Pathgrid::Point mCurrentNode;
         bool mTrimCurrentNode;
 
         float mCheckIdlePositionTimer;
@@ -87,7 +87,7 @@ namespace MWMechanics
                 \param repeat Repeat wander or not **/
             AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
 
-            explicit AiWander (const ESM::AiSequence::AiWander* wander);
+            explicit AiWander (const ESM3::AiSequence::AiWander* wander);
 
             bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
@@ -100,7 +100,7 @@ namespace MWMechanics
                 return options;
             }
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
+            void writeState(ESM3::AiSequence::AiSequence &sequence) const override;
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
@@ -150,11 +150,11 @@ namespace MWMechanics
             osg::Vec3f mDestination;
             bool mUsePathgrid;
 
-            void getNeighbouringNodes(ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points);
+            void getNeighbouringNodes(ESM3::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM3::Pathgrid::PointList& points);
 
-            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
+            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM3::Cell* cell, AiWanderStorage& storage);
 
-            void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
+            void trimAllowedNodes(std::vector<ESM3::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
 
             // constants for converting idleSelect values into groupNames
             enum GroupIndex
@@ -164,13 +164,13 @@ namespace MWMechanics
             };
 
             /// convert point from local (i.e. cell) to world coordinates
-            void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
+            void ToWorldCoordinates(ESM3::Pathgrid::Point& point, const ESM3::Cell * cell);
 
             void SetCurrentNodeToClosestAllowedNode(const osg::Vec3f& npcPos, AiWanderStorage& storage);
 
-            void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage);
+            void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM3::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage);
 
-            void AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage);
+            void AddPointBetweenPathGridPoints(const ESM3::Pathgrid::Point& start, const ESM3::Pathgrid::Point& end, AiWanderStorage& storage);
 
             /// lookup table for converting idleSelect value to groupName
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];

@@ -2,9 +2,9 @@
 
 #include <components/misc/rng.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/weatherstate.hpp>
+#include <components/esm3/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -252,7 +252,7 @@ inline void Weather::lightningAndThunder(void)
     MWBase::Environment::get().getSoundManager()->playSound(mThunderSoundID[distance], 1.0, 1.0);
 }
 
-RegionWeather::RegionWeather(const ESM::Region& region)
+RegionWeather::RegionWeather(const ESM3::Region& region)
     : mWeather(invalidWeatherID)
     , mChances()
 {
@@ -269,15 +269,15 @@ RegionWeather::RegionWeather(const ESM::Region& region)
     mChances.push_back(region.mData.mB);
 }
 
-RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
+RegionWeather::RegionWeather(const ESM3::RegionWeatherState& state)
     : mWeather(state.mWeather)
     , mChances(state.mChances)
 {
 }
 
-RegionWeather::operator ESM::RegionWeatherState() const
+RegionWeather::operator ESM3::RegionWeatherState() const
 {
-    ESM::RegionWeatherState state =
+    ESM3::RegionWeatherState state =
         {
             mWeather,
             mChances
@@ -589,8 +589,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::E
     addWeather("Snow", 0.5f, 40.0f, "meshes\\snow.nif"); // 8
     addWeather("Blizzard", 0.16f, 70.0f, "meshes\\blizzard.nif"); // 9
 
-    Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
-    for(; it != store.get<ESM::Region>().end(); ++it)
+    Store<ESM3::Region>::iterator it = store.get<ESM3::Region>().begin();
+    for(; it != store.get<ESM3::Region>().end(); ++it)
     {
         std::string regionID = Misc::StringUtils::lowerCase(it->mId);
         mRegions.insert(std::make_pair(regionID, RegionWeather(*it)));
@@ -869,7 +869,7 @@ bool WeatherManager::useTorches(float hour) const
 
 void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
 {
-    ESM::WeatherState state;
+    ESM3::WeatherState state;
     state.mCurrentRegion = mCurrentRegion;
     state.mTimePassed = mTimePassed;
     state.mFastForward = mFastForward;
@@ -890,7 +890,7 @@ void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     writer.endRecord(ESM::REC_WTHR);
 }
 
-bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
+bool WeatherManager::readRecord(ESM3::Reader& reader, uint32_t type)
 {
     if(ESM::REC_WTHR == type)
     {
@@ -899,11 +899,11 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
         {
             // Weather state isn't really all that important, so to preserve older save games, we'll just discard the
             // older weather records, rather than fail to handle the record.
-            reader.skipRecord();
+            reader.skipRecordData();
         }
         else
         {
-            ESM::WeatherState state;
+            ESM3::WeatherState state;
             state.load(reader);
 
             mCurrentRegion.swap(state.mCurrentRegion);
@@ -918,7 +918,7 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
             mRegions.clear();
             importRegions();
 
-            for(std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
+            for(std::map<std::string, ESM3::RegionWeatherState>::iterator it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
             {
                 std::map<std::string, RegionWeather>::iterator found = mRegions.find(it->first);
                 if (found != mRegions.end())
@@ -950,7 +950,7 @@ inline void WeatherManager::addWeather(const std::string& name,
                                        float dlFactor, float dlOffset,
                                        const std::string& particleEffect)
 {
-    static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
+    static const float fStromWindSpeed = mStore.get<ESM3::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
 
     Weather weather(name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 
@@ -959,7 +959,7 @@ inline void WeatherManager::addWeather(const std::string& name,
 
 inline void WeatherManager::importRegions()
 {
-    for(const ESM::Region& region : mStore.get<ESM::Region>())
+    for(const ESM3::Region& region : mStore.get<ESM3::Region>())
     {
         std::string regionID = Misc::StringUtils::lowerCase(region.mId);
         mRegions.insert(std::make_pair(regionID, RegionWeather(region)));

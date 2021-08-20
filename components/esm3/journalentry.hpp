@@ -1,12 +1,16 @@
-#ifndef OPENMW_ESM_JOURNALENTRY_H
-#define OPENMW_ESM_JOURNALENTRY_H
+#ifndef ESM3_JOURNALENTRY_H
+#define ESM3_JOURNALENTRY_H
 
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -28,8 +32,8 @@ namespace ESM
         int mMonth;
         int mDayOfMonth;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

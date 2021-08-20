@@ -32,7 +32,7 @@ namespace MWWorld
             return;
         }
 
-        LiveCellRef<ESM::Book> *ref = getTarget().get<ESM::Book>();
+        LiveCellRef<ESM3::Book> *ref = getTarget().get<ESM3::Book>();
 
         if (ref->mBase->mData.mIsScroll)
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Scroll, getTarget());
@@ -42,13 +42,13 @@ namespace MWWorld
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
         // Skill gain from books
-        if (ref->mBase->mData.mSkillId >= 0 && ref->mBase->mData.mSkillId < ESM::Skill::Length
+        if (ref->mBase->mData.mSkillId >= 0 && ref->mBase->mData.mSkillId < ESM3::Skill::Length
                 && !npcStats.hasBeenUsed (ref->mBase->mId))
         {
-            MWWorld::LiveCellRef<ESM::NPC> *playerRef = actor.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM3::NPC> *playerRef = actor.get<ESM3::NPC>();
 
-            const ESM::Class *class_ =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (
+            const ESM3::Class *class_ =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM3::Class>().find (
                     playerRef->mBase->mClass
                 );
 

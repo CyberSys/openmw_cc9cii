@@ -1,17 +1,21 @@
-#ifndef OPENMW_ESM_SPELLSTATE_H
-#define OPENMW_ESM_SPELLSTATE_H
+#ifndef ESM3_SPELLSTATE_H
+#define ESM3_SPELLSTATE_H
 
 #include <map>
 #include <vector>
 #include <string>
 #include <set>
 
-#include "defs.hpp"
+#include "../esm/defs.hpp"
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // NOTE: spell ids must be lower case
     struct SpellState
@@ -19,7 +23,7 @@ namespace ESM
         struct CorprusStats
         {
             int mWorsenings;
-            TimeStamp mNextWorsening;
+            ESM::TimeStamp mNextWorsening;
         };
 
         struct PermanentSpellEffectInfo
@@ -41,12 +45,12 @@ namespace ESM
         std::map<std::string, std::vector<PermanentSpellEffectInfo> > mPermanentSpellEffects;
         std::map<std::string, CorprusStats> mCorprusSpells;
 
-        std::map<std::string, TimeStamp> mUsedPowers;
+        std::map<std::string, ESM::TimeStamp> mUsedPowers;
 
         std::string mSelectedSpell;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 
 }

@@ -3,7 +3,7 @@
 
 #include <osg/Vec4f>
 
-namespace ESM
+namespace ESM3
 {
     struct Cell;
 }
@@ -15,7 +15,7 @@ namespace MWRender
     public:
         FogManager();
 
-        void configure(float viewDistance, const ESM::Cell *cell);
+        void configure(float viewDistance, const ESM3::Cell *cell);
         void configure(float viewDistance, float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f &color);
 
         osg::Vec4f getFogColor(bool isUnderwater) const;

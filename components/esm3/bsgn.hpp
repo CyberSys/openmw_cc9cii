@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_BSGN_H
-#define OPENMW_ESM_BSGN_H
+#ifndef ESM3_BSGN_H
+#define ESM3_BSGN_H
 
 #include <string>
 
@@ -7,26 +7,29 @@
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-struct BirthSign
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "BirthSign"; }
+    class Reader;
 
-    std::string mId, mName, mDescription, mTexture;
+    struct BirthSign
+    {
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "BirthSign"; }
 
-    // List of powers and abilities that come with this birth sign.
-    SpellList mPowers;
+        std::string mId, mName, mDescription, mTexture;
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        // List of powers and abilities that come with this birth sign.
+        SpellList mPowers;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID/index).
-};
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID/index).
+    };
 }
 #endif

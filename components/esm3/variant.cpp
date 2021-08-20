@@ -3,18 +3,12 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "esmreader.hpp"
+#include "common.hpp"
+#include "reader.hpp"
 #include "variantimp.hpp"
-
-#include "defs.hpp"
 
 namespace
 {
-    constexpr uint32_t STRV = ESM::FourCC<'S','T','R','V'>::value;
-    constexpr uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
-    constexpr uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
-    constexpr uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
-
     template <typename T, bool orDefault = false>
     struct GetValue
     {
@@ -48,117 +42,122 @@ namespace
     };
 }
 
-std::string ESM::Variant::getString() const
+std::string ESM3::Variant::getString() const
 {
     return std::get<std::string>(mData);
 }
 
-int ESM::Variant::getInteger() const
+int ESM3::Variant::getInteger() const
 {
     return std::visit(GetValue<int>{}, mData);
 }
 
-float ESM::Variant::getFloat() const
+float ESM3::Variant::getFloat() const
 {
     return std::visit(GetValue<float>{}, mData);
 }
 
-void ESM::Variant::read (ESMReader& esm, Format format)
+// NOTE: assumes sub-record header was just read before calling this method
+void ESM3::Variant::read (Reader& reader, Format format)
 {
+    const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+
     // type
-    VarType type = VT_Unknown;
+    ESM::VarType type = ESM::VT_Unknown;
 
-    if (format==Format_Global)
+    if (format == Format_Global)
     {
-        std::string typeId = esm.getHNString ("FNAM");
-
-        if (typeId == "s")
-            type = VT_Short;
-        else if (typeId == "l")
-            type = VT_Long;
-        else if (typeId == "f")
-            type = VT_Float;
-        else
-            esm.fail ("illegal global variable type " + typeId);
-    }
-    else if (format==Format_Gmst)
-    {
-        if (!esm.hasMoreSubs())
+        if (subHdr.typeId == ESM3::SUB_FNAM)
         {
-            type = VT_None;
+            char typeId = '\0';
+            assert(subHdr.dataSize == 1);
+            reader.get(typeId);
+
+            if (typeId == 's')
+                type = ESM::VT_Short;
+            else if (typeId == 'l')
+                type = ESM::VT_Long;
+            else if (typeId == 'f')
+                type = ESM::VT_Float;
+            else
+                reader.fail ("illegal global variable type " + std::string(&typeId, 1));
+        }
+        else
+            reader.fail ("global variable type not found");
+    }
+    else if (format == Format_Gmst)
+    {
+        if (!reader.hasMoreSubs())
+        {
+            type = ESM::VT_None;
         }
         else
         {
-            esm.getSubName();
-            NAME name = esm.retSubName();
+            reader.getSubRecordHeader();
 
-
-
-            if (name==STRV)
+            if (subHdr.typeId == ESM3::SUB_STRV)
             {
-                type = VT_String;
+                type = ESM::VT_String;
             }
-            else if (name==INTV)
+            else if (subHdr.typeId == ESM3::SUB_INTV)
             {
-                type = VT_Int;
+                type = ESM::VT_Int;
             }
-            else if (name==FLTV)
+            else if (subHdr.typeId == ESM3::SUB_FLTV)
             {
-                type = VT_Float;
+                type = ESM::VT_Float;
             }
             else
-                esm.fail ("invalid subrecord: " + name.toString());
+                reader.fail ("invalid subrecord: " + ESM::printName(subHdr.typeId));
         }
     }
     else if (format == Format_Info)
     {
-        esm.getSubName();
-        NAME name = esm.retSubName();
+        reader.getSubRecordHeader();
 
-        if (name==INTV)
+        if (subHdr.typeId == ESM3::SUB_INTV)
         {
-            type = VT_Int;
+            type = ESM::VT_Int;
         }
-        else if (name==FLTV)
+        else if (subHdr.typeId == ESM3::SUB_FLTV)
         {
-            type = VT_Float;
+            type = ESM::VT_Float;
         }
         else
-            esm.fail ("invalid subrecord: " + name.toString());
+            reader.fail ("invalid subrecord: " + ESM::printName(subHdr.typeId));
     }
     else if (format == Format_Local)
     {
-        esm.getSubName();
-        NAME name = esm.retSubName();
+        reader.getSubRecordHeader();
 
-        if (name==INTV)
+        if (subHdr.typeId == ESM3::SUB_INTV)
         {
-            type = VT_Int;
+            type = ESM::VT_Int;
         }
-        else if (name==FLTV)
+        else if (subHdr.typeId == ESM3::SUB_FLTV)
         {
-            type = VT_Float;
+            type = ESM::VT_Float;
         }
-        else if (name==STTV)
+        else if (subHdr.typeId == ESM3::SUB_STTV)
         {
-            type = VT_Short;
+            type = ESM::VT_Short;
         }
         else
-            esm.fail ("invalid subrecord: " + name.toString());
+            reader.fail ("invalid subrecord: " + ESM::printName(subHdr.typeId));
     }
 
     setType (type);
 
-    std::visit(ReadESMVariantValue {esm, format, mType}, mData);
+    std::visit(ReadESMVariantValue {reader, format, mType}, mData);
 }
 
-void ESM::Variant::write (ESMWriter& esm, Format format) const
+void ESM3::Variant::write (ESM::ESMWriter& esm, Format format) const
 {
-    if (mType==VT_Unknown)
+    if (mType==ESM::VT_Unknown)
     {
         throw std::runtime_error ("can not serialise variant of unknown type");
     }
-    else if (mType==VT_None)
+    else if (mType==ESM::VT_None)
     {
         if (format==Format_Global)
             throw std::runtime_error ("can not serialise variant of type none to global format");
@@ -175,69 +174,69 @@ void ESM::Variant::write (ESMWriter& esm, Format format) const
         std::visit(WriteESMVariantValue {esm, format, mType}, mData);
 }
 
-void ESM::Variant::write (std::ostream& stream) const
+void ESM3::Variant::write (std::ostream& stream) const
 {
     switch (mType)
     {
-        case VT_Unknown:
+        case ESM::VT_Unknown:
 
             stream << "variant unknown";
             break;
 
-        case VT_None:
+        case ESM::VT_None:
 
             stream << "variant none";
             break;
 
-        case VT_Short:
+        case ESM::VT_Short:
 
             stream << "variant short: " << std::get<int>(mData);
             break;
 
-        case VT_Int:
+        case ESM::VT_Int:
 
             stream << "variant int: " << std::get<int>(mData);
             break;
 
-        case VT_Long:
+        case ESM::VT_Long:
 
             stream << "variant long: " << std::get<int>(mData);
             break;
 
-        case VT_Float:
+        case ESM::VT_Float:
 
             stream << "variant float: " << std::get<float>(mData);
             break;
 
-        case VT_String:
+        case ESM::VT_String:
 
             stream << "variant string: \"" << std::get<std::string>(mData) << "\"";
             break;
     }
 }
 
-void ESM::Variant::setType (VarType type)
+void ESM3::Variant::setType (ESM::VarType type)
 {
     if (type!=mType)
     {
         switch (type)
         {
-            case VT_Unknown:
-            case VT_None:
+            case ESM::VT_Unknown:
+            case ESM::VT_None:
                 mData = std::monostate {};
                 break;
 
-            case VT_Short:
-            case VT_Int:
-            case VT_Long:
+            case ESM::VT_Short:
+            case ESM::VT_Int:
+            case ESM::VT_Long:
                 mData = std::visit(GetValue<int, true>{}, mData);
                 break;
 
-            case VT_Float:
+            case ESM::VT_Float:
                 mData = std::visit(GetValue<float, true>{}, mData);
                 break;
 
-            case VT_String:
+            case ESM::VT_String:
                 mData = std::string {};
                 break;
         }
@@ -246,27 +245,27 @@ void ESM::Variant::setType (VarType type)
     }
 }
 
-void ESM::Variant::setString (const std::string& value)
+void ESM3::Variant::setString (const std::string& value)
 {
     std::get<std::string>(mData) = value;
 }
 
-void ESM::Variant::setString (std::string&& value)
+void ESM3::Variant::setString (std::string&& value)
 {
     std::get<std::string>(mData) = std::move(value);
 }
 
-void ESM::Variant::setInteger (int value)
+void ESM3::Variant::setInteger (int value)
 {
     std::visit(SetValue(value), mData);
 }
 
-void ESM::Variant::setFloat (float value)
+void ESM3::Variant::setFloat (float value)
 {
     std::visit(SetValue(value), mData);
 }
 
-std::ostream& ESM::operator<< (std::ostream& stream, const Variant& value)
+std::ostream& ESM3::operator<< (std::ostream& stream, const Variant& value)
 {
     value.write (stream);
     return stream;

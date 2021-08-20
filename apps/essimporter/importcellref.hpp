@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include "importacdt.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -25,7 +25,7 @@ namespace ESSImport
 
         bool mDeleted;
 
-        void load(ESM::ESMReader& esm) override;
+        void load(ESM3::Reader& esm) override;
 
         ~CellRef() override = default;
     };

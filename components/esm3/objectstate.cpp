@@ -4,10 +4,12 @@
 #include <sstream>
 #include <typeinfo>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-void ESM::ObjectState::load (ESMReader &esm)
+// called from CreatureState::load, ContainerState::load(),
+//             InventoryState::load() and NpcState::load()
+void ESM3::ObjectState::load (Reader& esm)
 {
     mVersion = esm.getFormat();
 
@@ -15,40 +17,63 @@ void ESM::ObjectState::load (ESMReader &esm)
     mRef.loadData(esm, isDeleted);
 
     mHasLocals = 0;
-    esm.getHNOT (mHasLocals, "HLOC");
-
-    if (mHasLocals)
-        mLocals.load (esm);
-
-    mLuaScripts.load(esm);
-
     mEnabled = 1;
-    esm.getHNOT (mEnabled, "ENAB");
-
     mCount = 1;
-    esm.getHNOT (mCount, "COUN");
-
     mPosition = mRef.mPos;
-    esm.getHNOT (mPosition, "POS_", 24);
-
-    if (esm.isNextSub("LROT"))
-        esm.skipHSub(); // local rotation, no longer used
-
     mFlags = 0;
-    esm.getHNOT (mFlags, "FLAG");
-
-    // obsolete
-    int unused;
-    esm.getHNOT(unused, "LTIM");
-
-    mAnimationState.load(esm);
-
     // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
     mHasCustomState = true;
-    esm.getHNOT (mHasCustomState, "HCUS");
+
+    while (esm.getSubRecordHeader())
+    {
+        const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+        switch (subHdr.typeId)
+        {
+            case ESM3::SUB_HLOC:
+            {
+                esm.get(mHasLocals);
+
+                if (mHasLocals)
+                    mLocals.load (esm);
+                break;
+            }
+            case ESM3::SUB_LUAS:
+            {
+                esm.cacheSubRecordHeader();
+                mLuaScripts.load(esm);
+                break;
+            }
+            case ESM3::SUB_ANIS:
+            {
+                esm.cacheSubRecordHeader();
+                mAnimationState.load(esm);
+                break;
+            }
+            case ESM3::SUB_ENAB: esm.get(mEnabled); break;
+            case ESM3::SUB_COUN: esm.get(mCount); break;
+            case ESM3::SUB_FLAG: esm.get(mFlags); break;
+            case ESM3::SUB_HCUS: esm.get(mHasCustomState); break;
+            case ESM3::SUB_POS_:
+            {
+                if (subHdr.dataSize != 24 && sizeof(mPosition) != 24)
+                    esm.fail("ObjectState: Position data incorrect size");
+                esm.get(mPosition);
+                break;
+            }
+            case ESM3::SUB_LROT: // local rotation, no longer used
+            case ESM3::SUB_LTIM: // obsolete, unused
+            {
+                esm.skipSubRecordData();
+                break;
+            }
+            default:
+                esm.cacheSubRecordHeader();
+                return;
+        }
+    }
 }
 
-void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
+void ESM3::ObjectState::save (ESM::ESMWriter& esm, bool inInventory) const
 {
     mRef.save (esm, true, inInventory);
 
@@ -78,7 +103,7 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("HCUS", false);
 }
 
-void ESM::ObjectState::blank()
+void ESM3::ObjectState::blank()
 {
     mRef.blank();
     mHasLocals = 0;
@@ -93,74 +118,74 @@ void ESM::ObjectState::blank()
     mHasCustomState = true;
 }
 
-const ESM::NpcState& ESM::ObjectState::asNpcState() const
+const ESM3::NpcState& ESM3::ObjectState::asNpcState() const
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to NpcState";
     throw std::logic_error(error.str());
 }
 
-ESM::NpcState& ESM::ObjectState::asNpcState()
+ESM3::NpcState& ESM3::ObjectState::asNpcState()
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to NpcState";
     throw std::logic_error(error.str());
 }
 
-const ESM::CreatureState& ESM::ObjectState::asCreatureState() const
+const ESM3::CreatureState& ESM3::ObjectState::asCreatureState() const
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to CreatureState";
     throw std::logic_error(error.str());
 }
 
-ESM::CreatureState& ESM::ObjectState::asCreatureState()
+ESM3::CreatureState& ESM3::ObjectState::asCreatureState()
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to CreatureState";
     throw std::logic_error(error.str());
 }
 
-const ESM::ContainerState& ESM::ObjectState::asContainerState() const
+const ESM3::ContainerState& ESM3::ObjectState::asContainerState() const
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to ContainerState";
     throw std::logic_error(error.str());
 }
 
-ESM::ContainerState& ESM::ObjectState::asContainerState()
+ESM3::ContainerState& ESM3::ObjectState::asContainerState()
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to ContainerState";
     throw std::logic_error(error.str());
 }
 
-const ESM::DoorState& ESM::ObjectState::asDoorState() const
+const ESM3::DoorState& ESM3::ObjectState::asDoorState() const
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to DoorState";
     throw std::logic_error(error.str());
 }
 
-ESM::DoorState& ESM::ObjectState::asDoorState()
+ESM3::DoorState& ESM3::ObjectState::asDoorState()
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to DoorState";
     throw std::logic_error(error.str());
 }
 
-const ESM::CreatureLevListState& ESM::ObjectState::asCreatureLevListState() const
+const ESM3::CreatureLevListState& ESM3::ObjectState::asCreatureLevListState() const
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to CreatureLevListState";
     throw std::logic_error(error.str());
 }
 
-ESM::CreatureLevListState& ESM::ObjectState::asCreatureLevListState()
+ESM3::CreatureLevListState& ESM3::ObjectState::asCreatureLevListState()
 {
     std::stringstream error;
     error << "bad cast " << typeid(this).name() << " to CreatureLevListState";
     throw std::logic_error(error.str());
 }
 
-ESM::ObjectState::~ObjectState() {}
+ESM3::ObjectState::~ObjectState() {}

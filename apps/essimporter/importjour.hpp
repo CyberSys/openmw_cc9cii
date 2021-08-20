@@ -3,9 +3,9 @@
 
 #include <string>
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -17,7 +17,7 @@ namespace ESSImport
         // The entire journal, in HTML
         std::string mText;
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

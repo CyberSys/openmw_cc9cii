@@ -1,47 +1,50 @@
-#include "loadstat.hpp"
+#include "stat.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Static::sRecordId = REC_STAT;
 
-    void Static::load(ESMReader &esm, bool &isDeleted)
+    void Static::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
         //bool isBlocked = (mRecordFlags & ESM::FLAG_Blocked) != 0;
         //bool isPersistent = (mRecordFlags & ESM::FLAG_Persistent) != 0;
 
         bool hasName = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
     }
-    void Static::save(ESMWriter &esm, bool isDeleted) const
+
+    void Static::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
         if (isDeleted)

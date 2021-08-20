@@ -1,11 +1,11 @@
 #ifndef CSM_WORLD_INFOSELECTWRAPPER_H
 #define CSM_WORLD_INFOSELECTWRAPPER_H
 
-#include <components/esm/loadinfo.hpp>
+#include <components/esm3/info.hpp>
 
 namespace CSMWorld
 {
-    // ESM::DialInfo::SelectStruct.mSelectRule
+    // ESM3::DialInfo::SelectStruct.mSelectRule
     // 012345...
     // ^^^ ^^
     // ||| ||
@@ -150,7 +150,7 @@ namespace CSMWorld
         static std::string convertToString(RelationType type);
         static std::string convertToString(ComparisonType type);
 
-        ConstInfoSelectWrapper(const ESM::DialInfo::SelectStruct& select);
+        ConstInfoSelectWrapper(const ESM3::DialInfo::SelectStruct& select);
 
         FunctionName getFunctionName() const;
         RelationType getRelationType() const;
@@ -163,7 +163,7 @@ namespace CSMWorld
         bool conditionIsNeverTrue() const;
         bool variantTypeIsValid() const;
 
-        const ESM::Variant& getVariant() const;
+        const ESM3::Variant& getVariant() const;
 
         std::string toString() const;
 
@@ -209,7 +209,7 @@ namespace CSMWorld
 
     private:
 
-        const ESM::DialInfo::SelectStruct& mConstSelect;
+        const ESM3::DialInfo::SelectStruct& mConstSelect;
     };
 
     // Wrapper for DialInfo::SelectStruct that can modify the wrapped select struct
@@ -217,7 +217,7 @@ namespace CSMWorld
     {
     public:
 
-        InfoSelectWrapper(ESM::DialInfo::SelectStruct& select);
+        InfoSelectWrapper(ESM3::DialInfo::SelectStruct& select);
 
         // Wrapped SelectStruct will not be modified until update() is called
         void setFunctionName(FunctionName name);
@@ -230,11 +230,11 @@ namespace CSMWorld
         // This sets properties based on the function name to its defaults and updates the wrapped object
         void setDefaults();
 
-        ESM::Variant& getVariant();
+        ESM3::Variant& getVariant();
 
     private:
 
-        ESM::DialInfo::SelectStruct& mSelect;
+        ESM3::DialInfo::SelectStruct& mSelect;
 
         void writeRule();
     };

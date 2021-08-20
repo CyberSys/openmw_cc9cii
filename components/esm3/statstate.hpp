@@ -1,10 +1,14 @@
-#ifndef OPENMW_ESM_STATSTATE_H
-#define OPENMW_ESM_STATSTATE_H
+#ifndef ESM_STATSTATE_H
+#define ESM_STATSTATE_H
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -20,8 +24,8 @@ namespace ESM
 
         StatState();
 
-        void load (ESMReader &esm, bool intFallback = false);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm, bool intFallback = false);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

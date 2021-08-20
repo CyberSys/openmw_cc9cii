@@ -3,12 +3,12 @@
 
 #include "importcrec.hpp"
 
-#include <components/esm/creaturestate.hpp>
+#include <components/esm3/creaturestate.hpp>
 
 namespace ESSImport
 {
 
-    void convertCREC(const CREC& crec, ESM::CreatureState& state);
+    void convertCREC(const CREC& crec, ESM3::CreatureState& state);
 
 }
 

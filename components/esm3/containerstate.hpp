@@ -1,10 +1,10 @@
-#ifndef OPENMW_ESM_CONTAINERSTATE_H
-#define OPENMW_ESM_CONTAINERSTATE_H
+#ifndef ESM3_CONTAINERSTATE_H
+#define ESM3_CONTAINERSTATE_H
 
 #include "objectstate.hpp"
 #include "inventorystate.hpp"
 
-namespace ESM
+namespace ESM3
 {
     // format 0, saved games only
 
@@ -12,8 +12,8 @@ namespace ESM
     {
         InventoryState mInventory;
 
-        void load (ESMReader &esm) override;
-        void save (ESMWriter &esm, bool inInventory = false) const override;
+        void load (Reader &esm) override;
+        void save (ESM::ESMWriter &esm, bool inInventory = false) const override;
 
         ContainerState& asContainerState() override
         {

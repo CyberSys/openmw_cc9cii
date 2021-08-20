@@ -1,6 +1,6 @@
 #include "activator.hpp"
 
-#include <components/esm/loadacti.hpp>
+#include <components/esm3/acti.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -51,7 +51,7 @@ namespace MWClass
 
     std::string Activator::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM3::Activator> *ref = ptr.get<ESM3::Activator>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -72,15 +72,15 @@ namespace MWClass
 
     std::string Activator::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM3::Activator> *ref = ptr.get<ESM3::Activator>();
 
         return ref->mBase->mName;
     }
 
     std::string Activator::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM3::Activator> *ref =
+            ptr.get<ESM3::Activator>();
 
         return ref->mBase->mScript;
     }
@@ -89,7 +89,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Activator);
 
-        registerClass (typeid (ESM::Activator).name(), instance);
+        registerClass (typeid (ESM3::Activator).name(), instance);
     }
 
     bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const
@@ -99,7 +99,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM3::Activator> *ref = ptr.get<ESM3::Activator>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -120,7 +120,7 @@ namespace MWClass
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator");
+            const ESM3::Sound *sound = store.get<ESM3::Sound>().searchRandom("WolfActivator");
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
@@ -133,7 +133,7 @@ namespace MWClass
 
     MWWorld::Ptr Activator::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM3::Activator> *ref = ptr.get<ESM3::Activator>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
@@ -144,7 +144,7 @@ namespace MWClass
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
         std::string creatureId;
 
-        for (const ESM::Creature &iter : store.get<ESM::Creature>())
+        for (const ESM3::Creature &iter : store.get<ESM3::Creature>())
         {
             if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
             {
@@ -155,11 +155,11 @@ namespace MWClass
 
         int type = getSndGenTypeFromName(name);
 
-        std::vector<const ESM::SoundGenerator*> fallbacksounds;
+        std::vector<const ESM3::SoundGenerator*> fallbacksounds;
         if (!creatureId.empty())
         {
-            std::vector<const ESM::SoundGenerator*> sounds;
-            for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
+            std::vector<const ESM3::SoundGenerator*> sounds;
+            for (auto sound = store.get<ESM3::SoundGenerator>().begin(); sound != store.get<ESM3::SoundGenerator>().end(); ++sound)
             {
                 if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
                     sounds.push_back(&*sound);
@@ -175,7 +175,7 @@ namespace MWClass
         else
         {
             // The activator doesn't have a corresponding creature ID, but we can try to use the defaults
-            for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
+            for (auto sound = store.get<ESM3::SoundGenerator>().begin(); sound != store.get<ESM3::SoundGenerator>().end(); ++sound)
                 if (type == sound->mType && sound->mCreature.empty())
                     fallbacksounds.push_back(&*sound);
 
@@ -189,21 +189,21 @@ namespace MWClass
     int Activator::getSndGenTypeFromName(const std::string &name)
     {
         if (name == "left")
-            return ESM::SoundGenerator::LeftFoot;
+            return ESM3::SoundGenerator::LeftFoot;
         if (name == "right")
-            return ESM::SoundGenerator::RightFoot;
+            return ESM3::SoundGenerator::RightFoot;
         if (name == "swimleft")
-            return ESM::SoundGenerator::SwimLeft;
+            return ESM3::SoundGenerator::SwimLeft;
         if (name == "swimright")
-            return ESM::SoundGenerator::SwimRight;
+            return ESM3::SoundGenerator::SwimRight;
         if (name == "moan")
-            return ESM::SoundGenerator::Moan;
+            return ESM3::SoundGenerator::Moan;
         if (name == "roar")
-            return ESM::SoundGenerator::Roar;
+            return ESM3::SoundGenerator::Roar;
         if (name == "scream")
-            return ESM::SoundGenerator::Scream;
+            return ESM3::SoundGenerator::Scream;
         if (name == "land")
-            return ESM::SoundGenerator::Land;
+            return ESM3::SoundGenerator::Land;
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }

@@ -1,48 +1,60 @@
-#include "loadsscr.hpp"
+#include "sscr.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int StartScript::sRecordId = REC_SSCR;
 
-    void StartScript::load(ESMReader &esm, bool &isDeleted)
+    void StartScript::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
         bool hasData = false;
         bool hasName = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getString(mId); // NOTE: string not null terminated
+                    assert(subHdr.dataSize == mId.size() && "SSCR id string length incorrect");
                     hasName = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    mData = esm.getHString();
+                }
+                case ESM3::SUB_DATA:
+                {
+                    reader.getString(mData); // NOTE: string not null terminated
+                    assert(subHdr.dataSize == mData.size() && "SSCR data string length incorrect");
                     hasData = true;
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME");
+            reader.fail("Missing NAME");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing DATA");
+            reader.fail("Missing DATA");
     }
-    void StartScript::save(ESMWriter &esm, bool isDeleted) const
+
+    void StartScript::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
         if (isDeleted)

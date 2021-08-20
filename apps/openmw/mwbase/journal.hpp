@@ -18,8 +18,12 @@ namespace Loading
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace MWBase
@@ -93,7 +97,7 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
+            virtual void readRecord (ESM3::Reader& reader, uint32_t type) = 0;
     };
 }
 

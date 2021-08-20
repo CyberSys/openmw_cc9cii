@@ -1,62 +1,67 @@
-#include "loaddial.hpp"
+#include "dial.hpp"
 
 #include <components/debug/debuglog.hpp>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Dialogue::sRecordId = REC_DIAL;
 
-    void Dialogue::load(ESMReader &esm, bool &isDeleted)
+    void Dialogue::load(Reader& reader, bool& isDeleted)
     {
-        loadId(esm);
-        loadData(esm, isDeleted);
+        loadId(reader);
+        loadData(reader, isDeleted);
     }
 
-    void Dialogue::loadId(ESMReader &esm)
+    void Dialogue::loadId(Reader& reader)
     {
-        mId = esm.getHNString("NAME");
+        reader.getSubRecordHeader();
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        if (subHdr.typeId != ESM3::SUB_NAME)
+            reader.fail("Unexpected subrecord");
+
+        reader.getZString(mId);
     }
 
-    void Dialogue::loadData(ESMReader &esm, bool &isDeleted)
+    void Dialogue::loadData(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::FourCC<'D','A','T','A'>::value:
+                case ESM3::SUB_DATA:
                 {
-                    esm.getSubHeader();
-                    int size = esm.getSubSize();
-                    if (size == 1)
+                    if (subHdr.dataSize == 1)
                     {
-                        esm.getT(mType);
+                        reader.get(mType);
                     }
                     else
                     {
-                        esm.skip(size);
+                        reader.skipSubRecordData();
                     }
                     break;
                 }
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     mType = Unknown;
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
     }
 
-    void Dialogue::save(ESMWriter &esm, bool isDeleted) const
+    void Dialogue::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
         if (isDeleted)
@@ -74,11 +79,11 @@ namespace ESM
         mInfo.clear();
     }
 
-    void Dialogue::readInfo(ESMReader &esm, bool merge)
+    void Dialogue::readInfo(Reader& reader, bool merge)
     {
-        ESM::DialInfo info;
+        ESM3::DialInfo info;
         bool isDeleted = false;
-        info.load(esm, isDeleted);
+        info.load(reader, isDeleted);
 
         if (!merge || mInfo.empty())
         {

@@ -5,7 +5,7 @@
 #include <list>
 
 #include "esmcommon.hpp"
-#include "loadtes3.hpp"
+#include "../esm3/tes3.hpp"
 
 namespace ToUTF8
 {
@@ -146,7 +146,7 @@ class ESMWriter
         int mRecordCount;
         bool mCounting;
 
-        Header mHeader;
+        ESM3::Header mHeader;
     };
 }
 

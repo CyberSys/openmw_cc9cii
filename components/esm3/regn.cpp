@@ -1,89 +1,88 @@
-#include "loadregn.hpp"
+#include "regn.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Region::sRecordId = REC_REGN;
 
-    void Region::load(ESMReader &esm, bool &isDeleted)
+    void Region::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
         bool hasName = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'W','E','A','T'>::value:
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_BNAM: reader.getZString(mSleepList); break;
+                case ESM3::SUB_CNAM: reader.get(mMapColor); break;
+                case ESM3::SUB_WEAT:
                 {
-                    esm.getSubHeader();
-                    if (esm.getVer() == VER_12)
+                    if (reader.esmVersion() == ESM::VER_120)
                     {
                         mData.mA = 0;
                         mData.mB = 0;
-                        esm.getExact(&mData, sizeof(mData) - 2);
+                        reader.get(mData, sizeof(mData) - 2);
                     }
-                    else if (esm.getVer() == VER_13)
+                    else if (reader.esmVersion() == ESM::VER_130)
                     {
                         // May include the additional two bytes (but not necessarily)
-                        if (esm.getSubSize() == sizeof(mData))
+                        if (subHdr.dataSize == sizeof(mData))
                         {
-                            esm.getT(mData);
+                            reader.get(mData);
                         }
                         else
                         {
                             mData.mA = 0;
                             mData.mB = 0;
-                            esm.getExact(&mData, sizeof(mData)-2);
+                            reader.get(mData, sizeof(mData)-2);
                         }
                     }
                     else
                     {
-                        esm.fail("Don't know what to do in this version");
+                        reader.fail("Don't know what to do in this version");
                     }
                     break;
                 }
-                case ESM::FourCC<'B','N','A','M'>::value:
-                    mSleepList = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','N','A','M'>::value:
-                    esm.getHT(mMapColor);
-                    break;
-                case ESM::FourCC<'S','N','A','M'>::value:
+                case ESM3::SUB_SNAM:
                 {
-                    esm.getSubHeader();
                     SoundRef sr;
-                    sr.mSound.assign(esm.getString(32));
-                    esm.getT(sr.mChance);
+                    char tmp[32];
+                    reader.get(tmp[0], 32);  // NOTE: fixed size string
+                    sr.mSound = std::string(&tmp[0]); // remove junk
+
+                    reader.get(sr.mChance);
                     mSoundList.push_back(sr);
                     break;
                 }
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
     }
 
-    void Region::save(ESMWriter &esm, bool isDeleted) const
+    void Region::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -95,7 +94,7 @@ namespace ESM
 
         esm.writeHNOCString("FNAM", mName);
 
-        if (esm.getVersion() == VER_12)
+        if (esm.getVersion() == ESM::VER_12)
             esm.writeHNT("WEAT", mData, sizeof(mData) - 2);
         else
             esm.writeHNT("WEAT", mData);

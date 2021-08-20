@@ -1,7 +1,7 @@
 #include "pickpocketitemmodel.hpp"
 
 #include <components/misc/rng.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -21,7 +21,7 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         mSourceModel = sourceModel;
-        float chance = player.getClass().getSkill(player, ESM::Skill::Sneak);
+        float chance = player.getClass().getSkill(player, ESM3::Skill::Sneak);
 
         mSourceModel->update();
 
@@ -131,7 +131,7 @@ namespace MWGui
             return false;
         }
         else
-            player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
+            player.getClass().skillUsageSucceeded(player, ESM3::Skill::Sneak, 1);
 
         return true;
     }

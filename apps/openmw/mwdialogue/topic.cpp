@@ -12,7 +12,7 @@ namespace MWDialogue
 
     Topic::Topic (const std::string& topic)
     : mTopic (topic), mName (
-      MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic)->mId)
+      MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().find (topic)->mId)
     {}
 
     Topic::~Topic()
@@ -33,7 +33,7 @@ namespace MWDialogue
         mEntries.push_back (entry); // we want slicing here
     }
 
-    void Topic::insertEntry (const ESM::JournalEntry& entry)
+    void Topic::insertEntry (const ESM3::JournalEntry& entry)
     {
         mEntries.push_back (entry);
     }

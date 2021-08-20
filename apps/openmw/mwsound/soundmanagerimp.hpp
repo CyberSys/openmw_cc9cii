@@ -24,7 +24,7 @@ namespace VFS
     class Manager;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct Sound;
     struct Cell;
@@ -93,11 +93,11 @@ namespace MWSound
 
         float mTimePassed;
 
-        const ESM::Cell *mLastCell;
+        const ESM3::Cell *mLastCell;
 
         Sound* mCurrentRegionSound;
 
-        Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
+        Sound_Buffer *insertSound(const std::string &soundId, const ESM3::Sound *sound);
 
         // returns a decoder to start streaming, or nullptr if the sound was not found
         DecoderPtr loadVoice(const std::string &voicefile);
@@ -127,7 +127,7 @@ namespace MWSound
         };
 
         std::pair<WaterSoundAction, Sound_Buffer*> getWaterSoundAction(const WaterSoundUpdate& update,
-                                                                       const ESM::Cell* cell) const;
+                                                                       const ESM3::Cell* cell) const;
 
         SoundManager(const SoundManager &rhs);
         SoundManager& operator=(const SoundManager &rhs);

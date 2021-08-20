@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_NPCSTATS_H
-#define OPENMW_ESM_NPCSTATS_H
+#ifndef ESM3_NPCSTATS_H
+#define ESM3_NPCSTATS_H
 
 #include <string>
 #include <vector>
@@ -9,8 +9,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -45,8 +49,8 @@ namespace ESM
         /// Initialize to default state
         void blank();
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

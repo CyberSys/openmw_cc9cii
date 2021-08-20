@@ -1,13 +1,17 @@
-#ifndef COMPONENTS_ESM_MAGICEFFECTS_H
-#define COMPONENTS_ESM_MAGICEFFECTS_H
+#ifndef ESM3_MAGICEFFECTS_H
+#define ESM3_MAGICEFFECTS_H
 
 #include <map>
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
     struct MagicEffects
@@ -15,8 +19,8 @@ namespace ESM
         // <Effect Id, Base value>
         std::map<int, int> mEffects;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 
     struct SummonKey

@@ -1,43 +1,67 @@
 #include "globalmap.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+#include "../esm/defs.hpp"
 
-unsigned int ESM::GlobalMap::sRecordId = ESM::REC_GMAP;
-
-void ESM::GlobalMap::load (ESMReader &esm)
+namespace ESM3
 {
-    esm.getHNT(mBounds, "BNDS");
+    unsigned int GlobalMap::sRecordId = ESM::REC_GMAP;
 
-    esm.getSubNameIs("DATA");
-    esm.getSubHeader();
-    mImageData.resize(esm.getSubSize());
-    esm.getExact(&mImageData[0], mImageData.size());
-
-    while (esm.isNextSub("MRK_"))
+    // NOTE: "MRK_" equivalent to each loaded exterior REC_CELL (that's been visited - see flag)
+    // TODO: find out what is "mark location" in SUB_PNAM of REC_PCDT
+    //
+    // NOTE: "DATA" equivalent to SUB_MAPD in REC_FMAP (but scaled)
+    //       mBounds is derived from the image data
+    //
+    // (called from StateManager::loadGame() via WindowManager::readRecord() and MapWindow::readRecord())
+    void GlobalMap::load (Reader& esm)
     {
-        esm.getSubHeader();
-        CellId cell;
-        esm.getT(cell.first);
-        esm.getT(cell.second);
-        mMarkers.insert(cell);
+        while (esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_BNDS:
+                {
+                    esm.get(mBounds);
+                    break;
+                }
+                case ESM3::SUB_DATA:
+                {
+                    mImageData.resize(subHdr.dataSize);
+                    esm.get(mImageData[0], mImageData.size());
+                    break;
+                }
+                case ESM3::SUB_MRK_:
+                {
+                    CellId cell;
+                    esm.get(cell.first);
+                    esm.get(cell.second);
+                    mMarkers.insert(cell);
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData();
+                    break;
+            }
+        }
     }
-}
 
-void ESM::GlobalMap::save (ESMWriter &esm) const
-{
-    esm.writeHNT("BNDS", mBounds);
-
-    esm.startSubRecord("DATA");
-    esm.write(&mImageData[0], mImageData.size());
-    esm.endRecord("DATA");
-
-    for (std::set<CellId>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)
+    void GlobalMap::save (ESM::ESMWriter& esm) const
     {
-        esm.startSubRecord("MRK_");
-        esm.writeT(it->first);
-        esm.writeT(it->second);
-        esm.endRecord("MRK_");
+        esm.writeHNT("BNDS", mBounds);
+
+        esm.startSubRecord("DATA");
+        esm.write(&mImageData[0], mImageData.size());
+        esm.endRecord("DATA");
+
+        for (std::set<CellId>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)
+        {
+            esm.startSubRecord("MRK_");
+            esm.writeT(it->first);
+            esm.writeT(it->second);
+            esm.endRecord("MRK_");
+        }
     }
 }

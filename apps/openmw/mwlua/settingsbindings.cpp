@@ -51,10 +51,10 @@ namespace MWLua
             return Settings::Manager::getVector3(setting, category);
         };
 
-        const MWWorld::Store<ESM::GameSetting>* gmst = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting>* gmst = &MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
         config["getGMST"] = [lua, gmst](const std::string setting) -> sol::object
         {
-            const ESM::Variant& value = gmst->find(setting)->mValue;
+            const ESM3::Variant& value = gmst->find(setting)->mValue;
             if (value.getType() == ESM::VT_String)
                 return sol::make_object<std::string>(lua->sol(), value.getString());
             else if (value.getType() == ESM::VT_Int)

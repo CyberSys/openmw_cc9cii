@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_PROJECTILESTATE_H
-#define OPENMW_ESM_PROJECTILESTATE_H
+#ifndef ESM3_PROJECTILESTATE_H
+#define ESM3_PROJECTILESTATE_H
 
 #include <string>
 
@@ -8,24 +8,23 @@
 
 #include "effectlist.hpp"
 
-#include "util.hpp"
+#include "../esm/util.hpp"
 
-namespace ESM
+namespace ESM3
 {
-
     // format 0, savegames only
 
     struct BaseProjectileState
     {
         std::string mId;
 
-        Vector3 mPosition;
-        Quaternion mOrientation;
+        ESM::Vector3 mPosition;
+        ESM::Quaternion mOrientation;
 
         int mActorId;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 
     struct MagicBoltState : public BaseProjectileState
@@ -33,20 +32,19 @@ namespace ESM
         std::string mSpellId;
         float mSpeed;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 
     struct ProjectileState : public BaseProjectileState
     {
         std::string mBowId;
-        Vector3 mVelocity;
+        ESM::Vector3 mVelocity;
         float mAttackStrength;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
-
 }
 
 #endif

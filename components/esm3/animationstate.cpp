@@ -1,44 +1,56 @@
 #include "animationstate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     bool AnimationState::empty() const
     {
         return mScriptedAnims.empty();
     }
 
-    void AnimationState::load(ESMReader& esm)
+    // NOTE: this method is called from ObjectState::load()
+    // NOTE: assumed the sub-record header has *not* been read
+    void AnimationState::load(Reader& esm)
     {
         mScriptedAnims.clear();
 
-        while (esm.isNextSub("ANIS"))
+        while (esm.getSubRecordHeader())
         {
-            ScriptedAnimation anim;
+            if (esm.subRecordHeader().typeId == ESM3::SUB_ANIS)
+            {
+                ScriptedAnimation anim;
+                esm.getString(anim.mGroup); // NOTE: string not null terminated
 
-            anim.mGroup = esm.getHString();
-            esm.getHNOT(anim.mTime, "TIME");
-            esm.getHNOT(anim.mAbsolute, "ABST");
+                if (esm.getNextSubRecordHeader(ESM3::SUB_TIME))
+                    esm.get(anim.mTime);
 
-            esm.getSubNameIs("COUN");
-            // workaround bug in earlier version where size_t was used
-            esm.getSubHeader();
-            if (esm.getSubSize() == 8)
-                esm.getT(anim.mLoopCount);
+                if (esm.getNextSubRecordHeader(ESM3::SUB_ABST))
+                    esm.get(anim.mAbsolute);
+
+                esm.getSubRecordHeader(ESM3::SUB_COUN);
+                // workaround bug in earlier version where size_t was used
+                if (esm.subRecordHeader().dataSize == 8)
+                    esm.get(anim.mLoopCount);
+                else
+                {
+                    uint32_t loopcount;
+                    esm.get(loopcount);
+                    anim.mLoopCount = (uint64_t) loopcount;
+                }
+
+                mScriptedAnims.push_back(anim);
+            }
             else
             {
-                uint32_t loopcount;
-                esm.getT(loopcount);
-                anim.mLoopCount = (uint64_t) loopcount;
+                esm.cacheSubRecordHeader();
+                return;
             }
-
-            mScriptedAnims.push_back(anim);
         }
     }
 
-    void AnimationState::save(ESMWriter& esm) const
+    void AnimationState::save(ESM::ESMWriter& esm) const
     {
         for (ScriptedAnimations::const_iterator iter = mScriptedAnims.begin(); iter != mScriptedAnims.end(); ++iter)
         {

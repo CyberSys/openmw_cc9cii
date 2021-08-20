@@ -4,7 +4,7 @@
 #include <osg/ref_ptr>
 #include <osg/Geometry>
 
-namespace ESM
+namespace ESM3
 {
     struct Pathgrid;
 }
@@ -14,9 +14,9 @@ namespace SceneUtil
     const float DiamondHalfHeight = 40.f;
     const float DiamondHalfWidth = 16.f;
 
-    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid);
+    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM3::Pathgrid& pathgrid);
 
-    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(const ESM::Pathgrid& pathgrid,
+    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(const ESM3::Pathgrid& pathgrid,
         const std::vector<unsigned short>& selected);
 
     unsigned short getPathgridNode(unsigned short vertexIndex);

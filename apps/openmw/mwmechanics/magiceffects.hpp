@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-namespace ESM
+namespace ESM3
 {
     struct ENAMstruct;
     struct EffectList;
@@ -23,7 +23,7 @@ namespace MWMechanics
 
         EffectKey (int id, int arg = -1) : mId (id), mArg (arg) {}
 
-        EffectKey (const ESM::ENAMstruct& effect);
+        EffectKey (const ESM3::ENAMstruct& effect);
     };
 
     bool operator< (const EffectKey& left, const EffectKey& right);
@@ -96,8 +96,8 @@ namespace MWMechanics
 
             Collection::const_iterator end() const { return mCollection.end(); }
 
-            void readState (const ESM::MagicEffects& state);
-            void writeState (ESM::MagicEffects& state) const;
+            void readState (const ESM3::MagicEffects& state);
+            void writeState (ESM3::MagicEffects& state) const;
 
             void add (const EffectKey& key, const EffectParam& param);
             void remove (const EffectKey& key);

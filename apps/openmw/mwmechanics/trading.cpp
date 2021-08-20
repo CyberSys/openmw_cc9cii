@@ -23,12 +23,12 @@ namespace MWMechanics
         }
 
         // reject if npc is a creature
-        if ( merchant.getTypeName() != typeid(ESM::NPC).name() ) {
+        if ( merchant.getTypeName() != typeid(ESM3::NPC).name() ) {
             return false;
         }
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         // Is the player buying?
         bool buying = (merchantOffer < 0);
@@ -43,10 +43,10 @@ namespace MWMechanics
         const MWMechanics::CreatureStats &merchantStats = merchant.getClass().getCreatureStats(merchant);
         const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
 
-        float a1 = static_cast<float>(player.getClass().getSkill(player, ESM::Skill::Mercantile));
+        float a1 = static_cast<float>(player.getClass().getSkill(player, ESM3::Skill::Mercantile));
         float b1 = 0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified();
         float c1 = 0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified();
-        float d1 = static_cast<float>(merchant.getClass().getSkill(merchant, ESM::Skill::Mercantile));
+        float d1 = static_cast<float>(merchant.getClass().getSkill(merchant, ESM3::Skill::Mercantile));
         float e1 = 0.1f * merchantStats.getAttribute(ESM::Attribute::Luck).getModified();
         float f1 = 0.2f * merchantStats.getAttribute(ESM::Attribute::Personality).getModified();
 
@@ -76,7 +76,7 @@ namespace MWMechanics
         else if ( buying && (finalPrice < initialMerchantOffer) ) {
             skillGain = floor(100.f * (initialMerchantOffer - finalPrice) / initialMerchantOffer);
         }
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
+        player.getClass().skillUsageSucceeded(player, ESM3::Skill::Mercantile, 0, skillGain);
 
         return true;
     }

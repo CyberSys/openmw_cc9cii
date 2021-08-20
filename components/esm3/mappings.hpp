@@ -1,16 +1,16 @@
-#ifndef OPENMW_ESM_MAPPINGS_H
-#define OPENMW_ESM_MAPPINGS_H
+#ifndef ESM3_MAPPINGS_H
+#define ESM3_MAPPINGS_H
 
 #include <string>
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbody.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/body.hpp>
 
-namespace ESM
+namespace ESM3
 {
-    ESM::BodyPart::MeshPart getMeshPart(ESM::PartReferenceType type);
-    std::string getBoneName(ESM::PartReferenceType type);
-    std::string getMeshFilter(ESM::PartReferenceType type);
+    ESM3::BodyPart::MeshPart getMeshPart(ESM3::PartReferenceType type);
+    std::string getBoneName(ESM3::PartReferenceType type);
+    std::string getMeshFilter(ESM3::PartReferenceType type);
 }
 
 #endif

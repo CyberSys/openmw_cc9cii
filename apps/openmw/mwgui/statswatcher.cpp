@@ -67,7 +67,7 @@ namespace MWGui
 
         if (timeToDrown != mWatchedTimeToStartDrowning)
         {
-            static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>()
                     .find("fHoldBreathTime")->mValue.getFloat();
 
             mWatchedTimeToStartDrowning = timeToDrown;
@@ -81,13 +81,13 @@ namespace MWGui
             }
         }
 
-        //Loop over ESM::Skill::SkillEnum
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        //Loop over ESM3::Skill::SkillEnum
+        for (int i = 0; i < ESM3::Skill::Length; ++i)
         {
             if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
             {
                 mWatchedSkills[i] = stats.getSkill(i);
-                setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
+                setValue((ESM3::Skill::SkillEnum)i, stats.getSkill(i));
             }
         }
 
@@ -99,7 +99,7 @@ namespace MWGui
 
         if (mWatched.getClass().isNpc())
         {
-            const ESM::NPC *watchedRecord = mWatched.get<ESM::NPC>()->mBase;
+            const ESM3::NPC *watchedRecord = mWatched.get<ESM3::NPC>()->mBase;
 
             if (watchedRecord->mName != mWatchedName || mWatchedStatsEmpty)
             {
@@ -110,16 +110,16 @@ namespace MWGui
             if (watchedRecord->mRace != mWatchedRace || mWatchedStatsEmpty)
             {
                 mWatchedRace = watchedRecord->mRace;
-                const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore()
-                    .get<ESM::Race>().find(watchedRecord->mRace);
+                const ESM3::Race *race = MWBase::Environment::get().getWorld()->getStore()
+                    .get<ESM3::Race>().find(watchedRecord->mRace);
                 setValue("race", race->mName);
             }
 
             if (watchedRecord->mClass != mWatchedClass || mWatchedStatsEmpty)
             {
                 mWatchedClass = watchedRecord->mClass;
-                const ESM::Class *cls = MWBase::Environment::get().getWorld()->getStore()
-                    .get<ESM::Class>().find(watchedRecord->mClass);
+                const ESM3::Class *cls = MWBase::Environment::get().getWorld()->getStore()
+                    .get<ESM3::Class>().find(watchedRecord->mClass);
                 setValue("class", cls->mName);
 
                 MWBase::WindowManager::SkillList majorSkills (5);
@@ -154,7 +154,7 @@ namespace MWGui
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void StatsWatcher::setValue(ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
         /// allow custom skills.

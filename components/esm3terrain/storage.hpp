@@ -1,20 +1,20 @@
-#ifndef COMPONENTS_ESM_TERRAIN_STORAGE_H
-#define COMPONENTS_ESM_TERRAIN_STORAGE_H
+#ifndef COMPONENTS_ESM3_TERRAIN_STORAGE_H
+#define COMPONENTS_ESM3_TERRAIN_STORAGE_H
 
 #include <cassert>
 #include <mutex>
 
 #include <components/terrain/storage.hpp>
 
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadltex.hpp>
+#include <components/esm3/land.hpp>
+#include <components/esm3/ltex.hpp>
 
 namespace VFS
 {
     class Manager;
 }
 
-namespace ESMTerrain
+namespace ESM3Terrain
 {
 
     class LandCache;
@@ -24,13 +24,13 @@ namespace ESMTerrain
     {
     public:
         LandObject();
-        LandObject(const ESM::Land* land, int loadFlags);
+        LandObject(const ESM3::Land* land, int loadFlags);
         LandObject(const LandObject& copy, const osg::CopyOp& copyop);
         virtual ~LandObject();
 
-        META_Object(ESMTerrain, LandObject)
+        META_Object(ESM3Terrain, LandObject)
 
-        inline const ESM::Land::LandData* getData(int flags) const
+        inline const ESM3::Land::LandData* getData(int flags) const
         {
             if ((mData.mDataLoaded & flags) != flags)
                 return nullptr;
@@ -43,10 +43,10 @@ namespace ESMTerrain
         }
 
     private:
-        const ESM::Land* mLand;
+        const ESM3::Land* mLand;
         int mLoadFlags;
 
-        ESM::Land::LandData mData;
+        ESM3::Land::LandData mData;
     };
 
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)
@@ -58,7 +58,7 @@ namespace ESMTerrain
 
         // Not implemented in this class, because we need different Store implementations for game and editor
         virtual osg::ref_ptr<const LandObject> getLand (int cellX, int cellY)= 0;
-        virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
+        virtual const ESM3::LandTexture* getLandTexture(int index, short plugin) = 0;
         /// Get bounds of the whole terrain in cell units
         void getBounds(float& minX, float& maxX, float& minY, float& maxY) override = 0;
 
@@ -108,11 +108,11 @@ namespace ESMTerrain
 
         int getBlendmapScale(float chunkSize) override;
 
-        float getVertexHeight (const ESM::Land::LandData* data, int x, int y)
+        float getVertexHeight (const ESM3::Land::LandData* data, int x, int y)
         {
-            assert(x < ESM::Land::LAND_SIZE);
-            assert(y < ESM::Land::LAND_SIZE);
-            return data->mHeights[y * ESM::Land::LAND_SIZE + x];
+            assert(x < ESM3::Land::LAND_SIZE);
+            assert(y < ESM3::Land::LAND_SIZE);
+            return data->mHeights[y * ESM3::Land::LAND_SIZE + x];
         }
 
     private:
@@ -125,7 +125,7 @@ namespace ESMTerrain
         inline const LandObject* getLand(int cellX, int cellY, LandCache& cache);
 
         virtual bool useAlteration() const { return false; }
-        virtual void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const;
+        virtual void adjustColor(int col, int row, const ESM3::Land::LandData *heightData, osg::Vec4ub& color) const;
         virtual float getAlteredHeight(int col, int row) const;
 
         // Since plugins can define new texture palettes, we need to know the plugin index too

@@ -1,23 +1,24 @@
 #include "creaturelevliststate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
-
-    void CreatureLevListState::load(ESMReader &esm)
+    void CreatureLevListState::load(Reader& esm)
     {
         ObjectState::load(esm);
 
         mSpawnActorId = -1;
-        esm.getHNOT (mSpawnActorId, "SPAW");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_SPAW))
+            esm.get(mSpawnActorId);
 
         mSpawn = false;
-        esm.getHNOT (mSpawn, "RESP");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_RESP))
+            esm.get(mSpawn);
     }
 
-    void CreatureLevListState::save(ESMWriter &esm, bool inInventory) const
+    void CreatureLevListState::save(ESM::ESMWriter& esm, bool inInventory) const
     {
         ObjectState::save(esm, inInventory);
 
@@ -27,5 +28,4 @@ namespace ESM
         if (mSpawn)
             esm.writeHNT ("RESP", mSpawn);
     }
-
 }

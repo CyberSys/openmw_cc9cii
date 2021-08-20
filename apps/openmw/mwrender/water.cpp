@@ -37,7 +37,7 @@
 
 #include <components/shader/shadermanager.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include <components/fallback/fallback.hpp>
 
@@ -449,7 +449,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     createSimpleWaterStateSet(geom2, Fallback::Map::getFloat("Water_Map_Alpha"));
     geom2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geom2);
- 
+
     mSceneRoot->addChild(mWaterNode);
 
     setHeight(mTop);

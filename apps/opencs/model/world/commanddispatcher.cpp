@@ -44,7 +44,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() cons
         {
             int type = model.data (model.index (row, dialogueTypeIndex)).toInt();
 
-            if (type!=ESM::Dialogue::Topic && type!=ESM::Dialogue::Journal)
+            if (type != ESM3::Dialogue::Topic && type != ESM3::Dialogue::Journal)
                 continue;
         }
 

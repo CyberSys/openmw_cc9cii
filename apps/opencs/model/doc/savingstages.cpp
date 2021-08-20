@@ -4,7 +4,7 @@
 
 #include <QUndoStack>
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/dial.hpp>
 
 #include "../world/infocollection.hpp"
 #include "../world/cellcoordinates.hpp"
@@ -53,7 +53,7 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
         mState.getWriter().setAuthor ("");
         mState.getWriter().setDescription ("");
         mState.getWriter().setRecordCount (0);
-        mState.getWriter().setFormat (ESM::Header::CurrentFormat);
+        mState.getWriter().setFormat (ESM3::Header::CurrentFormat);
     }
     else
     {
@@ -96,12 +96,12 @@ int CSMDoc::WriteDialogueCollectionStage::setup()
 void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<ESM::Dialogue>& topic = mTopics.getRecord (stage);
+    const CSMWorld::Record<ESM3::Dialogue>& topic = mTopics.getRecord (stage);
 
     if (topic.mState == CSMWorld::RecordBase::State_Deleted)
     {
         // if the topic is deleted, we do not need to bother with INFO records.
-        ESM::Dialogue dialogue = topic.get();
+        ESM3::Dialogue dialogue = topic.get();
         writer.startRecord(dialogue.sRecordId);
         dialogue.save(writer, true);
         writer.endRecord(dialogue.sRecordId);
@@ -142,7 +142,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
         {
             if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
             {
-                ESM::DialInfo info = (*iter)->get();
+                ESM3::DialInfo info = (*iter)->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
 
                 info.mPrev = "";
@@ -292,7 +292,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences (const std::deque<int>& r
                 // An empty mOriginalCell is meant to indicate that it is the same as
                 // the current cell.  It is possible that a moved ref is moved again.
 
-                ESM::MovedCellRef moved;
+                ESM3::MovedCellRef moved;
                 moved.mRefNum = refRecord.mRefNum;
 
                 // Need to fill mTarget with the ref's new position.
@@ -370,10 +370,10 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         writer.startRecord (cellRecord.sRecordId);
 
         if (interior)
-            cellRecord.mData.mFlags |= ESM::Cell::Interior;
+            cellRecord.mData.mFlags |= ESM3::Cell::Interior;
         else
         {
-            cellRecord.mData.mFlags &= ~ESM::Cell::Interior;
+            cellRecord.mData.mFlags &= ~ESM3::Cell::Interior;
 
             std::istringstream stream (cellRecord.mId.c_str());
             char ignore;

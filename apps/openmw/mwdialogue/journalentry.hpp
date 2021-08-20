@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace ESM
+namespace ESM3
 {
     struct JournalEntry;
 }
@@ -27,11 +27,11 @@ namespace MWDialogue
         /// actor is optional
         Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
 
-        Entry (const ESM::JournalEntry& record);
+        Entry (const ESM3::JournalEntry& record);
 
         std::string getText() const;
 
-        void write (ESM::JournalEntry& entry) const;
+        void write (ESM3::JournalEntry& entry) const;
     };
 
     /// \brief A dialogue entry
@@ -45,9 +45,9 @@ namespace MWDialogue
 
         JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
 
-        JournalEntry (const ESM::JournalEntry& record);
+        JournalEntry (const ESM3::JournalEntry& record);
 
-        void write (ESM::JournalEntry& entry) const;
+        void write (ESM3::JournalEntry& entry) const;
 
         static JournalEntry makeFromQuest (const std::string& topic, int index);
 
@@ -66,9 +66,9 @@ namespace MWDialogue
         StampedJournalEntry (const std::string& topic, const std::string& infoId,
             int day, int month, int dayOfMonth, const MWWorld::Ptr& actor);
 
-        StampedJournalEntry (const ESM::JournalEntry& record);
+        StampedJournalEntry (const ESM3::JournalEntry& record);
 
-        void write (ESM::JournalEntry& entry) const;
+        void write (ESM3::JournalEntry& entry) const;
 
         static StampedJournalEntry makeFromQuest (const std::string& topic, int index, const MWWorld::Ptr& actor);
     };

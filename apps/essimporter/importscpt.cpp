@@ -1,26 +1,31 @@
 #include "importscpt.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <cassert>
 
-
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
-
-    void SCPT::load(ESM::ESMReader &esm)
+    void SCPT::load(ESM3::Reader& esm)
     {
-        esm.getHNT(mSCHD, "SCHD");
+        assert(esm.hdr().typeId == ESM3::REC_SCPT);
 
+        esm.getSubRecordHeader(ESM3::SUB_SCHD);
+        esm.get(mSCHD);
+
+        esm.getSubRecordHeader(); // mSCRI expects this
         mSCRI.load(esm);
 
         mRefNum = -1;
-        if (esm.isNextSub("RNAM"))
+        if (esm.getSubRecordHeader())
         {
-            mRunning = true;
-            esm.getHT(mRefNum);
+            if (esm.subRecordHeader().typeId == ESM3::SUB_RNAM)
+            {
+                esm.get(mRefNum);
+                mRunning = true;
+            }
+            else
+                mRunning = false;
         }
-        else
-            mRunning = false;
     }
-
 }

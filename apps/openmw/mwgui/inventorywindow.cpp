@@ -46,7 +46,7 @@ namespace
 
     bool isRightHandWeapon(const MWWorld::Ptr& item)
     {
-        if (item.getClass().getTypeName() != typeid(ESM::Weapon).name())
+        if (item.getClass().getTypeName() != typeid(ESM3::Weapon).name())
             return false;
         std::vector<int> equipmentSlots = item.getClass().getEquipmentSlots(item).first;
         return (!equipmentSlots.empty() && equipmentSlots.front() == MWWorld::InventoryStore::Slot_CarriedRight);
@@ -281,7 +281,7 @@ namespace MWGui
         // If we unequip weapon during attack, it can lead to unexpected behaviour
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
         {
-            bool isWeapon = item.mBase.getTypeName() == typeid(ESM::Weapon).name();
+            bool isWeapon = item.mBase.getTypeName() == typeid(ESM3::Weapon).name();
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
 
             if (isWeapon && invStore.isEquipped(item.mBase))
@@ -556,8 +556,8 @@ namespace MWGui
         {
             // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
             const std::string& type = ptr.getTypeName();
-            bool isBook = type == typeid(ESM::Book).name();
-            if (!isBook && type != typeid(ESM::Ingredient).name() && type != typeid(ESM::Repair).name())
+            bool isBook = type == typeid(ESM3::Book).name();
+            if (!isBook && type != typeid(ESM3::Ingredient).name() && type != typeid(ESM3::Repair).name())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
             // Books must have PCSkipEquip set to 1 instead
             else if (isBook)
@@ -593,8 +593,8 @@ namespace MWGui
             useItem(ptr);
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1 item
-            if ((ptr.getTypeName() == typeid(ESM::Potion).name() ||
-                 ptr.getTypeName() == typeid(ESM::Ingredient).name())
+            if ((ptr.getTypeName() == typeid(ESM3::Potion).name() ||
+                 ptr.getTypeName() == typeid(ESM3::Ingredient).name())
                 && mDragAndDrop->mDraggedCount > 1)
             {
                 // Item can be provided from other window for example container.
@@ -705,18 +705,18 @@ namespace MWGui
             return;
         // make sure the object is of a type that can be picked up
         std::string type = object.getTypeName();
-        if ( (type != typeid(ESM::Apparatus).name())
-            && (type != typeid(ESM::Armor).name())
-            && (type != typeid(ESM::Book).name())
-            && (type != typeid(ESM::Clothing).name())
-            && (type != typeid(ESM::Ingredient).name())
-            && (type != typeid(ESM::Light).name())
-            && (type != typeid(ESM::Miscellaneous).name())
-            && (type != typeid(ESM::Lockpick).name())
-            && (type != typeid(ESM::Probe).name())
-            && (type != typeid(ESM::Repair).name())
-            && (type != typeid(ESM::Weapon).name())
-            && (type != typeid(ESM::Potion).name()))
+        if ( (type != typeid(ESM3::Apparatus).name())
+            && (type != typeid(ESM3::Armor).name())
+            && (type != typeid(ESM3::Book).name())
+            && (type != typeid(ESM3::Clothing).name())
+            && (type != typeid(ESM3::Ingredient).name())
+            && (type != typeid(ESM3::Light).name())
+            && (type != typeid(ESM3::Miscellaneous).name())
+            && (type != typeid(ESM3::Lockpick).name())
+            && (type != typeid(ESM3::Probe).name())
+            && (type != typeid(ESM3::Repair).name())
+            && (type != typeid(ESM3::Weapon).name())
+            && (type != typeid(ESM3::Potion).name()))
             return;
 
         // An object that can be picked up must have a tooltip.
@@ -729,7 +729,7 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
-        
+
         if (!object.getRefData().activate())
             return;
 
@@ -809,7 +809,7 @@ namespace MWGui
 
             lastId = item.getCellRef().getRefId();
 
-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() &&
+            if (item.getClass().getTypeName() == typeid(ESM3::Weapon).name() &&
                 isRightHandWeapon(item) &&
                 item.getClass().canBeEquipped(item, player).first)
             {

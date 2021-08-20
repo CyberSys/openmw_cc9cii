@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace ESM
+namespace ESM3
 {
     struct Light;
     struct MagicEffect;
@@ -331,7 +331,7 @@ protected:
     void addSingleAnimSource(const std::string &model, const std::string& baseModel);
 
     /** Adds an additional light to the given node using the specified ESM record. */
-    void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *light);
+    void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM3::Light *light);
 
     void clearAnimSources();
 
@@ -378,7 +378,7 @@ public:
 
     // Add a spell casting glow to an object. From measuring video taken from the original engine,
     // the glow seems to be about 1.5 seconds except for telekinesis, which is 1 second.
-    void addSpellCastGlow(const ESM::MagicEffect *effect, float glowDuration = 1.5);
+    void addSpellCastGlow(const ESM3::MagicEffect *effect, float glowDuration = 1.5);
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 

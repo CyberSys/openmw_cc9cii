@@ -27,8 +27,8 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 
     setDefaultAmbient (colour);
 
-    bool isInterior = (record.get().mData.mFlags & ESM::Cell::Interior) != 0;
-    bool behaveLikeExterior = (record.get().mData.mFlags & ESM::Cell::QuasiEx) != 0;
+    bool isInterior = (record.get().mData.mFlags & ESM3::Cell::Interior) != 0;
+    bool behaveLikeExterior = (record.get().mData.mFlags & ESM3::Cell::QuasiEx) != 0;
 
     setExterior(behaveLikeExterior || !isInterior);
 

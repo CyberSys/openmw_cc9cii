@@ -8,7 +8,7 @@
 
 #include "creaturestats.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Class;
     struct NpcStats;
@@ -21,7 +21,7 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
             int mDisposition;
-            SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
+            SkillValue mSkill[ESM3::Skill::Length]; // SkillValue.mProgress used by the player only
 
             int mReputation;
             int mCrimeId;
@@ -78,12 +78,12 @@ namespace MWMechanics
 
             bool isInFaction (const std::string& faction) const;
 
-            float getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const;
+            float getSkillProgressRequirement (int skillIndex, const ESM3::Class& class_) const;
 
-            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor=1.f);
+            void useSkill (int skillIndex, const ESM3::Class& class_, int usageType = -1, float extraFactor=1.f);
             ///< Increase skill by usage.
 
-            void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress, bool readBook = false);
+            void increaseSkill (int skillIndex, const ESM3::Class& class_, bool preserveProgress, bool readBook = false);
 
             int getLevelProgress() const;
 
@@ -127,11 +127,11 @@ namespace MWMechanics
             /// @param time value from [0,20]
             void setTimeToStartDrowning(float time);
 
-            void writeState (ESM::CreatureStats& state) const;
-            void writeState (ESM::NpcStats& state) const;
+            void writeState (ESM3::CreatureStats& state) const;
+            void writeState (ESM3::NpcStats& state) const;
 
-            void readState (const ESM::CreatureStats& state);
-            void readState (const ESM::NpcStats& state);
+            void readState (const ESM3::CreatureStats& state);
+            void readState (const ESM3::NpcStats& state);
     };
 }
 

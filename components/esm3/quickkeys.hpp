@@ -1,13 +1,17 @@
-#ifndef OPENMW_COMPONENTS_ESM_QUICKKEYS_H
-#define OPENMW_COMPONENTS_ESM_QUICKKEYS_H
+#ifndef ESM3_QUICKKEYS_H
+#define ESM3_QUICKKEYS_H
 
 #include <vector>
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     struct QuickKeys
     {
@@ -19,10 +23,9 @@ namespace ESM
 
         std::vector<QuickKey> mKeys;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
-
 }
 
 #endif

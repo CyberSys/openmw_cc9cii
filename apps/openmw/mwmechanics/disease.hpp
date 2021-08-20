@@ -27,7 +27,7 @@ namespace MWMechanics
             return;
 
         float fDiseaseXferChance =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find(
                     "fDiseaseXferChance")->mValue.getFloat();
 
         MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
@@ -35,20 +35,20 @@ namespace MWMechanics
         Spells& spells = carrier.getClass().getCreatureStats(carrier).getSpells();
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
+            const ESM3::Spell* spell = it->first;
             if (actor.getClass().getCreatureStats(actor).getSpells().hasSpell(spell->mId))
                 continue;
 
             float resist = 0.f;
             if (Spells::hasCorprusEffect(spell))
-                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
-                                        - actorEffects.get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
-            else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
-                                        - actorEffects.get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
-            else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
-                                        - actorEffects.get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
+                resist = 1.f - 0.01f * (actorEffects.get(ESM3::MagicEffect::ResistCorprusDisease).getMagnitude()
+                                        - actorEffects.get(ESM3::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
+            else if (spell->mData.mType == ESM3::Spell::ST_Disease)
+                resist = 1.f - 0.01f * (actorEffects.get(ESM3::MagicEffect::ResistCommonDisease).getMagnitude()
+                                        - actorEffects.get(ESM3::MagicEffect::WeaknessToCommonDisease).getMagnitude());
+            else if (spell->mData.mType == ESM3::Spell::ST_Blight)
+                resist = 1.f - 0.01f * (actorEffects.get(ESM3::MagicEffect::ResistBlightDisease).getMagnitude()
+                                        - actorEffects.get(ESM3::MagicEffect::WeaknessToBlightDisease).getMagnitude());
             else
                 continue;
 
@@ -60,7 +60,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
                 std::string msg = "sMagicContractDisease";
-                msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(msg)->mValue.getString();
+                msg = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find(msg)->mValue.getString();
                 msg = Misc::StringUtils::format(msg, spell->mName);
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
             }

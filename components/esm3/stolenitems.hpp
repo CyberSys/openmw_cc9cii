@@ -1,13 +1,17 @@
-#ifndef OPENMW_COMPONENTS_ESM_STOLENITEMS_H
-#define OPENMW_COMPONENTS_ESM_STOLENITEMS_H
+#ifndef ESM3_STOLENITEMS_H
+#define ESM3_STOLENITEMS_H
 
 #include <map>
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
     struct StolenItems
@@ -15,7 +19,7 @@ namespace ESM
         typedef std::map<std::string, std::map<std::pair<std::string, bool>, int> > StolenItemsMap;
         StolenItemsMap mStolenItems;
 
-        void load(ESM::ESMReader& esm);
+        void load(Reader& esm);
         void write(ESM::ESMWriter& esm) const;
     };
 

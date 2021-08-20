@@ -1,70 +1,88 @@
-#include "loadclot.hpp"
+#include "clot.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int Clothing::sRecordId = REC_CLOT;
 
-    void Clothing::load(ESMReader &esm, bool &isDeleted)
+    void Clothing::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
 
         mParts.mParts.clear();
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        std::size_t partIndex = 0;
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId); // FIXME: fixed size?
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','T','D','T'>::value:
-                    esm.getHT(mData, 12);
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_SCRI: reader.getZString(mScript); break;
+                case ESM3::SUB_ITEX: reader.getZString(mIcon); break;
+                case ESM3::SUB_ENAM: reader.getZString(mEnchant); break;
+                case ESM3::SUB_CTDT:
+                {
+                    assert (subHdr.dataSize == 12 && "CLOT data size mismatch");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
-                    mScript = esm.getHString();
+                }
+                case ESM3::SUB_INDX:
+                {
+                    PartReference pr;
+                    reader.get(pr.mPart); // The INDX byte
+                    mParts.mParts.push_back(pr);
+                    partIndex = mParts.mParts.size();
                     break;
-                case ESM::FourCC<'I','T','E','X'>::value:
-                    mIcon = esm.getHString();
+                }
+                case ESM3::SUB_BNAM:
+                {
+                    assert (partIndex <= mParts.mParts.size() && "Male CLOT before INDX");
+                    reader.getString(mParts.mParts.back().mMale); // NOTE: string not null terminated
                     break;
-                case ESM::FourCC<'E','N','A','M'>::value:
-                    mEnchant = esm.getHString();
+                }
+                case ESM3::SUB_CNAM:
+                {
+                    assert (partIndex <= mParts.mParts.size() && "Female CLOT before INDX");
+                    reader.getString(mParts.mParts.back().mFemale); // NOTE: string not null terminated
                     break;
-                case ESM::FourCC<'I','N','D','X'>::value:
-                    mParts.add(esm);
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing CTDT subrecord");
+            reader.fail("Missing CTDT subrecord");
     }
 
-    void Clothing::save(ESMWriter &esm, bool isDeleted) const
+    void Clothing::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

@@ -20,10 +20,14 @@ namespace osg
 
 namespace ESM
 {
+    class ESMWriter;
+}
+
+namespace ESM3
+{
     struct Class;
 
-    class ESMReader;
-    class ESMWriter;
+    class Reader;
 }
 
 namespace MWWorld
@@ -85,7 +89,7 @@ namespace MWBase
             virtual void setPlayerClass (const std::string& id) = 0;
             ///< Set player class to stock class.
 
-            virtual void setPlayerClass (const ESM::Class& class_) = 0;
+            virtual void setPlayerClass (const ESM3::Class& class_) = 0;
             ///< Set player class to custom class.
 
             virtual void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) = 0;
@@ -217,7 +221,7 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
+            virtual void readRecord (ESM3::Reader& reader, uint32_t type) = 0;
 
             virtual void clear() = 0;
 

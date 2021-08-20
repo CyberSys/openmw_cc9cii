@@ -7,12 +7,16 @@
 
 #include <stdint.h>
 
-#include <components/esm/loadglob.hpp>
+#include <components/esm3/glob.hpp>
 
 namespace ESM
 {
     class ESMWriter;
-    class ESMReader;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace Loading
@@ -28,7 +32,7 @@ namespace MWWorld
     {
         private:
 
-            typedef std::map<std::string, ESM::Global> Collection;
+            typedef std::map<std::string, ESM3::Global> Collection;
 
             Collection mVariables; // type, value
 
@@ -38,9 +42,9 @@ namespace MWWorld
 
         public:
 
-            const ESM::Variant& operator[] (const std::string& name) const;
+            const ESM3::Variant& operator[] (const std::string& name) const;
 
-            ESM::Variant& operator[] (const std::string& name);
+            ESM3::Variant& operator[] (const std::string& name);
 
             char getType (const std::string& name) const;
             ///< If there is no global variable with this name, ' ' is returned.
@@ -52,7 +56,7 @@ namespace MWWorld
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            bool readRecord (ESM::ESMReader& reader, uint32_t type);
+            bool readRecord (ESM3::Reader& reader, uint32_t type);
             ///< Records for variables that do not exist are dropped silently.
             ///
             /// \return Known type?

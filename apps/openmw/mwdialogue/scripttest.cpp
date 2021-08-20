@@ -31,14 +31,14 @@ void test(const MWWorld::Ptr& actor, int &compiled, int &total, const Compiler::
     Compiler::StreamErrorHandler errorHandler;
     errorHandler.setWarningsMode (warningsMode);
 
-    const MWWorld::Store<ESM::Dialogue>& dialogues = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
-    for (MWWorld::Store<ESM::Dialogue>::iterator it = dialogues.begin(); it != dialogues.end(); ++it)
+    const MWWorld::Store<ESM3::Dialogue>& dialogues = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>();
+    for (MWWorld::Store<ESM3::Dialogue>::iterator it = dialogues.begin(); it != dialogues.end(); ++it)
     {
-        std::vector<const ESM::DialInfo*> infos = filter.listAll(*it);
+        std::vector<const ESM3::DialInfo*> infos = filter.listAll(*it);
 
-        for (std::vector<const ESM::DialInfo*>::iterator iter = infos.begin(); iter != infos.end(); ++iter)
+        for (std::vector<const ESM3::DialInfo*>::iterator iter = infos.begin(); iter != infos.end(); ++iter)
         {
-            const ESM::DialInfo* info = *iter;
+            const ESM3::DialInfo* info = *iter;
             if (!info->mResultScript.empty())
             {
                 bool success = true;
@@ -101,15 +101,15 @@ namespace ScriptTest
     std::pair<int, int> compileAll(const Compiler::Extensions *extensions, int warningsMode)
     {
         int compiled = 0, total = 0;
-        const MWWorld::Store<ESM::NPC>& npcs = MWBase::Environment::get().getWorld()->getStore().get<ESM::NPC>();
-        for (MWWorld::Store<ESM::NPC>::iterator it = npcs.begin(); it != npcs.end(); ++it)
+        const MWWorld::Store<ESM3::NPC>& npcs = MWBase::Environment::get().getWorld()->getStore().get<ESM3::NPC>();
+        for (MWWorld::Store<ESM3::NPC>::iterator it = npcs.begin(); it != npcs.end(); ++it)
         {
             MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), it->mId);
             test(ref.getPtr(), compiled, total, extensions, warningsMode);
         }
 
-        const MWWorld::Store<ESM::Creature>& creatures = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>();
-        for (MWWorld::Store<ESM::Creature>::iterator it = creatures.begin(); it != creatures.end(); ++it)
+        const MWWorld::Store<ESM3::Creature>& creatures = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Creature>();
+        for (MWWorld::Store<ESM3::Creature>::iterator it = creatures.begin(); it != creatures.end(); ++it)
         {
             MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), it->mId);
             test(ref.getPtr(), compiled, total, extensions, warningsMode);

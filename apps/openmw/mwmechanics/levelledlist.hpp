@@ -19,9 +19,9 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Seed& seed = Misc::Rng::getSeed())
+    inline std::string getLevelledItem (const ESM3::LevelledListBase* levItem, bool creature, Misc::Rng::Seed& seed = Misc::Rng::getSeed())
     {
-        const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
+        const std::vector<ESM3::LevelledListBase::LevelItem>& items = levItem->mList;
 
         const MWWorld::Ptr& player = getPlayer();
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
@@ -38,9 +38,9 @@ namespace MWMechanics
         }
 
         // For levelled creatures, the flags are swapped. This file format just makes so much sense.
-        bool allLevels = (levItem->mFlags & ESM::ItemLevList::AllLevels) != 0;
+        bool allLevels = (levItem->mFlags & ESM3::ItemLevList::AllLevels) != 0;
         if (creature)
-            allLevels = levItem->mFlags & ESM::CreatureLevList::AllLevels;
+            allLevels = levItem->mFlags & ESM3::CreatureLevList::AllLevels;
 
         std::pair<int, std::string> highest = std::make_pair(-1, "");
         for (const auto& levelledItem : items)
@@ -66,17 +66,17 @@ namespace MWMechanics
 
         // Is this another levelled item or a real item?
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, 1);
-        if (ref.getPtr().getTypeName() != typeid(ESM::ItemLevList).name()
-                && ref.getPtr().getTypeName() != typeid(ESM::CreatureLevList).name())
+        if (ref.getPtr().getTypeName() != typeid(ESM3::ItemLevList).name()
+                && ref.getPtr().getTypeName() != typeid(ESM3::CreatureLevList).name())
         {
             return item;
         }
         else
         {
-            if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
-                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, seed);
+            if (ref.getPtr().getTypeName() == typeid(ESM3::ItemLevList).name())
+                return getLevelledItem(ref.getPtr().get<ESM3::ItemLevList>()->mBase, false, seed);
             else
-                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, seed);
+                return getLevelledItem(ref.getPtr().get<ESM3::CreatureLevList>()->mBase, true, seed);
         }
     }
 

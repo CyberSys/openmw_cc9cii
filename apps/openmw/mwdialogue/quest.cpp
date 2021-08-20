@@ -1,6 +1,6 @@
 #include "quest.hpp"
 
-#include <components/esm/queststate.hpp>
+#include <components/esm3/queststate.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -17,18 +17,18 @@ namespace MWDialogue
     : Topic (topic), mIndex (0), mFinished (false)
     {}
 
-    Quest::Quest (const ESM::QuestState& state)
+    Quest::Quest (const ESM3::QuestState& state)
     : Topic (state.mTopic), mIndex (state.mState), mFinished (state.mFinished!=0)
     {}
 
     std::string Quest::getName() const
     {
-        const ESM::Dialogue *dialogue =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
+        const ESM3::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().find (mTopic);
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
+        for (ESM3::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->mQuestStatus==ESM::DialInfo::QS_Name)
+            if (iter->mQuestStatus==ESM3::DialInfo::QS_Name)
                 return iter->mResponse;
 
         return "";
@@ -54,10 +54,10 @@ namespace MWDialogue
     {
         int index = -1;
 
-        const ESM::Dialogue *dialogue =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (entry.mTopic);
+        const ESM3::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().find (entry.mTopic);
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
+        for (ESM3::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mId == entry.mInfoId)
             {
@@ -71,9 +71,9 @@ namespace MWDialogue
         for (auto &info : dialogue->mInfo)
         {
             if (info.mData.mJournalIndex == index
-            && (info.mQuestStatus == ESM::DialInfo::QS_Finished || info.mQuestStatus == ESM::DialInfo::QS_Restart))
+            && (info.mQuestStatus == ESM3::DialInfo::QS_Finished || info.mQuestStatus == ESM3::DialInfo::QS_Restart))
             {
-                mFinished = (info.mQuestStatus == ESM::DialInfo::QS_Finished);
+                mFinished = (info.mQuestStatus == ESM3::DialInfo::QS_Finished);
                 break;
             }
         }
@@ -88,7 +88,7 @@ namespace MWDialogue
         mEntries.push_back (entry); // we want slicing here
     }
 
-    void Quest::write (ESM::QuestState& state) const
+    void Quest::write (ESM3::QuestState& state) const
     {
         state.mTopic = getTopic();
         state.mState = mIndex;

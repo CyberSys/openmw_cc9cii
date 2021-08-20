@@ -1,55 +1,62 @@
-#include "loadbody.hpp"
+#include "body.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int BodyPart::sRecordId = REC_BODY;
 
-    void BodyPart::load(ESMReader &esm, bool &isDeleted)
+    void BodyPart::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mRace = esm.getHString();
-                    break;
-                case ESM::FourCC<'B','Y','D','T'>::value:
-                    esm.getHT(mData, 4);
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_FNAM: reader.getZString(mRace);  break;
+                case ESM3::SUB_BYDT:
+                {
+                    assert (sizeof(mData) == 4);
+                    assert (subHdr.dataSize == sizeof(mData));
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing BYDT subrecord");
+            reader.fail("Missing BYDT subrecord");
     }
 
-    void BodyPart::save(ESMWriter &esm, bool isDeleted) const
+    void BodyPart::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

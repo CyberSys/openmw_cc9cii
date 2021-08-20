@@ -9,14 +9,14 @@
 CSMTools::TopicInfoCheckStage::TopicInfoCheckStage(
     const CSMWorld::InfoCollection& topicInfos,
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-    const CSMWorld::IdCollection<ESM::Class>& classes,
-    const CSMWorld::IdCollection<ESM::Faction>& factions,
-    const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
-    const CSMWorld::IdCollection<ESM::Global>& globals,
-    const CSMWorld::IdCollection<ESM::Dialogue>& journals,
-    const CSMWorld::IdCollection<ESM::Race>& races,
-    const CSMWorld::IdCollection<ESM::Region>& regions,
-    const CSMWorld::IdCollection<ESM::Dialogue> &topics,
+    const CSMWorld::IdCollection<ESM3::Class>& classes,
+    const CSMWorld::IdCollection<ESM3::Faction>& factions,
+    const CSMWorld::IdCollection<ESM3::GameSetting>& gmsts,
+    const CSMWorld::IdCollection<ESM3::Global>& globals,
+    const CSMWorld::IdCollection<ESM3::Dialogue>& journals,
+    const CSMWorld::IdCollection<ESM3::Race>& races,
+    const CSMWorld::IdCollection<ESM3::Region>& regions,
+    const CSMWorld::IdCollection<ESM3::Dialogue> &topics,
     const CSMWorld::RefIdData& referencables,
     const CSMWorld::Resources& soundFiles)
     : mTopicInfos(topicInfos),
@@ -52,7 +52,7 @@ int CSMTools::TopicInfoCheckStage::setup()
     // Cell names can also include region names
     for (int i = 0; i < mRegions.getSize(); ++i)
     {
-        const CSMWorld::Record<ESM::Region>& regionRecord = mRegions.getRecord(i);
+        const CSMWorld::Record<ESM3::Region>& regionRecord = mRegions.getRecord(i);
 
         if (regionRecord.isDeleted())
             continue;
@@ -63,7 +63,7 @@ int CSMTools::TopicInfoCheckStage::setup()
     int index = mGameSettings.searchId("sDefaultCellname");
     if (index != -1)
     {
-        const CSMWorld::Record<ESM::GameSetting>& gmstRecord = mGameSettings.getRecord(index);
+        const CSMWorld::Record<ESM3::GameSetting>& gmstRecord = mGameSettings.getRecord(index);
 
         if (!gmstRecord.isDeleted() && gmstRecord.get().mValue.getType() == ESM::VT_String)
         {
@@ -89,12 +89,12 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
     // There should always be a topic that matches
     int topicIndex = mTopics.searchId(topicInfo.mTopicId);
 
-    const CSMWorld::Record<ESM::Dialogue>& topicRecord = mTopics.getRecord(topicIndex);
+    const CSMWorld::Record<ESM3::Dialogue>& topicRecord = mTopics.getRecord(topicIndex);
 
     if (topicRecord.isDeleted())
         return;
 
-    const ESM::Dialogue& topic = topicRecord.get();
+    const ESM3::Dialogue& topic = topicRecord.get();
 
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_TopicInfo, topicInfo.mId);
 
@@ -146,14 +146,14 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
         verifySound(topicInfo.mSound, id, messages);
     }
 
-    if (topicInfo.mResponse.empty() && topic.mType != ESM::Dialogue::Voice)
+    if (topicInfo.mResponse.empty() && topic.mType != ESM3::Dialogue::Voice)
     {
         messages.add(id, "Response is empty", "", CSMDoc::Message::Severity_Warning);
     }
 
     // Check info conditions
 
-    for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator it = topicInfo.mSelects.begin();
+    for (std::vector<ESM3::DialInfo::SelectStruct>::const_iterator it = topicInfo.mSelects.begin();
          it != topicInfo.mSelects.end(); ++it)
     {
         verifySelectStruct((*it), id, messages);
@@ -181,7 +181,7 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const 
     {
         CSMWorld::UniversalId tempId(index.second, actor);
         std::ostringstream stream;
-        stream << "Object '" << actor << "' has invalid type " << tempId.getTypeName() << " (an actor must be an NPC or a creature)"; 
+        stream << "Object '" << actor << "' has invalid type " << tempId.getTypeName() << " (an actor must be an NPC or a creature)";
         messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
@@ -214,7 +214,7 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
 
     int index = mFactions.searchId(factionName);
 
-    const ESM::Faction &faction = mFactions.getRecord(index).get();
+    const ESM3::Faction &faction = mFactions.getRecord(index).get();
 
     int limit = 0;
     for (; limit < 10; ++limit)
@@ -274,7 +274,7 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CS
             {
                 CSMWorld::UniversalId tempId(index.second, item);
                 std::ostringstream stream;
-                stream << "Object '" << item << "' has invalid type " << tempId.getTypeName() << " (an item can be a potion, an armor piece, a book and so on)"; 
+                stream << "Object '" << item << "' has invalid type " << tempId.getTypeName() << " (an item can be a potion, an armor piece, a book and so on)";
                 messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
                 return false;
             }
@@ -284,7 +284,7 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CS
     return true;
 }
 
-bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::SelectStruct& select,
+bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM3::DialInfo::SelectStruct& select,
     const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     CSMWorld::ConstInfoSelectWrapper infoCondition(select);

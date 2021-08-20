@@ -1,15 +1,19 @@
-#ifndef OPENMW_ESM_AIPACKAGE_H
-#define OPENMW_ESM_AIPACKAGE_H
+#ifndef ESM3_AIPACKAGE_H
+#define ESM3_AIPACKAGE_H
 
 #include <vector>
 #include <string>
 
-#include "esmcommon.hpp"
+#include "../esm/esmcommon.hpp" // NAME32
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     #pragma pack(push)
     #pragma pack(1)
@@ -44,13 +48,13 @@ namespace ESM
     {
         float   mX, mY, mZ;
         short   mDuration;
-        NAME32  mId;
+        ESM::NAME32 mId;
         short   mUnk;
     };
 
     struct AIActivate
     {
-        NAME32 mName;
+        ESM::NAME32 mName;
         unsigned char mUnk;
     };
 
@@ -91,9 +95,9 @@ namespace ESM
         std::vector<AIPackage> mList;
 
         /// Add a single AIPackage, assumes subrecord name was already read
-        void add(ESMReader &esm);
+        void add(Reader& esm);
 
-        void save(ESMWriter &esm) const;
+        void save(ESM::ESMWriter& esm) const;
     };
 }
 

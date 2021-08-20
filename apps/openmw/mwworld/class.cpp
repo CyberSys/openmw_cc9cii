@@ -162,7 +162,7 @@ namespace MWWorld
     {
         return 0;
     }
-    
+
     float Class::getCurrentSpeed (const Ptr& ptr) const
     {
         return 0;
@@ -338,7 +338,7 @@ namespace MWWorld
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem");
+            const ESM3::Sound *sound = store.get<ESM3::Sound>().searchRandom("WolfItem");
 
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
@@ -435,9 +435,9 @@ namespace MWWorld
         throw std::runtime_error("class does not support gore");
     }
 
-    void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
+    void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const {}
 
-    void Class::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const {}
+    void Class::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const {}
 
     int Class::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
@@ -504,13 +504,13 @@ namespace MWWorld
         if (enchantmentName.empty())
             return result;
 
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentName);
+        const ESM3::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Enchantment>().search(enchantmentName);
         if (!enchantment)
             return result;
 
         assert (enchantment->mEffects.mList.size());
 
-        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(
+        const ESM3::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().search(
                 enchantment->mEffects.mList.front().mEffectID);
         if (!magicEffect)
             return result;

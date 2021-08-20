@@ -104,7 +104,7 @@ namespace
     }
 
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs, bool onlyPhysics)
+                   MWRender::RenderingManager& rendering, std::set<ESM3::RefNum>& pagedRefs, bool onlyPhysics)
     {
         if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
         {
@@ -121,7 +121,7 @@ namespace
             return;
         }
 
-        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        const ESM3::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
@@ -282,7 +282,7 @@ namespace MWWorld
 
     void Scene::removeFromPagedRefs(const Ptr &ptr)
     {
-        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        const ESM3::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (refnum.hasContentFile() && mPagedRefs.erase(refnum))
         {
             if (!ptr.getRefData().getBaseNode()) return;
@@ -392,7 +392,7 @@ namespace MWWorld
         if (cell->getCell()->hasWater())
             mNavigator.removeWater(osg::Vec2i(cellX, cellY));
 
-        if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
+        if (const auto pathgrid = world->getStore().get<ESM3::Pathgrid>().search(*cell->getCell()))
             mNavigator.removePathgrid(*pathgrid);
 
         const auto player = world->getPlayerPtr();
@@ -434,29 +434,29 @@ namespace MWWorld
                 const osg::Vec2i cellPosition(cellX, cellY);
                 const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
                 const osg::Vec3f shift(origin.x(), origin.y(), origin.z());
-                const osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
-                const ESM::Land::LandData* const data = land == nullptr ? nullptr : land->getData(ESM::Land::DATA_VHGT);
+                const osg::ref_ptr<const ESM3Terrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+                const ESM3::Land::LandData* const data = land == nullptr ? nullptr : land->getData(ESM3::Land::DATA_VHGT);
                 const HeightfieldShape shape = [&] () -> HeightfieldShape
                 {
                     if (data == nullptr)
                     {
-                        return DetourNavigator::HeightfieldPlane {static_cast<float>(ESM::Land::DEFAULT_HEIGHT)};
+                        return DetourNavigator::HeightfieldPlane {static_cast<float>(ESM3::Land::DEFAULT_HEIGHT)};
                     }
                     else
                     {
                         DetourNavigator::HeightfieldSurface heights;
                         heights.mHeights = data->mHeights;
-                        heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
+                        heights.mSize = static_cast<std::size_t>(ESM3::Land::LAND_SIZE);
                         heights.mMinHeight = data->mMinHeight;
                         heights.mMaxHeight = data->mMaxHeight;
                         return heights;
                     }
                 } ();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shift, shape);
+                mNavigator.addHeightfield(cellPosition, ESM3::Land::REAL_SIZE, shift, shape);
             }
         }
 
-        if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
+        if (const auto pathgrid = world->getStore().get<ESM3::Pathgrid>().search(*cell->getCell()))
             mNavigator.addPathgrid(*cell->getCell(), *pathgrid);
 
         // register local scripts
@@ -485,7 +485,7 @@ namespace MWWorld
                     if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                     {
                         const btTransform& transform =heightField->getCollisionObject()->getWorldTransform();
-                        mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
+                        mNavigator.addWater(osg::Vec2i(cellX, cellY), ESM3::Land::REAL_SIZE,
                                             osg::Vec3f(static_cast<float>(transform.getOrigin().x()),
                                                        static_cast<float>(transform.getOrigin().y()),
                                                        waterLevel));
@@ -510,7 +510,7 @@ namespace MWWorld
 
             mNavigator.update(player.getRefData().getPosition().asVec3());
 
-            if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
+            if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM3::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
         }
 
@@ -530,14 +530,14 @@ namespace MWWorld
 
         if (!test && cell->getCell()->isExterior())
         {
-            float verts = ESM::Land::LAND_SIZE;
-            float worldsize = ESM::Land::REAL_SIZE;
+            float verts = ESM3::Land::LAND_SIZE;
+            float worldsize = ESM3::Land::REAL_SIZE;
 
             const int cellX = cell->getCell()->getGridX();
             const int cellY = cell->getCell()->getGridY();
 
-            osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+            osg::ref_ptr<const ESM3Terrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+            const ESM3::Land::LandData* data = land ? land->getData(ESM3::Land::DATA_VHGT) : nullptr;
             if (data)
             {
                 mPhysics->addHeightField (data->mHeights, cellX, cellY, worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
@@ -545,8 +545,8 @@ namespace MWWorld
             else
             {
                 static std::vector<float> defaultHeight;
-                defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
-                mPhysics->addHeightField (&defaultHeight[0], cellX, cellY, worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
+                defaultHeight.resize(verts*verts, ESM3::Land::DEFAULT_HEIGHT);
+                mPhysics->addHeightField (&defaultHeight[0], cellX, cellY, worldsize / (verts-1), verts, ESM3::Land::DEFAULT_HEIGHT, ESM3::Land::DEFAULT_HEIGHT, land.get());
             }
         }
 
@@ -730,13 +730,13 @@ namespace MWWorld
 
         mRendering.getResourceSystem()->setExpiryDelay(1.f);
 
-        const MWWorld::Store<ESM::Cell> &cells = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
+        const MWWorld::Store<ESM3::Cell> &cells = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Cell>();
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
         loadingListener->setProgressRange(cells.getExtSize());
 
-        MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
+        MWWorld::Store<ESM3::Cell>::iterator it = cells.extBegin();
         int i = 1;
         for (; it != cells.extEnd(); ++it)
         {
@@ -780,14 +780,14 @@ namespace MWWorld
 
         mRendering.getResourceSystem()->setExpiryDelay(1.f);
 
-        const MWWorld::Store<ESM::Cell> &cells = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
+        const MWWorld::Store<ESM3::Cell> &cells = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Cell>();
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
         loadingListener->setProgressRange(cells.getIntSize());
 
         int i = 1;
-        MWWorld::Store<ESM::Cell>::iterator it = cells.intBegin();
+        MWWorld::Store<ESM3::Cell>::iterator it = cells.intBegin();
         for (; it != cells.intEnd(); ++it)
         {
             loadingListener->setLabel("Testing interior cells ("+std::to_string(i)+"/"+std::to_string(cells.getIntSize())+")...");
@@ -1144,7 +1144,7 @@ namespace MWWorld
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (const MWWorld::CellStore* cellStore : mActiveCells)
         {
-            typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
+            typedef MWWorld::CellRefList<ESM3::Door>::List DoorList;
             const DoorList &doors = cellStore->getReadOnlyDoors().mList;
             for (auto& door : doors)
             {
@@ -1291,19 +1291,19 @@ namespace MWWorld
 
             if (ptr.getClass().isNpc())
             {
-                const std::vector<ESM::Transport::Dest>& transport = ptr.get<ESM::NPC>()->mBase->mTransport.mList;
+                const std::vector<ESM3::Transport::Dest>& transport = ptr.get<ESM3::NPC>()->mBase->mTransport.mList;
                 mList.insert(mList.begin(), transport.begin(), transport.end());
             }
             else
             {
-                const std::vector<ESM::Transport::Dest>& transport = ptr.get<ESM::Creature>()->mBase->mTransport.mList;
+                const std::vector<ESM3::Transport::Dest>& transport = ptr.get<ESM3::Creature>()->mBase->mTransport.mList;
                 mList.insert(mList.begin(), transport.begin(), transport.end());
             }
             return true;
         }
         float mPreloadDist;
         osg::Vec3f mPlayerPos;
-        std::vector<ESM::Transport::Dest> mList;
+        std::vector<ESM3::Transport::Dest> mList;
     };
 
     void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/, std::vector<PositionCellGrid>& exteriorPositions) // ignore predictedPos here since opening dialogue with travel service takes extra time
@@ -1313,11 +1313,11 @@ namespace MWWorld
 
         for (MWWorld::CellStore* cellStore : mActiveCells)
         {
-            cellStore->forEachType<ESM::NPC>(listVisitor);
-            cellStore->forEachType<ESM::Creature>(listVisitor);
+            cellStore->forEachType<ESM3::NPC>(listVisitor);
+            cellStore->forEachType<ESM3::Creature>(listVisitor);
         }
 
-        for (ESM::Transport::Dest& dest : listVisitor.mList)
+        for (ESM3::Transport::Dest& dest : listVisitor.mList)
         {
             if (!dest.mCellName.empty())
                 preloadCell(MWBase::Environment::get().getWorld()->getInterior(dest.mCellName));

@@ -1,16 +1,19 @@
-#ifndef OPENMW_COMPONENTS_ESM_TRANSPORT_H
-#define OPENMW_COMPONENTS_ESM_TRANSPORT_H
+#ifndef ESM3_TRANSPORT_H
+#define ESM3_TRANSPORT_H
 
 #include <string>
 #include <vector>
 
-#include "defs.hpp"
+#include "../esm/defs.hpp" // Position
 
 namespace ESM
 {
-
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     /// List of travel service destination. Shared by CREA and NPC_ records.
     struct Transport
@@ -18,16 +21,16 @@ namespace ESM
 
         struct Dest
         {
-            Position    mPos;
+            ESM::Position    mPos;
             std::string mCellName;
         };
 
         std::vector<Dest> mList;
 
         /// Load one destination, assumes the subrecord name was already read
-        void add(ESMReader &esm);
+        void add(Reader& esm);
 
-        void save(ESMWriter &esm) const;
+        void save(ESM::ESMWriter& esm) const;
 
     };
 

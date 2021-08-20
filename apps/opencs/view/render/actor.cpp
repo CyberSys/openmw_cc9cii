@@ -3,7 +3,7 @@
 #include <osg/Group>
 #include <osg/Node>
 
-#include <components/esm/mappings.hpp>
+#include <components/esm3/mappings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -93,20 +93,20 @@ namespace CSVRender
 
     void Actor::loadBodyParts()
     {
-        for (int i = 0; i < ESM::PRT_Count; ++i)
+        for (int i = 0; i < ESM3::PRT_Count; ++i)
         {
-            auto type = (ESM::PartReferenceType) i;
+            auto type = (ESM3::PartReferenceType) i;
             std::string partId = mActorData->getPart(type);
             attachBodyPart(type, getBodyPartMesh(partId));
         }
     }
 
-    void Actor::attachBodyPart(ESM::PartReferenceType type, const std::string& mesh)
+    void Actor::attachBodyPart(ESM3::PartReferenceType type, const std::string& mesh)
     {
         auto sceneMgr = mData.getResourceSystem()->getSceneManager();
 
         // Attach to skeleton
-        std::string boneName = ESM::getBoneName(type);
+        std::string boneName = ESM3::getBoneName(type);
         auto node = mNodeMap.find(boneName);
         if (!mesh.empty() && node != mNodeMap.end())
         {

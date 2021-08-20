@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWWORLD_RECORDCMP_H
 #define OPENMW_MWWORLD_RECORDCMP_H
 
-#include <components/esm/records.hpp>
+#include <components/esm3/records.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -16,17 +16,17 @@ namespace MWWorld
     };
 
     template <>
-    inline bool RecordCmp::operator()<ESM::Dialogue>(const ESM::Dialogue &x, const ESM::Dialogue &y) const {
+    inline bool RecordCmp::operator()<ESM3::Dialogue>(const ESM3::Dialogue &x, const ESM3::Dialogue &y) const {
         return Misc::StringUtils::ciLess(x.mId, y.mId);
     }
 
     template <>
-    inline bool RecordCmp::operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) const {
+    inline bool RecordCmp::operator()<ESM3::Cell>(const ESM3::Cell &x, const ESM3::Cell &y) const {
         return Misc::StringUtils::ciLess(x.mName, y.mName);
     }
 
     template <>
-    inline bool RecordCmp::operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
+    inline bool RecordCmp::operator()<ESM3::Pathgrid>(const ESM3::Pathgrid &x, const ESM3::Pathgrid &y) const {
         return Misc::StringUtils::ciLess(x.mCell, y.mCell);
     }
 

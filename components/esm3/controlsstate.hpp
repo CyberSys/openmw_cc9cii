@@ -1,10 +1,14 @@
-#ifndef OPENMW_ESM_CONTROLSSTATE_H
-#define OPENMW_ESM_CONTROLSSTATE_H
+#ifndef ESM3_CONTROLSSTATE_H
+#define ESM3_CONTROLSSTATE_H
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -31,8 +35,8 @@ namespace ESM
         bool mWeaponDrawingDisabled;
         bool mSpellDrawingDisabled;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

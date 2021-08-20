@@ -59,7 +59,7 @@ namespace MWScript
             id = ptr.getClass().getScript (ptr);
 
             ptr.getRefData().setLocals (
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
+                *MWBase::Environment::get().getWorld()->getStore().get<ESM3::Script>().find (id));
 
             return ptr.getRefData().getLocals();
         }
@@ -79,7 +79,7 @@ namespace MWScript
             id = ptr.getClass().getScript (ptr);
 
             ptr.getRefData().setLocals (
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
+                *MWBase::Environment::get().getWorld()->getStore().get<ESM3::Script>().find (id));
 
             return ptr.getRefData().getLocals();
         }
@@ -232,8 +232,8 @@ namespace MWScript
 
     std::vector<std::string> InterpreterContext::getGlobals() const
     {
-        const MWWorld::Store<ESM::Global>& globals =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Global>();
+        const MWWorld::Store<ESM3::Global>& globals =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Global>();
 
         std::vector<std::string> ids;
         for (auto& globalVariable : globals)
@@ -277,32 +277,32 @@ namespace MWScript
         const MWWorld::Ptr& ptr = getReferenceImp();
         if (ptr.getClass().isNpc())
         {
-            const ESM::NPC* npc = ptr.get<ESM::NPC>()->mBase;
+            const ESM3::NPC* npc = ptr.get<ESM3::NPC>()->mBase;
             return npc->mName;
         }
 
-        const ESM::Creature* creature = ptr.get<ESM::Creature>()->mBase;
+        const ESM3::Creature* creature = ptr.get<ESM3::Creature>()->mBase;
         return creature->mName;
     }
 
     std::string InterpreterContext::getNPCRace() const
     {
-        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc.mRace);
+        ESM3::NPC npc = *getReferenceImp().get<ESM3::NPC>()->mBase;
+        const ESM3::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>().find(npc.mRace);
         return race->mName;
     }
 
     std::string InterpreterContext::getNPCClass() const
     {
-        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc.mClass);
+        ESM3::NPC npc = *getReferenceImp().get<ESM3::NPC>()->mBase;
+        const ESM3::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Class>().find(npc.mClass);
         return class_->mName;
     }
 
     std::string InterpreterContext::getNPCFaction() const
     {
-        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npc.mFaction);
+        ESM3::NPC npc = *getReferenceImp().get<ESM3::NPC>()->mBase;
+        const ESM3::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(npc.mFaction);
         return faction->mName;
     }
 
@@ -319,29 +319,29 @@ namespace MWScript
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::Faction *fact = store.get<ESM::Faction>().find(faction);
+        const ESM3::Faction *fact = store.get<ESM3::Faction>().find(faction);
         return fact->mRanks[rank];
     }
 
     std::string InterpreterContext::getPCName() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
+        ESM3::NPC player = *world->getPlayerPtr().get<ESM3::NPC>()->mBase;
         return player.mName;
     }
 
     std::string InterpreterContext::getPCRace() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        std::string race = world->getPlayerPtr().get<ESM::NPC>()->mBase->mRace;
-        return world->getStore().get<ESM::Race>().find(race)->mName;
+        std::string race = world->getPlayerPtr().get<ESM3::NPC>()->mBase->mRace;
+        return world->getStore().get<ESM3::Race>().find(race)->mName;
     }
 
     std::string InterpreterContext::getPCClass() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        std::string class_ = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
-        return world->getStore().get<ESM::Class>().find(class_)->mName;
+        std::string class_ = world->getPlayerPtr().get<ESM3::NPC>()->mBase->mClass;
+        return world->getStore().get<ESM3::Class>().find(class_)->mName;
     }
 
     std::string InterpreterContext::getPCRank() const
@@ -365,7 +365,7 @@ namespace MWScript
             rank = 0;
 
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
+        const ESM3::Faction *faction = store.get<ESM3::Faction>().find(factionId);
 
         if(rank < 0 || rank > 9) // there are only 10 ranks
             return "";
@@ -395,7 +395,7 @@ namespace MWScript
             rank = 9;
 
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
+        const ESM3::Faction *faction = store.get<ESM3::Faction>().find(factionId);
 
         if(rank < 0)
             return "";

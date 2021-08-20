@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_INVENTORYSTATE_H
-#define OPENMW_ESM_INVENTORYSTATE_H
+#ifndef ESM3_INVENTORYSTATE_H
+#define ESM3_INVENTORYSTATE_H
 
 #include <map>
 
@@ -7,8 +7,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -30,8 +34,8 @@ namespace ESM
         InventoryState() : mSelectedEnchantItem(-1) {}
         virtual ~InventoryState() {}
 
-        virtual void load (ESMReader &esm);
-        virtual void save (ESMWriter &esm) const;
+        virtual void load (Reader& esm);
+        virtual void save (ESM::ESMWriter& esm) const;
     };
 }
 

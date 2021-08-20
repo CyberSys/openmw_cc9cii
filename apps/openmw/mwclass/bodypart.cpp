@@ -10,7 +10,7 @@ namespace MWClass
 
     MWWorld::Ptr BodyPart::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::BodyPart> *ref = ptr.get<ESM::BodyPart>();
+        const MWWorld::LiveCellRef<ESM3::BodyPart> *ref = ptr.get<ESM3::BodyPart>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
@@ -36,12 +36,12 @@ namespace MWClass
     {
         std::shared_ptr<MWWorld::Class> instance (new BodyPart);
 
-        registerClass (typeid (ESM::BodyPart).name(), instance);
+        registerClass (typeid (ESM3::BodyPart).name(), instance);
     }
 
     std::string BodyPart::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::BodyPart> *ref = ptr.get<ESM::BodyPart>();
+        const MWWorld::LiveCellRef<ESM3::BodyPart> *ref = ptr.get<ESM3::BodyPart>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

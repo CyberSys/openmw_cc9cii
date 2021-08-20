@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_RACECHECK_H
 #define CSM_TOOLS_RACECHECK_H
 
-#include <components/esm/loadrace.hpp>
+#include <components/esm3/race.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -12,7 +12,7 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that race records are internally consistent
     class RaceCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Race>& mRaces;
+            const CSMWorld::IdCollection<ESM3::Race>& mRaces;
             bool mPlayable;
             bool mIgnoreBaseRecords;
 
@@ -22,7 +22,7 @@ namespace CSMTools
 
         public:
 
-            RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races);
+            RaceCheckStage (const CSMWorld::IdCollection<ESM3::Race>& races);
 
             int setup() override;
             ///< \return number of steps

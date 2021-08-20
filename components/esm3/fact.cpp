@@ -1,12 +1,13 @@
-#include "loadfact.hpp"
+#include "fact.hpp"
 
+#include <cassert>
 #include <stdexcept>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Faction::sRecordId = REC_FACT;
 
@@ -26,7 +27,7 @@ namespace ESM
         return mSkills[index];
     }
 
-    void Faction::load(ESMReader &esm, bool &isDeleted)
+    void Faction::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -37,54 +38,73 @@ namespace ESM
         int rankCounter = 0;
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'R','N','A','M'>::value:
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_RNAM:
+                {
                     if (rankCounter >= 10)
-                        esm.fail("Rank out of range");
-                    mRanks[rankCounter++] = esm.getHString();
+                        reader.fail("Rank out of range");
+
+                    std::string rank;
+                    reader.getZString(rank); // NOTE: string has trailing nulls
+                    mRanks[rankCounter++] = rank;
                     break;
-                case ESM::FourCC<'F','A','D','T'>::value:
-                    esm.getHT(mData, 240);
+                }
+                case ESM3::SUB_FADT:
+                {
+                    assert (subHdr.dataSize == 240 && "FACT incorrect data size");
+                    assert (subHdr.dataSize == sizeof(mData) && "FACT incorrect data size");
+                    reader.get(mData);
                     if (mData.mIsHidden > 1)
-                        esm.fail("Unknown flag!");
+                        reader.fail("Unknown flag!");
+
                     hasData = true;
                     break;
-                case ESM::FourCC<'A','N','A','M'>::value:
+                }
+                case ESM3::SUB_ANAM:
                 {
-                    std::string faction = esm.getHString();
-                    int reaction;
-                    esm.getHNT(reaction, "INTV");
+                    std::string faction;
+                    reader.getString(faction); // NOTE: string not null terminated
+
+                    reader.getSubRecordHeader(); // WARN: assumes INTV follows immediatly after
+                    if (subHdr.typeId != ESM3::SUB_INTV)
+                        reader.fail("INTV was expected but a different sub-record found");
+
+                    std::int32_t reaction;
+                    reader.get(reaction);
                     mReactions[faction] = reaction;
                     break;
                 }
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing FADT subrecord");
+            reader.fail("Missing FADT subrecord");
     }
 
-    void Faction::save(ESMWriter &esm, bool isDeleted) const
+    void Faction::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

@@ -5,7 +5,7 @@
 
 #include "../mwmechanics/magiceffects.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct MagicEffect;
 }
@@ -32,7 +32,7 @@ namespace MWWorld
          *              If it isn't new, non-looping VFX should not be played.
          * @param playSound Play effect sound?
          */
-        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew) {}
+        virtual void permanentEffectAdded (const ESM3::MagicEffect *magicEffect, bool isNew) {}
 
         virtual ~InventoryStoreListener() = default;
     };
@@ -110,8 +110,8 @@ namespace MWWorld
 
             void fireEquipmentChangedEvent(const Ptr& actor);
 
-            void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const override;
-            void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory) override;
+            void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM3::InventoryState& inventory) const override;
+            void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM3::InventoryState& inventory) override;
 
             ContainerStoreIterator findSlot (int slot) const;
 
@@ -211,9 +211,9 @@ namespace MWWorld
             void clear() override;
             ///< Empty container.
 
-            void writeState (ESM::InventoryState& state) const override;
+            void writeState (ESM3::InventoryState& state) const override;
 
-            void readState (const ESM::InventoryState& state) override;
+            void readState (const ESM3::InventoryState& state) override;
     };
 }
 

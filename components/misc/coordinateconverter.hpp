@@ -2,9 +2,9 @@
 #define OPENMW_COMPONENTS_MISC_COORDINATECONVERTER_H
 
 #include <components/esm/defs.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/cell.hpp>
+#include <components/esm3/land.hpp>
+#include <components/esm3/pgrd.hpp>
 
 namespace Misc
 {
@@ -13,24 +13,24 @@ namespace Misc
     {
         public:
             CoordinateConverter(bool exterior, int cellX, int cellY)
-                : mCellX(exterior ? cellX * ESM::Land::REAL_SIZE : 0),
-                  mCellY(exterior ? cellY * ESM::Land::REAL_SIZE : 0)
+                : mCellX(exterior ? cellX * ESM3::Land::REAL_SIZE : 0),
+                  mCellY(exterior ? cellY * ESM3::Land::REAL_SIZE : 0)
             {
             }
 
-            explicit CoordinateConverter(const ESM::Cell* cell)
+            explicit CoordinateConverter(const ESM3::Cell* cell)
                 : CoordinateConverter(cell->isExterior(), cell->mData.mX, cell->mData.mY)
             {
             }
 
             /// in-place conversion from local to world
-            void toWorld(ESM::Pathgrid::Point& point) const
+            void toWorld(ESM3::Pathgrid::Point& point) const
             {
                 point.mX += mCellX;
                 point.mY += mCellY;
             }
 
-            ESM::Pathgrid::Point toWorldPoint(ESM::Pathgrid::Point point) const
+            ESM3::Pathgrid::Point toWorldPoint(ESM3::Pathgrid::Point point) const
             {
                 toWorld(point);
                 return point;

@@ -12,7 +12,7 @@ namespace osg
     class PositionAttitudeTransform;
 }
 
-namespace ESM
+namespace ESM3
 {
     struct Land;
 }
@@ -32,7 +32,7 @@ namespace CSVRender
         CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords);
         ~CellBorder();
 
-        void buildShape(const ESM::Land& esmLand);
+        void buildShape(const ESM3::Land& esmLand);
 
     private:
 

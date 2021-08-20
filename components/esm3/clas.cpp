@@ -1,12 +1,13 @@
-#include "loadclas.hpp"
+#include "clas.hpp"
 
 #include <stdexcept>
+#include <cassert>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Class::sRecordId = REC_CLAS;
 
@@ -22,7 +23,7 @@ namespace ESM
       "sSpecializationStealth"
     };
 
-    int& Class::CLDTstruct::getSkill (int index, bool major)
+    std::uint32_t& Class::CLDTstruct::getSkill (int index, bool major)
     {
         if (index<0 || index>=5)
             throw std::logic_error ("skill index out of range");
@@ -30,7 +31,7 @@ namespace ESM
         return mSkills[index][major ? 1 : 0];
     }
 
-    int Class::CLDTstruct::getSkill (int index, bool major) const
+    std::uint32_t Class::CLDTstruct::getSkill (int index, bool major) const
     {
         if (index<0 || index>=5)
             throw std::logic_error ("skill index out of range");
@@ -38,49 +39,56 @@ namespace ESM
         return mSkills[index][major ? 1 : 0];
     }
 
-    void Class::load(ESMReader &esm, bool &isDeleted)
+    void Class::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','L','D','T'>::value:
-                    esm.getHT(mData, 60);
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_DESC: reader.getString(mDescription); break; // NOTE: not null terminated
+                case ESM3::SUB_CLDT:
+                {
+                    assert (sizeof(mData) == 60);
+                    assert (subHdr.dataSize == sizeof(mData));
+                    reader.get(mData);
                     if (mData.mIsPlayable > 1)
-                        esm.fail("Unknown bool value");
+                        reader.fail("Unknown bool value");
+
                     hasData = true;
                     break;
-                case ESM::FourCC<'D','E','S','C'>::value:
-                    mDescription = esm.getHString();
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing CLDT subrecord");
+            reader.fail("Missing CLDT subrecord");
     }
-    void Class::save(ESMWriter &esm, bool isDeleted) const
+
+    void Class::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

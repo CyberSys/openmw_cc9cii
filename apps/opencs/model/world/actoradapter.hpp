@@ -8,14 +8,14 @@
 #include <QObject>
 #include <QModelIndex>
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbody.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/body.hpp>
 #include <components/misc/weakcache.hpp>
 
 #include "refidcollection.hpp"
 #include "idcollection.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Race;
 }
@@ -31,10 +31,10 @@ namespace CSMWorld
         Q_OBJECT
     public:
 
-        /// A list indexed by ESM::PartReferenceType
-        using ActorPartList = std::map<ESM::PartReferenceType, std::pair<std::string, int>>;
-        /// A list indexed by ESM::BodyPart::MeshPart
-        using RacePartList = std::array<std::string, ESM::BodyPart::MP_Count>;
+        /// A list indexed by ESM3::PartReferenceType
+        using ActorPartList = std::map<ESM3::PartReferenceType, std::pair<std::string, int>>;
+        /// A list indexed by ESM3::BodyPart::MeshPart
+        using RacePartList = std::array<std::string, ESM3::BodyPart::MP_Count>;
         /// Tracks unique strings
         using StringSet = std::unordered_set<std::string>;
 
@@ -50,25 +50,25 @@ namespace CSMWorld
             /// Checks if it's a beast race
             bool isBeast() const;
             /// Checks if a part could exist for the given type
-            bool handlesPart(ESM::PartReferenceType type) const;
+            bool handlesPart(ESM3::PartReferenceType type) const;
             /// Retrieves the associated body part
-            const std::string& getFemalePart(ESM::PartReferenceType index) const;
+            const std::string& getFemalePart(ESM3::PartReferenceType index) const;
             /// Retrieves the associated body part
-            const std::string& getMalePart(ESM::PartReferenceType index) const;
+            const std::string& getMalePart(ESM3::PartReferenceType index) const;
             /// Checks if the race has a data dependency
             bool hasDependency(const std::string& id) const;
 
             /// Sets the associated part if it's empty and marks a dependency
-            void setFemalePart(ESM::BodyPart::MeshPart partIndex, const std::string& partId);
+            void setFemalePart(ESM3::BodyPart::MeshPart partIndex, const std::string& partId);
             /// Sets the associated part if it's empty and marks a dependency
-            void setMalePart(ESM::BodyPart::MeshPart partIndex, const std::string& partId);
+            void setMalePart(ESM3::BodyPart::MeshPart partIndex, const std::string& partId);
             /// Marks an additional dependency
             void addOtherDependency(const std::string& id);
             /// Clears parts and dependencies
             void reset_data(const std::string& raceId, bool isBeast=false);
 
         private:
-            bool handles(ESM::PartReferenceType type) const;
+            bool handles(ESM3::PartReferenceType type) const;
             std::string mId;
             bool mIsBeast;
             RacePartList mFemaleParts;
@@ -93,12 +93,12 @@ namespace CSMWorld
             /// Returns the skeleton the actor should use for attaching parts to
             std::string getSkeleton() const;
             /// Retrieves the associated actor part
-            const std::string getPart(ESM::PartReferenceType index) const;
+            const std::string getPart(ESM3::PartReferenceType index) const;
             /// Checks if the actor has a data dependency
             bool hasDependency(const std::string& id) const;
 
             /// Sets the actor part used and marks a dependency
-            void setPart(ESM::PartReferenceType partIndex, const std::string& partId, int priority);
+            void setPart(ESM3::PartReferenceType partIndex, const std::string& partId, int priority);
             /// Marks an additional dependency for the actor
             void addOtherDependency(const std::string& id);
             /// Clears race, parts, and dependencies
@@ -164,8 +164,8 @@ namespace CSMWorld
         void updateDirty();
 
         RefIdCollection& mReferenceables;
-        IdCollection<ESM::Race>& mRaces;
-        IdCollection<ESM::BodyPart>& mBodyParts;
+        IdCollection<ESM3::Race>& mRaces;
+        IdCollection<ESM3::BodyPart>& mBodyParts;
 
         Misc::WeakCache<std::string, ActorData> mCachedActors; // Key: referenceable id
         Misc::WeakCache<std::string, RaceData> mCachedRaces; // Key: race id

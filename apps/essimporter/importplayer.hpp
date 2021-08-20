@@ -5,14 +5,14 @@
 #include <string>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/esm/esmcommon.hpp>
 
 #include "importacdt.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -25,9 +25,9 @@ struct REFR
 
     std::string mRefID;
     ESM::Position mPos;
-    ESM::RefNum mRefNum;
+    ESM3::RefNum mRefNum;
 
-    void load(ESM::ESMReader& esm);
+    void load(ESM3::Reader& esm);
 };
 
 /// Other player data
@@ -118,7 +118,7 @@ struct PCDT
     bool mHasAADT;
     AADT mAADT;
 
-    void load(ESM::ESMReader& esm);
+    void load(ESM3::Reader& esm);
 };
 
 }

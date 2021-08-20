@@ -72,7 +72,7 @@ namespace MWMechanics
 
         switch (effectKey.mId)
         {
-        case ESM::MagicEffect::DamageAttribute:
+        case ESM3::MagicEffect::DamageAttribute:
         {
             if (godmode)
                 break;
@@ -81,51 +81,51 @@ namespace MWMechanics
             creatureStats.setAttribute(effectKey.mArg, attr);
             break;
         }
-        case ESM::MagicEffect::RestoreAttribute:
+        case ESM3::MagicEffect::RestoreAttribute:
         {
             AttributeValue attr = creatureStats.getAttribute(effectKey.mArg);
             attr.restore(magnitude);
             creatureStats.setAttribute(effectKey.mArg, attr);
             break;
         }
-        case ESM::MagicEffect::RestoreHealth:
-        case ESM::MagicEffect::RestoreMagicka:
-        case ESM::MagicEffect::RestoreFatigue:
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::RestoreHealth, magnitude);
+        case ESM3::MagicEffect::RestoreHealth:
+        case ESM3::MagicEffect::RestoreMagicka:
+        case ESM3::MagicEffect::RestoreFatigue:
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM3::MagicEffect::RestoreHealth, magnitude);
             break;
-        case ESM::MagicEffect::DamageHealth:
+        case ESM3::MagicEffect::DamageHealth:
             if (godmode)
                 break;
             receivedMagicDamage = true;
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM3::MagicEffect::DamageHealth, -magnitude);
             break;
 
-        case ESM::MagicEffect::DamageMagicka:
-        case ESM::MagicEffect::DamageFatigue:
+        case ESM3::MagicEffect::DamageMagicka:
+        case ESM3::MagicEffect::DamageFatigue:
         {
             if (godmode)
                 break;
-            int index = effectKey.mId-ESM::MagicEffect::DamageHealth;
+            int index = effectKey.mId-ESM3::MagicEffect::DamageHealth;
             static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
             adjustDynamicStat(creatureStats, index, -magnitude, index == 2 && uncappedDamageFatigue);
             break;
         }
-        case ESM::MagicEffect::AbsorbHealth:
+        case ESM3::MagicEffect::AbsorbHealth:
             if (!godmode || magnitude <= 0)
             {
                 if (magnitude > 0.f)
                     receivedMagicDamage = true;
-                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM3::MagicEffect::AbsorbHealth, -magnitude);
             }
             break;
 
-        case ESM::MagicEffect::AbsorbMagicka:
-        case ESM::MagicEffect::AbsorbFatigue:
+        case ESM3::MagicEffect::AbsorbMagicka:
+        case ESM3::MagicEffect::AbsorbFatigue:
             if (!godmode || magnitude <= 0)
-                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM3::MagicEffect::AbsorbHealth, -magnitude);
             break;
 
-        case ESM::MagicEffect::DisintegrateArmor:
+        case ESM3::MagicEffect::DisintegrateArmor:
         {
             if (godmode)
                 break;
@@ -149,12 +149,12 @@ namespace MWMechanics
 
             break;
         }
-        case ESM::MagicEffect::DisintegrateWeapon:
+        case ESM3::MagicEffect::DisintegrateWeapon:
             if (!godmode)
                 disintegrateSlot(actor, MWWorld::InventoryStore::Slot_CarriedRight, magnitude);
             break;
 
-        case ESM::MagicEffect::SunDamage:
+        case ESM3::MagicEffect::SunDamage:
         {
             // isInCell shouldn't be needed, but updateActor called during game start
             if (!actor.isInCell() || !actor.getCell()->isExterior() || godmode)
@@ -163,7 +163,7 @@ namespace MWMechanics
             float timeDiff = std::min(7.f, std::max(0.f, std::abs(time - 13)));
             float damageScale = 1.f - timeDiff / 7.f;
             // When cloudy, the sun damage effect is halved
-            static float fMagicSunBlockedMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+            static float fMagicSunBlockedMult = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find(
                         "fMagicSunBlockedMult")->mValue.getFloat();
 
             int weather = MWBase::Environment::get().getWorld()->getCurrentWeather();
@@ -177,10 +177,10 @@ namespace MWMechanics
             break;
         }
 
-        case ESM::MagicEffect::FireDamage:
-        case ESM::MagicEffect::ShockDamage:
-        case ESM::MagicEffect::FrostDamage:
-        case ESM::MagicEffect::Poison:
+        case ESM3::MagicEffect::FireDamage:
+        case ESM3::MagicEffect::ShockDamage:
+        case ESM3::MagicEffect::FrostDamage:
+        case ESM3::MagicEffect::Poison:
         {
             if (godmode)
                 break;
@@ -189,16 +189,16 @@ namespace MWMechanics
             break;
         }
 
-        case ESM::MagicEffect::DamageSkill:
-        case ESM::MagicEffect::RestoreSkill:
+        case ESM3::MagicEffect::DamageSkill:
+        case ESM3::MagicEffect::RestoreSkill:
         {
             if (!actor.getClass().isNpc())
                 break;
-            if (godmode && effectKey.mId == ESM::MagicEffect::DamageSkill)
+            if (godmode && effectKey.mId == ESM3::MagicEffect::DamageSkill)
                 break;
             NpcStats &npcStats = actor.getClass().getNpcStats(actor);
             SkillValue& skill = npcStats.getSkill(effectKey.mArg);
-            if (effectKey.mId == ESM::MagicEffect::RestoreSkill)
+            if (effectKey.mId == ESM3::MagicEffect::RestoreSkill)
                 skill.restore(magnitude);
             else
                 skill.damage(magnitude);

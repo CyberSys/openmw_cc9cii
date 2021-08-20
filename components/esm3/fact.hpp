@@ -1,73 +1,76 @@
-#ifndef OPENMW_ESM_FACT_H
-#define OPENMW_ESM_FACT_H
+#ifndef ESM3_FACT_H
+#define ESM3_FACT_H
 
 #include <string>
 #include <map>
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-/*
- * Faction definitions
- */
-
-// Requirements for each rank
-struct RankData
+namespace ESM3
 {
-    int mAttribute1, mAttribute2; // Attribute level
+    class Reader;
 
-    // Skill level (faction skills given in
-    // skillID below.) You need one skill at
-    // level 'mPrimarySkill' and two skills at level
-    // 'mFavouredSkill' to advance to this rank.
-    int mPrimarySkill, mFavouredSkill;
+    /*
+     * Faction definitions
+     */
 
-    int mFactReaction; // Reaction from faction members
-};
-
-struct Faction
-{
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Faction"; }
-
-    std::string mId, mName;
-
-    struct FADTstruct
+    // Requirements for each rank
+    struct RankData
     {
-        // Which attributes we like
-        int mAttribute[2];
+        int mAttribute1, mAttribute2; // Attribute level
 
-        RankData mRankData[10];
+        // Skill level (faction skills given in
+        // skillID below.) You need one skill at
+        // level 'mPrimarySkill' and two skills at level
+        // 'mFavouredSkill' to advance to this rank.
+        int mPrimarySkill, mFavouredSkill;
 
-        int mSkills[7]; // IDs of skills this faction require
-                        // Each element will either contain an ESM::Skill index, or -1.
+        int mFactReaction; // Reaction from faction members
+    };
 
-        int mIsHidden; // 1 - hidden from player
+    struct Faction
+    {
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "Faction"; }
 
-        int& getSkill (int index, bool ignored = false);
-        ///< Throws an exception for invalid values of \a index.
+        std::string mId, mName;
 
-        int getSkill (int index, bool ignored = false) const;
-        ///< Throws an exception for invalid values of \a index.
-    }; // 240 bytes
+        struct FADTstruct
+        {
+            // Which attributes we like
+            int mAttribute[2];
 
-    FADTstruct mData;
+            RankData mRankData[10];
 
-    // <Faction ID, Reaction>
-    std::map<std::string, int> mReactions;
+            int mSkills[7]; // IDs of skills this faction require
+                            // Each element will either contain an ESM::Skill index, or -1.
 
-    // Name of faction ranks (may be empty for NPC factions)
-    std::string mRanks[10];
+            int mIsHidden; // 1 - hidden from player
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+            int& getSkill (int index, bool ignored = false);
+            ///< Throws an exception for invalid values of \a index.
 
-    void blank();
-     ///< Set record to default state (does not touch the ID/index).
-};
+            int getSkill (int index, bool ignored = false) const;
+            ///< Throws an exception for invalid values of \a index.
+        }; // 240 bytes
+
+        FADTstruct mData;
+
+        // <Faction ID, Reaction>
+        std::map<std::string, int> mReactions;
+
+        // Name of faction ranks (may be empty for NPC factions)
+        std::string mRanks[10];
+
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+         ///< Set record to default state (does not touch the ID/index).
+    };
 }
 #endif

@@ -1,12 +1,12 @@
-#include "loadskil.hpp"
+#include "skil.hpp"
 
 #include <sstream>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     const std::string Skill::sSkillNames[Length] = {
         "Block",
@@ -95,6 +95,7 @@ namespace ESM
         "stealth_speechcraft.dds",
         "stealth_handtohand.dds",
     };
+
     const std::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds = {{
         Block,
         Armorer,
@@ -127,43 +128,48 @@ namespace ESM
 
     unsigned int Skill::sRecordId = REC_SKIL;
 
-    void Skill::load(ESMReader &esm, bool &isDeleted)
+    void Skill::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false; // Skill record can't be deleted now (may be changed in the future)
 
         bool hasIndex = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::FourCC<'I','N','D','X'>::value:
-                    esm.getHT(mIndex);
+                case ESM3::SUB_INDX:
+                {
+                    reader.get(mIndex);
                     hasIndex = true;
                     break;
-                case ESM::FourCC<'S','K','D','T'>::value:
-                    esm.getHT(mData, 24);
+                }
+                case ESM3::SUB_SKDT:
+                {
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::FourCC<'D','E','S','C'>::value:
-                    mDescription = esm.getHString();
-                    break;
+                }
+                case ESM3::SUB_DESC: reader.getString(mDescription); break; // NOTE: not null terminated
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
+                    break;
             }
         }
+
         if (!hasIndex)
-            esm.fail("Missing INDX");
+            reader.fail("Missing INDX");
+
         if (!hasData)
-            esm.fail("Missing SKDT");
+            reader.fail("Missing SKDT");
 
         // create an ID from the index and the name (only used in the editor and likely to change in the
         // future)
         mId = indexToId (mIndex);
     }
 
-    void Skill::save(ESMWriter &esm, bool /*isDeleted*/) const
+    void Skill::save(ESM::ESMWriter& esm, bool /*isDeleted*/) const
     {
         esm.writeHNT("INDX", mIndex);
         esm.writeHNT("SKDT", mData, 24);
@@ -182,16 +188,16 @@ namespace ESM
     {
         std::ostringstream stream;
 
-        if (index!=-1)
+        if (index != -1)
         {
             stream << "#";
 
-            if (index<10)
+            if (index < 10)
                 stream << "0";
 
             stream << index;
 
-            if (index>=0 && index<Length)
+            if (index >= 0 && index < Length)
                 stream << sSkillNameIds[index].substr (6);
         }
 

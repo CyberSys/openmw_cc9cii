@@ -2,14 +2,14 @@
 
 #include <stdexcept>
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 namespace MWMechanics
 {
     EffectKey::EffectKey() : mId (0), mArg (-1) {}
 
-    EffectKey::EffectKey (const ESM::ENAMstruct& effect)
+    EffectKey::EffectKey (const ESM3::ENAMstruct& effect)
     {
         mId = effect.mEffectID;
         mArg = -1;
@@ -191,7 +191,7 @@ namespace MWMechanics
         return result;
     }
 
-    void MagicEffects::writeState(ESM::MagicEffects &state) const
+    void MagicEffects::writeState(ESM3::MagicEffects &state) const
     {
         // Don't need to save Modifiers, they are recalculated every frame anyway.
         for (Collection::const_iterator iter (begin()); iter!=end(); ++iter)
@@ -204,7 +204,7 @@ namespace MWMechanics
         }
     }
 
-    void MagicEffects::readState(const ESM::MagicEffects &state)
+    void MagicEffects::readState(const ESM3::MagicEffects &state)
     {
         for (std::map<int, int>::const_iterator it = state.mEffects.begin(); it != state.mEffects.end(); ++it)
         {

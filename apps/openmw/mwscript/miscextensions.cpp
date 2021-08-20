@@ -18,8 +18,8 @@
 
 #include <components/resource/resourcesystem.hpp>
 
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/mgef.hpp>
+#include <components/esm3/crea.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -51,7 +51,7 @@
 namespace
 {
 
-    void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
+    void addToLevList(ESM3::LevelledListBase* list, const std::string& itemId, int level)
     {
         for (auto& levelItem : list->mList)
         {
@@ -59,16 +59,16 @@ namespace
                 return;
         }
 
-        ESM::LevelledListBase::LevelItem item;
+        ESM3::LevelledListBase::LevelItem item;
         item.mId = itemId;
         item.mLevel = level;
         list->mList.push_back(item);
     }
 
-    void removeFromLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
+    void removeFromLevList(ESM3::LevelledListBase* list, const std::string& itemId, int level)
     {
         // level of -1 removes all items with that itemId
-        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM3::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (level != -1 && it->mLevel != level)
             {
@@ -310,7 +310,7 @@ namespace MWScript
 
                     // Instantly reset door to closed state
                     // This is done when using Lock in scripts, but not when using Lock spells.
-                    if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
+                    if (ptr.getTypeName() == typeid(ESM3::Door).name() && !ptr.getCellRef().getTeleport())
                     {
                         MWBase::Environment::get().getWorld()->activateDoor(ptr, MWWorld::DoorState::Idle);
                     }
@@ -559,7 +559,7 @@ namespace MWScript
                     char *end;
                     long key = strtol(effect.c_str(), &end, 10);
                     if(key < 0 || key > 32767 || *end != '\0')
-                        key = ESM::MagicEffect::effectStringToId(effect);
+                        key = ESM3::MagicEffect::effectStringToId(effect);
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
@@ -602,7 +602,7 @@ namespace MWScript
                         return;
 
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                    store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
+                    store.get<ESM3::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
                     MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1, ptr);
 
@@ -1219,7 +1219,7 @@ namespace MWScript
                 std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
                 runtime.pop();
 
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().search(spellId);
                 if (!spell)
                 {
                     runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
@@ -1265,7 +1265,7 @@ namespace MWScript
                 std::string spellId = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().search(spellId);
                 if (!spell)
                 {
                     runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
@@ -1432,7 +1432,7 @@ namespace MWScript
                 int level = runtime[0].mInteger;
                 runtime.pop();
 
-                ESM::CreatureLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
+                ESM3::CreatureLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM3::CreatureLevList>().find(levId);
                 addToLevList(&listCopy, creatureId, level);
                 MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
             }
@@ -1450,7 +1450,7 @@ namespace MWScript
                 int level = runtime[0].mInteger;
                 runtime.pop();
 
-                ESM::CreatureLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
+                ESM3::CreatureLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM3::CreatureLevList>().find(levId);
                 removeFromLevList(&listCopy, creatureId, level);
                 MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
             }
@@ -1468,7 +1468,7 @@ namespace MWScript
                 int level = runtime[0].mInteger;
                 runtime.pop();
 
-                ESM::ItemLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
+                ESM3::ItemLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM3::ItemLevList>().find(levId);
                 addToLevList(&listCopy, itemId, level);
                 MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
             }
@@ -1486,7 +1486,7 @@ namespace MWScript
                 int level = runtime[0].mInteger;
                 runtime.pop();
 
-                ESM::ItemLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
+                ESM3::ItemLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM3::ItemLevList>().find(levId);
                 removeFromLevList(&listCopy, itemId, level);
                 MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
             }

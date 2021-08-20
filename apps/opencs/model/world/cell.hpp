@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 namespace CSMWorld
 {
@@ -12,11 +12,11 @@ namespace CSMWorld
     ///
     /// \attention The mData.mX and mData.mY fields of the ESM::Cell struct are not used.
     /// Exterior cell coordinates are encoded in the cell ID.
-    struct Cell : public ESM::Cell
+    struct Cell : public ESM3::Cell
     {
         std::string mId;
 
-        void load (ESM::ESMReader &esm, bool &isDeleted);
+        void load (ESM::Reader& reader, bool& isDeleted);
 
     };
 }

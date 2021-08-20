@@ -1,14 +1,16 @@
-#include "loadspel.hpp"
+#include "spel.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int Spell::sRecordId = REC_SPEL;
 
-    void Spell::load(ESMReader &esm, bool &isDeleted)
+    void Spell::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -16,44 +18,55 @@ namespace ESM
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'S','P','D','T'>::value:
-                    esm.getHT(mData, 12);
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_SPDT:
+                {
+                    assert (subHdr.dataSize == 12 && "SPEL incorrect data size");
+                    assert (subHdr.dataSize == sizeof(mData) && "SPEL incorrect data size");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::FourCC<'E','N','A','M'>::value:
+                }
+                case ESM3::SUB_ENAM:
+                {
+                    assert (subHdr.dataSize == 24 && "SPEL incorrect effect size");
+                    assert (subHdr.dataSize == sizeof(ENAMstruct) && "SPEL incorrect effect size");
                     ENAMstruct s;
-                    esm.getHT(s, 24);
+                    reader.get(s);
                     mEffects.mList.push_back(s);
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing SPDT subrecord");
+            reader.fail("Missing SPDT subrecord");
     }
 
-    void Spell::save(ESMWriter &esm, bool isDeleted) const
+    void Spell::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

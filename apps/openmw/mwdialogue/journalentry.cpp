@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include <components/esm/journalentry.hpp>
+#include <components/esm3/journalentry.hpp>
 
 #include <components/interpreter/defines.hpp>
 
@@ -19,10 +19,10 @@ namespace MWDialogue
     Entry::Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
     : mInfoId (infoId)
     {
-        const ESM::Dialogue *dialogue =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
+        const ESM3::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().find (topic);
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
+        for (ESM3::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mId == mInfoId)
             {
@@ -43,14 +43,14 @@ namespace MWDialogue
         throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + topic);
     }
 
-    Entry::Entry (const ESM::JournalEntry& record) : mInfoId (record.mInfo), mText (record.mText), mActorName(record.mActorName) {}
+    Entry::Entry (const ESM3::JournalEntry& record) : mInfoId (record.mInfo), mText (record.mText), mActorName(record.mActorName) {}
 
     std::string Entry::getText() const
     {
         return mText;
     }
 
-    void Entry::write (ESM::JournalEntry& entry) const
+    void Entry::write (ESM3::JournalEntry& entry) const
     {
         entry.mInfo = mInfoId;
         entry.mText = mText;
@@ -62,11 +62,11 @@ namespace MWDialogue
         : Entry (topic, infoId, actor), mTopic (topic)
     {}
 
-    JournalEntry::JournalEntry (const ESM::JournalEntry& record)
+    JournalEntry::JournalEntry (const ESM3::JournalEntry& record)
         : Entry (record), mTopic (record.mTopic)
     {}
 
-    void JournalEntry::write (ESM::JournalEntry& entry) const
+    void JournalEntry::write (ESM3::JournalEntry& entry) const
     {
         Entry::write (entry);
         entry.mTopic = mTopic;
@@ -79,10 +79,10 @@ namespace MWDialogue
 
     std::string JournalEntry::idFromIndex (const std::string& topic, int index)
     {
-        const ESM::Dialogue *dialogue =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
+        const ESM3::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().find (topic);
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
+        for (ESM3::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mData.mJournalIndex==index)
             {
@@ -102,12 +102,12 @@ namespace MWDialogue
     : JournalEntry (topic, infoId, actor), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
     {}
 
-    StampedJournalEntry::StampedJournalEntry (const ESM::JournalEntry& record)
+    StampedJournalEntry::StampedJournalEntry (const ESM3::JournalEntry& record)
     : JournalEntry (record), mDay (record.mDay), mMonth (record.mMonth),
       mDayOfMonth (record.mDayOfMonth)
     {}
 
-    void StampedJournalEntry::write (ESM::JournalEntry& entry) const
+    void StampedJournalEntry::write (ESM3::JournalEntry& entry) const
     {
         JournalEntry::write (entry);
         entry.mDay = mDay;

@@ -1,22 +1,25 @@
 #include "cellstate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-void ESM::CellState::load (ESMReader &esm)
+void ESM3::CellState::load (Reader& esm)
 {
     mWaterLevel = 0;
-    esm.getHNOT (mWaterLevel, "WLVL");
+    if (esm.getNextSubRecordHeader(ESM3::SUB_WLVL))
+        esm.get(mWaterLevel);
 
     mHasFogOfWar = false;
-    esm.getHNOT (mHasFogOfWar, "HFOW");
+    if (esm.getNextSubRecordHeader(ESM3::SUB_HFOW))
+        esm.get(mHasFogOfWar);
 
     mLastRespawn.mDay = 0;
     mLastRespawn.mHour = 0;
-    esm.getHNOT (mLastRespawn, "RESP");
+    if (esm.getNextSubRecordHeader(ESM3::SUB_RESP))
+        esm.get(mLastRespawn);
 }
 
-void ESM::CellState::save (ESMWriter &esm) const
+void ESM3::CellState::save (ESM::ESMWriter& esm) const
 {
     if (!mId.mPaged)
         esm.writeHNT ("WLVL", mWaterLevel);

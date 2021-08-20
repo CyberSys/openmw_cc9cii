@@ -1,64 +1,66 @@
-#include "loadligh.hpp"
+#include "ligh.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int Light::sRecordId = REC_LIGH;
 
-    void Light::load(ESMReader &esm, bool &isDeleted)
+    void Light::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId); // FIXME: fixed size?
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'I','T','E','X'>::value:
-                    mIcon = esm.getHString();
-                    break;
-                case ESM::FourCC<'L','H','D','T'>::value:
-                    esm.getHT(mData, 24);
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_SCRI: reader.getZString(mScript); break;
+                case ESM3::SUB_ITEX: reader.getZString(mIcon); break;
+                case ESM3::SUB_SNAM: reader.getZString(mSound); break;
+                case ESM3::SUB_LHDT:
+                {
+                    assert (subHdr.dataSize == 24 && "LIGH data size mismatch");
+                    assert (subHdr.dataSize == sizeof(mData) && "LIGH data size mismatch");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
-                    mScript = esm.getHString();
-                    break;
-                case ESM::FourCC<'S','N','A','M'>::value:
-                    mSound = esm.getHString();
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing LHDT subrecord");
+            reader.fail("Missing LHDT subrecord");
     }
-    void Light::save(ESMWriter &esm, bool isDeleted) const
+
+    void Light::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

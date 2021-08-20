@@ -1,29 +1,31 @@
-#ifndef OPENMW_ESM_ACTI_H
-#define OPENMW_ESM_ACTI_H
+#ifndef ESM3_ACTI_H
+#define ESM3_ACTI_H
 
 #include <string>
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-struct Activator
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Activator"; }
+    class Reader;
 
-    unsigned int mRecordFlags;
-    std::string mId, mName, mScript, mModel;
+    struct Activator
+    {
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "Activator"; }
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        unsigned int mRecordFlags;
+        std::string mId, mName, mScript, mModel;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
 
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 }
 #endif

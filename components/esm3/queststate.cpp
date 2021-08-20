@@ -1,16 +1,21 @@
 #include "queststate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-void ESM::QuestState::load (ESMReader &esm)
+void ESM3::QuestState::load (Reader& esm)
 {
-    mTopic = esm.getHNString ("YETO");
-    esm.getHNOT (mState, "QSTA");
-    esm.getHNOT (mFinished, "QFIN");
+    esm.getSubRecordHeader(ESM3::SUB_YETO);
+    esm.getString(mTopic); // NOTE: not null terminated
+
+    if (esm.getNextSubRecordHeader(ESM3::SUB_QSTA))
+        esm.get(mState);
+    if (esm.getNextSubRecordHeader(ESM3::SUB_QFIN))
+        esm.get(mFinished);
 }
 
-void ESM::QuestState::save (ESMWriter &esm) const
+void ESM3::QuestState::save (ESM::ESMWriter& esm) const
 {
     esm.writeHNString ("YETO", mTopic);
     esm.writeHNT ("QSTA", mState);

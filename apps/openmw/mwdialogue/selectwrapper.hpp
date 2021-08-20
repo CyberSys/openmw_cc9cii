@@ -1,13 +1,13 @@
 #ifndef GAME_MWDIALOGUE_SELECTWRAPPER_H
 #define GAME_MWDIALOGUE_SELECTWRAPPER_H
 
-#include <components/esm/loadinfo.hpp>
+#include <components/esm3/info.hpp>
 
 namespace MWDialogue
 {
     class SelectWrapper
     {
-            const ESM::DialInfo::SelectStruct& mSelect;
+            const ESM3::DialInfo::SelectStruct& mSelect;
 
         public:
 
@@ -61,7 +61,7 @@ namespace MWDialogue
 
         public:
 
-            SelectWrapper (const ESM::DialInfo::SelectStruct& select);
+            SelectWrapper (const ESM3::DialInfo::SelectStruct& select);
 
             Function getFunction() const;
 

@@ -1,14 +1,18 @@
-#ifndef OPENMW_ESM_CELLSTATE_H
-#define OPENMW_ESM_CELLSTATE_H
+#ifndef ESM3_CELLSTATE_H
+#define ESM3_CELLSTATE_H
 
 #include "cellid.hpp"
 
-#include "defs.hpp"
+#include "../esm/defs.hpp"
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -23,8 +27,8 @@ namespace ESM
 
         ESM::TimeStamp mLastRespawn;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

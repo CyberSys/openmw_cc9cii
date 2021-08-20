@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <components/misc/stringops.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -929,7 +929,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
     MwIniImporter::dependencyList unsortedFiles;
 
-    ESM::ESMReader reader;
+    ESM3::Reader reader;
     reader.setEncoder(&encoder);
     for (auto& file : contentFiles)
     {
@@ -939,7 +939,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
         {
             dependencies.push_back(gameFile.name);
         }
-        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), dependencies);
+        unsortedFiles.emplace_back(boost::filesystem::path(reader.getFileName()).filename().string(), dependencies);
         reader.close();
     }
 

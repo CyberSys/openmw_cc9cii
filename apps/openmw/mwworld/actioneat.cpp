@@ -1,6 +1,6 @@
 #include "actioneat.hpp"
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
 #include "../mwworld/containerstore.hpp"
 
@@ -19,7 +19,7 @@ namespace MWWorld
         std::string id = getTarget().getCellRef().getRefId();
 
         if (actor.getClass().apply (actor, id, actor) && actor == MWMechanics::getPlayer())
-            actor.getClass().skillUsageSucceeded (actor, ESM::Skill::Alchemy, 1);
+            actor.getClass().skillUsageSucceeded (actor, ESM3::Skill::Alchemy, 1);
     }
 
     ActionEat::ActionEat (const MWWorld::Ptr& object) : Action (false, object) {}

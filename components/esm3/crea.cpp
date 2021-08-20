@@ -1,19 +1,21 @@
-#include "loadcrea.hpp"
+#include "crea.hpp"
+
+#include <cassert>
 
 #include <components/debug/debuglog.hpp>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM {
-
+namespace ESM3
+{
     unsigned int Creature::sRecordId = REC_CREA;
 
-    void Creature::load(ESMReader &esm, bool &isDeleted)
+    void Creature::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
 
         mAiPackage.mList.clear();
         mInventory.mList.clear();
@@ -28,87 +30,95 @@ namespace ESM {
         bool hasName = false;
         bool hasNpdt = false;
         bool hasFlags = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','N','A','M'>::value:
-                    mOriginal = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'S','C','R','I'>::value:
-                    mScript = esm.getHString();
-                    break;
-                case ESM::FourCC<'N','P','D','T'>::value:
-                    esm.getHT(mData, 96);
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_SCRI: reader.getZString(mScript); break;
+                case ESM3::SUB_CNAM: reader.getZString(mOriginal); break;
+                case ESM3::SUB_NPDT:
+                {
+                    assert (subHdr.dataSize == 96 && "CREA data size mismatch");
+                    assert (subHdr.dataSize == sizeof(mData) && "CREA data size mismatch");
+                    reader.get(mData);
                     hasNpdt = true;
                     break;
-                case ESM::FourCC<'F','L','A','G'>::value:
+                }
+                case ESM3::SUB_FLAG:
+                {
                     int flags;
-                    esm.getHT(flags);
+                    assert (subHdr.dataSize == 4 && "CREA flag size mismatch");
+                    reader.get(flags);
                     mFlags = flags & 0xFF;
                     mBloodType = ((flags >> 8) & 0xFF) >> 2;
                     hasFlags = true;
                     break;
-                case ESM::FourCC<'X','S','C','L'>::value:
-                    esm.getHT(mScale);
+                }
+                case ESM3::SUB_XSCL: reader.get(mScale); break;
+                case ESM3::SUB_NPCO: mInventory.add(reader); break;
+                case ESM3::SUB_NPCS: mSpells.add(reader); break;
+                case ESM3::SUB_AIDT:
+                {
+                    assert (subHdr.dataSize == sizeof(mAiData) && "CREA AiData size mismatch");
+                    reader.get(mAiData, sizeof(mAiData));
                     break;
-                case ESM::FourCC<'N','P','C','O'>::value:
-                    mInventory.add(esm);
+                }
+                case ESM3::SUB_DODT:
+                case ESM3::SUB_DNAM:
+                {
+                    mTransport.add(reader);
                     break;
-                case ESM::FourCC<'N','P','C','S'>::value:
-                    mSpells.add(esm);
+                }
+                case ESM3::SUB_AI_A: // Activate
+                case ESM3::SUB_AI_E: // Escort
+                case ESM3::SUB_AI_F: // Follow
+                case ESM3::SUB_AI_T: // Travel
+                case ESM3::SUB_AI_W: // Wander
+                case ESM3::SUB_CNDT: // Cell
+                {
+                    mAiPackage.add(reader);
                     break;
-                case ESM::FourCC<'A','I','D','T'>::value:
-                    esm.getHExact(&mAiData, sizeof(mAiData));
-                    break;
-                case ESM::FourCC<'D','O','D','T'>::value:
-                case ESM::FourCC<'D','N','A','M'>::value:
-                    mTransport.add(esm);
-                    break;
-                case AI_Wander:
-                case AI_Activate:
-                case AI_Escort:
-                case AI_Follow:
-                case AI_Travel:
-                case AI_CNDT:
-                    mAiPackage.add(esm);
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
-                    isDeleted = true;
-                    break;
-                case ESM::FourCC<'I','N','D','X'>::value:
+                }
+                case ESM3::SUB_INDX:
+                {
                     // seems to occur only in .ESS files, unsure of purpose
                     int index;
-                    esm.getHT(index);
+                    reader.get(index);
                     Log(Debug::Warning) << "Creature::load: Unhandled INDX " << index;
                     break;
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
+                    isDeleted = true;
+                    break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasNpdt && !isDeleted)
-            esm.fail("Missing NPDT subrecord");
+            reader.fail("Missing NPDT subrecord");
+
         if (!hasFlags && !isDeleted)
-            esm.fail("Missing FLAG subrecord");
+            reader.fail("Missing FLAG subrecord");
     }
 
-    void Creature::save(ESMWriter &esm, bool isDeleted) const
+    void Creature::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

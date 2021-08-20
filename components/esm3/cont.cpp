@@ -1,22 +1,26 @@
-#include "loadcont.hpp"
+#include "cont.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+//#include <cassert>
+#include <iostream>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
-
-    void InventoryList::add(ESMReader &esm)
+    // NOTE: assumes sub-record header was just read
+    void InventoryList::add(Reader& reader)
     {
-        esm.getSubHeader();
         ContItem ci;
-        esm.getT(ci.mCount);
-        ci.mItem.assign(esm.getString(32));
+        reader.get(ci.mCount);
+        char tmp[32];
+        reader.get(tmp[0], 32); // NOTE: fixed size string
+        ci.mItem = std::string(&tmp[0]); // remove junk
         mList.push_back(ci);
     }
 
-    void InventoryList::save(ESMWriter &esm) const
+    void InventoryList::save(ESM::ESMWriter& esm) const
     {
         for (std::vector<ContItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
@@ -29,68 +33,76 @@ namespace ESM
 
     unsigned int Container::sRecordId = REC_CONT;
 
-    void Container::load(ESMReader &esm, bool &isDeleted)
+    void Container::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
 
         mInventory.mList.clear();
 
         bool hasName = false;
         bool hasWeight = false;
         bool hasFlags = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','N','D','T'>::value:
-                    esm.getHT(mWeight, 4);
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_SCRI: reader.getZString(mScript); break;
+                case ESM3::SUB_CNDT:
+                {
+                    //assert (subHdr.dataSize == 4 && "CONT weight size mismatch");
+                    reader.get(mWeight);
                     hasWeight = true;
                     break;
-                case ESM::FourCC<'F','L','A','G'>::value:
-                    esm.getHT(mFlags, 4);
+                }
+                case ESM3::SUB_FLAG:
+                {
+                    //assert (subHdr.dataSize == 4 && "CONT flag size mismatch");
+                    reader.get(mFlags);
                     if (mFlags & 0xf4)
-                        esm.fail("Unknown flags");
+                        reader.fail("Unknown flags");
                     if (!(mFlags & 0x8))
-                        esm.fail("Flag 8 not set");
+                        reader.fail("Flag 8 not set");
                     hasFlags = true;
                     break;
-                case ESM::FourCC<'S','C','R','I'>::value:
-                    mScript = esm.getHString();
+                }
+                case ESM3::SUB_NPCO:
+                {
+                    mInventory.add(reader);
                     break;
-                case ESM::FourCC<'N','P','C','O'>::value:
-                    mInventory.add(esm);
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasWeight && !isDeleted)
-            esm.fail("Missing CNDT subrecord");
+            reader.fail("Missing CNDT subrecord");
+
         if (!hasFlags && !isDeleted)
-            esm.fail("Missing FLAG subrecord");
+            reader.fail("Missing FLAG subrecord");
     }
 
-    void Container::save(ESMWriter &esm, bool isDeleted) const
+    void Container::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

@@ -37,7 +37,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     CSVRender::WorldspaceWidget* worldspaceWidget = nullptr;
     widgetType whatWidget;
 
-    if (id.getId()==ESM::CellId::sDefaultWorldspace)
+    if (id.getId()==ESM3::CellId::sDefaultWorldspace)
     {
         whatWidget = widget_Paged;
 
@@ -163,7 +163,7 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& 
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
 {
-    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::CellId::sDefaultWorldspace));
+    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM3::CellId::sDefaultWorldspace));
     int size = selection.getSize();
 
     std::ostringstream stream;

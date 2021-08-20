@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include "importscri.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -63,7 +63,7 @@ namespace ESSImport
     };
 #pragma pack(pop)
 
-    struct ActorData : public ESM::CellRef
+    struct ActorData : public ESM3::CellRef
     {
         bool mHasACDT;
         ACDT mACDT;
@@ -86,7 +86,7 @@ namespace ESSImport
         bool mHasANIS;
         ANIS mANIS; // scripted animation state
 
-        virtual void load(ESM::ESMReader& esm);
+        virtual void load(ESM3::Reader& esm);
 
         virtual ~ActorData() = default;
     };

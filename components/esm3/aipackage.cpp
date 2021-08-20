@@ -1,9 +1,12 @@
 #include "aipackage.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     void AIData::blank()
     {
@@ -11,42 +14,53 @@ namespace ESM
         mServices = 0;
     }
 
-    void AIPackageList::add(ESMReader &esm)
+    // NOTE: assumes sub-record header was just read
+    void AIPackageList::add(Reader& reader)
     {
         AIPackage pack;
-        if (esm.retSubName() == AI_CNDT) {
-            if (mList.empty()) 
-            {
-                esm.fail("AIPackge with an AI_CNDT applying to no cell.");
-            } else {
-                mList.back().mCellName = esm.getHString();
-            }
-        } else if (esm.retSubName() == AI_Wander) {
-            pack.mType = AI_Wander;
-            esm.getHExact(&pack.mWander, 14);
-            mList.push_back(pack);
-        } else if (esm.retSubName() == AI_Travel) {
-            pack.mType = AI_Travel;
-            esm.getHExact(&pack.mTravel, 16);
-            mList.push_back(pack);
-        } else if (esm.retSubName() == AI_Escort ||
-                   esm.retSubName() == AI_Follow)
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        if (subHdr.typeId == ESM3::SUB_CNDT)
         {
-            pack.mType =
-                (esm.retSubName() == AI_Escort) ? AI_Escort : AI_Follow;
-                esm.getHExact(&pack.mTarget, 48);
-            mList.push_back(pack);
-        } else if (esm.retSubName() == AI_Activate) {
-            pack.mType = AI_Activate;
-            esm.getHExact(&pack.mActivate, 33);
-            mList.push_back(pack);
-        } else { // not AI package related data, so leave
-             return;
+            if (mList.empty())
+            {
+                reader.fail("AIPackge with an AI_CNDT applying to no cell.");
+            } else {
+                reader.getZString(mList.back().mCellName);
+            }
         }
-
+        else if (subHdr.typeId == ESM3::SUB_AI_W)
+        {
+            pack.mType = AI_Wander;
+            assert (subHdr.dataSize == 14 && "AIPackage wander size mismatch");
+            reader.get(pack.mWander);
+            mList.push_back(pack);
+        }
+        else if (subHdr.typeId == ESM3::SUB_AI_T)
+        {
+            pack.mType = AI_Travel;
+            assert (subHdr.dataSize == 16 && "AIPackage travel size mismatch");
+            reader.get(pack.mTravel);
+            mList.push_back(pack);
+        }
+        else if (subHdr.typeId == ESM3::SUB_AI_E || subHdr.typeId == ESM3::SUB_AI_F)
+        {
+            pack.mType = (subHdr.typeId == ESM3::SUB_AI_E) ? AI_Escort : AI_Follow;
+            assert (subHdr.dataSize == 48 && "AIPackage escort/follow size mismatch");
+            reader.get(pack.mTarget);
+            mList.push_back(pack);
+        }
+        else if (subHdr.typeId == ESM3::SUB_AI_A)
+        {
+            pack.mType = AI_Activate;
+            assert (subHdr.dataSize == 33 && "AIPackage activate size mismatch");
+            reader.get(pack.mActivate);
+            mList.push_back(pack);
+        }
+        else
+             return; // not AI package related data, so leave
     }
 
-    void AIPackageList::save(ESMWriter &esm) const
+    void AIPackageList::save(ESM::ESMWriter& esm) const
     {
         typedef std::vector<AIPackage>::const_iterator PackageIter;
         for (PackageIter it = mList.begin(); it != mList.end(); ++it) {

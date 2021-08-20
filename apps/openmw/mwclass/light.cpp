@@ -1,7 +1,7 @@
 #include "light.hpp"
 
-#include <components/esm/loadligh.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/ligh.hpp>
+#include <components/esm3/objectstate.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -26,22 +26,22 @@ namespace MWClass
 
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        MWWorld::LiveCellRef<ESM3::Light> *ref =
+            ptr.get<ESM3::Light>();
 
         // Insert even if model is empty, so that the light is added
-        renderingInterface.getObjects().insertModel(ptr, model, true, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        renderingInterface.getObjects().insertModel(ptr, model, true, !(ref->mBase->mData.mFlags & ESM3::Light::OffDefault));
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        MWWorld::LiveCellRef<ESM3::Light> *ref =
+            ptr.get<ESM3::Light>();
         assert (ref->mBase != nullptr);
 
         insertObjectPhysics(ptr, model, rotation, physics, skipAnimated);
 
-        if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
+        if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM3::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
                                                                       MWSound::Type::Sfx,
                                                                       MWSound::PlayMode::Loop);
@@ -50,7 +50,7 @@ namespace MWClass
     void Light::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics, bool skipAnimated) const
     {
         // TODO: add option somewhere to enable collision for placeable objects
-        if (!model.empty() && (ptr.get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry) == 0)
+        if (!model.empty() && (ptr.get<ESM3::Light>()->mBase->mData.mFlags & ESM3::Light::Carry) == 0)
             physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World, skipAnimated);
     }
 
@@ -61,7 +61,7 @@ namespace MWClass
 
     std::string Light::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -72,7 +72,7 @@ namespace MWClass
 
     std::string Light::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         if (ref->mBase->mModel.empty())
             return std::string();
@@ -87,8 +87,8 @@ namespace MWClass
         if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
 
-        MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-        if(!(ref->mBase->mData.mFlags&ESM::Light::Carry))
+        MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
+        if(!(ref->mBase->mData.mFlags&ESM3::Light::Carry))
             return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction());
 
         return defaultItemActivate(ptr, actor);
@@ -96,18 +96,18 @@ namespace MWClass
 
     std::string Light::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         return ref->mBase->mScript;
     }
 
     std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         std::vector<int> slots_;
 
-        if (ref->mBase->mData.mFlags & ESM::Light::Carry)
+        if (ref->mBase->mData.mFlags & ESM3::Light::Carry)
             slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
 
         return std::make_pair (slots_, false);
@@ -115,7 +115,7 @@ namespace MWClass
 
     int Light::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         return ref->mBase->mData.mValue;
     }
@@ -124,7 +124,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Light);
 
-        registerClass (typeid (ESM::Light).name(), instance);
+        registerClass (typeid (ESM3::Light).name(), instance);
     }
 
     std::string Light::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -140,7 +140,7 @@ namespace MWClass
 
     std::string Light::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         return ref->mBase->mIcon;
     }
@@ -152,7 +152,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -179,9 +179,9 @@ namespace MWClass
 
     bool Light::showsInInventory (const MWWorld::ConstPtr& ptr) const
     {
-        const ESM::Light* light = ptr.get<ESM::Light>()->mBase;
+        const ESM3::Light* light = ptr.get<ESM3::Light>()->mBase;
 
-        if (!(light->mData.mFlags & ESM::Light::Carry))
+        if (!(light->mData.mFlags & ESM3::Light::Carry))
             return false;
 
         return Class::showsInInventory(ptr);
@@ -203,7 +203,7 @@ namespace MWClass
 
     float Light::getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
         if (ptr.getCellRef().getCharge() == -1)
             return static_cast<float>(ref->mBase->mData.mTime);
         else
@@ -212,26 +212,26 @@ namespace MWClass
 
     MWWorld::Ptr Light::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     bool Light::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return (npcServices & ESM::NPC::Lights) != 0;
+        return (npcServices & ESM3::NPC::Lights) != 0;
     }
 
     float Light::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
         return ref->mBase->mData.mWeight;
     }
 
     std::pair<int, std::string> Light::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-        if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
+        const MWWorld::LiveCellRef<ESM3::Light> *ref = ptr.get<ESM3::Light>();
+        if (!(ref->mBase->mData.mFlags & ESM3::Light::Carry))
             return std::make_pair(0,"");
 
         return std::make_pair(1,"");
@@ -239,6 +239,6 @@ namespace MWClass
 
     std::string Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
-      return ptr.get<ESM::Light>()->mBase->mSound;
+      return ptr.get<ESM3::Light>()->mBase->mSound;
     }
 }

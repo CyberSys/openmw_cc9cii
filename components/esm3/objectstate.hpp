@@ -1,18 +1,22 @@
-#ifndef OPENMW_ESM_OBJECTSTATE_H
-#define OPENMW_ESM_OBJECTSTATE_H
+#ifndef ESM3_OBJECTSTATE_H
+#define ESM3_OBJECTSTATE_H
 
 #include <string>
 #include <vector>
 
 #include "cellref.hpp"
 #include "locals.hpp"
-#include "luascripts.hpp"
+#include "../esm/luascripts.hpp"
 #include "animationstate.hpp"
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
     struct ContainerState;
     struct CreatureLevListState;
     struct CreatureState;
@@ -28,10 +32,10 @@ namespace ESM
 
         unsigned char mHasLocals;
         Locals mLocals;
-        LuaScripts mLuaScripts;
+        ESM::LuaScripts mLuaScripts;
         unsigned char mEnabled;
-        int mCount;
-        ESM::Position mPosition;
+        int mCount;              // TODO: should really be unsigned
+        ESM::Position mPosition; // TODO: init with some sane defaults?
         unsigned int mFlags;
 
         // Is there any class-specific state following the ObjectState
@@ -39,7 +43,7 @@ namespace ESM
 
         unsigned int mVersion;
 
-        ESM::AnimationState mAnimationState;
+        ESM3::AnimationState mAnimationState;
 
         ObjectState()
         : mHasLocals(0), mEnabled(0), mCount(0)
@@ -47,9 +51,9 @@ namespace ESM
         {}
 
         /// @note Does not load the CellRef ID, it should already be loaded before calling this method
-        virtual void load (ESMReader &esm);
+        virtual void load (Reader& esm);
 
-        virtual void save (ESMWriter &esm, bool inInventory = false) const;
+        virtual void save (ESM::ESMWriter& esm, bool inInventory = false) const;
 
         virtual /// Initialize to default state
         void blank();

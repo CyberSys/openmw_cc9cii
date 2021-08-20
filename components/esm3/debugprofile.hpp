@@ -1,12 +1,16 @@
-#ifndef COMPONENTS_ESM_DEBUGPROFILE_H
-#define COMPONENTS_ESM_DEBUGPROFILE_H
+#ifndef ESM3_DEBUGPROFILE_H
+#define ESM3_DEBUGPROFILE_H
 
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     struct DebugProfile
     {
@@ -27,8 +31,8 @@ namespace ESM
 
         unsigned int mFlags;
 
-        void load (ESMReader& esm, bool &isDeleted);
-        void save (ESMWriter& esm, bool isDeleted = false) const;
+        void load (Reader& reader, bool &isDeleted);
+        void save (ESM::ESMWriter& esm, bool isDeleted = false) const;
 
         /// Set record to default state (does not touch the ID).
         void blank();

@@ -1,6 +1,6 @@
 #include "aiactivate.hpp"
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -44,18 +44,18 @@ namespace MWMechanics
         return false;
     }
 
-    void AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiActivate::writeState(ESM3::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());
+        std::unique_ptr<ESM3::AiSequence::AiActivate> activate(new ESM3::AiSequence::AiActivate());
         activate->mTargetId = mObjectId;
 
-        ESM::AiSequence::AiPackageContainer package;
-        package.mType = ESM::AiSequence::Ai_Activate;
+        ESM3::AiSequence::AiPackageContainer package;
+        package.mType = ESM3::AiSequence::Ai_Activate;
         package.mPackage = activate.release();
         sequence.mPackages.push_back(package);
     }
 
-    AiActivate::AiActivate(const ESM::AiSequence::AiActivate *activate)
+    AiActivate::AiActivate(const ESM3::AiSequence::AiActivate *activate)
         : mObjectId(activate->mTargetId)
     {
     }

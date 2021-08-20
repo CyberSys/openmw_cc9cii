@@ -25,7 +25,7 @@ namespace MWSound
 
         AudioParams makeAudioParams(const MWBase::World& world)
         {
-            const auto& settings = world.getStore().get<ESM::GameSetting>();
+            const auto& settings = world.getStore().get<ESM3::GameSetting>();
             AudioParams params;
             params.mAudioDefaultMinDistance = settings.find("fAudioDefaultMinDistance")->mValue.getFloat();
             params.mAudioDefaultMaxDistance = settings.find("fAudioDefaultMaxDistance")->mValue.getFloat();
@@ -64,7 +64,7 @@ namespace MWSound
     {
         if (mBufferNameMap.empty())
         {
-            for (const ESM::Sound& sound : MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>())
+            for (const ESM3::Sound& sound : MWBase::Environment::get().getWorld()->getStore().get<ESM3::Sound>())
                 insertSound(Misc::StringUtils::lowerCase(sound.mId), sound);
         }
 
@@ -74,7 +74,7 @@ namespace MWSound
             sfx = it->second;
         else
         {
-            const ESM::Sound *sound = MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>().search(soundId);
+            const ESM3::Sound *sound = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Sound>().search(soundId);
             if (sound == nullptr)
                 return {};
             sfx = insertSound(soundId, *sound);
@@ -112,7 +112,7 @@ namespace MWSound
         mUnusedBuffers.clear();
     }
 
-    Sound_Buffer* SoundBufferPool::insertSound(const std::string& soundId, const ESM::Sound& sound)
+    Sound_Buffer* SoundBufferPool::insertSound(const std::string& soundId, const ESM3::Sound& sound)
     {
         static const AudioParams audioParams = makeAudioParams(*MWBase::Environment::get().getWorld());
 

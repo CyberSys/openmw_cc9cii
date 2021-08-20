@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_LOCALS_H
-#define OPENMW_ESM_LOCALS_H
+#ifndef ESM3_LOCALS_H
+#define ESM3_LOCALS_H
 
 #include <vector>
 #include <string>
@@ -8,8 +8,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     /// \brief Storage structure for local variables (only used in saved games)
     ///
@@ -19,8 +23,8 @@ namespace ESM
     {
         std::vector<std::pair<std::string, Variant> > mVariables;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

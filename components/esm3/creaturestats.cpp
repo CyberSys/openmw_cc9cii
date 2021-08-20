@@ -1,9 +1,14 @@
 #include "creaturestats.hpp"
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
 
-void ESM::CreatureStats::load (ESMReader &esm)
+#include <cassert>
+
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+void ESM3::CreatureStats::load (Reader& esm)
 {
+    int format = esm.getFormat();
+
     bool intFallback = esm.getFormat() < 11;
     for (int i=0; i<8; ++i)
         mAttributes[i].load (esm, intFallback);
@@ -12,11 +17,17 @@ void ESM::CreatureStats::load (ESMReader &esm)
         mDynamic[i].load (esm);
 
     mGoldPool = 0;
-    esm.getHNOT (mGoldPool, "GOLD");
-
     mTradeTime.mDay = 0;
     mTradeTime.mHour = 0;
-    esm.getHNOT (mTradeTime, "TIME");
+    mMovementFlags = 0;
+    mFallHeight = 0;
+    mDrawState = 0;
+    mLevel = 1;
+    mActorId = -1;
+    mDeathAnimation = -1;
+    mTimeOfDeath.mDay = 0;
+    mTimeOfDeath.mHour = 0;
+    mHasAiSettings = false;
 
     int flags = 0;
     mDead = false;
@@ -32,125 +43,154 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mHitRecovery = false;
     mBlock = false;
     mRecalcDynamicStats = false;
-    if (esm.getFormat() < 8)
+
+    bool finished = false;
+    while (!finished && esm.getSubRecordHeader())
     {
-        esm.getHNOT (mDead, "DEAD");
-        esm.getHNOT (mDeathAnimationFinished, "DFNT");
-        if (esm.getFormat() < 3 && mDead)
-            mDeathAnimationFinished = true;
-        esm.getHNOT (mDied, "DIED");
-        esm.getHNOT (mMurdered, "MURD");
-        if (esm.isNextSub("FRHT"))
-            esm.skipHSub(); // Friendly hits, no longer used
-        esm.getHNOT (mTalkedTo, "TALK");
-        esm.getHNOT (mAlarmed, "ALRM");
-        esm.getHNOT (mAttacked, "ATKD");
-        if (esm.isNextSub("HOST"))
-            esm.skipHSub(); // Hostile, no longer used
-        if (esm.isNextSub("ATCK"))
-            esm.skipHSub(); // attackingOrSpell, no longer used
-        esm.getHNOT (mKnockdown, "KNCK");
-        esm.getHNOT (mKnockdownOneFrame, "KNC1");
-        esm.getHNOT (mKnockdownOverOneFrame, "KNCO");
-        esm.getHNOT (mHitRecovery, "HITR");
-        esm.getHNOT (mBlock, "BLCK");
+        const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+        switch (subHdr.typeId)
+        {
+            case ESM3::SUB_GOLD: esm.get(mGoldPool); break;
+            case ESM3::SUB_TIME: esm.get(mTradeTime); break;
+            case ESM3::SUB_AFLG:
+            {
+                assert(format >= 8);
+                esm.get(flags);
+                mDead = flags & Dead;
+                mDeathAnimationFinished = flags & DeathAnimationFinished;
+                mDied = flags & Died;
+                mMurdered = flags & Murdered;
+                mTalkedTo = flags & TalkedTo;
+                mAlarmed = flags & Alarmed;
+                mAttacked = flags & Attacked;
+                mKnockdown = flags & Knockdown;
+                mKnockdownOneFrame = flags & KnockdownOneFrame;
+                mKnockdownOverOneFrame = flags & KnockdownOverOneFrame;
+                mHitRecovery = flags & HitRecovery;
+                mBlock = flags & Block;
+                mRecalcDynamicStats = flags & RecalcDynamicStats;
+                break;
+            }
+            case ESM3::SUB_DEAD:
+            {
+                assert(format < 8);
+                esm.get(mDead);
+                if (format < 3 && mDead)
+                    mDeathAnimationFinished = true;
+                break;
+            }
+            case ESM3::SUB_DFNT: assert(format < 8); esm.get(mDeathAnimationFinished); break;
+            case ESM3::SUB_DIED: assert(format < 8); esm.get(mDied); break;
+            case ESM3::SUB_MURD: assert(format < 8); esm.get(mMurdered); break;
+            case ESM3::SUB_FRHT: assert(format < 8); esm.skipSubRecordData(); break; // Friendly hits, no longer used
+            case ESM3::SUB_TALK: assert(format < 8); esm.get(mTalkedTo); break;
+            case ESM3::SUB_ALRM: assert(format < 8); esm.get(mAlarmed); break;
+            case ESM3::SUB_ATKD: assert(format < 8); esm.get(mAttacked); break;
+            case ESM3::SUB_HOST: assert(format < 8); esm.skipSubRecordData(); break; // Hostile, no longer used
+            case ESM3::SUB_ATCK: assert(format < 8); esm.skipSubRecordData(); break; // AttackingOrSpell, no longer used
+            case ESM3::SUB_KNCK: assert(format < 8); esm.get(mKnockdown); break;
+            case ESM3::SUB_KNC1: assert(format < 8); esm.get(mKnockdownOneFrame); break;
+            case ESM3::SUB_KNCO: assert(format < 8); esm.get(mKnockdownOverOneFrame); break;
+            case ESM3::SUB_HITR: assert(format < 8); esm.get(mHitRecovery); break;
+            case ESM3::SUB_BLCK: assert(format < 8); esm.get(mBlock); break;
+            case ESM3::SUB_MOVE: esm.get(mMovementFlags); break;
+            case ESM3::SUB_ASTR: esm.skipSubRecordData(); break; // attackStrength, no longer used
+            case ESM3::SUB_FALL: esm.get(mFallHeight); break;
+            case ESM3::SUB_LHIT: esm.get(mLastHitObject); break;
+            case ESM3::SUB_LHAT: esm.get(mLastHitAttemptObject); break;
+            case ESM3::SUB_CALC: assert(format < 8); esm.get(mRecalcDynamicStats); break;
+            case ESM3::SUB_DRAW: esm.get(mDrawState); break;
+            case ESM3::SUB_LEVL: esm.get(mLevel); break;
+            case ESM3::SUB_ACID: esm.get(mActorId); break;
+            case ESM3::SUB_DANM: esm.get(mDeathAnimation); break;
+            case ESM3::SUB_DTIM: esm.get(mTimeOfDeath); break;
+            case ESM3::SUB_SPEL:
+            {
+                esm.cacheSubRecordHeader();
+                mSpells.load(esm);
+                break;
+            }
+            case ESM3::SUB_ID__:
+            {
+                esm.cacheSubRecordHeader();
+                mActiveSpells.load(esm);
+                break;
+            }
+            case ESM3::SUB_AIPK:
+            {
+                esm.cacheSubRecordHeader();
+                mAiSequence.load(esm);
+                break;
+            }
+            case ESM3::SUB_LAST: // FIXME: this should not occur here, see Arwen converted save
+            {
+                esm.skipSubRecordData();
+                break;
+            }
+            case ESM3::SUB_EFID:
+            {
+                esm.cacheSubRecordHeader();
+                mMagicEffects.load(esm);
+                break;
+            }
+            case ESM3::SUB_SUMM:
+            {
+                int magicEffect;
+                esm.get(magicEffect);
+
+                std::string source = "";
+                int effectIndex = -1;
+                int actorId;
+
+                if (esm.getNextSubRecordHeader(ESM3::SUB_SOUR))
+                    esm.getZString(source);
+
+                if (esm.getNextSubRecordHeader(ESM3::SUB_EIND))
+                    esm.get(effectIndex);
+
+                esm.getSubRecordHeader(ESM3::SUB_ACID);
+                esm.get(actorId);
+
+                mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
+                break;
+            }
+            case ESM3::SUB_GRAV:
+            {
+                int actorId;
+                esm.get(actorId);
+                mSummonGraveyard.push_back(actorId);
+                break;
+            }
+            case ESM3::SUB_AISE: esm.get(mHasAiSettings); break;
+            case ESM3::SUB_CORP:
+            {
+                std::string id;
+                esm.getZString(id);
+
+                CorprusStats stats;
+                esm.getSubRecordHeader(ESM3::SUB_WORS);
+                esm.get(stats.mWorsenings);
+                esm.getSubRecordHeader(ESM3::SUB_TIME);
+                esm.get(stats.mNextWorsening);
+
+                mCorprusSpells[id] = stats;
+                break;
+            }
+            default:
+                finished = true;
+                 esm.cacheSubRecordHeader();
+                 break;
+        }
     }
-    else
-    {
-        esm.getHNOT(flags, "AFLG");
-        mDead = flags & Dead;
-        mDeathAnimationFinished = flags & DeathAnimationFinished;
-        mDied = flags & Died;
-        mMurdered = flags & Murdered;
-        mTalkedTo = flags & TalkedTo;
-        mAlarmed = flags & Alarmed;
-        mAttacked = flags & Attacked;
-        mKnockdown = flags & Knockdown;
-        mKnockdownOneFrame = flags & KnockdownOneFrame;
-        mKnockdownOverOneFrame = flags & KnockdownOverOneFrame;
-        mHitRecovery = flags & HitRecovery;
-        mBlock = flags & Block;
-        mRecalcDynamicStats = flags & RecalcDynamicStats;
-    }
-
-    mMovementFlags = 0;
-    esm.getHNOT (mMovementFlags, "MOVE");
-
-    if (esm.isNextSub("ASTR"))
-        esm.skipHSub(); // attackStrength, no longer used
-
-    mFallHeight = 0;
-    esm.getHNOT (mFallHeight, "FALL");
-
-    mLastHitObject = esm.getHNOString ("LHIT");
-
-    mLastHitAttemptObject = esm.getHNOString ("LHAT");
-
-    if (esm.getFormat() < 8)
-        esm.getHNOT (mRecalcDynamicStats, "CALC");
-
-    mDrawState = 0;
-    esm.getHNOT (mDrawState, "DRAW");
-
-    mLevel = 1;
-    esm.getHNOT (mLevel, "LEVL");
-
-    mActorId = -1;
-    esm.getHNOT (mActorId, "ACID");
-
-    mDeathAnimation = -1;
-    esm.getHNOT (mDeathAnimation, "DANM");
-
-    mTimeOfDeath.mDay = 0;
-    mTimeOfDeath.mHour = 0;
-    esm.getHNOT (mTimeOfDeath, "DTIM");
-
-    mSpells.load(esm);
-    mActiveSpells.load(esm);
-    mAiSequence.load(esm);
-    mMagicEffects.load(esm);
-
-    while (esm.isNextSub("SUMM"))
-    {
-        int magicEffect;
-        esm.getHT(magicEffect);
-        std::string source = esm.getHNOString("SOUR");
-        int effectIndex = -1;
-        esm.getHNOT (effectIndex, "EIND");
-        int actorId;
-        esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
-    }
-
-    while (esm.isNextSub("GRAV"))
-    {
-        int actorId;
-        esm.getHT(actorId);
-        mSummonGraveyard.push_back(actorId);
-    }
-
-    mHasAiSettings = false;
-    esm.getHNOT(mHasAiSettings, "AISE");
 
     if (mHasAiSettings)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i].load(esm);
     }
-
-    while (esm.isNextSub("CORP"))
-    {
-        std::string id = esm.getHString();
-
-        CorprusStats stats;
-        esm.getHNT(stats.mWorsenings, "WORS");
-        esm.getHNT(stats.mNextWorsening, "TIME");
-
-        mCorprusSpells[id] = stats;
-    }
 }
 
-void ESM::CreatureStats::save (ESMWriter &esm) const
+void ESM3::CreatureStats::save (ESM::ESMWriter& esm) const
 {
     for (int i=0; i<8; ++i)
         mAttributes[i].save (esm);
@@ -246,7 +286,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     }
 }
 
-void ESM::CreatureStats::blank()
+void ESM3::CreatureStats::blank()
 {
     mTradeTime.mHour = 0;
     mTradeTime.mDay = 0;

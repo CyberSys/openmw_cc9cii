@@ -5,7 +5,7 @@
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -20,7 +20,7 @@
 
 namespace CSVRender
 {
-    const int CellWater::CellSize = ESM::Land::REAL_SIZE;
+    const int CellWater::CellSize = ESM3::Land::REAL_SIZE;
 
     CellWater::CellWater(CSMWorld::Data& data, osg::Group* cellNode, const std::string& id,
         const CSMWorld::CellCoordinates& cellCoords)

@@ -1,16 +1,19 @@
-#ifndef OPENMW_ESM_EFFECTLIST_H
-#define OPENMW_ESM_EFFECTLIST_H
+#ifndef ESM3_EFFECTLIST_H
+#define ESM3_EFFECTLIST_H
 
+#include <cstdint>
 #include <vector>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
 
-    #pragma pack(push)
-    #pragma pack(1)
+namespace ESM3
+{
+    class Reader;
 
+    #pragma pack(push, 1)
     /** Defines a spell effect. Shared between SPEL (Spells), ALCH
      (Potions) and ENCH (Item enchantments) records
      */
@@ -24,8 +27,9 @@ namespace ESM
         signed char mSkill, mAttribute; // -1 if N/A
 
         // Other spell parameters
-        int mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)
-        int mArea, mDuration, mMagnMin, mMagnMax;
+        // TODO: These used to be signed int - not sure if there's code that relies on that
+        std::uint32_t mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)
+        std::uint32_t mArea, mDuration, mMagnMin, mMagnMax;
     };
     #pragma pack(pop)
 
@@ -35,11 +39,12 @@ namespace ESM
         std::vector<ENAMstruct> mList;
 
         /// Load one effect, assumes subrecord name was already read
-        void add(ESMReader &esm);
+        void add(Reader& reader);
 
         /// Load all effects
-        void load(ESMReader &esm);
-        void save(ESMWriter &esm) const;
+        void load(Reader& reader); // was used by ENCH and ALCH
+
+        void save(ESM::ESMWriter& esm) const;
     };
 
 }

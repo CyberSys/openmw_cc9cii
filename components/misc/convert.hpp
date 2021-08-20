@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_MISC_CONVERT_H
 #define OPENMW_COMPONENTS_MISC_CONVERT_H
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/pgrd.hpp>
 
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
@@ -23,7 +23,7 @@ namespace Convert
         return osg::Vec3f(value.x(), value.y(), value.z());
     }
 
-    inline osg::Vec3f makeOsgVec3f(const ESM::Pathgrid::Point& value)
+    inline osg::Vec3f makeOsgVec3f(const ESM3::Pathgrid::Point& value)
     {
         return osg::Vec3f(value.mX, value.mY, value.mZ);
     }

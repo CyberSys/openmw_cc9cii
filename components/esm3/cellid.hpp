@@ -1,12 +1,16 @@
-#ifndef OPENMW_ESM_CELLID_H
-#define OPENMW_ESM_CELLID_H
+#ifndef ESM3_CELLID_H
+#define ESM3_CELLID_H
 
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     struct CellId
     {
@@ -22,8 +26,8 @@ namespace ESM
 
         static const std::string sDefaultWorldspace;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& reader);
+        void save (ESM::ESMWriter &esm) const;
     };
 
     bool operator== (const CellId& left, const CellId& right);

@@ -22,7 +22,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/debug/debuglog.hpp>
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/gmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/misc/convert.hpp>
@@ -84,14 +84,14 @@ namespace
         // Advance acrobatics and set flag for GetPCJumping
         if (isPlayer)
         {
-            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, 0);
+            ptr.getClass().skillUsageSucceeded(ptr, ESM3::Skill::Acrobatics, 0);
             MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
         }
 
         // Decrease fatigue
         if (!isPlayer || !MWBase::Environment::get().getWorld()->getGodModeState())
         {
-            const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            const MWWorld::Store<ESM3::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
             const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
             const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
             const float normalizedEncumbrance = std::min(1.f, ptr.getClass().getNormalizedEncumbrance(ptr));
@@ -224,7 +224,7 @@ namespace MWPhysics
         }
 
         // Use cone shape as fallback
-        const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM3::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
         btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->mValue.getFloat()/2.0f), queryDistance);
         shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->mValue.getFloat()/2.0f) /
@@ -706,10 +706,10 @@ namespace MWPhysics
 
         // check if Actor should spawn above water
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-        const bool canWaterWalk = effects.get(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
+        const bool canWaterWalk = effects.get(ESM3::MagicEffect::WaterWalking).getMagnitude() > 0;
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get(), canWaterWalk);
-        
+
         mActors.emplace(ptr, std::move(actor));
     }
 
@@ -784,7 +784,7 @@ namespace MWPhysics
             const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
             bool waterCollision = false;
-            if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
+            if (cell->getCell()->hasWater() && effects.get(ESM3::MagicEffect::WaterWalking).getMagnitude())
             {
                 if (physicActor->getCollisionMode() || !world->isUnderwater(actor.getCell(), actor.getRefData().getPosition().asVec3()))
                     waterCollision = true;
@@ -793,9 +793,9 @@ namespace MWPhysics
             physicActor->setCanWaterWalk(waterCollision);
 
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
-            const float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
+            const float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM3::MagicEffect::SlowFall).getMagnitude() * 0.005f));
             const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
-            const bool inert = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
+            const bool inert = stats.isDead() || (!godmode && stats.getMagicEffects().get(ESM3::MagicEffect::Paralyze).getModifier() > 0);
 
             framedata.first.emplace_back(physicActor);
             framedata.second.emplace_back(*physicActor, inert, waterCollision, slowFall, waterlevel);
@@ -978,7 +978,7 @@ namespace MWPhysics
         , mWalkingOnWater(false)
         , mInert(inert)
         , mCollisionObject(actor.getCollisionObject())
-        , mSwimLevel(waterlevel - (actor.getRenderingHalfExtents().z() * 2 * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat()))
+        , mSwimLevel(waterlevel - (actor.getRenderingHalfExtents().z() * 2 * MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fSwimHeightScale")->mValue.getFloat()))
         , mSlowFall(slowFall)
         , mRotation()
         , mMovement(actor.velocity())

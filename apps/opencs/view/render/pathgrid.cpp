@@ -68,7 +68,7 @@ namespace CSVRender
         , mDragGeometry(nullptr)
         , mTag(new PathgridTag(this))
     {
-        const float CoordScalar = ESM::Land::REAL_SIZE;
+        const float CoordScalar = ESM3::Land::REAL_SIZE;
 
         mBaseNode = new osg::PositionAttitudeTransform ();
         mBaseNode->setPosition(osg::Vec3f(mCoords.getX() * CoordScalar, mCoords.getY() * CoordScalar, 0.f));
@@ -86,7 +86,7 @@ namespace CSVRender
         if (index != -1)
         {
             const CSMWorld::Cell& cell = mData.getCells().getRecord(index).get();
-            mInterior = cell.mData.mFlags & ESM::Cell::Interior;
+            mInterior = cell.mData.mFlags & ESM3::Cell::Interior;
         }
     }
 
@@ -665,7 +665,7 @@ namespace CSVRender
 
     int Pathgrid::clampToCell(int v)
     {
-        const int CellExtent = ESM::Land::REAL_SIZE;
+        const int CellExtent = ESM3::Land::REAL_SIZE;
 
         if (mInterior)
             return v;

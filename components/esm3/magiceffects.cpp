@@ -1,29 +1,43 @@
 #include "magiceffects.hpp"
 
-#include "esmwriter.hpp"
-#include "esmreader.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
-
-void MagicEffects::save(ESMWriter &esm) const
-{
-    for (std::map<int, int>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    void MagicEffects::load(Reader& esm)
     {
-        esm.writeHNT("EFID", it->first);
-        esm.writeHNT("BASE", it->second);
-    }
-}
+        bool finished = false;
+        while (!finished && esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_EFID:
+                {
+                    int id, base;
+                    esm.get(id);
 
-void MagicEffects::load(ESMReader &esm)
-{
-    while (esm.isNextSub("EFID"))
+                    esm.getSubRecordHeader(ESM3::SUB_BASE);
+                    esm.get(base);
+
+                    mEffects.insert(std::make_pair(id, base));
+                    break;
+                }
+                default:
+                    finished = true;
+                    esm.cacheSubRecordHeader();
+                    break;
+            }
+        }
+    }
+
+    void MagicEffects::save(ESM::ESMWriter& esm) const
     {
-        int id, base;
-        esm.getHT(id);
-        esm.getHNT(base, "BASE");
-        mEffects.insert(std::make_pair(id, base));
+        for (std::map<int, int>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        {
+            esm.writeHNT("EFID", it->first);
+            esm.writeHNT("BASE", it->second);
+        }
     }
-}
-
 }

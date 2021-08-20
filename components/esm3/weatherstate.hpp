@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_WEATHERSTATE_H
-#define OPENMW_ESM_WEATHERSTATE_H
+#ifndef ESM3_WEATHERSTATE_H
+#define ESM3_WEATHERSTATE_H
 
 #include <map>
 #include <string>
@@ -7,8 +7,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     struct RegionWeatherState
     {
@@ -28,8 +32,8 @@ namespace ESM
         int mQueuedWeather;
         std::map<std::string, RegionWeatherState> mRegions;
 
-        void load(ESMReader& esm);
-        void save(ESMWriter& esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 }
 

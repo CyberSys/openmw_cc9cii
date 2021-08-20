@@ -1,7 +1,7 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
-#include <components/esm/loadclas.hpp>
+#include <components/esm3/clas.hpp>
 
 #include <map>
 #include <vector>
@@ -47,7 +47,7 @@ namespace MWGui
 
     void setValue (const std::string& id, const MWMechanics::AttributeValue& value) override;
     void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
-    void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
+    void setValue(const ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
     void configureSkills(const SkillList& major, const SkillList& minor) override;
 
     void onFrame(float duration);
@@ -75,11 +75,11 @@ namespace MWGui
     std::string mPlayerName;
     std::string mPlayerRaceId;
     std::string mPlayerBirthSignId;
-    ESM::Class mPlayerClass;
+    ESM3::Class mPlayerClass;
 
     //Class generation vars
     unsigned mGenerateClassStep;                 // Keeps track of current step in Generate Class dialog
-    ESM::Class::Specialization mGenerateClassResponses[3];
+    ESM3::Class::Specialization mGenerateClassResponses[3];
     unsigned mGenerateClassSpecializations[3];   // A counter for each specialization which is increased when an answer is chosen
     std::string mGenerateClass;                  // In order: Combat, Magic, Stealth
 

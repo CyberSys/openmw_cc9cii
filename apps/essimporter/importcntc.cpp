@@ -1,16 +1,36 @@
 #include "importcntc.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <cassert>
+
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
 
-    void CNTC::load(ESM::ESMReader &esm)
+    void CNTC::load(ESM3::Reader& esm)
     {
-        mIndex = 0;
-        esm.getHNT(mIndex, "INDX");
+        assert(esm.hdr().typeId == ESM3::REC_CNTC);
 
-        mInventory.load(esm);
+        mIndex = 0;
+        while (esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_INDX:
+                {
+                    esm.get(mIndex);
+                    break;
+                }
+                case ESM3::SUB_NPCO:
+                {
+                    mInventory.load(esm);
+                    break;
+                }
+                default:
+                    esm.fail("CNTC: Unknown subrecord");
+            }
+        }
     }
 
 }

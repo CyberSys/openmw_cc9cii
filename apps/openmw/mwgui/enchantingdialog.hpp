@@ -70,7 +70,7 @@ namespace MWGui
         MyGUI::TextBox* mPriceText;
 
         MWMechanics::Enchanting mEnchanting;
-        ESM::EffectList mEffectList;
+        ESM3::EffectList mEffectList;
     };
 
 }

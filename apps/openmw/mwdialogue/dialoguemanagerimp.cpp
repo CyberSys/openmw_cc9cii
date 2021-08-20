@@ -5,9 +5,9 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/loaddial.hpp>
-#include <components/esm/loadinfo.hpp>
-#include <components/esm/dialoguestate.hpp>
+#include <components/esm3/dial.hpp>
+#include <components/esm3/info.hpp>
+#include <components/esm3/dialoguestate.hpp>
 #include <components/esm/esmwriter.hpp>
 
 #include <components/compiler/exception.hpp>
@@ -139,17 +139,17 @@ namespace MWDialogue
         mActorKnownTopicsFlag.clear();
 
         //greeting
-        const MWWorld::Store<ESM::Dialogue> &dialogs =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM3::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>();
 
         Filter filter (actor, mChoice, mTalkedTo);
 
-        for (MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin(); it != dialogs.end(); ++it)
+        for (MWWorld::Store<ESM3::Dialogue>::iterator it = dialogs.begin(); it != dialogs.end(); ++it)
         {
-            if(it->mType == ESM::Dialogue::Greeting)
+            if(it->mType == ESM3::Dialogue::Greeting)
             {
                 // Search a response (we do not accept a fallback to "Info refusal" here)
-                if (const ESM::DialInfo *info = filter.search (*it, false))
+                if (const ESM3::DialInfo *info = filter.search (*it, false))
                 {
                     creatureStats.talkedToPlayer();
 
@@ -272,16 +272,16 @@ namespace MWDialogue
     {
         Filter filter (mActor, mChoice, mTalkedTo);
 
-        const MWWorld::Store<ESM::Dialogue> &dialogues =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM3::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>();
 
-        const ESM::Dialogue& dialogue = *dialogues.find (topic);
+        const ESM3::Dialogue& dialogue = *dialogues.find (topic);
 
-        const ESM::DialInfo* info = filter.search(dialogue, true);
+        const ESM3::DialInfo* info = filter.search(dialogue, true);
         if (info)
         {
             std::string title;
-            if (dialogue.mType==ESM::Dialogue::Persuasion)
+            if (dialogue.mType==ESM3::Dialogue::Persuasion)
             {
                 // Determine GMST from dialogue topic. GMSTs are:
                 // sAdmireSuccess, sAdmireFail, sIntimidateSuccess, sIntimidateFail,
@@ -290,8 +290,8 @@ namespace MWDialogue
 
                 modifiedTopic.erase (std::remove (modifiedTopic.begin(), modifiedTopic.end(), ' '), modifiedTopic.end());
 
-                const MWWorld::Store<ESM::GameSetting>& gmsts =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                const MWWorld::Store<ESM3::GameSetting>& gmsts =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
                 title = gmsts.find (modifiedTopic)->mValue.getString();
             }
@@ -301,11 +301,11 @@ namespace MWDialogue
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             callback->addResponse(title, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
-            if (dialogue.mType == ESM::Dialogue::Topic)
+            if (dialogue.mType == ESM3::Dialogue::Topic)
             {
                 // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
                 // in which case it should not be added to the journal.
-                for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
+                for (ESM3::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
                     iter!=dialogue.mInfo.end(); ++iter)
                 {
                     if (iter->mId == info->mId)
@@ -324,9 +324,9 @@ namespace MWDialogue
         }
     }
 
-    const ESM::Dialogue *DialogueManager::searchDialogue(const std::string& id)
+    const ESM3::Dialogue *DialogueManager::searchDialogue(const std::string& id)
     {
-        return MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search(id);
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>().search(id);
     }
 
     void DialogueManager::updateGlobals()
@@ -341,13 +341,13 @@ namespace MWDialogue
         mActorKnownTopics.clear();
         mActorKnownTopicsFlag.clear();
 
-        const auto& dialogs = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const auto& dialogs = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>();
 
         Filter filter (mActor, -1, mTalkedTo);
 
         for (const auto& dialog : dialogs)
         {
-            if (dialog.mType == ESM::Dialogue::Topic)
+            if (dialog.mType == ESM3::Dialogue::Topic)
             {
                 const auto* answer = filter.search(dialog, true);
                 auto topicId = Misc::StringUtils::lowerCase(dialog.mId);
@@ -398,8 +398,8 @@ namespace MWDialogue
     {
         if(!mIsInChoice)
         {
-            const ESM::Dialogue* dialogue = searchDialogue(keyword);
-            if (dialogue && dialogue->mType == ESM::Dialogue::Topic)
+            const ESM3::Dialogue* dialogue = searchDialogue(keyword);
+            if (dialogue && dialogue->mType == ESM3::Dialogue::Topic)
             {
                 executeTopic (keyword, callback);
             }
@@ -434,14 +434,14 @@ namespace MWDialogue
     {
         mChoice = answer;
 
-        const ESM::Dialogue* dialogue = searchDialogue(mLastTopic);
+        const ESM3::Dialogue* dialogue = searchDialogue(mLastTopic);
         if (dialogue)
         {
             Filter filter (mActor, mChoice, mTalkedTo);
 
-            if (dialogue->mType == ESM::Dialogue::Topic || dialogue->mType == ESM::Dialogue::Greeting)
+            if (dialogue->mType == ESM3::Dialogue::Topic || dialogue->mType == ESM3::Dialogue::Greeting)
             {
-                if (const ESM::DialInfo *info = filter.search (*dialogue, true))
+                if (const ESM3::DialInfo *info = filter.search (*dialogue, true))
                 {
                     std::string text = info->mResponse;
                     parseText (text);
@@ -453,11 +453,11 @@ namespace MWDialogue
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     callback->addResponse("", Interpreter::fixDefinesDialog(text, interpreterContext));
 
-                    if (dialogue->mType == ESM::Dialogue::Topic)
+                    if (dialogue->mType == ESM3::Dialogue::Topic)
                     {
                         // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
                         // in which case it should not be added to the journal
-                        for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue->mInfo.begin();
+                        for (ESM3::Dialogue::InfoContainer::const_iterator iter = dialogue->mInfo.begin();
                             iter!=dialogue->mInfo.end(); ++iter)
                         {
                             if (iter->mId == info->mId)
@@ -519,7 +519,7 @@ namespace MWDialogue
         mPermanentDispositionChange += perm;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
+        player.getClass().skillUsageSucceeded(player, ESM3::Skill::Speechcraft, success ? 0 : 1);
 
         if (success)
         {
@@ -569,20 +569,20 @@ namespace MWDialogue
     {
         Filter filter (mActor, service, mTalkedTo);
 
-        const MWWorld::Store<ESM::Dialogue> &dialogues =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM3::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>();
 
-        const ESM::Dialogue& dialogue = *dialogues.find ("Service Refusal");
+        const ESM3::Dialogue& dialogue = *dialogues.find ("Service Refusal");
 
-        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, false, false, true);
+        std::vector<const ESM3::DialInfo *> infos = filter.list (dialogue, false, false, true);
         if (!infos.empty())
         {
-            const ESM::DialInfo* info = infos[0];
+            const ESM3::DialInfo* info = infos[0];
 
             parseText (info->mResponse);
 
-            const MWWorld::Store<ESM::GameSetting>& gmsts =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            const MWWorld::Store<ESM3::GameSetting>& gmsts =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>();
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
 
@@ -616,11 +616,11 @@ namespace MWDialogue
         }
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Dialogue *dial = store.get<ESM::Dialogue>().find(topic);
+        const ESM3::Dialogue *dial = store.get<ESM3::Dialogue>().find(topic);
 
         const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
         Filter filter(actor, 0, creatureStats.hasTalkedToPlayer());
-        const ESM::DialInfo *info = filter.search(*dial, false);
+        const ESM3::DialInfo *info = filter.search(*dial, false);
         if(info != nullptr)
         {
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
@@ -640,7 +640,7 @@ namespace MWDialogue
 
     void DialogueManager::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        ESM::DialogueState state;
+        ESM3::DialogueState state;
 
         for (std::set<std::string>::const_iterator iter (mKnownTopics.begin());
             iter!=mKnownTopics.end(); ++iter)
@@ -655,18 +655,18 @@ namespace MWDialogue
         writer.endRecord (ESM::REC_DIAS);
     }
 
-    void DialogueManager::readRecord (ESM::ESMReader& reader, uint32_t type)
+    void DialogueManager::readRecord (ESM3::Reader& reader, uint32_t type)
     {
         if (type==ESM::REC_DIAS)
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-            ESM::DialogueState state;
+            ESM3::DialogueState state;
             state.load (reader);
 
             for (std::vector<std::string>::const_iterator iter (state.mKnownTopics.begin());
                 iter!=state.mKnownTopics.end(); ++iter)
-                if (store.get<ESM::Dialogue>().search (*iter))
+                if (store.get<ESM3::Dialogue>().search (*iter))
                     mKnownTopics.insert (*iter);
 
             mChangedFactionReaction = state.mChangedFactionReaction;
@@ -679,8 +679,8 @@ namespace MWDialogue
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);
 
         // Make sure the factions exist
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(fact1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(fact2);
 
         int newValue = getFactionReaction(faction1, faction2) + diff;
 
@@ -694,8 +694,8 @@ namespace MWDialogue
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);
 
         // Make sure the factions exist
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(fact1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(fact2);
 
         std::map<std::string, int>& map = mChangedFactionReaction[fact1];
         map[fact2] = absolute;
@@ -710,7 +710,7 @@ namespace MWDialogue
         if (map != mChangedFactionReaction.end() && map->second.find(fact2) != map->second.end())
             return map->second.at(fact2);
 
-        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
+        const ESM3::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(fact1);
 
         std::map<std::string, int>::const_iterator it = faction->mReactions.begin();
         for (; it != faction->mReactions.end(); ++it)

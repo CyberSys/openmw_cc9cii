@@ -1,11 +1,11 @@
 #ifndef MWMECHANICS_SPELLCASTING_H
 #define MWMECHANICS_SPELLCASTING_H
 
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Spell;
     struct Ingredient;
@@ -23,7 +23,7 @@ namespace MWMechanics
         MWWorld::Ptr mCaster; // May be empty
         MWWorld::Ptr mTarget; // May be empty
 
-        void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects);
+        void playSpellCastingEffects(const std::vector<ESM3::ENAMstruct>& effects);
 
     public:
         bool mStack{false};
@@ -37,16 +37,16 @@ namespace MWMechanics
     public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool manualSpell=false);
 
-        bool cast (const ESM::Spell* spell);
+        bool cast (const ESM3::Spell* spell);
 
         /// @note mCaster must be an actor
         /// @param launchProjectile If set to false, "on target" effects are directly applied instead of being launched as projectile originating from the caster.
         bool cast (const MWWorld::Ptr& item, bool launchProjectile=true);
 
         /// @note mCaster must be an NPC
-        bool cast (const ESM::Ingredient* ingredient);
+        bool cast (const ESM3::Ingredient* ingredient);
 
-        bool cast (const ESM::Potion* potion);
+        bool cast (const ESM3::Potion* potion);
 
         /// @note Auto detects if spell, ingredient or potion
         bool cast (const std::string& id);
@@ -59,7 +59,7 @@ namespace MWMechanics
         /// @note \a target can be any type of object, not just actors.
         /// @note \a caster can be any type of object, or even an empty object.
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-                      const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
+                      const ESM3::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 
         /// @note \a caster can be any type of object, or even an empty object.
         /// @return was the target suitable for the effect?

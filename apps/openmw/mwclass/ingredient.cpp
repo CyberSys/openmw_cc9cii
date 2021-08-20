@@ -1,6 +1,6 @@
 #include "ingredient.hpp"
 
-#include <components/esm/loadingr.hpp>
+#include <components/esm3/ingr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -30,7 +30,7 @@ namespace MWClass
 
     std::string Ingredient::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -41,7 +41,7 @@ namespace MWClass
 
     std::string Ingredient::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -55,14 +55,14 @@ namespace MWClass
 
     std::string Ingredient::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
 
         return ref->mBase->mScript;
     }
 
     int Ingredient::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
 
         return ref->mBase->mData.mValue;
     }
@@ -81,7 +81,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Ingredient);
 
-        registerClass (typeid (ESM::Ingredient).name(), instance);
+        registerClass (typeid (ESM3::Ingredient).name(), instance);
     }
 
     std::string Ingredient::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -96,14 +96,14 @@ namespace MWClass
 
     std::string Ingredient::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
 
         return ref->mBase->mIcon;
     }
 
     MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -120,10 +120,10 @@ namespace MWClass
         }
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        float alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
+        float alchemySkill = player.getClass().getSkill(player, ESM3::Skill::Alchemy);
 
         static const float fWortChanceValue =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
+                MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
 
         MWGui::Widgets::SpellEffectList list;
         for (int i=0; i<4; ++i)
@@ -152,20 +152,20 @@ namespace MWClass
 
     MWWorld::Ptr Ingredient::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     bool Ingredient::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return (npcServices & ESM::NPC::Ingredients) != 0;
+        return (npcServices & ESM3::NPC::Ingredients) != 0;
     }
 
 
     float Ingredient::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM3::Ingredient> *ref = ptr.get<ESM3::Ingredient>();
         return ref->mBase->mData.mWeight;
     }
 }

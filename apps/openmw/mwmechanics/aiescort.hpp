@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace ESM
+namespace ESM3
 {
 namespace AiSequence
 {
@@ -28,7 +28,7 @@ namespace MWMechanics
                 \implement AiEscortCell **/
             AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z);
 
-            AiEscort(const ESM::AiSequence::AiEscort* escort);
+            AiEscort(const ESM3::AiSequence::AiEscort* escort);
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
@@ -42,7 +42,7 @@ namespace MWMechanics
                 return options;
             }
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
+            void writeState(ESM3::AiSequence::AiSequence &sequence) const override;
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 

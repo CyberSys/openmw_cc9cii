@@ -1,24 +1,26 @@
 #include "cellid.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-const std::string ESM::CellId::sDefaultWorldspace = "sys::default";
+const std::string ESM3::CellId::sDefaultWorldspace = "sys::default";
 
-void ESM::CellId::load (ESMReader &esm)
+void ESM3::CellId::load (Reader& reader)
 {
-    mWorldspace = esm.getHNString ("SPAC");
+    if (reader.getNextSubRecordHeader(ESM3::SUB_SPAC))
+        reader.getString(mWorldspace); // NOTE: string not null terminated
 
-    if (esm.isNextSub ("CIDX"))
+    if (reader.getNextSubRecordHeader(ESM3::SUB_CIDX))
     {
-        esm.getHT (mIndex, 8);
+        reader.get(mIndex, 8);
         mPaged = true;
     }
     else
         mPaged = false;
 }
 
-void ESM::CellId::save (ESMWriter &esm) const
+void ESM3::CellId::save (ESM::ESMWriter& esm) const
 {
     esm.writeHNString ("SPAC", mWorldspace);
 
@@ -26,18 +28,18 @@ void ESM::CellId::save (ESMWriter &esm) const
         esm.writeHNT ("CIDX", mIndex, 8);
 }
 
-bool ESM::operator== (const CellId& left, const CellId& right)
+bool ESM3::operator== (const CellId& left, const CellId& right)
 {
     return left.mWorldspace==right.mWorldspace && left.mPaged==right.mPaged &&
         (!left.mPaged || (left.mIndex.mX==right.mIndex.mX && left.mIndex.mY==right.mIndex.mY));
 }
 
-bool ESM::operator!= (const CellId& left, const CellId& right)
+bool ESM3::operator!= (const CellId& left, const CellId& right)
 {
     return !(left==right);
 }
 
-bool ESM::operator < (const CellId& left, const CellId& right)
+bool ESM3::operator < (const CellId& left, const CellId& right)
 {
     if (left.mPaged < right.mPaged)
         return true;

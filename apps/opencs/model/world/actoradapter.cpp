@@ -1,10 +1,10 @@
 #include "actoradapter.hpp"
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/mappings.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/clot.hpp>
+#include <components/esm3/npc_.hpp>
+#include <components/esm3/race.hpp>
+#include <components/esm3/mappings.hpp>
 #include <components/sceneutil/actorutil.hpp>
 
 #include "data.hpp"
@@ -26,29 +26,29 @@ namespace CSMWorld
         mIsBeast = false;
     }
 
-    bool ActorAdapter::RaceData::handlesPart(ESM::PartReferenceType type) const
+    bool ActorAdapter::RaceData::handlesPart(ESM3::PartReferenceType type) const
     {
         switch (type)
         {
-            case ESM::PRT_Skirt:
-            case ESM::PRT_Shield:
-            case ESM::PRT_RPauldron:
-            case ESM::PRT_LPauldron:
-            case ESM::PRT_Weapon:
+            case ESM3::PRT_Skirt:
+            case ESM3::PRT_Shield:
+            case ESM3::PRT_RPauldron:
+            case ESM3::PRT_LPauldron:
+            case ESM3::PRT_Weapon:
                 return false;
             default:
                 return true;
         }
     }
 
-    const std::string& ActorAdapter::RaceData::getFemalePart(ESM::PartReferenceType index) const
+    const std::string& ActorAdapter::RaceData::getFemalePart(ESM3::PartReferenceType index) const
     {
-        return mFemaleParts[ESM::getMeshPart(index)];
+        return mFemaleParts[ESM3::getMeshPart(index)];
     }
 
-    const std::string& ActorAdapter::RaceData::getMalePart(ESM::PartReferenceType index) const
+    const std::string& ActorAdapter::RaceData::getMalePart(ESM3::PartReferenceType index) const
     {
-        return mMaleParts[ESM::getMeshPart(index)];
+        return mMaleParts[ESM3::getMeshPart(index)];
     }
 
     bool ActorAdapter::RaceData::hasDependency(const std::string& id) const
@@ -56,13 +56,13 @@ namespace CSMWorld
         return mDependencies.find(id) != mDependencies.end();
     }
 
-    void ActorAdapter::RaceData::setFemalePart(ESM::BodyPart::MeshPart index, const std::string& partId)
+    void ActorAdapter::RaceData::setFemalePart(ESM3::BodyPart::MeshPart index, const std::string& partId)
     {
         mFemaleParts[index] = partId;
         addOtherDependency(partId);
     }
 
-    void ActorAdapter::RaceData::setMalePart(ESM::BodyPart::MeshPart index, const std::string& partId)
+    void ActorAdapter::RaceData::setMalePart(ESM3::BodyPart::MeshPart index, const std::string& partId)
     {
         mMaleParts[index] = partId;
         addOtherDependency(partId);
@@ -121,7 +121,7 @@ namespace CSMWorld
         return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
     }
 
-    const std::string ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
+    const std::string ActorAdapter::ActorData::getPart(ESM3::PartReferenceType index) const
     {
         auto it = mParts.find(index);
         if (it == mParts.end())
@@ -151,7 +151,7 @@ namespace CSMWorld
         return mDependencies.find(id) != mDependencies.end();
     }
 
-    void ActorAdapter::ActorData::setPart(ESM::PartReferenceType index, const std::string& partId, int priority)
+    void ActorAdapter::ActorData::setPart(ESM3::PartReferenceType index, const std::string& partId, int priority)
     {
         auto it = mParts.find(index);
         if (it != mParts.end())
@@ -496,7 +496,7 @@ namespace CSMWorld
         }
 
         auto& race = raceRecord.get();
-        data->reset_data(id, race.mData.mFlags & ESM::Race::Beast);
+        data->reset_data(id, race.mData.mFlags & ESM3::Race::Beast);
 
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)
@@ -511,10 +511,10 @@ namespace CSMWorld
             }
 
             auto& part = partRecord.get();
-            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin && !is1stPersonPart(part.mId))
+            if (part.mRace == id && part.mData.mType == ESM3::BodyPart::MT_Skin && !is1stPersonPart(part.mId))
             {
-                auto type = (ESM::BodyPart::MeshPart) part.mData.mPart;
-                bool female = part.mData.mFlags & ESM::BodyPart::BPF_Female;
+                auto type = (ESM3::BodyPart::MeshPart) part.mData.mPart;
+                bool female = part.mData.mFlags & ESM3::BodyPart::BPF_Female;
                 if (female) data->setFemalePart(type, part.mId);
                 else data->setMalePart(type, part.mId);
             }
@@ -525,14 +525,14 @@ namespace CSMWorld
     {
         // Common setup, record is known to exist and is not deleted
         int index = mReferenceables.searchId(id);
-        auto& npc = dynamic_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(index)).get();
+        auto& npc = dynamic_cast<const Record<ESM3::NPC>&>(mReferenceables.getRecord(index)).get();
 
         RaceDataPtr raceData = getRaceData(npc.mRace);
         data->reset_data(id, "", false, !npc.isMale(), raceData);
 
         // Add head and hair
-        data->setPart(ESM::PRT_Head, npc.mHead, 0);
-        data->setPart(ESM::PRT_Hair, npc.mHair, 0);
+        data->setPart(ESM3::PRT_Head, npc.mHead, 0);
+        data->setPart(ESM3::PRT_Hair, npc.mHair, 0);
 
         // Add inventory items
         for (auto& item : npc.mInventory.mList)
@@ -562,11 +562,11 @@ namespace CSMWorld
         }
 
         // Convenience function to add a parts list to actor data
-        auto addParts = [&](const std::vector<ESM::PartReference>& list, int priority) {
+        auto addParts = [&](const std::vector<ESM3::PartReference>& list, int priority) {
             for (auto& part : list)
             {
                 std::string partId;
-                auto partType = (ESM::PartReferenceType) part.mPart;
+                auto partType = (ESM3::PartReferenceType) part.mPart;
 
                 if (data->isFemale())
                     partId = part.mFemale;
@@ -576,8 +576,8 @@ namespace CSMWorld
                 data->setPart(partType, partId, priority);
 
                 // An another vanilla quirk: hide hairs if an item replaces Head part
-                if (partType == ESM::PRT_Head)
-                    data->setPart(ESM::PRT_Hair, "", priority);
+                if (partType == ESM3::PRT_Head)
+                    data->setPart(ESM3::PRT_Hair, "", priority);
             }
         };
 
@@ -585,7 +585,7 @@ namespace CSMWorld
         int type = mReferenceables.getData(index, TypeColumn).toInt();
         if (type == UniversalId::Type_Armor)
         {
-            auto& armor = dynamic_cast<const Record<ESM::Armor>&>(record).get();
+            auto& armor = dynamic_cast<const Record<ESM3::Armor>&>(record).get();
             addParts(armor.mParts.mParts, 1);
 
             // Changing parts could affect what is picked for rendering
@@ -593,26 +593,26 @@ namespace CSMWorld
         }
         else if (type == UniversalId::Type_Clothing)
         {
-            auto& clothing = dynamic_cast<const Record<ESM::Clothing>&>(record).get();
+            auto& clothing = dynamic_cast<const Record<ESM3::Clothing>&>(record).get();
 
-            std::vector<ESM::PartReferenceType> parts;
-            if (clothing.mData.mType == ESM::Clothing::Robe)
+            std::vector<ESM3::PartReferenceType> parts;
+            if (clothing.mData.mType == ESM3::Clothing::Robe)
             {
                 parts = {
-                    ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
-                    ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                    ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_Cuirass
+                    ESM3::PRT_Groin, ESM3::PRT_Skirt, ESM3::PRT_RLeg, ESM3::PRT_LLeg,
+                    ESM3::PRT_RUpperarm, ESM3::PRT_LUpperarm, ESM3::PRT_RKnee, ESM3::PRT_LKnee,
+                    ESM3::PRT_RForearm, ESM3::PRT_LForearm, ESM3::PRT_Cuirass
                 };
             }
-            else if (clothing.mData.mType == ESM::Clothing::Skirt)
+            else if (clothing.mData.mType == ESM3::Clothing::Skirt)
             {
-                parts = {ESM::PRT_Groin, ESM::PRT_RLeg, ESM::PRT_LLeg};
+                parts = {ESM3::PRT_Groin, ESM3::PRT_RLeg, ESM3::PRT_LLeg};
             }
 
-            std::vector<ESM::PartReference> reservedList;
+            std::vector<ESM3::PartReference> reservedList;
             for (const auto& p : parts)
             {
-                ESM::PartReference pr;
+                ESM3::PartReference pr;
                 pr.mPart = p;
                 reservedList.emplace_back(pr);
             }
@@ -630,7 +630,7 @@ namespace CSMWorld
     {
         // Record is known to exist and is not deleted
         int index = mReferenceables.searchId(id);
-        auto& creature = dynamic_cast<const Record<ESM::Creature>&>(mReferenceables.getRecord(index)).get();
+        auto& creature = dynamic_cast<const Record<ESM3::Creature>&>(mReferenceables.getRecord(index)).get();
 
         data->reset_data(id, creature.mModel, true);
     }

@@ -13,7 +13,7 @@
 #include <components/misc/stringops.hpp>
 #include <components/terrain/world.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include "../mwrender/landmanager.hpp"
 
@@ -443,7 +443,7 @@ namespace MWWorld
 
     void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid *exceptPos)
     {
-        const float resetThreshold = ESM::Land::REAL_SIZE;
+        const float resetThreshold = ESM3::Land::REAL_SIZE;
         for (const auto& pos : mTerrainPreloadPositions)
             if (exceptPos && (pos.first-exceptPos->first).length2() < resetThreshold*resetThreshold && pos.second == exceptPos->second)
                 return;

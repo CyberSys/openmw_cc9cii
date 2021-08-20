@@ -4,7 +4,7 @@
 #include <osg/Geometry>
 #include <osg/VertexAttribDivisor>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
@@ -19,8 +19,8 @@ namespace MWRender
     {
         switch (type)
         {
-          case ESM::REC_STAT:
-            return store.get<ESM::Static>().searchStatic(id)->mModel;
+          case ESM3::REC_STAT:
+            return store.get<ESM3::Static>().searchStatic(id)->mModel;
           default:
             return std::string();
         }
@@ -164,13 +164,13 @@ namespace MWRender
         float mDensity = 0.f;
     };
 
-    inline bool isInChunkBorders(ESM::CellRef& ref, osg::Vec2f& minBound, osg::Vec2f& maxBound)
+    inline bool isInChunkBorders(ESM3::CellRef& ref, osg::Vec2f& minBound, osg::Vec2f& maxBound)
     {
         osg::Vec2f size = maxBound - minBound;
         if (size.x() >=1 && size.y() >=1) return true;
 
         osg::Vec3f pos = ref.mPos.asVec3();
-        osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
+        osg::Vec3f cellPos = pos / ESM3::Land::REAL_SIZE;
         if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
             || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (maxBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
             return false;
@@ -208,23 +208,23 @@ namespace MWRender
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
         DensityCalculator calculator(mDensity);
-        std::vector<ESM::ESMReader> esm;
+        std::vector<ESM3::Reader> esm;
         osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size/2.f), std::floor(center.y() - size/2.f));
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
             {
-                const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
+                const ESM3::Cell* cell = store.get<ESM3::Cell>().searchStatic(cellX, cellY);
                 if (!cell) continue;
 
                 calculator.reset();
                 for (size_t i=0; i<cell->mContextList.size(); ++i)
                 {
-                    unsigned int index = cell->mContextList[i].index;
+                    unsigned int index = cell->mContextList[i].modIndex;
                     if (esm.size() <= index)
                         esm.resize(index+1);
                     cell->restore(esm[index], i);
-                    ESM::CellRef ref;
+                    ESM3::CellRef ref;
                     ref.mRefNum.unset();
                     bool deleted = false;
                     while(cell->getNextRef(esm[index], ref, deleted))
@@ -251,7 +251,7 @@ namespace MWRender
     osg::ref_ptr<osg::Node> Groundcover::createChunk(InstanceMap& instances, const osg::Vec2f& center)
     {
         osg::ref_ptr<osg::Group> group = new osg::Group;
-        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0)*ESM::Land::REAL_SIZE;
+        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0)*ESM3::Land::REAL_SIZE;
         for (auto& pair : instances)
         {
             const osg::Node* temp = mSceneManager->getTemplate(pair.first);

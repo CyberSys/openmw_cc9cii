@@ -1,4 +1,4 @@
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/dial.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -47,8 +47,8 @@ namespace MWDialogue
 
         void tokenizeKeywords(const std::string & text, std::vector<Token> & tokens)
         {
-            const MWWorld::Store<ESM::Dialogue> & dialogs =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+            const MWWorld::Store<ESM3::Dialogue> & dialogs =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM3::Dialogue>();
 
             std::vector<std::string> keywordList;
             keywordList.reserve(dialogs.getSize());

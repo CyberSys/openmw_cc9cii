@@ -6,9 +6,13 @@
 
 namespace ESM
 {
-    struct ControlsState;
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    struct ControlsState;
+    class Reader;
 }
 
 namespace Loading
@@ -28,7 +32,7 @@ namespace MWInput
         void clear();
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
-        void readRecord(ESM::ESMReader& reader, uint32_t type);
+        void readRecord(ESM3::Reader& reader, uint32_t type);
         int countSavedGameRecords() const;
 
     private:

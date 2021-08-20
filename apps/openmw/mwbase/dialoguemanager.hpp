@@ -14,8 +14,12 @@ namespace Loading
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace MWWorld
@@ -102,7 +106,7 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
+            virtual void readRecord (ESM3::Reader& reader, uint32_t type) = 0;
 
             /// Changes faction1's opinion of faction2 by \a diff.
             virtual void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff) = 0;

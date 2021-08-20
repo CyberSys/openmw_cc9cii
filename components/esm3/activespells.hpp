@@ -1,16 +1,20 @@
-#ifndef OPENMW_ESM_ACTIVESPELLS_H
-#define OPENMW_ESM_ACTIVESPELLS_H
+#ifndef ESM3_ACTIVESPELLS_H
+#define ESM3_ACTIVESPELLS_H
 
 #include "effectlist.hpp"
-#include "defs.hpp"
+#include "../esm/defs.hpp"
 
 #include <string>
 #include <map>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // Parameters of an effect concerning lasting effects.
     // Note we are not using ENAMstruct since the magnitude may be modified by magic resistance, etc.
@@ -38,8 +42,8 @@ namespace ESM
         typedef std::multimap<std::string, ActiveSpellParams > TContainer;
         TContainer mSpells;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

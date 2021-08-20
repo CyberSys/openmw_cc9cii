@@ -1,10 +1,10 @@
+#include "convertacdt.hpp"
+
 #include <string>
 #include <iostream>
 #include <limits>
 
 #include <components/misc/stringops.hpp>
-
-#include "convertacdt.hpp"
 
 namespace ESSImport
 {
@@ -18,7 +18,7 @@ namespace ESSImport
         return mwIndex;
     }
 
-    void convertACDT (const ACDT& acdt, ESM::CreatureStats& cStats)
+    void convertACDT (const ACDT& acdt, ESM3::CreatureStats& cStats)
     {
         for (int i=0; i<3; ++i)
         {
@@ -38,14 +38,14 @@ namespace ESSImport
         cStats.mAttacked = (acdt.mFlags & Attacked) != 0;
     }
 
-    void convertACSC (const ACSC& acsc, ESM::CreatureStats& cStats)
+    void convertACSC (const ACSC& acsc, ESM3::CreatureStats& cStats)
     {
         cStats.mDead = (acsc.mFlags & Dead) != 0;
     }
 
-    void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats)
+    void convertNpcData (const ActorData& actorData, ESM3::NpcStats& npcStats)
     {
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i=0; i<ESM3::Skill::Length; ++i)
         {
             npcStats.mSkills[i].mMod = actorData.mSkills[i][1];
             npcStats.mSkills[i].mCurrent = actorData.mSkills[i][1];
@@ -55,7 +55,7 @@ namespace ESSImport
         npcStats.mTimeToStartDrowning = actorData.mACDT.mBreathMeter;
     }
 
-    void convertANIS (const ANIS& anis, ESM::AnimationState& state)
+    void convertANIS (const ANIS& anis, ESM3::AnimationState& state)
     {
         static const char* animGroups[] =
         {
@@ -87,7 +87,7 @@ namespace ESSImport
             std::string group(animGroups[anis.mGroupIndex]);
             Misc::StringUtils::lowerCaseInPlace(group);
 
-            ESM::AnimationState::ScriptedAnimation scriptedAnim;
+            ESM3::AnimationState::ScriptedAnimation scriptedAnim;
             scriptedAnim.mGroup = group;
             scriptedAnim.mTime = anis.mTime;
             scriptedAnim.mAbsolute = true;

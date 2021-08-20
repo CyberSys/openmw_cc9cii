@@ -1,53 +1,70 @@
-#include "loadench.hpp"
+#include "ench.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int Enchantment::sRecordId = REC_ENCH;
 
-    void Enchantment::load(ESMReader &esm, bool &isDeleted)
+    void Enchantment::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
         mEffects.mList.clear();
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'E','N','D','T'>::value:
-                    esm.getHT(mData, 16);
+                }
+                case ESM3::SUB_ENDT:
+                {
+                    assert (subHdr.dataSize == 16 && "ENCH incorrect data size");
+                    assert (subHdr.dataSize == sizeof(mData) && "ENCH incorrect data size");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::FourCC<'E','N','A','M'>::value:
-                    mEffects.add(esm);
+                }
+                case ESM3::SUB_ENAM:
+                {
+                    //mEffects.add(reader);
+                    ENAMstruct s;
+                    assert (subHdr.dataSize == 24 && "ENCH effect size mismatch");
+                    reader.get(s);
+                    mEffects.mList.push_back(s);
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing ENDT subrecord");
+            reader.fail("Missing ENDT subrecord");
     }
 
-    void Enchantment::save(ESMWriter &esm, bool isDeleted) const
+    void Enchantment::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

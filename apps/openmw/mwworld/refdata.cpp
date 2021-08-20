@@ -1,6 +1,6 @@
 #include "refdata.hpp"
 
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 #include "customdata.hpp"
 #include "cellstore.hpp"
@@ -64,7 +64,7 @@ namespace MWWorld
         }
     }
 
-    RefData::RefData (const ESM::CellRef& cellRef)
+    RefData::RefData (const ESM3::CellRef& cellRef)
     : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
       mCustomData (nullptr),
@@ -72,7 +72,7 @@ namespace MWWorld
     {
     }
 
-    RefData::RefData (const ESM::ObjectState& objectState, bool deletedByContentFile)
+    RefData::RefData (const ESM3::ObjectState& objectState, bool deletedByContentFile)
     : mBaseNode(nullptr), mDeletedByContentFile(deletedByContentFile),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
@@ -102,7 +102,7 @@ namespace MWWorld
         }
     }
 
-    void RefData::write (ESM::ObjectState& objectState, const std::string& scriptId) const
+    void RefData::write (ESM3::ObjectState& objectState, const std::string& scriptId) const
     {
         objectState.mHasLocals = mLocals.write (objectState.mLocals, scriptId);
 
@@ -165,7 +165,7 @@ namespace MWWorld
         return mCount;
     }
 
-    void RefData::setLocals (const ESM::Script& script)
+    void RefData::setLocals (const ESM3::Script& script)
     {
         if (mLocals.configure (script) && !mLocals.isEmpty())
             mChanged = true;
@@ -284,12 +284,12 @@ namespace MWWorld
         return ret;
     }
 
-    const ESM::AnimationState& RefData::getAnimationState() const
+    const ESM3::AnimationState& RefData::getAnimationState() const
     {
         return mAnimationState;
     }
 
-    ESM::AnimationState& RefData::getAnimationState()
+    ESM3::AnimationState& RefData::getAnimationState()
     {
         return mAnimationState;
     }

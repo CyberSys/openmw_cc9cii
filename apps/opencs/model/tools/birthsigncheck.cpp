@@ -6,7 +6,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns,
+CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM3::BirthSign>& birthsigns,
                                                     const CSMWorld::Resources &textures)
 : mBirthsigns(birthsigns),
   mTextures(textures)
@@ -23,13 +23,13 @@ int CSMTools::BirthsignCheckStage::setup()
 
 void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
+    const CSMWorld::Record<ESM3::BirthSign>& record = mBirthsigns.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::BirthSign& birthsign = record.get();
+    const ESM3::BirthSign& birthsign = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 

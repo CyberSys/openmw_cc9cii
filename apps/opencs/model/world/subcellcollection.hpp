@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace CSMWorld
@@ -20,7 +20,7 @@ namespace CSMWorld
     {
             const IdCollection<Cell>& mCells;
 
-            void loadRecord (ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted) override;
+            void loadRecord (ESXRecordT& record, ESM::Reader& reader, bool& isDeleted) override;
 
         public:
 
@@ -29,10 +29,10 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     void SubCellCollection<ESXRecordT, IdAccessorT>::loadRecord (ESXRecordT& record,
-                                                                 ESM::ESMReader& reader,
+                                                                 ESM::Reader& reader,
                                                                  bool& isDeleted)
     {
-        record.load (reader, isDeleted, mCells);
+        record.load (static_cast<ESM3::Reader&>(reader), isDeleted, mCells);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

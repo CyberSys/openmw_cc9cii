@@ -1,43 +1,62 @@
 #include "controlsstate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-ESM::ControlsState::ControlsState()
-    : mViewSwitchDisabled(false),
-      mControlsDisabled(false),
-      mJumpingDisabled(false),
-      mLookingDisabled(false),
-      mVanityModeDisabled(false),
-      mWeaponDrawingDisabled(false),
-      mSpellDrawingDisabled(false)
+namespace ESM3
 {
-}
+    ControlsState::ControlsState()
+        : mViewSwitchDisabled(false),
+          mControlsDisabled(false),
+          mJumpingDisabled(false),
+          mLookingDisabled(false),
+          mVanityModeDisabled(false),
+          mWeaponDrawingDisabled(false),
+          mSpellDrawingDisabled(false)
+    {
+    }
 
-void ESM::ControlsState::load(ESM::ESMReader& esm)
-{
-    int flags;
-    esm.getHNT(flags, "CFLG");
+    // NOTE: equivalent to "player flags" in SUB_PNAM of REC_PCDT
+    // (called from StateManager::loadGame() via InputManager::readRecord())
+    void ControlsState::load(Reader& esm)
+    {
+        while (esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_CFLG:
+                {
+                    int flags;
+                    esm.get(flags);
 
-    mViewSwitchDisabled = flags & ViewSwitchDisabled;
-    mControlsDisabled = flags & ControlsDisabled;
-    mJumpingDisabled = flags & JumpingDisabled;
-    mLookingDisabled = flags & LookingDisabled;
-    mVanityModeDisabled = flags & VanityModeDisabled;
-    mWeaponDrawingDisabled = flags & WeaponDrawingDisabled;
-    mSpellDrawingDisabled = flags & SpellDrawingDisabled;
-}
+                    mViewSwitchDisabled =    flags & ViewSwitchDisabled;
+                    mControlsDisabled =      flags & ControlsDisabled;
+                    mJumpingDisabled =       flags & JumpingDisabled;
+                    mLookingDisabled =       flags & LookingDisabled;
+                    mVanityModeDisabled =    flags & VanityModeDisabled;
+                    mWeaponDrawingDisabled = flags & WeaponDrawingDisabled;
+                    mSpellDrawingDisabled =  flags & SpellDrawingDisabled;
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData();
+                    break;
+            }
+        }
+    }
 
-void ESM::ControlsState::save(ESM::ESMWriter& esm) const
-{
-    int flags = 0;
-    if (mViewSwitchDisabled) flags |= ViewSwitchDisabled;
-    if (mControlsDisabled) flags |= ControlsDisabled;
-    if (mJumpingDisabled) flags |= JumpingDisabled;
-    if (mLookingDisabled) flags |= LookingDisabled;
-    if (mVanityModeDisabled) flags |= VanityModeDisabled;
-    if (mWeaponDrawingDisabled) flags |= WeaponDrawingDisabled;
-    if (mSpellDrawingDisabled) flags |= SpellDrawingDisabled;
+    void ControlsState::save(ESM::ESMWriter& esm) const
+    {
+        int flags = 0;
+        if (mViewSwitchDisabled) flags |= ViewSwitchDisabled;
+        if (mControlsDisabled) flags |= ControlsDisabled;
+        if (mJumpingDisabled) flags |= JumpingDisabled;
+        if (mLookingDisabled) flags |= LookingDisabled;
+        if (mVanityModeDisabled) flags |= VanityModeDisabled;
+        if (mWeaponDrawingDisabled) flags |= WeaponDrawingDisabled;
+        if (mSpellDrawingDisabled) flags |= SpellDrawingDisabled;
 
-    esm.writeHNT("CFLG", flags);
+        esm.writeHNT("CFLG", flags);
+    }
 }

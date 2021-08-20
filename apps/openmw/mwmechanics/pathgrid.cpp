@@ -25,7 +25,7 @@ namespace
     //
     // Approx. 514 Euclidean distance and 533 Manhattan distance.
     //
-    float manhattan(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
+    float manhattan(const ESM3::Pathgrid::Point& a, const ESM3::Pathgrid::Point& b)
     {
         return 300.0f * (abs(a.mX - b.mX) + abs(a.mY - b.mY) + abs(a.mZ - b.mZ));
     }
@@ -40,7 +40,7 @@ namespace
     //   Manhattan:
     //   - |curr.x - goal.x| + |curr.y - goal.y| + |curr.z - goal.z|
     //   - faster but not the shortest path
-    float costAStar(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
+    float costAStar(const ESM3::Pathgrid::Point& a, const ESM3::Pathgrid::Point& b)
     {
         //return distance(a, b);
         return manhattan(a, b);
@@ -105,7 +105,7 @@ namespace MWMechanics
             return true;
 
         mCell = cell->getCell();
-        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell());
+        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Pathgrid>().search(*cell->getCell());
         if(!mPathgrid)
             return false;
 
@@ -129,7 +129,7 @@ namespace MWMechanics
         return true;
     }
 
-    const ESM::Pathgrid *PathgridGraph::getPathgrid() const
+    const ESM3::Pathgrid *PathgridGraph::getPathgrid() const
     {
         return mPathgrid;
     }
@@ -218,7 +218,7 @@ namespace MWMechanics
         return (mGraph[start].componentId == mGraph[end].componentId);
     }
 
-    void PathgridGraph::getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const
+    void PathgridGraph::getNeighbouringPoints(const int index, ESM3::Pathgrid::PointList &nodes) const
     {
         for(int i = 0; i < static_cast<int> (mGraph[index].edges.size()); i++)
         {
@@ -255,9 +255,9 @@ namespace MWMechanics
      *       pathgrid points form (currently they are converted to world
      *       coordinates).  Essentially trading speed w/ memory.
      */
-    std::deque<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start, const int goal) const
+    std::deque<ESM3::Pathgrid::Point> PathgridGraph::aStarSearch(const int start, const int goal) const
     {
-        std::deque<ESM::Pathgrid::Point> path;
+        std::deque<ESM3::Pathgrid::Point> path;
         if(!isPointConnected(start, goal))
         {
             return path; // there is no path, return an empty path

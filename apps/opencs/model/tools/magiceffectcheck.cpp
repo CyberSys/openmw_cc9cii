@@ -16,8 +16,8 @@ std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id,
     return std::string();
 }
 
-CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect> &effects,
-                                                       const CSMWorld::IdCollection<ESM::Sound> &sounds,
+CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollection<ESM3::MagicEffect> &effects,
+                                                       const CSMWorld::IdCollection<ESM3::Sound> &sounds,
                                                        const CSMWorld::RefIdCollection &objects,
                                                        const CSMWorld::Resources &icons,
                                                        const CSMWorld::Resources &textures)
@@ -39,13 +39,13 @@ int CSMTools::MagicEffectCheckStage::setup()
 
 void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messages)
 {
-    const CSMWorld::Record<ESM::MagicEffect> &record = mMagicEffects.getRecord(stage);
+    const CSMWorld::Record<ESM3::MagicEffect> &record = mMagicEffects.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    ESM::MagicEffect effect = record.get();
+    ESM3::MagicEffect effect = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_MagicEffect, effect.mId);
 
     if (effect.mDescription.empty())

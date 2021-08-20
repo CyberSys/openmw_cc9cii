@@ -1,24 +1,25 @@
 #include "doorstate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
 #include <components/debug/debuglog.hpp>
 
-namespace ESM
+namespace ESM3
 {
-
-    void DoorState::load(ESMReader &esm)
+    void DoorState::load(Reader& esm)
     {
         ObjectState::load(esm);
 
         mDoorState = 0;
-        esm.getHNOT (mDoorState, "ANIM");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_ANIM))
+            esm.get(mDoorState);
+
         if (mDoorState < 0 || mDoorState > 2)
             Log(Debug::Warning) << "Dropping invalid door state (" << mDoorState << ") for door \"" << mRef.mRefID << "\"";
     }
 
-    void DoorState::save(ESMWriter &esm, bool inInventory) const
+    void DoorState::save(ESM::ESMWriter& esm, bool inInventory) const
     {
         ObjectState::save(esm, inInventory);
 
@@ -31,5 +32,4 @@ namespace ESM
         if (mDoorState != 0)
             esm.writeHNT ("ANIM", mDoorState);
     }
-
 }

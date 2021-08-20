@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_GMSTCHECK_H
 #define CSM_TOOLS_GMSTCHECK_H
 
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/gmst.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -14,7 +14,7 @@ namespace CSMTools
     {
     public:
         
-        GmstCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings);
+        GmstCheckStage(const CSMWorld::IdCollection<ESM3::GameSetting>& gameSettings);
         
         int setup() override;
         ///< \return number of steps
@@ -24,7 +24,7 @@ namespace CSMTools
         
     private:
         
-        const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
+        const CSMWorld::IdCollection<ESM3::GameSetting>& mGameSettings;
         bool mIgnoreBaseRecords;
         
         std::string varTypeToString(ESM::VarType);

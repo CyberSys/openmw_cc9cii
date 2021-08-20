@@ -6,7 +6,7 @@
 
 #include "journalentry.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct JournalEntry;
 }
@@ -40,7 +40,7 @@ namespace MWDialogue
             ///
             /// \note Redundant entries are ignored.
 
-            void insertEntry (const ESM::JournalEntry& entry);
+            void insertEntry (const ESM3::JournalEntry& entry);
             ///< Add entry without checking for redundant entries or modifying the state of the
             /// topic otherwise
 

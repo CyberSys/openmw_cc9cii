@@ -497,7 +497,7 @@ namespace
         "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
     };
 
-    // impact from magic effects, see ESM::Skill::SkillEnum in <component/esm/loadskil.hpp>
+    // impact from magic effects, see ESM3::Skill::SkillEnum in <component/esm3/skil.hpp>
     static const char *sSkills[] =
     {
         "Block", "Armorer", "MediumArmor", "HeavyArmor", "BluntWeapon",
@@ -514,7 +514,7 @@ namespace
         "Self", "Touch", "Target", 0
     };
 
-    // magic effect names, see ESM::MagicEffect::Effects in <component/esm/loadmgef.hpp>
+    // magic effect names, see ESM3::MagicEffect::Effects in <component/esm3/mgef.hpp>
     static const char *sEffectId[] =
     {
         "WaterBreathing", "SwiftSwim", "WaterWalking", "Shield", "FireShield",
@@ -548,7 +548,7 @@ namespace
         "SummonBonewolf", "SummonCreature04", "SummonCreature05", 0
     };
 
-    // see ESM::PartReferenceType in <component/esm/loadarmo.hpp>
+    // see ESM3::PartReferenceType in <component/esma3/armo.hpp>
     static const char *sPartRefType[] =
     {
         "Head", "Hair", "Neck", "Cuirass", "Groin",
@@ -559,7 +559,7 @@ namespace
         "Weapon", "Tail", 0
     };
 
-    // see the enums in <component/esm/aipackage.hpp>
+    // see the enums in <component/esm3/aipackage.hpp>
     static const char *sAiPackageType[] =
     {
         "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0

@@ -19,7 +19,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <MyGUI_Macros.h>
-#include <components/esm/records.hpp>
+#include <components/esm3/records.hpp>
 
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -194,13 +194,13 @@ namespace MWGui
         for (size_t i = 0; i < mModel->getItemCount(); ++i)
         {
             MWWorld::Ptr item = mModel->getItem(i).mBase;
-            if (item.getTypeName() != typeid(ESM::Ingredient).name())
+            if (item.getTypeName() != typeid(ESM3::Ingredient).name())
                 continue;
 
             itemNames.insert(item.getClass().getName(item));
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-            auto const alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
+            auto const alchemySkill = player.getClass().getSkill(player, ESM3::Skill::Alchemy);
 
             auto const effects = MWMechanics::Alchemy::effectsDescription(item, alchemySkill);
             itemEffects.insert(effects.begin(), effects.end());
@@ -344,10 +344,10 @@ namespace MWGui
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectKey.mId;
-            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectKey.mId);
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+            const ESM3::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(effectKey.mId);
+            if (magicEffect->mData.mFlags & ESM3::MagicEffect::TargetSkill)
                 params.mSkill = effectKey.mArg;
-            else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+            else if (magicEffect->mData.mFlags & ESM3::MagicEffect::TargetAttribute)
                 params.mAttribute = effectKey.mArg;
             params.mIsConstant = true;
             params.mNoTarget = true;

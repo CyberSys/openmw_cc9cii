@@ -1,27 +1,31 @@
-#ifndef OPENMW_ESM_CELLREF_H
-#define OPENMW_ESM_CELLREF_H
+#ifndef ESM3_CELLREF_H
+#define ESM3_CELLREF_H
 
 #include <limits>
 #include <string>
 
-#include "defs.hpp"
+#include "../esm/defs.hpp" // Position
 
 namespace ESM
 {
     class ESMWriter;
-    class ESMReader;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     const int UnbreakableLock = std::numeric_limits<int>::max();
     extern int GroundcoverIndex;
 
     struct RefNum
     {
-        unsigned int mIndex;
-        int mContentFile;
+        std::uint32_t mIndex;
+        std::int32_t mContentFile;
 
-        void load (ESMReader& esm, bool wide = false, const std::string& tag = "FRMR");
+        void load (Reader& reader, bool wide = false, std::uint32_t tag = ESM::FourCC<'F', 'R', 'M', 'R'>::value);
 
-        void save (ESMWriter &esm, bool wide = false, const std::string& tag = "FRMR") const;
+        void save (ESM::ESMWriter& esm, bool wide = false, const std::string& tag = "FRMR") const;
 
         inline bool hasContentFile() const { return mContentFile >= 0; }
 
@@ -30,7 +34,7 @@ namespace ESM
 
         // Note: this method should not be used for objects with invalid RefNum
         // (for example, for objects from disabled plugins in savegames).
-        inline bool fromGroundcoverFile() const { return mContentFile >= GroundcoverIndex; }
+        inline bool fromGroundcoverFile() const { return mContentFile >= GroundcoverIndex; } // TODO: check for 0xffffffff as well?
     };
 
     /* Cell reference. This represents ONE object (of many) inside the
@@ -90,7 +94,7 @@ namespace ESM
             bool mTeleport;
 
             // Teleport location for the door, if this is a teleporting door.
-            Position mDoorDest;
+            ESM::Position mDoorDest;
 
             // Destination cell for doors (optional)
             std::string mDestCell;
@@ -105,17 +109,17 @@ namespace ESM
             signed char mReferenceBlocked;
 
             // Position and rotation of this object within the cell
-            Position mPos;
+            ESM::Position mPos;
 
             /// Calls loadId and loadData
-            void load (ESMReader& esm, bool &isDeleted, bool wideRefNum = false);
+            void load (Reader& reader, bool &isDeleted, bool wideRefNum = false);
 
-            void loadId (ESMReader& esm, bool wideRefNum = false);
+            void loadId (Reader& reader, bool wideRefNum = false);
 
             /// Implicitly called by load
-            void loadData (ESMReader& esm, bool &isDeleted);
+            bool loadData (Reader& reader, bool& isDeleted);
 
-            void save (ESMWriter &esm, bool wideRefNum = false, bool inInventory = false, bool isDeleted = false) const;
+            void save (ESM::ESMWriter& esm, bool wideRefNum = false, bool inInventory = false, bool isDeleted = false) const;
 
             void blank();
     };
@@ -133,7 +137,6 @@ namespace ESM
             return false;
         return left.mContentFile<right.mContentFile;
     }
-
 }
 
 #endif

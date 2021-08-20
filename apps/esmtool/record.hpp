@@ -3,12 +3,16 @@
 
 #include <string>
 
-#include <components/esm/records.hpp>
+#include <components/esm3/records.hpp>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace EsmTool
@@ -50,11 +54,11 @@ namespace EsmTool
             mPrintPlain = plain;
         }
 
-        virtual void load(ESM::ESMReader &esm) = 0;
-        virtual void save(ESM::ESMWriter &esm) = 0;
+        virtual void load(ESM3::Reader& esm) = 0;
+        virtual void save(ESM::ESMWriter& esm) = 0;
         virtual void print() = 0;
 
-        static RecordBase *create(ESM::NAME type);
+        static RecordBase *create(std::uint32_t typeId);
 
         // just make it a bit shorter
         template <class T>
@@ -82,65 +86,65 @@ namespace EsmTool
             return mData;
         }
 
-        void save(ESM::ESMWriter &esm) override {
+        void save(ESM::ESMWriter& esm) override {
             mData.save(esm, mIsDeleted);
         }
 
-        void load(ESM::ESMReader &esm) override {
+        void load(ESM3::Reader& esm) override {
             mData.load(esm, mIsDeleted);
         }
 
         void print() override;
     };
-    
-    template<> std::string Record<ESM::Cell>::getId() const;
-    template<> std::string Record<ESM::Land>::getId() const;
-    template<> std::string Record<ESM::MagicEffect>::getId() const;
-    template<> std::string Record<ESM::Pathgrid>::getId() const;
-    template<> std::string Record<ESM::Skill>::getId() const;
 
-    template<> void Record<ESM::Activator>::print();
-    template<> void Record<ESM::Potion>::print();
-    template<> void Record<ESM::Armor>::print();
-    template<> void Record<ESM::Apparatus>::print();
-    template<> void Record<ESM::BodyPart>::print();
-    template<> void Record<ESM::Book>::print();
-    template<> void Record<ESM::BirthSign>::print();
-    template<> void Record<ESM::Cell>::print();
-    template<> void Record<ESM::Class>::print();
-    template<> void Record<ESM::Clothing>::print();
-    template<> void Record<ESM::Container>::print();
-    template<> void Record<ESM::Creature>::print();
-    template<> void Record<ESM::Dialogue>::print();
-    template<> void Record<ESM::Door>::print();
-    template<> void Record<ESM::Enchantment>::print();
-    template<> void Record<ESM::Faction>::print();
-    template<> void Record<ESM::Global>::print();
-    template<> void Record<ESM::GameSetting>::print();
-    template<> void Record<ESM::DialInfo>::print();
-    template<> void Record<ESM::Ingredient>::print();
-    template<> void Record<ESM::Land>::print();
-    template<> void Record<ESM::CreatureLevList>::print();
-    template<> void Record<ESM::ItemLevList>::print();
-    template<> void Record<ESM::Light>::print();
-    template<> void Record<ESM::Lockpick>::print();
-    template<> void Record<ESM::Probe>::print();
-    template<> void Record<ESM::Repair>::print();
-    template<> void Record<ESM::LandTexture>::print();
-    template<> void Record<ESM::MagicEffect>::print();
-    template<> void Record<ESM::Miscellaneous>::print();
-    template<> void Record<ESM::NPC>::print();
-    template<> void Record<ESM::Pathgrid>::print();
-    template<> void Record<ESM::Race>::print();
-    template<> void Record<ESM::Region>::print();
-    template<> void Record<ESM::Script>::print();
-    template<> void Record<ESM::Skill>::print();
-    template<> void Record<ESM::SoundGenerator>::print();
-    template<> void Record<ESM::Sound>::print();
-    template<> void Record<ESM::Spell>::print();
-    template<> void Record<ESM::StartScript>::print();
-    template<> void Record<ESM::Static>::print();
-    template<> void Record<ESM::Weapon>::print();
+    template<> std::string Record<ESM3::Cell>::getId() const;
+    template<> std::string Record<ESM3::Land>::getId() const;
+    template<> std::string Record<ESM3::MagicEffect>::getId() const;
+    template<> std::string Record<ESM3::Pathgrid>::getId() const;
+    template<> std::string Record<ESM3::Skill>::getId() const;
+
+    template<> void Record<ESM3::Activator>::print();
+    template<> void Record<ESM3::Potion>::print();
+    template<> void Record<ESM3::Armor>::print();
+    template<> void Record<ESM3::Apparatus>::print();
+    template<> void Record<ESM3::BodyPart>::print();
+    template<> void Record<ESM3::Book>::print();
+    template<> void Record<ESM3::BirthSign>::print();
+    template<> void Record<ESM3::Cell>::print();
+    template<> void Record<ESM3::Class>::print();
+    template<> void Record<ESM3::Clothing>::print();
+    template<> void Record<ESM3::Container>::print();
+    template<> void Record<ESM3::Creature>::print();
+    template<> void Record<ESM3::Dialogue>::print();
+    template<> void Record<ESM3::Door>::print();
+    template<> void Record<ESM3::Enchantment>::print();
+    template<> void Record<ESM3::Faction>::print();
+    template<> void Record<ESM3::Global>::print();
+    template<> void Record<ESM3::GameSetting>::print();
+    template<> void Record<ESM3::DialInfo>::print();
+    template<> void Record<ESM3::Ingredient>::print();
+    template<> void Record<ESM3::Land>::print();
+    template<> void Record<ESM3::CreatureLevList>::print();
+    template<> void Record<ESM3::ItemLevList>::print();
+    template<> void Record<ESM3::Light>::print();
+    template<> void Record<ESM3::Lockpick>::print();
+    template<> void Record<ESM3::Probe>::print();
+    template<> void Record<ESM3::Repair>::print();
+    template<> void Record<ESM3::LandTexture>::print();
+    template<> void Record<ESM3::MagicEffect>::print();
+    template<> void Record<ESM3::Miscellaneous>::print();
+    template<> void Record<ESM3::NPC>::print();
+    template<> void Record<ESM3::Pathgrid>::print();
+    template<> void Record<ESM3::Race>::print();
+    template<> void Record<ESM3::Region>::print();
+    template<> void Record<ESM3::Script>::print();
+    template<> void Record<ESM3::Skill>::print();
+    template<> void Record<ESM3::SoundGenerator>::print();
+    template<> void Record<ESM3::Sound>::print();
+    template<> void Record<ESM3::Spell>::print();
+    template<> void Record<ESM3::StartScript>::print();
+    template<> void Record<ESM3::Static>::print();
+    template<> void Record<ESM3::Weapon>::print();
 }
 
 #endif

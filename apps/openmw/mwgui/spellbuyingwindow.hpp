@@ -4,7 +4,7 @@
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Spell;
 }
@@ -41,7 +41,7 @@ namespace MWGui
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onSpellButtonClick(MyGUI::Widget* _sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void addSpell(const ESM::Spell& spell);
+            void addSpell(const ESM3::Spell& spell);
             void clearSpells();
             int mCurrentY;
 
@@ -52,7 +52,7 @@ namespace MWGui
             bool playerHasSpell (const std::string& id);
 
         private:
-            static bool sortSpells (const ESM::Spell* left, const ESM::Spell* right);
+            static bool sortSpells (const ESM3::Spell* left, const ESM3::Spell* right);
     };
 }
 

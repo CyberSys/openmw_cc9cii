@@ -3,7 +3,7 @@
 
 #include "actor.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct GameSetting;
 }
@@ -18,26 +18,26 @@ namespace MWClass
 
             struct GMST
             {
-                const ESM::GameSetting *fMinWalkSpeed;
-                const ESM::GameSetting *fMaxWalkSpeed;
-                const ESM::GameSetting *fEncumberedMoveEffect;
-                const ESM::GameSetting *fSneakSpeedMultiplier;
-                const ESM::GameSetting *fAthleticsRunBonus;
-                const ESM::GameSetting *fBaseRunMultiplier;
-                const ESM::GameSetting *fMinFlySpeed;
-                const ESM::GameSetting *fMaxFlySpeed;
-                const ESM::GameSetting *fSwimRunBase;
-                const ESM::GameSetting *fSwimRunAthleticsMult;
-                const ESM::GameSetting *fJumpEncumbranceBase;
-                const ESM::GameSetting *fJumpEncumbranceMultiplier;
-                const ESM::GameSetting *fJumpAcrobaticsBase;
-                const ESM::GameSetting *fJumpAcroMultiplier;
-                const ESM::GameSetting *fJumpRunMultiplier;
-                const ESM::GameSetting *fWereWolfRunMult;
-                const ESM::GameSetting *fKnockDownMult;
-                const ESM::GameSetting *iKnockDownOddsMult;
-                const ESM::GameSetting *iKnockDownOddsBase;
-                const ESM::GameSetting *fCombatArmorMinMult;
+                const ESM3::GameSetting *fMinWalkSpeed;
+                const ESM3::GameSetting *fMaxWalkSpeed;
+                const ESM3::GameSetting *fEncumberedMoveEffect;
+                const ESM3::GameSetting *fSneakSpeedMultiplier;
+                const ESM3::GameSetting *fAthleticsRunBonus;
+                const ESM3::GameSetting *fBaseRunMultiplier;
+                const ESM3::GameSetting *fMinFlySpeed;
+                const ESM3::GameSetting *fMaxFlySpeed;
+                const ESM3::GameSetting *fSwimRunBase;
+                const ESM3::GameSetting *fSwimRunAthleticsMult;
+                const ESM3::GameSetting *fJumpEncumbranceBase;
+                const ESM3::GameSetting *fJumpEncumbranceMultiplier;
+                const ESM3::GameSetting *fJumpAcrobaticsBase;
+                const ESM3::GameSetting *fJumpAcroMultiplier;
+                const ESM3::GameSetting *fJumpRunMultiplier;
+                const ESM3::GameSetting *fWereWolfRunMult;
+                const ESM3::GameSetting *fKnockDownMult;
+                const ESM3::GameSetting *iKnockDownOddsMult;
+                const ESM3::GameSetting *iKnockDownOddsBase;
+                const ESM3::GameSetting *fCombatArmorMinMult;
             };
 
             static const GMST& getGmst();
@@ -139,10 +139,10 @@ namespace MWClass
                 return true;
             }
 
-            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM3::ObjectState& state) const override;
             ///< Read additional state from \a state into \a ptr.
 
-            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM3::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
             int getBaseGold(const MWWorld::ConstPtr& ptr) const override;

@@ -1,13 +1,17 @@
-#ifndef OPENMW_ESM_GLOBALSCRIPT_H
-#define OPENMW_ESM_GLOBALSCRIPT_H
+#ifndef ESM3_GLOBALSCRIPT_H
+#define ESM3_GLOBALSCRIPT_H
 
 #include "locals.hpp"
 #include "cellref.hpp"
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     /// \brief Storage structure for global script state (only used in saved games)
 
@@ -19,8 +23,8 @@ namespace ESM
         std::string mTargetId; // for targeted scripts
         RefNum mTargetRef;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

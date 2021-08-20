@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_DIALOGUESTATE_H
-#define OPENMW_ESM_DIALOGUESTATE_H
+#ifndef ESM3_DIALOGUESTATE_H
+#define ESM3_DIALOGUESTATE_H
 
 #include <string>
 #include <vector>
@@ -7,8 +7,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -20,8 +24,8 @@ namespace ESM
         // must be lower case faction IDs
         std::map<std::string, std::map<std::string, int> > mChangedFactionReaction;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

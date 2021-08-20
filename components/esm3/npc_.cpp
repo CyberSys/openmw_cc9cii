@@ -1,17 +1,19 @@
-#include "loadnpc.hpp"
+#include "npc_.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int NPC::sRecordId = REC_NPC_;
 
-    void NPC::load(ESMReader &esm, bool &isDeleted)
+    void NPC::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
 
         mSpells.mList.clear();
         mInventory.mList.clear();
@@ -23,53 +25,41 @@ namespace ESM
         bool hasName = false;
         bool hasNpdt = false;
         bool hasFlags = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'M','O','D','L'>::value:
-                    mModel = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'R','N','A','M'>::value:
-                    mRace = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','N','A','M'>::value:
-                    mClass = esm.getHString();
-                    break;
-                case ESM::FourCC<'A','N','A','M'>::value:
-                    mFaction = esm.getHString();
-                    break;
-                case ESM::FourCC<'B','N','A','M'>::value:
-                    mHead = esm.getHString();
-                    break;
-                case ESM::FourCC<'K','N','A','M'>::value:
-                    mHair = esm.getHString();
-                    break;
-                case ESM::FourCC<'S','C','R','I'>::value:
-                    mScript = esm.getHString();
-                    break;
-                case ESM::FourCC<'N','P','D','T'>::value:
+                }
+                case ESM3::SUB_MODL: reader.getZString(mModel); break;
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_RNAM: reader.getZString(mRace); break;
+                case ESM3::SUB_CNAM: reader.getZString(mClass); break;
+                case ESM3::SUB_ANAM: reader.getZString(mFaction); break;
+                case ESM3::SUB_BNAM: reader.getZString(mHead); break;
+                case ESM3::SUB_KNAM: reader.getZString(mHair); break;
+                case ESM3::SUB_SCRI: reader.getZString(mScript); break;
+                case ESM3::SUB_NPDT:
+                {
                     hasNpdt = true;
-                    esm.getSubHeader();
-                    if (esm.getSubSize() == 52)
+                    if (subHdr.dataSize == 52)
                     {
                         mNpdtType = NPC_DEFAULT;
-                        esm.getExact(&mNpdt, 52);
+                        assert (subHdr.dataSize == sizeof(mNpdt) && "NPC_ data size mismatch");
+                        reader.get(mNpdt);
                     }
-                    else if (esm.getSubSize() == 12)
+                    else if (subHdr.dataSize == 12)
                     {
                         //Reading into temporary NPDTstruct12 object
                         NPDTstruct12 npdt12;
                         mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-                        esm.getExact(&npdt12, 12);
+                        assert (subHdr.dataSize == sizeof(npdt12) && "NPC_ data size mismatch");
+                        reader.get(npdt12);
 
                         //Clearing the mNdpt struct to initialize all values
                         blankNpdt();
@@ -81,54 +71,66 @@ namespace ESM
                         mNpdt.mGold = npdt12.mGold;
                     }
                     else
-                        esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+                        reader.fail("NPC_NPDT must be 12 or 52 bytes long");
                     break;
-                case ESM::FourCC<'F','L','A','G'>::value:
-                    hasFlags = true;
+                }
+                case ESM3::SUB_FLAG:
+                {
                     int flags;
-                    esm.getHT(flags);
+                    assert (subHdr.dataSize == 4 && "NPC_ flag size mismatch");
+                    reader.get(flags);
                     mFlags = flags & 0xFF;
                     mBloodType = ((flags >> 8) & 0xFF) >> 2;
+                    hasFlags = true;
                     break;
-                case ESM::FourCC<'N','P','C','S'>::value:
-                    mSpells.add(esm);
+                }
+                case ESM3::SUB_NPCO: mInventory.add(reader); break;
+                case ESM3::SUB_NPCS: mSpells.add(reader); break;
+                case ESM3::SUB_AIDT:
+                {
+                    assert (subHdr.dataSize == sizeof(mAiData) && "NPC_ AiData size mismatch");
+                    reader.get(mAiData, sizeof(mAiData));
                     break;
-                case ESM::FourCC<'N','P','C','O'>::value:
-                    mInventory.add(esm);
+                }
+                case ESM3::SUB_DODT:
+                case ESM3::SUB_DNAM:
+                {
+                    mTransport.add(reader);
                     break;
-                case ESM::FourCC<'A','I','D','T'>::value:
-                    esm.getHExact(&mAiData, sizeof(mAiData));
+                }
+                case ESM3::SUB_AI_A: // Activate
+                case ESM3::SUB_AI_E: // Escort
+                case ESM3::SUB_AI_F: // Follow
+                case ESM3::SUB_AI_T: // Travel
+                case ESM3::SUB_AI_W: // Wander
+                case ESM3::SUB_CNDT: // Cell
+                {
+                    mAiPackage.add(reader);
                     break;
-                case ESM::FourCC<'D','O','D','T'>::value:
-                case ESM::FourCC<'D','N','A','M'>::value:
-                    mTransport.add(esm);
-                    break;
-                case AI_Wander:
-                case AI_Activate:
-                case AI_Escort:
-                case AI_Follow:
-                case AI_Travel:
-                case AI_CNDT:
-                    mAiPackage.add(esm);
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasNpdt && !isDeleted)
-            esm.fail("Missing NPDT subrecord");
+            reader.fail("Missing NPDT subrecord");
+
         if (!hasFlags && !isDeleted)
-            esm.fail("Missing FLAG subrecord");
+            reader.fail("Missing FLAG subrecord");
     }
-    void NPC::save(ESMWriter &esm, bool isDeleted) const
+
+    void NPC::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

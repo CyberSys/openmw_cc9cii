@@ -26,7 +26,7 @@ namespace MWGui
             void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
             void setValue (const std::string& id, const std::string& value) override;
             void setValue (const std::string& id, int value) override;
-            void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
+            void setValue(const ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
             void configureSkills(const SkillList& major, const SkillList& minor) override;
 
             void setReputation (int reputation) { if (reputation != mReputation) mChanged = true; this->mReputation = reputation; }

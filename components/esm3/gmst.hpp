@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_GMST_H
-#define OPENMW_ESM_GMST_H
+#ifndef ESM3_GMST_H
+#define ESM3_GMST_H
 
 #include <string>
 
@@ -7,32 +7,35 @@
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-/*
- *  Game setting
- *
- */
-
-struct GameSetting
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "GameSetting"; }
+    class Reader;
 
-    std::string mId;
+    /*
+     *  Game setting
+     *
+     */
 
-    Variant mValue;
+    struct GameSetting
+    {
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "GameSetting"; }
 
-    void load(ESMReader &esm, bool &isDeleted);
+        std::string mId;
 
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        Variant mValue;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        void load(Reader& reader, bool& isDeleted);
+
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 
     bool operator== (const GameSetting& left, const GameSetting& right);
 }

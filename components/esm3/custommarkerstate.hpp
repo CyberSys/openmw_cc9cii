@@ -1,30 +1,35 @@
-#ifndef OPENMW_ESM_CUSTOMMARKERSTATE_H
-#define OPENMW_ESM_CUSTOMMARKERSTATE_H
+#ifndef ESM3_CUSTOMMARKERSTATE_H
+#define ESM3_CUSTOMMARKERSTATE_H
 
 #include "cellid.hpp"
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-// format 0, saved games only
-struct CustomMarker
+namespace ESM3
 {
-    float mWorldX;
-    float mWorldY;
+    class Reader;
 
-    ESM::CellId mCell;
-
-    std::string mNote;
-
-    bool operator == (const CustomMarker& other) const
+    // format 0, saved games only
+    struct CustomMarker
     {
-        return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
-    }
+        float mWorldX;
+        float mWorldY;
 
-    void load (ESM::ESMReader& reader);
-    void save (ESM::ESMWriter& writer) const;
-};
+        ESM3::CellId mCell;
 
+        std::string mNote;
+
+        bool operator == (const CustomMarker& other) const
+        {
+            return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
+        }
+
+        void load (Reader& reader);
+        void save (ESM::ESMWriter& writer) const;
+    };
 }
 
 #endif

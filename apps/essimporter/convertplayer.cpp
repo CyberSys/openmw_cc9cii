@@ -6,13 +6,13 @@
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM::ControlsState& controls)
+    void convertPCDT(const PCDT& pcdt, ESM3::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM3::ControlsState& controls)
     {
         out.mBirthsign = pcdt.mBirthsign;
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
         for (const auto & essFaction : pcdt.mFactions)
         {
-            ESM::NpcStats::Faction faction;
+            ESM3::NpcStats::Faction faction;
             faction.mExpelled = (essFaction.mFlags & 0x2) != 0;
             faction.mRank = essFaction.mRank;
             faction.mReputation = essFaction.mReputation;
@@ -54,8 +54,8 @@ namespace ESSImport
 
             const PCDT::PNAM::MarkLocation& mark = pcdt.mPNAM.mMarkLocation;
 
-            ESM::CellId cell;
-            cell.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            ESM3::CellId cell;
+            cell.mWorldspace = ESM3::CellId::sDefaultWorldspace;
             cell.mPaged = true;
 
             cell.mIndex.mX = mark.mCellX;

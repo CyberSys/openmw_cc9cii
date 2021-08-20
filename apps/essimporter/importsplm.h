@@ -2,12 +2,14 @@
 #define OPENMW_ESSIMPORT_IMPORTSPLM_H
 
 #include <vector>
+#include <cstring>
+
 #include <components/esm/esmcommon.hpp>
 #include <components/esm/util.hpp>
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -54,8 +56,6 @@ struct SPLM
     {
         int mUnknown;
     };
-
-
 #pragma pack(pop)
 
     struct ActiveEffect
@@ -69,11 +69,19 @@ struct SPLM
         SPDT mSPDT;
         std::string mTarget;
         std::vector<ActiveEffect> mActiveEffects;
+
+        void blank()
+        {
+            mIndex = 0;
+            memset(&mSPDT, 0, sizeof(mSPDT));
+            mTarget.clear();
+            mActiveEffects.clear();
+        }
     };
 
     std::vector<ActiveSpell> mActiveSpells;
 
-    void load(ESM::ESMReader& esm);
+    void load(ESM3::Reader& esm);
 };
 
 }

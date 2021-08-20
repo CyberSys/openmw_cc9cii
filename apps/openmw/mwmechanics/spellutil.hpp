@@ -1,9 +1,9 @@
 #ifndef MWMECHANICS_SPELLUTIL_H
 #define MWMECHANICS_SPELLUTIL_H
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/skil.hpp>
 
-namespace ESM
+namespace ESM3
 {
     struct ENAMstruct;
     struct MagicEffect;
@@ -17,15 +17,15 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    ESM::Skill::SkillEnum spellSchoolToSkill(int school);
+    ESM3::Skill::SkillEnum spellSchoolToSkill(int school);
 
     enum class EffectCostMethod {
         GameSpell,
         PlayerSpell,
     };
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr, const EffectCostMethod method = EffectCostMethod::GameSpell);
-    int calcSpellCost (const ESM::Spell& spell);
+    float calcEffectCost(const ESM3::ENAMstruct& effect, const ESM3::MagicEffect* magicEffect = nullptr, const EffectCostMethod method = EffectCostMethod::GameSpell);
+    int calcSpellCost (const ESM3::Spell& spell);
 
     int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 
@@ -38,15 +38,15 @@ namespace MWMechanics
      * @note actor can be an NPC or a creature
      * @return success chance from 0 to 100 (in percent), if cap=false then chance above 100 may be returned.
      */
-    float calcSpellBaseSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool);
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=true);
+    float calcSpellBaseSuccessChance (const ESM3::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool);
+    float getSpellSuccessChance (const ESM3::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=true);
     float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=true);
 
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
-    int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
+    int getSpellSchool(const ESM3::Spell* spell, const MWWorld::Ptr& actor);
 
     /// Get whether or not the given spell contributes to skill progress.
-    bool spellIncreasesSkill(const ESM::Spell* spell);
+    bool spellIncreasesSkill(const ESM3::Spell* spell);
     bool spellIncreasesSkill(const std::string& spellId);
 
     /// Check if the given effect can be applied to the target. If \a castByPlayer, emits a message box on failure.

@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include <components/esm/activespells.hpp>
+#include <components/esm3/activespells.hpp>
 
 #include "../mwworld/timestamp.hpp"
 
@@ -21,7 +21,7 @@ namespace MWMechanics
     {
         public:
 
-            typedef ESM::ActiveEffect ActiveEffect;
+            typedef ESM3::ActiveEffect ActiveEffect;
 
             struct ActiveSpellParams
             {
@@ -36,8 +36,8 @@ namespace MWMechanics
             typedef std::multimap<std::string, ActiveSpellParams > TContainer;
             typedef TContainer::const_iterator TIterator;
 
-            void readState (const ESM::ActiveSpells& state);
-            void writeState (ESM::ActiveSpells& state) const;
+            void readState (const ESM3::ActiveSpells& state);
+            void writeState (ESM3::ActiveSpells& state) const;
 
             TIterator begin() const;
 

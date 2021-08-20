@@ -1,18 +1,31 @@
 #include "importproj.h"
 
-#include <components/esm/esmreader.hpp>
+#include <cassert>
+
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
-
-void ESSImport::PROJ::load(ESM::ESMReader& esm)
-{
-    while (esm.isNextSub("PNAM"))
+    void ESSImport::PROJ::load(ESM3::Reader& esm)
     {
-        PNAM pnam;
-        esm.getHT(pnam);
-        mProjectiles.push_back(pnam);
-    }
-}
+        assert(esm.hdr().typeId == ESM3::REC_PROJ);
 
+        while (esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_PNAM:
+                {
+                    PNAM pnam;
+                    esm.get(pnam);
+                    mProjectiles.push_back(pnam);
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData();
+                    break;
+            }
+        }
+    }
 }

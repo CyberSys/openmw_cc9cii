@@ -3,7 +3,7 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_InputManager.h>
 
-#include <components/esm/loadbook.hpp>
+#include <components/esm3/book.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -91,7 +91,7 @@ namespace MWGui
         clearPages();
         mCurrentPage = 0;
 
-        MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
+        MWWorld::LiveCellRef<ESM3::Book> *ref = mBook.get<ESM3::Book>();
 
         Formatting::BookFormatter formatter;
         mPages = formatter.markupToWidget(mLeftPage, ref->mBase->mText);

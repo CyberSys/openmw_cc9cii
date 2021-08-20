@@ -1,6 +1,6 @@
 #include "probe.hpp"
 
-#include <components/esm/loadprob.hpp>
+#include <components/esm3/prob.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -30,7 +30,7 @@ namespace MWClass
 
     std::string Probe::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -41,7 +41,7 @@ namespace MWClass
 
     std::string Probe::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -54,8 +54,8 @@ namespace MWClass
 
     std::string Probe::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref =
+            ptr.get<ESM3::Probe>();
 
         return ref->mBase->mScript;
     }
@@ -71,7 +71,7 @@ namespace MWClass
 
     int Probe::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
 
         return ref->mBase->mData.mValue;
     }
@@ -80,7 +80,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Probe);
 
-        registerClass (typeid (ESM::Probe).name(), instance);
+        registerClass (typeid (ESM3::Probe).name(), instance);
     }
 
     std::string Probe::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -95,14 +95,14 @@ namespace MWClass
 
     std::string Probe::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
 
         return ref->mBase->mIcon;
     }
 
     MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -138,7 +138,7 @@ namespace MWClass
 
     MWWorld::Ptr Probe::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
@@ -155,19 +155,19 @@ namespace MWClass
 
     bool Probe::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return (npcServices & ESM::NPC::Probes) != 0;
+        return (npcServices & ESM3::NPC::Probes) != 0;
     }
 
     int Probe::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
 
         return ref->mBase->mData.mUses;
     }
 
     float Probe::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM3::Probe> *ref = ptr.get<ESM3::Probe>();
         return ref->mBase->mData.mWeight;
     }
 }

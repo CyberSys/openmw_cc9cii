@@ -29,7 +29,7 @@ namespace
     struct Response
     {
         const std::string mText;
-        const ESM::Class::Specialization mSpecialization;
+        const ESM3::Class::Specialization mSpecialization;
     };
 
     struct Step
@@ -49,9 +49,9 @@ namespace
         std::string answer2 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerThree");
         std::string sound = "vo\\misc\\chargen qa" + MyGUI::utility::toString(number) + ".wav";
 
-        Response r0 = {answer0, ESM::Class::Combat};
-        Response r1 = {answer1, ESM::Class::Magic};
-        Response r2 = {answer2, ESM::Class::Stealth};
+        Response r0 = {answer0, ESM3::Class::Combat};
+        Response r1 = {answer1, ESM3::Class::Magic};
+        Response r2 = {answer2, ESM3::Class::Stealth};
 
         // randomize order in which responses are displayed
         int order = Misc::Rng::rollDice(6);
@@ -99,9 +99,9 @@ namespace MWGui
         , mGenerateClassStep(0)
     {
         mCreationStage = CSE_NotStarted;
-        mGenerateClassResponses[0] = ESM::Class::Combat;
-        mGenerateClassResponses[1] = ESM::Class::Magic;
-        mGenerateClassResponses[2] = ESM::Class::Stealth;
+        mGenerateClassResponses[0] = ESM3::Class::Combat;
+        mGenerateClassResponses[1] = ESM3::Class::Magic;
+        mGenerateClassResponses[2] = ESM3::Class::Stealth;
         mGenerateClassSpecializations[0] = 0;
         mGenerateClassSpecializations[1] = 0;
         mGenerateClassSpecializations[2] = 0;
@@ -110,8 +110,8 @@ namespace MWGui
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             mPlayerAttributes.emplace(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue());
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            mPlayerSkillValues.emplace(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue());
+        for (int i = 0; i < ESM3::Skill::Length; ++i)
+            mPlayerSkillValues.emplace(ESM3::Skill::sSkillIds[i], MWMechanics::SkillValue());
     }
 
     void CharacterCreation::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
@@ -154,7 +154,7 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void CharacterCreation::setValue(const ESM3::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         mPlayerSkillValues[parSkill] = value;
         if (mReviewDialog)
@@ -271,11 +271,11 @@ namespace MWGui
 
                     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-                    const ESM::NPC *playerNpc = world->getPlayerPtr().get<ESM::NPC>()->mBase;
+                    const ESM3::NPC *playerNpc = world->getPlayerPtr().get<ESM3::NPC>()->mBase;
 
                     const MWWorld::Player player = world->getPlayer();
 
-                    const ESM::Class *playerClass = world->getStore().get<ESM::Class>().find(playerNpc->mClass);
+                    const ESM3::Class *playerClass = world->getStore().get<ESM3::Class>().find(playerNpc->mClass);
 
                     mReviewDialog->setPlayerName(playerNpc->mName);
                     mReviewDialog->setRace(playerNpc->mRace);
@@ -294,7 +294,7 @@ namespace MWGui
                     }
                     for (auto& skillPair : mPlayerSkillValues)
                     {
-                        mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (skillPair.first), skillPair.second);
+                        mReviewDialog->setSkillValue(static_cast<ESM3::Skill::SkillEnum> (skillPair.first), skillPair.second);
                     }
                     mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
 
@@ -363,8 +363,8 @@ namespace MWGui
             if (!classId.empty())
                 MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
 
-            const ESM::Class *klass =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(classId);
+            const ESM3::Class *klass =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM3::Class>().find(classId);
             if (klass)
             {
                 mPlayerClass = *klass;
@@ -433,7 +433,7 @@ namespace MWGui
     {
         if (mRaceDialog)
         {
-            const ESM::NPC &data = mRaceDialog->getResult();
+            const ESM3::NPC &data = mRaceDialog->getResult();
             mPlayerRaceId = data.mRace;
             if (!mPlayerRaceId.empty()) {
                 MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
@@ -500,7 +500,7 @@ namespace MWGui
     {
         if (mCreateClassDialog)
         {
-            ESM::Class klass;
+            ESM3::Class klass;
             klass.mName = mCreateClassDialog->getName();
             klass.mDescription = mCreateClassDialog->getDescription();
             klass.mData.mSpecialization = mCreateClassDialog->getSpecializationId();
@@ -511,8 +511,8 @@ namespace MWGui
             klass.mData.mAttribute[0] = attributes[0];
             klass.mData.mAttribute[1] = attributes[1];
 
-            std::vector<ESM::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
-            std::vector<ESM::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
+            std::vector<ESM3::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
+            std::vector<ESM3::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
             assert(majorSkills.size() >= sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]));
             assert(minorSkills.size() >= sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]));
             for (size_t i = 0; i < sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]); ++i)
@@ -560,12 +560,12 @@ namespace MWGui
             return;
         }
 
-        ESM::Class::Specialization specialization = mGenerateClassResponses[_index];
-        if (specialization == ESM::Class::Combat)
+        ESM3::Class::Specialization specialization = mGenerateClassResponses[_index];
+        if (specialization == ESM3::Class::Combat)
             ++mGenerateClassSpecializations[0];
-        else if (specialization == ESM::Class::Magic)
+        else if (specialization == ESM3::Class::Magic)
             ++mGenerateClassSpecializations[1];
-        else if (specialization == ESM::Class::Stealth)
+        else if (specialization == ESM3::Class::Stealth)
             ++mGenerateClassSpecializations[2];
         ++mGenerateClassStep;
         showClassQuestionDialog();
@@ -715,8 +715,8 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
-        const ESM::Class *klass =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
+        const ESM3::Class *klass =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Class>().find(mGenerateClass);
 
         mPlayerClass = *klass;
 

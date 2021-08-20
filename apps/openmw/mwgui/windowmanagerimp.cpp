@@ -1,7 +1,6 @@
 #include "windowmanagerimp.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <chrono>
 #include <thread>
 
@@ -28,7 +27,7 @@
 #include <components/sdlutil/sdlcursormanager.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 
 #include <components/fontloader/fontloader.hpp>
@@ -341,7 +340,7 @@ namespace MWGui
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
         mGuiModeStates[GM_Journal].mOpenSound = "book open";
 
-        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->mValue.getFloat());
+        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM3::GameSetting>().find("fMessageTimePerChar")->mValue.getFloat());
 
         SpellBuyingWindow* spellBuyingWindow = new SpellBuyingWindow();
         mWindows.push_back(spellBuyingWindow);
@@ -775,7 +774,7 @@ namespace MWGui
 
     std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
     {
-        const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(id);
+        const ESM3::GameSetting *setting = mStore->get<ESM3::GameSetting>().search(id);
 
         if (setting && setting->mValue.getType()==ESM::VT_String)
             return setting->mValue.getString();
@@ -1016,21 +1015,21 @@ namespace MWGui
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
         std::string tag(_tag);
-        
+
         std::string MyGuiPrefix = "setting=";
         size_t MyGuiPrefixLength = MyGuiPrefix.length();
 
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
-        
+
         if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
         {
             tag = tag.substr(MyGuiPrefixLength, tag.length());
             size_t comma_pos = tag.find(',');
             std::string settingSection = tag.substr(0, comma_pos);
             std::string settingTag = tag.substr(comma_pos+1, tag.length());
-            
-            _result = Settings::Manager::getString(settingTag, settingSection);            
+
+            _result = Settings::Manager::getString(settingTag, settingSection);
         }
         else if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
@@ -1048,7 +1047,7 @@ namespace MWGui
                 Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'";
                 return;
             }
-            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
+            const ESM3::GameSetting *setting = mStore->get<ESM3::GameSetting>().find(tag);
 
             if (setting && setting->mValue.getType()==ESM::VT_String)
                 _result = setting->mValue.getString();
@@ -1256,7 +1255,7 @@ namespace MWGui
         mSelectedEnchantItem = MWWorld::Ptr();
         mHud->setSelectedSpell(spellId, successChancePercent);
 
-        const ESM::Spell* spell = mStore->get<ESM::Spell>().find(spellId);
+        const ESM3::Spell* spell = mStore->get<ESM3::Spell>().find(spellId);
 
         mSpellWindow->setTitle(spell->mName);
     }
@@ -1265,7 +1264,7 @@ namespace MWGui
     {
         mSelectedEnchantItem = item;
         mSelectedSpell = "";
-        const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
+        const ESM3::Enchantment* ench = mStore->get<ESM3::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
         int chargePercent = static_cast<int>(item.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
@@ -1702,7 +1701,7 @@ namespace MWGui
         }
     }
 
-    void WindowManager::readRecord(ESM::ESMReader &reader, uint32_t type)
+    void WindowManager::readRecord(ESM3::Reader &reader, uint32_t type)
     {
         if (type == ESM::REC_GMAP)
             mMap->readRecord(reader, type);
@@ -1710,14 +1709,16 @@ namespace MWGui
             mQuickKeysMenu->readRecord(reader, type);
         else if (type == ESM::REC_ASPL)
         {
-            reader.getSubNameIs("ID__");
-            std::string spell = reader.getHString();
-            if (mStore->get<ESM::Spell>().search(spell))
+            // equivalent to SUB_WNAM in REC_REFR
+            reader.getSubRecordHeader(ESM3::SUB_ID__);
+            std::string spell;
+            reader.getString(spell); // NOTE: string not null terminated, unless omwsave :-(
+            if (mStore->get<ESM3::Spell>().search(spell))
                 mSelectedSpell = spell;
         }
         else if (type == ESM::REC_MARK)
         {
-            ESM::CustomMarker marker;
+            ESM3::CustomMarker marker;
             marker.load(reader);
             mCustomMarkers.addMarker(marker, false);
         }

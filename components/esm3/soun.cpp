@@ -1,52 +1,59 @@
-#include "loadsoun.hpp"
+#include "soun.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Sound::sRecordId = REC_SOUN;
 
-    void Sound::load(ESMReader &esm, bool &isDeleted)
+    void Sound::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mSound = esm.getHString();
-                    break;
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    esm.getHT(mData, 3);
+                }
+                case ESM3::SUB_DATA:
+                {
+                    if (subHdr.dataSize != sizeof(mData) || subHdr.dataSize != 3)
+                        reader.fail("SOUN incorrect data size");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mSound); break;
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing DATA subrecord");
+            reader.fail("Missing DATA subrecord");
     }
 
-    void Sound::save(ESMWriter &esm, bool isDeleted) const
+    void Sound::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

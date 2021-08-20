@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
@@ -38,7 +38,7 @@ namespace MWRender
         DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
     }
 
-    void FogManager::configure(float viewDistance, const ESM::Cell *cell)
+    void FogManager::configure(float viewDistance, const ESM3::Cell *cell)
     {
         osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
 

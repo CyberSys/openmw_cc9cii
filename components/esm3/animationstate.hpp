@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_ANIMATIONSTATE_H
-#define OPENMW_ESM_ANIMATIONSTATE_H
+#ifndef ESM3_ANIMATIONSTATE_H
+#define ESM3_ANIMATIONSTATE_H
 
 #include <string>
 #include <vector>
@@ -7,8 +7,12 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
     struct AnimationState
@@ -29,8 +33,8 @@ namespace ESM
 
         bool empty() const;
 
-        void load(ESMReader& esm);
-        void save(ESMWriter& esm) const;
+        void load(Reader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 }
 

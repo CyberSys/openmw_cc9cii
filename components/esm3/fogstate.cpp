@@ -1,7 +1,7 @@
 #include "fogstate.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
 #include <osgDB/ReadFile>
 
@@ -10,6 +10,8 @@
 
 #include "savedgame.hpp"
 
+namespace
+{
 void convertFogOfWar(std::vector<char>& imageData)
 {
     if (imageData.empty())
@@ -51,23 +53,27 @@ void convertFogOfWar(std::vector<char>& imageData)
     std::string str = ostream.str();
     imageData = std::vector<char>(str.begin(), str.end());
 }
+}
 
-void ESM::FogState::load (ESMReader &esm)
+void ESM3::FogState::load (Reader& esm)
 {
-    esm.getHNOT(mBounds, "BOUN");
-    esm.getHNOT(mNorthMarkerAngle, "ANGL");
+    if (esm.getNextSubRecordHeader(ESM3::SUB_BOUN))
+        esm.get(mBounds);
+
+    if (esm.getNextSubRecordHeader(ESM3::SUB_ANGL))
+        esm.get(mNorthMarkerAngle);
+
     int dataFormat = esm.getFormat();
-    while (esm.isNextSub("FTEX"))
+    while (esm.getNextSubRecordHeader(ESM3::SUB_FTEX))
     {
-        esm.getSubHeader();
         FogTexture tex;
 
-        esm.getT(tex.mX);
-        esm.getT(tex.mY);
+        esm.get(tex.mX);
+        esm.get(tex.mY);
 
-        size_t imageSize = esm.getSubSize()-sizeof(int)*2;
+        size_t imageSize = esm.subRecordHeader().dataSize-sizeof(int)*2;
         tex.mImageData.resize(imageSize);
-        esm.getExact(&tex.mImageData[0], imageSize);
+        esm.get(tex.mImageData[0], imageSize);
 
         if (dataFormat < 7)
             convertFogOfWar(tex.mImageData);
@@ -76,7 +82,7 @@ void ESM::FogState::load (ESMReader &esm)
     }
 }
 
-void ESM::FogState::save (ESMWriter &esm, bool interiorCell) const
+void ESM3::FogState::save (ESM::ESMWriter &esm, bool interiorCell) const
 {
     if (interiorCell)
     {

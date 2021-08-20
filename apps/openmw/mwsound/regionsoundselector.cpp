@@ -13,7 +13,7 @@ namespace MWSound
 {
     namespace
     {
-        int addChance(int result, const ESM::Region::SoundRef &v)
+        int addChance(int result, const ESM3::Region::SoundRef &v)
         {
             return result + v.mChance;
         }
@@ -42,7 +42,7 @@ namespace MWSound
             mSumChance = 0;
         }
 
-        const ESM::Region* const region = world.getStore().get<ESM::Region>().search(mLastRegionName);
+        const ESM3::Region* const region = world.getStore().get<ESM3::Region>().search(mLastRegionName);
 
         if (region == nullptr)
             return {};
@@ -57,7 +57,7 @@ namespace MWSound
         const int r = Misc::Rng::rollDice(std::max(mSumChance, 100));
         int pos = 0;
 
-        const auto isSelected = [&] (const ESM::Region::SoundRef& sound)
+        const auto isSelected = [&] (const ESM3::Region::SoundRef& sound)
         {
             if (r - pos < sound.mChance)
                 return true;

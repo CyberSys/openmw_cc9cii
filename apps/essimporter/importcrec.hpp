@@ -2,11 +2,11 @@
 #define OPENMW_ESSIMPORT_CREC_H
 
 #include "importinventory.hpp"
-#include <components/esm/aipackage.hpp>
+#include <components/esm3/aipackage.hpp>
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -18,9 +18,9 @@ namespace ESSImport
         int mIndex;
 
         Inventory mInventory;
-        ESM::AIPackageList mAiPackages;
+        ESM3::AIPackageList mAiPackage;
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

@@ -1,289 +1,190 @@
-#ifndef OPENMW_ESM_READER_H
-#define OPENMW_ESM_READER_H
+#ifndef ESM3_READER_H
+#define ESM3_READER_H
 
 #include <cstdint>
-#include <cassert>
 #include <vector>
 #include <sstream>
 
-#include <components/files/constrainedfilestream.hpp>
+#include "common.hpp"
+#include "tes3.hpp"
+#include "../esm/reader.hpp"
 
-#include <components/misc/stringops.hpp>
-
-#include <components/to_utf8/to_utf8.hpp>
-
-#include "esmcommon.hpp"
-#include "loadtes3.hpp"
-
-namespace ESM {
-
-class ESMReader
+namespace ESM3
 {
-public:
+    struct ReaderContext
+    {
+        std::string     filename;         // in case we need to reopen to restore the context
+        std::uint32_t   modIndex;         // the sequential position of this file in the load order:
+                                          //  0x00 reserved, 0xFF in-game
 
-  ESMReader();
+        // When working with multiple esX files, we will generate lists of all files that
+        //  actually contribute to a specific cell. Therefore, we need to store the index
+        //  of the file belonging to this contest. See CellStore::(list/load)refs for details.
+        std::vector<std::uint32_t> parentFileIndices;
 
-  /*************************************************************************
-   *
-   *  Information retrieval
-   *
-   *************************************************************************/
+        std::size_t     filePos;          // File position. Only used for stored contexts, not regularly
+                                          // updated within the reader itself.
 
-  int getVer() const { return mHeader.mData.version; }
-  int getRecordCount() const { return mHeader.mData.records; }
-  float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
-  const std::string getAuthor() const { return mHeader.mData.author; }
-  const std::string getDesc() const { return mHeader.mData.desc; }
-  const std::vector<Header::MasterData> &getGameFiles() const { return mHeader.mMaster; }
-  const Header& getHeader() const { return mHeader; }
-  int getFormat() const { return mHeader.mFormat; };
-  const NAME &retSubName() const { return mCtx.subName; }
-  uint32_t getSubSize() const { return mCtx.leftSub; }
-  std::string getName() const {return mCtx.filename; };
+        // for keeping track of things
+        std::size_t     fileRead;         // number of bytes read, incl. the current record
 
-  /*************************************************************************
-   *
-   *  Opening and closing
-   *
-   *************************************************************************/
+        RecordHeader    recordHeader;     // header of the current record or group being processed
+        SubRecordHeader subRecordHeader;  // header of the current sub record being processed
+        std::uint32_t   recordRead;       // bytes read from the sub records, incl. the current one
 
-  /** Save the current file position and information in a ESM_Context
-      struct
-   */
-  ESM_Context getContext();
+        // for usage patterns mainly in state management
+        bool            subHdrTypeRead;   // if true don't read it again
+        bool            subHdrCached;     // if true don't read it again
+    };
 
-  /** Restore a previously saved context */
-  void restoreContext(const ESM_Context &rc);
+    class Reader : public ESM::Reader
+    {
+        ESM3::Header         mHeader;     // ESM3 header
 
-  /** Close the file, resets all information. After calling close()
-      the structure may be reused to load a new file.
-  */
-  void close();
+        ReaderContext        mCtx;
 
-  /// Raw opening. Opens the file and sets everything up but doesn't
-  /// parse the header.
-  void openRaw(Files::IStreamPtr _esm, const std::string &name);
+        ToUTF8::Utf8Encoder* mEncoder;
 
-  /// Load ES file from a new stream, parses the header. Closes the
-  /// currently open file first, if any.
-  void open(Files::IStreamPtr _esm, const std::string &name);
+        size_t mFileSize;
 
-  void open(const std::string &file);
+        Files::IStreamPtr    mStream;
 
-  void openRaw(const std::string &filename);
+        /// Raw opening. Opens the file and sets everything up but doesn't
+        /// parse the header.
+        void openRaw(Files::IStreamPtr _esm, const std::string &name);
 
-  /// Get the current position in the file. Make sure that the file has been opened!
-  size_t getFileOffset() const { return mEsm->tellg(); };
+        void clearCtx();
 
-  // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
-  //  terrain palette, but ESMReader does not pass a reference to the correct plugin
-  //  to the individual load() methods. This hack allows to pass this reference
-  //  indirectly to the load() method.
-  void setIndex(const int index) { mCtx.index = index;}
-  int getIndex() {return mCtx.index;}
+        [[noreturn]] void reportSubSizeMismatch(size_t want, size_t got) {
+                fail("record size mismatch, requested " +
+                        std::to_string(want) +
+                        ", got" +
+                        std::to_string(got));
+        }
 
-  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
-  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
+    public:
 
-  void addParentFileIndex(int index) { mCtx.parentFileIndices.push_back(index); }
-  const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
+        Reader(Files::IStreamPtr esmStream, const std::string& filename);
+        Reader(); // public as ESM3::Land and ESMTool uses it
+        ~Reader() { close(); }
 
-  /*************************************************************************
-   *
-   *  Medium-level reading shortcuts
-   *
-   *************************************************************************/
+        void open(const std::string &filename); // FIXME: redundant but ESMTool uses it
+        void openRaw(const std::string &filename); // FIXME: should be private but ESMTool uses it
 
-  // Read data of a given type, stored in a subrecord of a given name
-  template <typename X>
-  void getHNT(X &x, const char* name)
-  {
-    getSubNameIs(name);
-    getHT(x);
-  }
+        /// Load ES file from a new stream, parses the header. Closes the
+        /// currently open file first, if any.
+        void open(Files::IStreamPtr _esm, const std::string &name); // FIXME: should be private but StoreTest uses it
 
-  // Optional version of getHNT
-  template <typename X>
-  void getHNOT(X &x, const char* name)
-  {
-      if(isNextSub(name))
-          getHT(x);
-  }
+        /** Close the file, resets all information. After calling close()
+            the structure may be reused to load a new file.
+        */
+        void close() final;
 
-  // Version with extra size checking, to make sure the compiler
-  // doesn't mess up our struct padding.
-  template <typename X>
-  void getHNT(X &x, const char* name, int size)
-  {
-      assert(sizeof(X) == size);
-      getSubNameIs(name);
-      getHT(x);
-  }
+        inline bool isEsm4() const final { return false; }
 
-  template <typename X>
-  void getHNOT(X &x, const char* name, int size)
-  {
-      assert(sizeof(X) == size);
-      if(isNextSub(name))
-          getHT(x);
-  }
+        /// Sets font encoder for ESM strings
+        inline void setEncoder(ToUTF8::Utf8Encoder* encoder) final { mEncoder = encoder; };
 
-  // Get data of a given type/size, including subrecord header
-  template <typename X>
-  void getHT(X &x)
-  {
-      getSubHeader();
-      if (mCtx.leftSub != sizeof(X))
-          reportSubSizeMismatch(sizeof(X), mCtx.leftSub);
-      getT(x);
-  }
+        inline const std::vector<ESM::MasterData> &getGameFiles() const final { return mHeader.mMaster; }
 
-  // Version with extra size checking, to make sure the compiler
-  // doesn't mess up our struct padding.
-  template <typename X>
-  void getHT(X &x, int size)
-  {
-      assert(sizeof(X) == size);
-      getHT(x);
-  }
+        inline int getRecordCount() const final { return mHeader.mData.records; }
+        inline const std::string getAuthor() const final { return mHeader.mData.author; }
+        inline int getFormat() const final { return mHeader.mFormat; };
+        inline const std::string getDesc() const final { return mHeader.mData.desc; }
 
-  // Read a string by the given name if it is the next record.
-  std::string getHNOString(const char* name);
+        // used by ESM3::CellRef and others for debugging
+        inline std::string getFileName() const final { return mCtx.filename; };
+        const ESM3::Header& getHeader() const { return mHeader; } // used by ESSImporter
+        inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
+        inline unsigned int numRecords() const { return mHeader.mData.records; }
 
-  // Read a string with the given sub-record name
-  std::string getHNString(const char* name);
+        inline bool hasMoreRecs() const final { return (mFileSize - mCtx.fileRead) > 0; }
 
-  // Read a string, including the sub-record header (but not the name)
-  std::string getHString();
+        size_t getFileSize() const { return mFileSize; }
 
-  // Read the given number of bytes from a subrecord
-  void getHExact(void*p, int size);
+        /// Get the current position in the file. Make sure that the file has been opened!
+        size_t getFileOffset() const { return mStream->tellg(); }; // only used for debug logging
 
-  // Read the given number of bytes from a named subrecord
-  void getHNExact(void*p, int size, const char* name);
+        /** Save the current file position and information in a ESM_Context
+            struct
+         */
+        ReaderContext getContext();
 
-  /*************************************************************************
-   *
-   *  Low level sub-record methods
-   *
-   *************************************************************************/
+        /** Restore a previously saved context */
+        void restoreContext(const ReaderContext &rc);
 
-  // Get the next subrecord name and check if it matches the parameter
-  void getSubNameIs(const char* name);
+        // Read x bytes of header. The caller can then decide whether to process or skip the data.
+        bool getRecordHeader();
 
-  /** Checks if the next sub record name matches the parameter. If it
-      does, it is read into 'subName' just as if getSubName() was
-      called. If not, the read name will still be available for future
-      calls to getSubName(), isNextSub() and getSubNameIs().
-   */
-  bool isNextSub(const char* name);
+        inline const RecordHeader& hdr() const { return mCtx.recordHeader; }
 
-  bool peekNextSub(const char* name);
+        /// Get record flags of last record
+        unsigned int getRecordFlags() { return mCtx.recordHeader.flags; }
 
-  // Store the current subrecord name for the next call of getSubName()
-  void cacheSubName() {mCtx.subCached = true; };
+        // Skip the data part of a record
+        // Note: assumes the header was read correctly (partial skip is allowed)
+        void skipRecordData();
 
-  // Read subrecord name. This gets called a LOT, so I've optimized it
-  // slightly.
-  void getSubName();
-
-  // Skip current sub record, including header (but not including
-  // name.)
-  void skipHSub();
-
-  // Skip sub record and check its size
-  void skipHSubSize(int size);
-
-  // Skip all subrecords until the given subrecord or no more subrecords remaining
-  void skipHSubUntil(const char* name);
-
-  /* Sub-record header. This updates leftRec beyond the current
-     sub-record as well. leftSub contains size of current sub-record.
-  */
-  void getSubHeader();
-
-  /*************************************************************************
-   *
-   *  Low level record methods
-   *
-   *************************************************************************/
-
-  // Get the next record name
-  NAME getRecName();
-
-  // Skip the rest of this record. Assumes the name and header have
-  // already been read
-  void skipRecord();
-
-  /* Read record header. This updatesleftFile BEYOND the data that
-     follows the header, ie beyond the entire record. You should use
-     leftRec to orient yourself inside the record itself.
-  */
-  void getRecHeader() { getRecHeader(mRecordFlags); }
-  void getRecHeader(uint32_t &flags);
-
-  bool hasMoreRecs() const { return mCtx.leftFile > 0; }
-  bool hasMoreSubs() const { return mCtx.leftRec > 0; }
+        // Used by Variant and Cell
+        // NOTE: mCtx.recordRead is updated when sub-record header is read
+        inline bool hasMoreSubs() { return mCtx.subHdrCached || mCtx.recordRead < mCtx.recordHeader.dataSize; }
 
 
-  /*************************************************************************
-   *
-   *  Lowest level data reading and misc methods
-   *
-   *************************************************************************/
+        // Read x bytes of header. The caller can then decide whether to process or skip the data.
+        bool getSubRecordHeader();
+        void cacheSubRecordHeader(); // NOTE: try not to rely on this
 
-  template <typename X>
-  void getT(X &x) { getExact(&x, sizeof(X)); }
+        // Convenience method
+        std::uint32_t getNextSubRecordType();
 
-  void getExact(void* x, int size) { mEsm->read((char*)x, size); }
-  void getName(NAME &name) { getT(name); }
-  void getUint(uint32_t &u) { getT(u); }
+        // Convenience method, mainly for state management
+        inline bool getNextSubRecordHeader(std::uint32_t type) {
+            return getNextSubRecordType() == type && getSubRecordHeader();
+        }
 
-  // Read the next 'size' bytes and return them as a string. Converts
-  // them from native encoding to UTF8 in the process.
-  std::string getString(int size);
+        // Convenience method, mainly for state management
+        bool getSubRecordHeader(std::uint32_t type);
 
-  void skip(int bytes) { mEsm->seekg(getFileOffset()+bytes); };
+        // Skip the data part of a subrecord
+        // Note: assumes the header was read correctly and nothing else was read
+        void skipSubRecordData() { mStream->ignore(mCtx.subRecordHeader.dataSize); }
 
-  /// Used for error handling
-  [[noreturn]] void fail(const std::string &msg);
+        void skipSubRecordData(std::uint32_t size) { mStream->ignore(size); }
 
-  /// Sets font encoder for ESM strings
-  void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; };
+        inline const SubRecordHeader& subRecordHeader() const { return mCtx.subRecordHeader; }
 
-  /// Get record flags of last record
-  unsigned int getRecordFlags() { return mRecordFlags; }
+        template<typename T>
+        void get(T& t, std::size_t size = sizeof(T)) { mStream->read((char*)&t, size); }
 
-  size_t getFileSize() const { return mFileSize; }
+        template<typename T>
+        bool getExact(T& t) {
+            mStream->read((char*)&t, sizeof(T));
+            return mStream->gcount() == sizeof(T); // FIXME: try/catch block needed?
+        }
 
-private:
-  [[noreturn]] void reportSubSizeMismatch(size_t want, size_t got) {
-          fail("record size mismatch, requested " +
-                  std::to_string(want) +
-                  ", got" +
-                  std::to_string(got));
-  }
+        bool getZString(std::string& str) {
+            return getStringImpl(str, mCtx.subRecordHeader.dataSize, mStream, mEncoder, true);
+        }
 
-  void clearCtx();
+        bool getString(std::string& str) {
+            return getStringImpl(str, mCtx.subRecordHeader.dataSize, mStream, mEncoder);
+        }
 
-  Files::IStreamPtr mEsm;
+        // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
+        //  terrain palette, but Reader does not pass a reference to the correct plugin
+        //  to the individual load() methods. This hack allows to pass this reference
+        //  indirectly to the load() method.
+        void setModIndex(std::uint32_t index) final { mCtx.modIndex = index;}
+        std::uint32_t getModIndex() {return mCtx.modIndex;}
 
-  ESM_Context mCtx;
+        void addParentFileIndex(std::uint32_t index) { mCtx.parentFileIndices.push_back(index); }
+        const std::vector<std::uint32_t>& getParentFileIndices() const { return mCtx.parentFileIndices; }
 
-  unsigned int mRecordFlags;
+        // FIXME: for testing only
+        //bool checkReadFile() { return (mCtx.readFile != mCtx.filePos+mCtx.recordHeader.dataSize); }
 
-  // Special file signifier (see SpecialFile enum above)
-
-  // Buffer for ESM strings
-  std::vector<char> mBuffer;
-
-  Header mHeader;
-
-  std::vector<ESMReader> *mGlobalReaderList;
-  ToUTF8::Utf8Encoder* mEncoder;
-
-  size_t mFileSize;
-
-};
+        /// Used for error handling
+        [[noreturn]] void fail(const std::string &msg);
+    };
 }
-#endif
+#endif // ESM3_READER_H

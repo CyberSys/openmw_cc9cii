@@ -22,7 +22,7 @@ namespace MWWorld
         /// and the build will fail with an ugly three-way cyclic header dependence
         /// so we need to pass the instantiation of the method to the linker, when
         /// all methods are known.
-        void load (ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
+        void load (ESM3::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
 
         LiveRef &insert (const LiveRef &item)
         {
@@ -31,7 +31,7 @@ namespace MWWorld
         }
 
         /// Remove all references with the given refNum from this list.
-        void remove (const ESM::RefNum &refNum)
+        void remove (const ESM3::RefNum &refNum)
         {
             for (typename List::iterator it = mList.begin(); it != mList.end();)
             {

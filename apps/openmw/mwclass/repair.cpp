@@ -1,6 +1,6 @@
 #include "repair.hpp"
 
-#include <components/esm/loadrepa.hpp>
+#include <components/esm3/repa.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -27,7 +27,7 @@ namespace MWClass
 
     std::string Repair::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -38,7 +38,7 @@ namespace MWClass
 
     std::string Repair::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -52,15 +52,15 @@ namespace MWClass
 
     std::string Repair::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref =
+            ptr.get<ESM3::Repair>();
 
         return ref->mBase->mScript;
     }
 
     int Repair::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
 
         return ref->mBase->mData.mValue;
     }
@@ -69,7 +69,7 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Repair);
 
-        registerClass (typeid (ESM::Repair).name(), instance);
+        registerClass (typeid (ESM3::Repair).name(), instance);
     }
 
     std::string Repair::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -84,7 +84,7 @@ namespace MWClass
 
     std::string Repair::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
 
         return ref->mBase->mIcon;
     }
@@ -96,14 +96,14 @@ namespace MWClass
 
     int Repair::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
 
         return ref->mBase->mData.mUses;
     }
 
     MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -130,7 +130,7 @@ namespace MWClass
 
     MWWorld::Ptr Repair::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
@@ -142,12 +142,12 @@ namespace MWClass
 
     bool Repair::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return (npcServices & ESM::NPC::RepairItem) != 0;
+        return (npcServices & ESM3::NPC::RepairItem) != 0;
     }
 
     float Repair::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM3::Repair> *ref = ptr.get<ESM3::Repair>();
         return ref->mBase->mData.mWeight;
     }
 }

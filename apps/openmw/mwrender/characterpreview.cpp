@@ -397,12 +397,12 @@ namespace MWRender
         if(iter != inv.end())
         {
             groupname = "inventoryweapononehand";
-            if(iter->getTypeName() == typeid(ESM::Weapon).name())
+            if(iter->getTypeName() == typeid(ESM3::Weapon).name())
             {
-                MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
+                MWWorld::LiveCellRef<ESM3::Weapon> *ref = iter->get<ESM3::Weapon>();
                 int type = ref->mBase->mData.mType;
-                const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(type);
-                showCarriedLeft = !(weaponInfo->mFlags & ESM::WeaponType::TwoHanded);
+                const ESM3::WeaponType* weaponInfo = MWMechanics::getWeaponType(type);
+                showCarriedLeft = !(weaponInfo->mFlags & ESM3::WeaponType::TwoHanded);
 
                 std::string inventoryGroup = weaponInfo->mLongGroup;
                 inventoryGroup = "inventory" + inventoryGroup;
@@ -412,11 +412,11 @@ namespace MWRender
                     groupname = inventoryGroup;
                 else
                 {
-                    static const std::string oneHandFallback = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
-                    static const std::string twoHandFallback = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+                    static const std::string oneHandFallback = "inventory" + MWMechanics::getWeaponType(ESM3::Weapon::LongBladeOneHand)->mLongGroup;
+                    static const std::string twoHandFallback = "inventory" + MWMechanics::getWeaponType(ESM3::Weapon::LongBladeTwoHand)->mLongGroup;
 
                     // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
-                    if (weaponInfo->mFlags & ESM::WeaponType::TwoHanded && weaponInfo->mWeaponClass == ESM::WeaponType::Melee)
+                    if (weaponInfo->mFlags & ESM3::WeaponType::TwoHanded && weaponInfo->mWeaponClass == ESM3::WeaponType::Melee)
                         groupname = twoHandFallback;
                     else
                         groupname = oneHandFallback;
@@ -430,7 +430,7 @@ namespace MWRender
         mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name() && showCarriedLeft)
+        if(torch != inv.end() && torch->getTypeName() == typeid(ESM3::Light).name() && showCarriedLeft)
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, Animation::BlendMask_LeftArm, false,
@@ -498,7 +498,7 @@ namespace MWRender
     RaceSelectionPreview::RaceSelectionPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
         : CharacterPreview(parent, resourceSystem, MWMechanics::getPlayer(),
             512, 512, osg::Vec3f(0, 125, 8), osg::Vec3f(0,0,8))
-        , mBase (*mCharacter.get<ESM::NPC>()->mBase)
+        , mBase (*mCharacter.get<ESM3::NPC>()->mBase)
         , mRef(&mBase)
         , mPitchRadians(osg::DegreesToRadians(6.f))
     {
@@ -516,7 +516,7 @@ namespace MWRender
         redraw();
     }
 
-    void RaceSelectionPreview::setPrototype(const ESM::NPC &proto)
+    void RaceSelectionPreview::setPrototype(const ESM3::NPC &proto)
     {
         mBase = proto;
         mBase.mId = "player";

@@ -5,8 +5,8 @@
 #include "../world/refiddata.hpp"
 #include "../world/universalid.hpp"
 
-CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,
-                                                 const CSMWorld::IdCollection<ESM::Sound> &sounds,
+CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ESM3::SoundGenerator> &soundGens,
+                                                 const CSMWorld::IdCollection<ESM3::Sound> &sounds,
                                                  const CSMWorld::RefIdCollection &objects)
     : mSoundGens(soundGens),
       mSounds(sounds),
@@ -24,13 +24,13 @@ int CSMTools::SoundGenCheckStage::setup()
 
 void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages)
 {
-    const CSMWorld::Record<ESM::SoundGenerator> &record = mSoundGens.getRecord(stage);
+    const CSMWorld::Record<ESM3::SoundGenerator> &record = mSoundGens.getRecord(stage);
     
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::SoundGenerator& soundGen = record.get();
+    const ESM3::SoundGenerator& soundGen = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_SoundGen, soundGen.mId);
 
     if (!soundGen.mCreature.empty())

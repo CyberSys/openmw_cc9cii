@@ -1,14 +1,16 @@
-#include "loadrace.hpp"
+#include "race.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int Race::sRecordId = REC_RACE;
 
-    int Race::MaleFemale::getValue (bool male) const
+    std::uint32_t Race::MaleFemale::getValue (bool male) const
     {
         return male ? mMale : mFemale;
     }
@@ -18,7 +20,7 @@ namespace ESM
         return male ? mMale : mFemale;
     }
 
-    void Race::load(ESMReader &esm, bool &isDeleted)
+    void Race::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -26,43 +28,51 @@ namespace ESM
 
         bool hasName = false;
         bool hasData = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
-                    break;
-                case ESM::FourCC<'R','A','D','T'>::value:
-                    esm.getHT(mData, 140);
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_DESC: reader.getString(mDescription); break; // NOTE: not null terminated
+                case ESM3::SUB_RADT:
+                {
+                    assert (subHdr.dataSize == 140 && "RACE incorrect data size");
+                    assert (subHdr.dataSize == sizeof(mData) && "RACE incorrect data size");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::FourCC<'D','E','S','C'>::value:
-                    mDescription = esm.getHString();
+                }
+                case ESM3::SUB_NPCS:
+                {
+                    mPowers.add(reader);
                     break;
-                case ESM::FourCC<'N','P','C','S'>::value:
-                    mPowers.add(esm);
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
         if (!hasData && !isDeleted)
-            esm.fail("Missing RADT subrecord");
+            reader.fail("Missing RADT subrecord");
     }
-    void Race::save(ESMWriter &esm, bool isDeleted) const
+
+    void Race::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

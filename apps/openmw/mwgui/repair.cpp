@@ -70,8 +70,8 @@ void Repair::setPtr(const MWWorld::Ptr &item)
 
 void Repair::updateRepairView()
 {
-    MWWorld::LiveCellRef<ESM::Repair> *ref =
-        mRepair.getTool().get<ESM::Repair>();
+    MWWorld::LiveCellRef<ESM3::Repair> *ref =
+        mRepair.getTool().get<ESM3::Repair>();
 
     int uses = mRepair.getTool().getClass().getItemHealth(mRepair.getTool());
 

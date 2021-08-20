@@ -1,11 +1,11 @@
 #include "cells.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/cellstate.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellstate.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 
@@ -60,9 +60,9 @@ namespace
     };
 }
 
-MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
+MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM3::Cell *cell)
 {
-    if (cell->mData.mFlags & ESM::Cell::Interior)
+    if (cell->mData.mFlags & ESM3::Cell::Interior)
     {
         std::string lowerName(Misc::StringUtils::lowerCase(cell->mName));
         std::map<std::string, CellStore>::iterator result = mInteriors.find (lowerName);
@@ -118,19 +118,19 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
     if (cell.getState()!=CellStore::State_Loaded)
         cell.load ();
 
-    ESM::CellState cellState;
+    ESM3::CellState cellState;
 
     cell.saveState (cellState);
 
-    writer.startRecord (ESM::REC_CSTA);
+    writer.startRecord (ESM3::REC_CSTA);
     cellState.mId.save (writer);
     cellState.save (writer);
     cell.writeFog(writer);
     cell.writeReferences (writer);
-    writer.endRecord (ESM::REC_CSTA);
+    writer.endRecord (ESM3::REC_CSTA);
 }
 
-MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
+MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::Reader*>& reader)
 : mStore (store), mReader (reader),
   mIdCacheIndex (0)
 {
@@ -145,18 +145,18 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result==mExteriors.end())
     {
-        const ESM::Cell *cell = mStore.get<ESM::Cell>().search(x, y);
+        const ESM3::Cell *cell = mStore.get<ESM3::Cell>().search(x, y);
 
         if (!cell)
         {
             // Cell isn't predefined. Make one on the fly.
-            ESM::Cell record;
-            record.mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            ESM3::Cell record;
+            record.mCellId.mWorldspace = ESM3::CellId::sDefaultWorldspace;
             record.mCellId.mPaged = true;
             record.mCellId.mIndex.mX = x;
             record.mCellId.mIndex.mY = y;
 
-            record.mData.mFlags = ESM::Cell::HasWater;
+            record.mData.mFlags = ESM3::Cell::HasWater;
             record.mData.mX = x;
             record.mData.mY = y;
             record.mWater = 0;
@@ -184,7 +184,7 @@ MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 
     if (result==mInteriors.end())
     {
-        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(lowerName);
+        const ESM3::Cell *cell = mStore.get<ESM3::Cell>().find(lowerName);
 
         result = mInteriors.insert (std::make_pair (lowerName, CellStore (cell, mStore, mReader))).first;
     }
@@ -223,7 +223,7 @@ void MWWorld::Cells::recharge (float duration)
     }
 }
 
-MWWorld::CellStore *MWWorld::Cells::getCell (const ESM::CellId& id)
+MWWorld::CellStore *MWWorld::Cells::getCell (const ESM3::CellId& id)
 {
     if (id.mPaged)
         return getExterior (id.mIndex.mX, id.mIndex.mY);
@@ -289,8 +289,8 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     }
 
     // Now try the other cells
-    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
-    MWWorld::Store<ESM::Cell>::iterator iter;
+    const MWWorld::Store<ESM3::Cell> &cells = mStore.get<ESM3::Cell>();
+    MWWorld::Store<ESM3::Cell>::iterator iter;
 
     for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
@@ -316,7 +316,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& id, const ESM::RefNum& refNum)
+MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& id, const ESM3::RefNum& refNum)
 {
     for (auto& pair : mInteriors)
     {
@@ -333,7 +333,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& id, const ESM::RefNum& r
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum)
+MWWorld::Ptr MWWorld::Cells::getPtr(CellStore& cellStore, const std::string& id, const ESM3::RefNum& refNum)
 {
     if (cellStore.getState() == CellStore::State_Unloaded)
         cellStore.preload();
@@ -349,8 +349,8 @@ MWWorld::Ptr MWWorld::Cells::getPtr(CellStore& cellStore, const std::string& id,
 
 void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
 {
-    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
-    for (MWWorld::Store<ESM::Cell>::iterator iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+    const MWWorld::Store<ESM3::Cell> &cells = mStore.get<ESM3::Cell>();
+    for (MWWorld::Store<ESM3::Cell>::iterator iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
         CellStore *cellStore = getCellStore (&(*iter));
 
@@ -363,8 +363,8 @@ void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorl
 
 void MWWorld::Cells::getInteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
 {
-    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
-    for (MWWorld::Store<ESM::Cell>::iterator iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
+    const MWWorld::Store<ESM3::Cell> &cells = mStore.get<ESM3::Cell>();
+    for (MWWorld::Store<ESM3::Cell>::iterator iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
         CellStore *cellStore = getCellStore (&(*iter));
 
@@ -429,7 +429,7 @@ public:
 
     MWWorld::Cells& mCells;
 
-    MWWorld::CellStore* getCellStore(const ESM::CellId& cellId) override
+    MWWorld::CellStore* getCellStore(const ESM3::CellId& cellId) override
     {
         try
         {
@@ -442,12 +442,15 @@ public:
     }
 };
 
-bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
+bool MWWorld::Cells::readRecord (ESM::Reader& readerBase, uint32_t type,
     const std::map<int, int>& contentFileMap)
 {
-    if (type==ESM::REC_CSTA)
+    // FIXME: probably better to have asEsm3Reader()
+    ESM3::Reader& reader = static_cast<ESM3::Reader&>(readerBase);
+
+    if (type==ESM3::REC_CSTA)
     {
-        ESM::CellState state;
+        ESM3::CellState state;
         state.mId.load (reader);
 
         CellStore *cellStore = nullptr;
@@ -460,7 +463,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         {
             // silently drop cells that don't exist anymore
             Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)";
-            reader.skipRecord();
+            reader.skipRecordData();
             return true;
         }
 

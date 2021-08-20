@@ -83,7 +83,7 @@ namespace MWGui
         getWidget(mSkillView, "SkillView");
         mSkillView->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM3::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
             mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (nullptr)));
@@ -122,8 +122,8 @@ namespace MWGui
     {
         mRaceId = raceId;
 
-        const ESM::Race *race =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(mRaceId);
+        const ESM3::Race *race =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>().search(mRaceId);
         if (race)
         {
             ToolTips::createRaceToolTip(mRaceWidget, race);
@@ -133,7 +133,7 @@ namespace MWGui
         mUpdateSkillArea = true;
     }
 
-    void ReviewDialog::setClass(const ESM::Class& class_)
+    void ReviewDialog::setClass(const ESM3::Class& class_)
     {
         mKlass = class_;
         mClassWidget->setCaption(mKlass.mName);
@@ -144,8 +144,8 @@ namespace MWGui
     {
         mBirthSignId = signId;
 
-        const ESM::BirthSign *sign =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().search(mBirthSignId);
+        const ESM3::BirthSign *sign =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM3::BirthSign>().search(mBirthSignId);
         if (sign)
         {
             mBirthSignWidget->setCaption(sign->mName);
@@ -198,7 +198,7 @@ namespace MWGui
         }
     }
 
-    void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
+    void ReviewDialog::setSkillValue(ESM3::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
     {
         mSkillValues[skillId] = value;
         MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
@@ -229,7 +229,7 @@ namespace MWGui
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
-        for (const int skill : ESM::Skill::sSkillIds)
+        for (const int skill : ESM3::Skill::sSkillIds)
         {
             if (skillSet.find(skill) == skillSet.end())
                 mMiscSkills.push_back(skill);
@@ -300,7 +300,7 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    void ReviewDialog::addItem(const ESM::Spell* spell, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
+    void ReviewDialog::addItem(const ESM3::Spell* spell, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         Widgets::MWSpellPtr widget = mSkillView->createWidget<Widgets::MWSpell>("MW_StatName", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
         widget->setSpellId(spell->mId);
@@ -327,10 +327,10 @@ namespace MWGui
 
         for (const int& skillId : skills)
         {
-            if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
+            if (skillId < 0 || skillId >= ESM3::Skill::Length) // Skip unknown skill indexes
                 continue;
-            assert(skillId >= 0 && skillId < ESM::Skill::Length);
-            const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
+            assert(skillId >= 0 && skillId < ESM3::Skill::Length);
+            const std::string &skillNameId = ESM3::Skill::sSkillNameIds[skillId];
             const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
@@ -375,16 +375,16 @@ namespace MWGui
         // starting spells
         std::vector<std::string> spells;
 
-        const ESM::Race* race = nullptr;
+        const ESM3::Race* race = nullptr;
         if (!mRaceId.empty())
-            race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(mRaceId);
+            race = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>().find(mRaceId);
 
-        int skills[ESM::Skill::Length];
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        unsigned int skills[ESM3::Skill::Length];
+        for (size_t i=0; i<ESM3::Skill::Length; ++i)
             skills[i] = mSkillValues.find(i)->second.getBase();
 
-        int attributes[ESM::Attribute::Length];
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        unsigned int attributes[ESM::Attribute::Length];
+        for (size_t i=0; i<ESM::Attribute::Length; ++i)
             attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
 
         std::vector<std::string> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
@@ -407,7 +407,7 @@ namespace MWGui
 
         if (!mBirthSignId.empty())
         {
-            const ESM::BirthSign* sign = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
+            const ESM3::BirthSign* sign = MWBase::Environment::get().getWorld()->getStore().get<ESM3::BirthSign>().find(mBirthSignId);
             for (const std::string& spellId : sign->mPowers.mList)
             {
                 std::string lower = Misc::StringUtils::lowerCase(spellId);
@@ -421,8 +421,8 @@ namespace MWGui
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"), coord1, coord2);
         for (std::string& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-            if (spell->mData.mType == ESM::Spell::ST_Ability)
+            const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find(spellId);
+            if (spell->mData.mType == ESM3::Spell::ST_Ability)
                 addItem(spell, coord1, coord2);
         }
 
@@ -430,8 +430,8 @@ namespace MWGui
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1, coord2);
         for (std::string& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-            if (spell->mData.mType == ESM::Spell::ST_Power)
+            const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find(spellId);
+            if (spell->mData.mType == ESM3::Spell::ST_Power)
                 addItem(spell, coord1, coord2);
         }
 
@@ -439,8 +439,8 @@ namespace MWGui
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1, coord2);
         for (std::string& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-            if (spell->mData.mType == ESM::Spell::ST_Spell)
+            const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find(spellId);
+            if (spell->mData.mType == ESM3::Spell::ST_Spell)
                 addItem(spell, coord1, coord2);
         }
 

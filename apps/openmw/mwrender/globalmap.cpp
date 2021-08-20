@@ -17,7 +17,7 @@
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/util.hpp>
 
-#include <components/esm/globalmap.hpp>
+#include <components/esm3/globalmap.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -101,7 +101,7 @@ namespace MWRender
     class CreateMapWorkItem : public SceneUtil::WorkItem
     {
     public:
-        CreateMapWorkItem(int width, int height, int minX, int minY, int maxX, int maxY, int cellSize, const MWWorld::Store<ESM::Land>& landStore)
+        CreateMapWorkItem(int width, int height, int minX, int minY, int maxX, int maxY, int cellSize, const MWWorld::Store<ESM3::Land>& landStore)
             : mWidth(width), mHeight(height), mMinX(minX), mMinY(minY), mMaxX(maxX), mMaxY(maxY), mCellSize(cellSize), mLandStore(landStore)
         {
         }
@@ -120,7 +120,7 @@ namespace MWRender
             {
                 for (int y = mMinY; y <= mMaxY; ++y)
                 {
-                    const ESM::Land* land = mLandStore.search (x,y);
+                    const ESM3::Land* land = mLandStore.search (x,y);
 
                     for (int cellY=0; cellY<mCellSize; ++cellY)
                     {
@@ -135,7 +135,7 @@ namespace MWRender
                             unsigned char r,g,b;
 
                             float y2 = 0;
-                            if (land && (land->mDataTypes & ESM::Land::DATA_WNAM))
+                            if (land && (land->mDataTypes & ESM3::Land::DATA_WNAM))
                                 y2 = land->mWnam[vertexY * 9 + vertexX] / 128.f;
                             else
                                 y2 = SCHAR_MIN / 128.f;
@@ -212,7 +212,7 @@ namespace MWRender
         int mWidth, mHeight;
         int mMinX, mMinY, mMaxX, mMaxY;
         int mCellSize;
-        const MWWorld::Store<ESM::Land>& mLandStore;
+        const MWWorld::Store<ESM3::Land>& mLandStore;
 
         osg::ref_ptr<osg::Texture2D> mBaseTexture;
         osg::ref_ptr<osg::Texture2D> mAlphaTexture;
@@ -250,8 +250,8 @@ namespace MWRender
             MWBase::Environment::get().getWorld()->getStore();
 
         // get the size of the world
-        MWWorld::Store<ESM::Cell>::iterator it = esmStore.get<ESM::Cell>().extBegin();
-        for (; it != esmStore.get<ESM::Cell>().extEnd(); ++it)
+        MWWorld::Store<ESM3::Cell>::iterator it = esmStore.get<ESM3::Cell>().extBegin();
+        for (; it != esmStore.get<ESM3::Cell>().extEnd(); ++it)
         {
             if (it->getGridX() < mMinX)
                 mMinX = it->getGridX();
@@ -266,7 +266,7 @@ namespace MWRender
         mWidth = mCellSize*(mMaxX-mMinX+1);
         mHeight = mCellSize*(mMaxY-mMinY+1);
 
-        mWorkItem = new CreateMapWorkItem(mWidth, mHeight, mMinX, mMinY, mMaxX, mMaxY, mCellSize, esmStore.get<ESM::Land>());
+        mWorkItem = new CreateMapWorkItem(mWidth, mHeight, mMinX, mMinY, mMaxX, mMaxY, mCellSize, esmStore.get<ESM3::Land>());
         mWorkQueue->addWorkItem(mWorkItem);
     }
 
@@ -391,7 +391,7 @@ namespace MWRender
         requestOverlayTextureUpdate(0, 0, mWidth, mHeight, osg::ref_ptr<osg::Texture2D>(), true, false);
     }
 
-    void GlobalMap::write(ESM::GlobalMap& map)
+    void GlobalMap::write(ESM3::GlobalMap& map)
     {
         ensureLoaded();
 
@@ -433,11 +433,11 @@ namespace MWRender
         }
     };
 
-    void GlobalMap::read(ESM::GlobalMap& map)
+    void GlobalMap::read(ESM3::GlobalMap& map)
     {
         ensureLoaded();
 
-        const ESM::GlobalMap::Bounds& bounds = map.mBounds;
+        const ESM3::GlobalMap::Bounds& bounds = map.mBounds;
 
         if (bounds.mMaxX-bounds.mMinX < 0)
             return;

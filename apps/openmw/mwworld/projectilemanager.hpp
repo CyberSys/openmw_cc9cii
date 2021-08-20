@@ -6,7 +6,7 @@
 #include <osg/ref_ptr>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 
@@ -64,7 +64,7 @@ namespace MWWorld
         void clear();
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
-        bool readRecord (ESM::ESMReader& reader, uint32_t type);
+        bool readRecord (ESM3::Reader& reader, uint32_t type);
         int countSavedGameRecords() const;
 
     private:
@@ -104,7 +104,7 @@ namespace MWWorld
             // Name of item to display as effect source in magic menu (in case we casted an enchantment)
             std::string mSourceName;
 
-            ESM::EffectList mEffects;
+            ESM3::EffectList mEffects;
 
             float mSpeed;
 

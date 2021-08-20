@@ -1,13 +1,17 @@
-#ifndef OPENMW_ESM_SPELLLIST_H
-#define OPENMW_ESM_SPELLLIST_H
+#ifndef ESM3_SPELLLIST_H
+#define ESM3_SPELLLIST_H
 
 #include <vector>
 #include <string>
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     /** A list of references to spells and spell effects. This is shared
      between the records BSGN, NPC and RACE.
@@ -21,9 +25,9 @@ namespace ESM
         bool exists(const std::string& spell) const;
 
         /// Load one spell, assumes the subrecord name was already read
-        void add(ESMReader &esm);
+        void add(Reader& esm);
 
-        void save(ESMWriter &esm) const;
+        void save(ESM::ESMWriter& esm) const;
     };
 }
 

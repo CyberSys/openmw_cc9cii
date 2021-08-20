@@ -1,7 +1,7 @@
 #include "aiescort.hpp"
 
-#include <components/esm/aisequence.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/aisequence.hpp>
+#include <components/esm3/cell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -36,7 +36,7 @@ namespace MWMechanics
         mTargetActorRefId = actorId;
     }
 
-    AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
+    AiEscort::AiEscort(const ESM3::AiSequence::AiEscort *escort)
         : mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
         // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
         // The exact value of mDuration only matters for repeating packages.
@@ -97,9 +97,9 @@ namespace MWMechanics
         return false;
     }
 
-    void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiEscort::writeState(ESM3::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());
+        std::unique_ptr<ESM3::AiSequence::AiEscort> escort(new ESM3::AiSequence::AiEscort());
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;
@@ -108,8 +108,8 @@ namespace MWMechanics
         escort->mRemainingDuration = mRemainingDuration;
         escort->mCellId = mCellId;
 
-        ESM::AiSequence::AiPackageContainer package;
-        package.mType = ESM::AiSequence::Ai_Escort;
+        ESM3::AiSequence::AiPackageContainer package;
+        package.mType = ESM3::AiSequence::Ai_Escort;
         package.mPackage = escort.release();
         sequence.mPackages.push_back(package);
     }

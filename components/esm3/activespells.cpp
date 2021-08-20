@@ -1,12 +1,77 @@
 #include "activespells.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
+    void ActiveSpells::load(Reader& esm)
+    {
+        int format = esm.getFormat();
 
-    void ActiveSpells::save(ESMWriter &esm) const
+        while (esm.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            if (subHdr.typeId == ESM3::SUB_ID__)
+            {
+                std::string spellId;
+                esm.getZString(spellId);
+
+                ActiveSpellParams params;
+                esm.getSubRecordHeader(ESM3::SUB_CAST);
+                esm.get(params.mCasterActorId);
+
+                esm.getSubRecordHeader(ESM3::SUB_DISP);
+                esm.getZString(params.mDisplayName);
+
+                // spell casting timestamp, no longer used
+                if (esm.getNextSubRecordHeader(ESM3::SUB_TIME))
+                    esm.skipSubRecordData();
+
+                while (esm.getNextSubRecordHeader(ESM3::SUB_MGEF))
+                {
+                    ActiveEffect effect;
+                    esm.get(effect.mEffectId);
+                    effect.mArg = -1;
+
+                    if (esm.getNextSubRecordHeader(ESM3::SUB_ARG_))
+                        esm.get(effect.mArg);
+
+                    esm.getSubRecordHeader(ESM3::SUB_MAGN);
+                    esm.get(effect.mMagnitude);
+
+                    esm.getSubRecordHeader(ESM3::SUB_DURA);
+                    esm.get(effect.mDuration);
+
+                    effect.mEffectIndex = -1;
+                    if (esm.getNextSubRecordHeader(ESM3::SUB_EIND))
+                        esm.get(effect.mEffectIndex);
+
+                    if (format < 9)
+                        effect.mTimeLeft = effect.mDuration;
+                    else if (esm.getSubRecordHeader())
+                    {
+                        if (esm.subRecordHeader().typeId == ESM3::SUB_LEFT)
+                        {
+                            esm.get(effect.mTimeLeft);
+                        }
+                    }
+
+                    params.mEffects.push_back(effect);
+                }
+
+                mSpells.insert(std::make_pair(spellId, params));
+                break;
+            }
+            else
+            {
+                esm.cacheSubRecordHeader();
+                return;
+            }
+        }
+    }
+
+    void ActiveSpells::save(ESM::ESMWriter& esm) const
     {
         for (TContainer::const_iterator it = mSpells.begin(); it != mSpells.end(); ++it)
         {
@@ -27,43 +92,6 @@ namespace ESM
                 esm.writeHNT ("EIND", effectIt->mEffectIndex);
                 esm.writeHNT ("LEFT", effectIt->mTimeLeft);
             }
-        }
-    }
-
-    void ActiveSpells::load(ESMReader &esm)
-    {
-        int format = esm.getFormat();
-
-        while (esm.isNextSub("ID__"))
-        {
-            std::string spellId = esm.getHString();
-
-            ActiveSpellParams params;
-            esm.getHNT (params.mCasterActorId, "CAST");
-            params.mDisplayName = esm.getHNString ("DISP");
-
-            // spell casting timestamp, no longer used
-            if (esm.isNextSub("TIME"))
-                esm.skipHSub();
-
-            while (esm.isNextSub("MGEF"))
-            {
-                ActiveEffect effect;
-                esm.getHT(effect.mEffectId);
-                effect.mArg = -1;
-                esm.getHNOT(effect.mArg, "ARG_");
-                esm.getHNT (effect.mMagnitude, "MAGN");
-                esm.getHNT (effect.mDuration, "DURA");
-                effect.mEffectIndex = -1;
-                esm.getHNOT (effect.mEffectIndex, "EIND");
-                if (format < 9)
-                    effect.mTimeLeft = effect.mDuration;
-                else
-                    esm.getHNT (effect.mTimeLeft, "LEFT");
-
-                params.mEffects.push_back(effect);
-            }
-            mSpells.insert(std::make_pair(spellId, params));
         }
     }
 }

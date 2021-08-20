@@ -5,7 +5,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 #include <components/misc/constants.hpp>
 
 CSMWorld::CellCoordinates::CellCoordinates() : mX (0), mY (0) {}
@@ -71,8 +71,8 @@ std::pair<int, int> CSMWorld::CellCoordinates::coordinatesToCellIndex (float x, 
 
 std::pair<int, int> CSMWorld::CellCoordinates::toTextureCoords(const osg::Vec3d& worldPos)
 {
-    const auto xd = static_cast<float>(worldPos.x() * ESM::Land::LAND_TEXTURE_SIZE / ESM::Land::REAL_SIZE - 0.25f);
-    const auto yd = static_cast<float>(worldPos.y() * ESM::Land::LAND_TEXTURE_SIZE / ESM::Land::REAL_SIZE + 0.25f);
+    const auto xd = static_cast<float>(worldPos.x() * ESM3::Land::LAND_TEXTURE_SIZE / ESM3::Land::REAL_SIZE - 0.25f);
+    const auto yd = static_cast<float>(worldPos.y() * ESM3::Land::LAND_TEXTURE_SIZE / ESM3::Land::REAL_SIZE + 0.25f);
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));
@@ -82,8 +82,8 @@ std::pair<int, int> CSMWorld::CellCoordinates::toTextureCoords(const osg::Vec3d&
 
 std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(const osg::Vec3d& worldPos)
 {
-    const auto xd = static_cast<float>(worldPos.x() * (ESM::Land::LAND_SIZE - 1) / ESM::Land::REAL_SIZE + 0.5f);
-    const auto yd = static_cast<float>(worldPos.y() * (ESM::Land::LAND_SIZE - 1) / ESM::Land::REAL_SIZE + 0.5f);
+    const auto xd = static_cast<float>(worldPos.x() * (ESM3::Land::LAND_SIZE - 1) / ESM3::Land::REAL_SIZE + 0.5f);
+    const auto yd = static_cast<float>(worldPos.y() * (ESM3::Land::LAND_SIZE - 1) / ESM3::Land::REAL_SIZE + 0.5f);
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));
@@ -93,35 +93,35 @@ std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(const osg::Vec3d& 
 
 float CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(int textureGlobal)
 {
-    return ESM::Land::REAL_SIZE * (static_cast<float>(textureGlobal) + 0.25f) / ESM::Land::LAND_TEXTURE_SIZE;
+    return ESM3::Land::REAL_SIZE * (static_cast<float>(textureGlobal) + 0.25f) / ESM3::Land::LAND_TEXTURE_SIZE;
 }
 
 float CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(int textureGlobal)
 {
-    return ESM::Land::REAL_SIZE * (static_cast<float>(textureGlobal) - 0.25f) / ESM::Land::LAND_TEXTURE_SIZE;
+    return ESM3::Land::REAL_SIZE * (static_cast<float>(textureGlobal) - 0.25f) / ESM3::Land::LAND_TEXTURE_SIZE;
 }
 
 float CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(int vertexGlobal)
 {
-    return ESM::Land::REAL_SIZE * static_cast<float>(vertexGlobal) / (ESM::Land::LAND_SIZE - 1);
+    return ESM3::Land::REAL_SIZE * static_cast<float>(vertexGlobal) / (ESM3::Land::LAND_SIZE - 1);
 }
 
 int CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(int vertexGlobal)
 {
-    return static_cast<int>(vertexGlobal - std::floor(static_cast<float>(vertexGlobal) / (ESM::Land::LAND_SIZE - 1)) * (ESM::Land::LAND_SIZE - 1));
+    return static_cast<int>(vertexGlobal - std::floor(static_cast<float>(vertexGlobal) / (ESM3::Land::LAND_SIZE - 1)) * (ESM3::Land::LAND_SIZE - 1));
 }
 
 std::string CSMWorld::CellCoordinates::textureGlobalToCellId(const std::pair<int, int>& textureGlobal)
 {
-    int x = std::floor(static_cast<float>(textureGlobal.first) / ESM::Land::LAND_TEXTURE_SIZE);
-    int y = std::floor(static_cast<float>(textureGlobal.second) / ESM::Land::LAND_TEXTURE_SIZE);
+    int x = std::floor(static_cast<float>(textureGlobal.first) / ESM3::Land::LAND_TEXTURE_SIZE);
+    int y = std::floor(static_cast<float>(textureGlobal.second) / ESM3::Land::LAND_TEXTURE_SIZE);
     return generateId(x, y);
 }
 
 std::string CSMWorld::CellCoordinates::vertexGlobalToCellId(const std::pair<int, int>& vertexGlobal)
 {
-    int x = std::floor(static_cast<float>(vertexGlobal.first) / (ESM::Land::LAND_SIZE - 1));
-    int y = std::floor(static_cast<float>(vertexGlobal.second) / (ESM::Land::LAND_SIZE - 1));
+    int x = std::floor(static_cast<float>(vertexGlobal.first) / (ESM3::Land::LAND_SIZE - 1));
+    int y = std::floor(static_cast<float>(vertexGlobal.second) / (ESM3::Land::LAND_SIZE - 1));
     return generateId(x, y);
 }
 

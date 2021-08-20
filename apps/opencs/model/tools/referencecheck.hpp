@@ -12,7 +12,7 @@ namespace CSMTools
             ReferenceCheckStage (const CSMWorld::RefCollection& references,
                 const CSMWorld::RefIdCollection& referencables,
                 const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-                const CSMWorld::IdCollection<ESM::Faction>& factions);
+                const CSMWorld::IdCollection<ESM3::Faction>& factions);
 
             void perform(int stage, CSMDoc::Messages& messages) override;
             int setup() override;
@@ -22,7 +22,7 @@ namespace CSMTools
             const CSMWorld::RefIdCollection& mObjects;
             const CSMWorld::RefIdData& mDataSet;
             const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
-            const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            const CSMWorld::IdCollection<ESM3::Faction>& mFactions;
             bool mIgnoreBaseRecords;
     };
 }

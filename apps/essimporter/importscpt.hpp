@@ -3,11 +3,12 @@
 
 #include "importscri.hpp"
 
-#include <components/esm/loadscpt.hpp>
+#include <components/esm3/scpt.hpp>
+#include <components/esm/esmcommon.hpp> // NAME32
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -16,7 +17,7 @@ namespace ESSImport
     struct SCHD
     {
         ESM::NAME32              mName;
-        ESM::Script::SCHDstruct  mData;
+        ESM3::Script::SCHDstruct mData;
     };
 
     // A running global script
@@ -30,7 +31,7 @@ namespace ESSImport
         bool mRunning;
         int mRefNum; // Targeted reference, -1: no reference
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

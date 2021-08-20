@@ -5,11 +5,11 @@
 
 #include <QVariant>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadcrea.hpp>
+#include <components/esm3/alch.hpp>
+#include <components/esm3/ench.hpp>
+#include <components/esm3/appa.hpp>
+#include <components/esm3/npc_.hpp>
+#include <components/esm3/crea.hpp>
 
 #include "columnbase.hpp"
 #include "record.hpp"
@@ -343,7 +343,7 @@ namespace CSMWorld
         PotionColumns (const InventoryColumns& columns);
     };
 
-    class PotionRefIdAdapter : public InventoryRefIdAdapter<ESM::Potion>
+    class PotionRefIdAdapter : public InventoryRefIdAdapter<ESM3::Potion>
     {
             PotionColumns mColumns;
             const RefIdColumn *mAutoCalc;
@@ -367,7 +367,7 @@ namespace CSMWorld
         IngredientColumns (const InventoryColumns& columns);
     };
 
-    class IngredientRefIdAdapter : public InventoryRefIdAdapter<ESM::Ingredient>
+    class IngredientRefIdAdapter : public InventoryRefIdAdapter<ESM3::Ingredient>
     {
             IngredientColumns mColumns;
 
@@ -691,7 +691,7 @@ namespace CSMWorld
         record.setModified(record2);
     }
 
-    class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>
+    class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM3::Apparatus>
     {
             const RefIdColumn *mType;
             const RefIdColumn *mQuality;
@@ -709,7 +709,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
-    class ArmorRefIdAdapter : public EnchantableRefIdAdapter<ESM::Armor>
+    class ArmorRefIdAdapter : public EnchantableRefIdAdapter<ESM3::Armor>
     {
             const RefIdColumn *mType;
             const RefIdColumn *mHealth;
@@ -729,7 +729,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
-    class BookRefIdAdapter : public EnchantableRefIdAdapter<ESM::Book>
+    class BookRefIdAdapter : public EnchantableRefIdAdapter<ESM3::Book>
     {
             const RefIdColumn *mBookType;
             const RefIdColumn *mSkill;
@@ -748,7 +748,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
-    class ClothingRefIdAdapter : public EnchantableRefIdAdapter<ESM::Clothing>
+    class ClothingRefIdAdapter : public EnchantableRefIdAdapter<ESM3::Clothing>
     {
             const RefIdColumn *mType;
             const RefIdColumn *mPartRef;
@@ -766,7 +766,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
-    class ContainerRefIdAdapter : public NameRefIdAdapter<ESM::Container>
+    class ContainerRefIdAdapter : public NameRefIdAdapter<ESM3::Container>
     {
             const RefIdColumn *mWeight;
             const RefIdColumn *mOrganic;
@@ -799,7 +799,7 @@ namespace CSMWorld
         CreatureColumns (const ActorColumns& actorColumns);
     };
 
-    class CreatureRefIdAdapter : public ActorRefIdAdapter<ESM::Creature>
+    class CreatureRefIdAdapter : public ActorRefIdAdapter<ESM3::Creature>
     {
             CreatureColumns mColumns;
 
@@ -815,7 +815,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
-    class DoorRefIdAdapter : public NameRefIdAdapter<ESM::Door>
+    class DoorRefIdAdapter : public NameRefIdAdapter<ESM3::Door>
     {
             const RefIdColumn *mOpenSound;
             const RefIdColumn *mCloseSound;
@@ -845,7 +845,7 @@ namespace CSMWorld
         LightColumns (const InventoryColumns& columns);
     };
 
-    class LightRefIdAdapter : public InventoryRefIdAdapter<ESM::Light>
+    class LightRefIdAdapter : public InventoryRefIdAdapter<ESM3::Light>
     {
             LightColumns mColumns;
 
@@ -861,7 +861,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
-    class MiscRefIdAdapter : public InventoryRefIdAdapter<ESM::Miscellaneous>
+    class MiscRefIdAdapter : public InventoryRefIdAdapter<ESM3::Miscellaneous>
     {
             const RefIdColumn *mKey;
 
@@ -894,7 +894,7 @@ namespace CSMWorld
         NpcColumns (const ActorColumns& actorColumns);
     };
 
-    class NpcRefIdAdapter : public ActorRefIdAdapter<ESM::NPC>
+    class NpcRefIdAdapter : public ActorRefIdAdapter<ESM3::NPC>
     {
             NpcColumns mColumns;
 
@@ -924,7 +924,7 @@ namespace CSMWorld
         WeaponColumns (const EnchantableColumns& columns);
     };
 
-    class WeaponRefIdAdapter : public EnchantableRefIdAdapter<ESM::Weapon>
+    class WeaponRefIdAdapter : public EnchantableRefIdAdapter<ESM3::Weapon>
     {
             WeaponColumns mColumns;
 
@@ -1227,9 +1227,9 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT container = record.get();
 
-            std::vector<ESM::ContItem>& list = container.mInventory.mList;
+            std::vector<ESM3::ContItem>& list = container.mInventory.mList;
 
-            ESM::ContItem newRow = ESM::ContItem();
+            ESM3::ContItem newRow = ESM3::ContItem();
 
             if (position >= (int)list.size())
                 list.push_back(newRow);
@@ -1246,7 +1246,7 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT container = record.get();
 
-            std::vector<ESM::ContItem>& list = container.mInventory.mList;
+            std::vector<ESM3::ContItem>& list = container.mInventory.mList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -1264,7 +1264,7 @@ namespace CSMWorld
             ESXRecordT container = record.get();
 
             container.mInventory.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::ContItem> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM3::ContItem> >&>(nestedTable).mNestedTable;
 
             record.setModified (container);
         }
@@ -1276,7 +1276,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::ContItem> >(record.get().mInventory.mList);
+            return new NestedTableWrapper<std::vector<typename ESM3::ContItem> >(record.get().mInventory.mList);
         }
 
         QVariant getNestedData (const RefIdColumn *column,
@@ -1285,12 +1285,12 @@ namespace CSMWorld
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-            const std::vector<ESM::ContItem>& list = record.get().mInventory.mList;
+            const std::vector<ESM3::ContItem>& list = record.get().mInventory.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
 
-            const ESM::ContItem& content = list.at(subRowIndex);
+            const ESM3::ContItem& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
@@ -1307,7 +1307,7 @@ namespace CSMWorld
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
             ESXRecordT container = record.get();
-            std::vector<ESM::ContItem>& list = container.mInventory.mList;
+            std::vector<ESM3::ContItem>& list = container.mInventory.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -1491,7 +1491,7 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT traveller = record.get();
 
-            std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
+            std::vector<ESM3::Transport::Dest>& list = traveller.mTransport.mList;
 
             ESM::Position newPos;
             for (unsigned i = 0; i < 3; ++i)
@@ -1500,7 +1500,7 @@ namespace CSMWorld
                 newPos.rot[i] = 0;
             }
 
-            ESM::Transport::Dest newRow;
+            ESM3::Transport::Dest newRow;
             newRow.mPos = newPos;
             newRow.mCellName = "";
 
@@ -1519,7 +1519,7 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT traveller = record.get();
 
-            std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
+            std::vector<ESM3::Transport::Dest>& list = traveller.mTransport.mList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -1537,7 +1537,7 @@ namespace CSMWorld
             ESXRecordT traveller = record.get();
 
             traveller.mTransport.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::Transport::Dest> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM3::Transport::Dest> >&>(nestedTable).mNestedTable;
 
             record.setModified (traveller);
         }
@@ -1549,7 +1549,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::Transport::Dest> >(record.get().mTransport.mList);
+            return new NestedTableWrapper<std::vector<typename ESM3::Transport::Dest> >(record.get().mTransport.mList);
         }
 
         QVariant getNestedData (const RefIdColumn *column,
@@ -1558,12 +1558,12 @@ namespace CSMWorld
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-            const std::vector<ESM::Transport::Dest>& list = record.get().mTransport.mList;
+            const std::vector<ESM3::Transport::Dest>& list = record.get().mTransport.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
 
-            const ESM::Transport::Dest& content = list.at(subRowIndex);
+            const ESM3::Transport::Dest& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
@@ -1585,7 +1585,7 @@ namespace CSMWorld
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
             ESXRecordT traveller = record.get();
-            std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
+            std::vector<ESM3::Transport::Dest>& list = traveller.mTransport.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -1644,10 +1644,10 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT actor = record.get();
 
-            std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
+            std::vector<ESM3::AIPackage>& list = actor.mAiPackage.mList;
 
-            ESM::AIPackage newRow;
-            newRow.mType = ESM::AI_Wander;
+            ESM3::AIPackage newRow;
+            newRow.mType = ESM3::AI_Wander;
             newRow.mWander.mDistance = 0;
             newRow.mWander.mDuration = 0;
             newRow.mWander.mTimeOfDay = 0;
@@ -1671,7 +1671,7 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT actor = record.get();
 
-            std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
+            std::vector<ESM3::AIPackage>& list = actor.mAiPackage.mList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -1689,7 +1689,7 @@ namespace CSMWorld
             ESXRecordT actor = record.get();
 
             actor.mAiPackage.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::AIPackage> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM3::AIPackage> >&>(nestedTable).mNestedTable;
 
             record.setModified (actor);
         }
@@ -1701,7 +1701,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::AIPackage> >(record.get().mAiPackage.mList);
+            return new NestedTableWrapper<std::vector<typename ESM3::AIPackage> >(record.get().mAiPackage.mList);
         }
 
         QVariant getNestedData (const RefIdColumn *column,
@@ -1710,12 +1710,12 @@ namespace CSMWorld
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-            const std::vector<ESM::AIPackage>& list = record.get().mAiPackage.mList;
+            const std::vector<ESM3::AIPackage>& list = record.get().mAiPackage.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
 
-            const ESM::AIPackage& content = list.at(subRowIndex);
+            const ESM3::AIPackage& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
@@ -1723,27 +1723,27 @@ namespace CSMWorld
                     // FIXME: should more than one AI package type be allowed?  Check vanilla
                     switch (content.mType)
                     {
-                        case ESM::AI_Wander: return 0;
-                        case ESM::AI_Travel: return 1;
-                        case ESM::AI_Follow: return 2;
-                        case ESM::AI_Escort: return 3;
-                        case ESM::AI_Activate: return 4;
-                        case ESM::AI_CNDT:
+                        case ESM3::AI_Wander: return 0;
+                        case ESM3::AI_Travel: return 1;
+                        case ESM3::AI_Follow: return 2;
+                        case ESM3::AI_Escort: return 3;
+                        case ESM3::AI_Activate: return 4;
+                        case ESM3::AI_CNDT:
                         default: return QVariant();
                     }
                 case 1: // wander dist
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         return content.mWander.mDistance;
                     else
                         return QVariant();
                 case 2: // wander dur
-                    if (content.mType == ESM::AI_Wander ||
-                            content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM3::AI_Wander ||
+                            content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         return content.mWander.mDuration;
                     else
                         return QVariant();
                 case 3: // wander ToD
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         return content.mWander.mTimeOfDay; // FIXME: not sure of the format
                     else
                         return QVariant();
@@ -1755,48 +1755,48 @@ namespace CSMWorld
                 case 9:
                 case 10:
                 case 11:
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         return static_cast<int>(content.mWander.mIdle[subColIndex-4]);
                     else
                         return QVariant();
                 case 12: // wander repeat
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         return content.mWander.mShouldRepeat != 0;
                     else
                         return QVariant();
                 case 13: // activate name
-                    if (content.mType == ESM::AI_Activate)
+                    if (content.mType == ESM3::AI_Activate)
                         return QString(content.mActivate.mName.toString().c_str());
                     else
                         return QVariant();
                 case 14: // target id
-                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         return QString(content.mTarget.mId.toString().c_str());
                     else
                         return QVariant();
                 case 15: // target cell
-                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         return QString::fromUtf8(content.mCellName.c_str());
                     else
                         return QVariant();
                 case 16:
-                    if (content.mType == ESM::AI_Travel)
+                    if (content.mType == ESM3::AI_Travel)
                         return content.mTravel.mX;
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    else if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         return content.mTarget.mX;
                     else
                         return QVariant();
                 case 17:
-                    if (content.mType == ESM::AI_Travel)
+                    if (content.mType == ESM3::AI_Travel)
                         return content.mTravel.mY;
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    else if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         return content.mTarget.mY;
                     else
                         return QVariant();
                 case 18:
-                    if (content.mType == ESM::AI_Travel)
+                    if (content.mType == ESM3::AI_Travel)
                         return content.mTravel.mZ;
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    else if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         return content.mTarget.mZ;
                     else
                         return QVariant();
@@ -1811,42 +1811,42 @@ namespace CSMWorld
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
             ESXRecordT actor = record.get();
-            std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
+            std::vector<ESM3::AIPackage>& list = actor.mAiPackage.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
 
-            ESM::AIPackage& content = list.at(subRowIndex);
+            ESM3::AIPackage& content = list.at(subRowIndex);
 
             switch(subColIndex)
             {
                 case 0: // ai package type
                     switch (value.toInt())
                     {
-                        case 0: content.mType = ESM::AI_Wander; break;
-                        case 1: content.mType = ESM::AI_Travel; break;
-                        case 2: content.mType = ESM::AI_Follow; break;
-                        case 3: content.mType = ESM::AI_Escort; break;
-                        case 4: content.mType = ESM::AI_Activate; break;
+                        case 0: content.mType = ESM3::AI_Wander; break;
+                        case 1: content.mType = ESM3::AI_Travel; break;
+                        case 2: content.mType = ESM3::AI_Follow; break;
+                        case 3: content.mType = ESM3::AI_Escort; break;
+                        case 4: content.mType = ESM3::AI_Activate; break;
                         default: return; // return without saving
                     }
                     break; // always save
 
                 case 1:
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         content.mWander.mDistance = static_cast<short>(value.toInt());
                     else
                         return; // return without saving
 
                     break; // always save
                 case 2:
-                    if (content.mType == ESM::AI_Wander ||
-                            content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM3::AI_Wander ||
+                            content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         content.mWander.mDuration = static_cast<short>(value.toInt());
                     else
                         return; // return without saving
                 case 3:
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         content.mWander.mTimeOfDay = static_cast<unsigned char>(value.toInt());
                     else
                         return; // return without saving
@@ -1860,62 +1860,62 @@ namespace CSMWorld
                 case 9:
                 case 10:
                 case 11:
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         content.mWander.mIdle[subColIndex-4] = static_cast<unsigned char>(value.toInt());
                     else
                         return; // return without saving
 
                     break; // always save
                 case 12:
-                    if (content.mType == ESM::AI_Wander)
+                    if (content.mType == ESM3::AI_Wander)
                         content.mWander.mShouldRepeat = static_cast<unsigned char>(value.toInt());
                     else
                         return; // return without saving
 
                     break; // always save
                 case 13: // NAME32
-                    if (content.mType == ESM::AI_Activate)
+                    if (content.mType == ESM3::AI_Activate)
                         content.mActivate.mName.assign(value.toString().toUtf8().constData());
                     else
                         return; // return without saving
 
                     break; // always save
                 case 14: // NAME32
-                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         content.mTarget.mId.assign(value.toString().toUtf8().constData());
                     else
                         return; // return without saving
 
                     break; // always save
                 case 15:
-                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         content.mCellName = std::string(value.toString().toUtf8().constData());
                     else
                         return; // return without saving
 
                     break; // always save
                 case 16:
-                    if (content.mType == ESM::AI_Travel)
+                    if (content.mType == ESM3::AI_Travel)
                         content.mTravel.mX = value.toFloat();
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    else if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         content.mTarget.mX = value.toFloat();
                     else
                         return; // return without saving
 
                     break; // always save
                 case 17:
-                    if (content.mType == ESM::AI_Travel)
+                    if (content.mType == ESM3::AI_Travel)
                         content.mTravel.mY = value.toFloat();
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    else if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         content.mTarget.mY = value.toFloat();
                     else
                         return; // return without saving
 
                     break; // always save
                 case 18:
-                    if (content.mType == ESM::AI_Travel)
+                    if (content.mType == ESM3::AI_Travel)
                         content.mTravel.mZ = value.toFloat();
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    else if (content.mType == ESM3::AI_Follow || content.mType == ESM3::AI_Escort)
                         content.mTarget.mZ = value.toFloat();
                     else
                         return; // return without saving
@@ -1965,9 +1965,9 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT apparel = record.get();
 
-            std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
+            std::vector<ESM3::PartReference>& list = apparel.mParts.mParts;
 
-            ESM::PartReference newPart;
+            ESM3::PartReference newPart;
             newPart.mPart = 0; // 0 == head
             newPart.mMale = "";
             newPart.mFemale = "";
@@ -1987,7 +1987,7 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT apparel = record.get();
 
-            std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
+            std::vector<ESM3::PartReference>& list = apparel.mParts.mParts;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -2005,7 +2005,7 @@ namespace CSMWorld
             ESXRecordT apparel = record.get();
 
             apparel.mParts.mParts =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::PartReference> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM3::PartReference> >&>(nestedTable).mNestedTable;
 
             record.setModified (apparel);
         }
@@ -2017,7 +2017,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::PartReference> >(record.get().mParts.mParts);
+            return new NestedTableWrapper<std::vector<typename ESM3::PartReference> >(record.get().mParts.mParts);
         }
 
         QVariant getNestedData (const RefIdColumn *column,
@@ -2026,18 +2026,18 @@ namespace CSMWorld
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-            const std::vector<ESM::PartReference>& list = record.get().mParts.mParts;
+            const std::vector<ESM3::PartReference>& list = record.get().mParts.mParts;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
 
-            const ESM::PartReference& content = list.at(subRowIndex);
+            const ESM3::PartReference& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
                 case 0:
                 {
-                    if (content.mPart < ESM::PRT_Count)
+                    if (content.mPart < ESM3::PRT_Count)
                         return content.mPart;
                     else
                         throw std::runtime_error("Part Reference Type unexpected value");
@@ -2055,7 +2055,7 @@ namespace CSMWorld
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
             ESXRecordT apparel = record.get();
-            std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
+            std::vector<ESM3::PartReference>& list = apparel.mParts.mParts;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -2193,7 +2193,7 @@ namespace CSMWorld
                 switch (subColIndex)
                 {
                     case 0: return QVariant(); // disable the checkbox editor
-                    case 1: return record.get().mFlags & ESM::CreatureLevList::AllLevels;
+                    case 1: return record.get().mFlags & ESM3::CreatureLevList::AllLevels;
                     case 2: return static_cast<int> (record.get().mChanceNone);
                     default:
                         throw std::runtime_error("Trying to access non-existing column in levelled creatues!");
@@ -2203,8 +2203,8 @@ namespace CSMWorld
             {
                 switch (subColIndex)
                 {
-                    case 0: return record.get().mFlags & ESM::ItemLevList::Each;
-                    case 1: return record.get().mFlags & ESM::ItemLevList::AllLevels;
+                    case 0: return record.get().mFlags & ESM3::ItemLevList::Each;
+                    case 1: return record.get().mFlags & ESM3::ItemLevList::AllLevels;
                     case 2: return static_cast<int> (record.get().mChanceNone);
                     default:
                         throw std::runtime_error("Trying to access non-existing column in levelled items!");
@@ -2228,12 +2228,12 @@ namespace CSMWorld
                     {
                         if(value.toBool())
                         {
-                            leveled.mFlags |= ESM::CreatureLevList::AllLevels;
+                            leveled.mFlags |= ESM3::CreatureLevList::AllLevels;
                             break;
                         }
                         else
                         {
-                            leveled.mFlags &= ~ESM::CreatureLevList::AllLevels;
+                            leveled.mFlags &= ~ESM3::CreatureLevList::AllLevels;
                             break;
                         }
                     }
@@ -2250,12 +2250,12 @@ namespace CSMWorld
                     {
                         if(value.toBool())
                         {
-                            leveled.mFlags |= ESM::ItemLevList::Each;
+                            leveled.mFlags |= ESM3::ItemLevList::Each;
                             break;
                         }
                         else
                         {
-                            leveled.mFlags &= ~ESM::ItemLevList::Each;
+                            leveled.mFlags &= ~ESM3::ItemLevList::Each;
                             break;
                         }
                     }
@@ -2263,12 +2263,12 @@ namespace CSMWorld
                     {
                         if(value.toBool())
                         {
-                            leveled.mFlags |= ESM::ItemLevList::AllLevels;
+                            leveled.mFlags |= ESM3::ItemLevList::AllLevels;
                             break;
                         }
                         else
                         {
-                            leveled.mFlags &= ~ESM::ItemLevList::AllLevels;
+                            leveled.mFlags &= ~ESM3::ItemLevList::AllLevels;
                             break;
                         }
                     }
@@ -2315,9 +2315,9 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT leveled = record.get();
 
-            std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
+            std::vector<ESM3::LevelledListBase::LevelItem>& list = leveled.mList;
 
-            ESM::LevelledListBase::LevelItem newItem;
+            ESM3::LevelledListBase::LevelItem newItem;
             newItem.mId = "";
             newItem.mLevel = 0;
 
@@ -2336,7 +2336,7 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
             ESXRecordT leveled = record.get();
 
-            std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
+            std::vector<ESM3::LevelledListBase::LevelItem>& list = leveled.mList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
@@ -2354,7 +2354,7 @@ namespace CSMWorld
             ESXRecordT leveled = record.get();
 
             leveled.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM3::LevelledListBase::LevelItem> >&>(nestedTable).mNestedTable;
 
             record.setModified (leveled);
         }
@@ -2366,7 +2366,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem> >(record.get().mList);
+            return new NestedTableWrapper<std::vector<typename ESM3::LevelledListBase::LevelItem> >(record.get().mList);
         }
 
         QVariant getNestedData (const RefIdColumn *column,
@@ -2375,12 +2375,12 @@ namespace CSMWorld
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-            const std::vector<ESM::LevelledListBase::LevelItem>& list = record.get().mList;
+            const std::vector<ESM3::LevelledListBase::LevelItem>& list = record.get().mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");
 
-            const ESM::LevelledListBase::LevelItem& content = list.at(subRowIndex);
+            const ESM3::LevelledListBase::LevelItem& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
@@ -2397,7 +2397,7 @@ namespace CSMWorld
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
             ESXRecordT leveled = record.get();
-            std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
+            std::vector<ESM3::LevelledListBase::LevelItem>& list = leveled.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
                 throw std::runtime_error ("index out of range");

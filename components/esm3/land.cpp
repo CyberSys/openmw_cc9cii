@@ -1,15 +1,14 @@
-#include "loadland.hpp"
+#include "land.hpp"
 
 #include <limits>
 #include <utility>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    unsigned int Land::sRecordId = REC_LAND;
+    unsigned int Land::sRecordId = ESM3::REC_LAND;
 
     Land::Land()
         : mFlags(0)
@@ -36,83 +35,97 @@ namespace ESM
         delete mLandData;
     }
 
-    void Land::load(ESMReader &esm, bool &isDeleted)
+    void Land::load(Reader& reader, bool& isDeleted)
     {
+        mContext = reader.getContext(); // TODO: is there another way of loading data later?
+
+        std::fill(std::begin(mWnam), std::end(mWnam), (unsigned char)0); // cast to suppress warning
+
+        mLandData = nullptr;
+
         isDeleted = false;
 
-        mPlugin = esm.getIndex();
+        mPlugin = reader.getModIndex();
 
         bool hasLocation = false;
-        bool isLoaded = false;
-        while (!isLoaded && esm.hasMoreSubs())
+        //bool isLoaded = false;
+        while (/*!isLoaded && */reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::FourCC<'I','N','T','V'>::value:
-                    esm.getSubHeader();
-                    if (esm.getSubSize() != 8)
-                        esm.fail("Subrecord size is not equal to 8");
-                    esm.getT<int>(mX);
-                    esm.getT<int>(mY);
+                case ESM3::SUB_INTV:
+                {
+                    if (subHdr.dataSize != 8)
+                        reader.fail("Subrecord size is not equal to 8");
+
+                    reader.get(mX);
+                    reader.get(mY);
                     hasLocation = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    esm.getHT(mFlags);
+                }
+                case ESM3::SUB_DATA:
+                {
+                    if (subHdr.dataSize != sizeof(mFlags))
+                        //reader.reportSubSizeMismatch(sizeof(mFlags), subHdr.dataSize);
+                        throw std::runtime_error("LAND DATA data size mismatch");
+
+                    reader.get(mFlags);
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
+                case ESM3::SUB_VNML:
+                {
+                    reader.skipSubRecordData(); // Skip the land data here. Load it when the cell is loaded.
+                    mDataTypes |= DATA_VNML;
+                    break;
+                }
+                case ESM3::SUB_VHGT:
+                {
+                    reader.skipSubRecordData(); // Skip the land data here. Load it when the cell is loaded.
+                    mDataTypes |= DATA_VHGT;
+                    break;
+                }
+                case ESM3::SUB_WNAM:
+                {
+                    if (subHdr.dataSize != sizeof(mWnam))
+                        //reader.reportSubSizeMismatch(sizeof(mWnam), subHdr.dataSize);
+                        throw std::runtime_error("LAND DATA data size mismatch");
+
+                    reader.get(mWnam);
+                    mDataTypes |= DATA_WNAM;
+                    break;
+                }
+                case ESM3::SUB_VCLR:
+                {
+                    reader.skipSubRecordData(); // Skip the land data here. Load it when the cell is loaded.
+                    mDataTypes |= DATA_VCLR;
+                    break;
+                }
+                case ESM3::SUB_VTEX:
+                {
+                    reader.skipSubRecordData(); // Skip the land data here. Load it when the cell is loaded.
+                    mDataTypes |= DATA_VTEX;
+                    break;
+                }
                 default:
-                    esm.cacheSubName();
-                    isLoaded = true;
+                    reader.fail("Unknown subrecord");
+                    //esm.cacheSubName();
+                    //isLoaded = true;
                     break;
             }
         }
 
         if (!hasLocation)
-            esm.fail("Missing INTV subrecord");
-
-        mContext = esm.getContext();
-
-        mLandData = nullptr;
-        std::fill(std::begin(mWnam), std::end(mWnam), 0);
-
-        // Skip the land data here. Load it when the cell is loaded.
-        while (esm.hasMoreSubs())
-        {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
-            {
-                case ESM::FourCC<'V','N','M','L'>::value:
-                    esm.skipHSub();
-                    mDataTypes |= DATA_VNML;
-                    break;
-                case ESM::FourCC<'V','H','G','T'>::value:
-                    esm.skipHSub();
-                    mDataTypes |= DATA_VHGT;
-                    break;
-                case ESM::FourCC<'W','N','A','M'>::value:
-                    esm.getHExact(mWnam, sizeof(mWnam));
-                    mDataTypes |= DATA_WNAM;
-                    break;
-                case ESM::FourCC<'V','C','L','R'>::value:
-                    esm.skipHSub();
-                    mDataTypes |= DATA_VCLR;
-                    break;
-                case ESM::FourCC<'V','T','E','X'>::value:
-                    esm.skipHSub();
-                    mDataTypes |= DATA_VTEX;
-                    break;
-                default:
-                    esm.fail("Unknown subrecord");
-                    break;
-            }
-        }
+            reader.fail("Missing INTV subrecord");
     }
 
-    void Land::save(ESMWriter &esm, bool isDeleted) const
+    void Land::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.startSubRecord("INTV");
         esm.writeT(mX);
@@ -165,12 +178,12 @@ namespace ESM
                 signed char wnam[LAND_GLOBAL_MAP_LOD_SIZE];
                 constexpr float max = std::numeric_limits<signed char>::max();
                 constexpr float min = std::numeric_limits<signed char>::min();
-                constexpr float vertMult = static_cast<float>(ESM::Land::LAND_SIZE - 1) / LAND_GLOBAL_MAP_LOD_SIZE_SQRT;
+                constexpr float vertMult = static_cast<float>(ESM3::Land::LAND_SIZE - 1) / LAND_GLOBAL_MAP_LOD_SIZE_SQRT;
                 for (int row = 0; row < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++row)
                 {
                     for (int col = 0; col < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++col)
                     {
-                        float height = mLandData->mHeights[int(row * vertMult) * ESM::Land::LAND_SIZE + int(col * vertMult)];
+                        float height = mLandData->mHeights[int(row * vertMult) * ESM3::Land::LAND_SIZE + int(col * vertMult)];
                         height /= height > 0 ? 128.f : 16.f;
                         height = std::min(max, std::max(min, height));
                         wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<signed char>(height);
@@ -194,13 +207,13 @@ namespace ESM
     {
         mPlugin = 0;
 
-        std::fill(std::begin(mWnam), std::end(mWnam), 0);
+        std::fill(std::begin(mWnam), std::end(mWnam), (unsigned char)0); // cast to suppress warning
 
         if (!mLandData)
             mLandData = new LandData;
 
         mLandData->mHeightOffset = 0;
-        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0);
+        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), (unsigned char)0); // cast to suppress warning
         mLandData->mMinHeight = 0;
         mLandData->mMaxHeight = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
@@ -209,8 +222,8 @@ namespace ESM
             mLandData->mNormals[i*3+1] = 0;
             mLandData->mNormals[i*3+2] = 127;
         }
-        std::fill(std::begin(mLandData->mTextures), std::end(mLandData->mTextures), 0);
-        std::fill(std::begin(mLandData->mColours), std::end(mLandData->mColours), 255);
+        std::fill(std::begin(mLandData->mTextures), std::end(mLandData->mTextures), (unsigned char)0); // cast to suppress warning
+        std::fill(std::begin(mLandData->mColours), std::end(mLandData->mColours), (unsigned char)255); // cast to suppress warning
         mLandData->mUnk1 = 0;
         mLandData->mUnk2 = 0;
         mLandData->mDataLoaded = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_WNAM |
@@ -249,53 +262,71 @@ namespace ESM
             return;
         }
 
-        ESM::ESMReader reader;
+        ESM3::Reader reader;
         reader.restoreContext(mContext);
 
-        if (reader.isNextSub("VNML")) {
-            condLoad(reader, flags, target->mDataLoaded, DATA_VNML, target->mNormals, sizeof(target->mNormals));
-        }
-
-        if (reader.isNextSub("VHGT")) {
-            VHGT vhgt;
-            if (condLoad(reader, flags, target->mDataLoaded, DATA_VHGT, &vhgt, sizeof(vhgt))) {
-                target->mMinHeight = std::numeric_limits<float>::max();
-                target->mMaxHeight = -std::numeric_limits<float>::max();
-                float rowOffset = vhgt.mHeightOffset;
-                for (int y = 0; y < LAND_SIZE; y++) {
-                    rowOffset += vhgt.mHeightData[y * LAND_SIZE];
-
-                    target->mHeights[y * LAND_SIZE] = rowOffset * HEIGHT_SCALE;
-                    if (rowOffset * HEIGHT_SCALE > target->mMaxHeight)
-                        target->mMaxHeight = rowOffset * HEIGHT_SCALE;
-                    if (rowOffset * HEIGHT_SCALE < target->mMinHeight)
-                        target->mMinHeight = rowOffset * HEIGHT_SCALE;
-
-                    float colOffset = rowOffset;
-                    for (int x = 1; x < LAND_SIZE; x++) {
-                        colOffset += vhgt.mHeightData[y * LAND_SIZE + x];
-                        target->mHeights[x + y * LAND_SIZE] = colOffset * HEIGHT_SCALE;
-
-                        if (colOffset * HEIGHT_SCALE > target->mMaxHeight)
-                            target->mMaxHeight = colOffset * HEIGHT_SCALE;
-                        if (colOffset * HEIGHT_SCALE < target->mMinHeight)
-                            target->mMinHeight = colOffset * HEIGHT_SCALE;
-                    }
+        while (reader.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_VNML:
+                {
+                    condLoad(reader, flags, target->mDataLoaded, DATA_VNML,
+                            target->mNormals, sizeof(target->mNormals));
+                    break;
                 }
-                target->mUnk1 = vhgt.mUnk1;
-                target->mUnk2 = vhgt.mUnk2;
-            }
-        }
+                case ESM3::SUB_VHGT:
+                {
+                    VHGT vhgt;
+                    if (condLoad(reader, flags, target->mDataLoaded, DATA_VHGT, &vhgt, sizeof(vhgt)))
+                    {
+                        target->mMinHeight = std::numeric_limits<float>::max();
+                        target->mMaxHeight = -std::numeric_limits<float>::max();
+                        float rowOffset = vhgt.mHeightOffset;
+                        for (int y = 0; y < LAND_SIZE; y++) {
+                            rowOffset += vhgt.mHeightData[y * LAND_SIZE];
 
-        if (reader.isNextSub("WNAM"))
-            reader.skipHSub();
+                            target->mHeights[y * LAND_SIZE] = rowOffset * HEIGHT_SCALE;
+                            if (rowOffset * HEIGHT_SCALE > target->mMaxHeight)
+                                target->mMaxHeight = rowOffset * HEIGHT_SCALE;
+                            if (rowOffset * HEIGHT_SCALE < target->mMinHeight)
+                                target->mMinHeight = rowOffset * HEIGHT_SCALE;
 
-        if (reader.isNextSub("VCLR"))
-            condLoad(reader, flags, target->mDataLoaded, DATA_VCLR, target->mColours, 3 * LAND_NUM_VERTS);
-        if (reader.isNextSub("VTEX")) {
-            uint16_t vtex[LAND_NUM_TEXTURES];
-            if (condLoad(reader, flags, target->mDataLoaded, DATA_VTEX, vtex, sizeof(vtex))) {
-                transposeTextureData(vtex, target->mTextures);
+                            float colOffset = rowOffset;
+                            for (int x = 1; x < LAND_SIZE; x++) {
+                                colOffset += vhgt.mHeightData[y * LAND_SIZE + x];
+                                target->mHeights[x + y * LAND_SIZE] = colOffset * HEIGHT_SCALE;
+
+                                if (colOffset * HEIGHT_SCALE > target->mMaxHeight)
+                                    target->mMaxHeight = colOffset * HEIGHT_SCALE;
+                                if (colOffset * HEIGHT_SCALE < target->mMinHeight)
+                                    target->mMinHeight = colOffset * HEIGHT_SCALE;
+                            }
+                        }
+                        target->mUnk1 = vhgt.mUnk1;
+                        target->mUnk2 = vhgt.mUnk2;
+                    }
+                    break;
+                }
+                case ESM3::SUB_VCLR:
+                {
+                    condLoad(reader, flags, target->mDataLoaded, DATA_VCLR,
+                            target->mColours, 3 * LAND_NUM_VERTS);
+                    break;
+                }
+                case ESM3::SUB_VTEX:
+                {
+                    std::uint16_t vtex[LAND_NUM_TEXTURES];
+                    if (condLoad(reader, flags, target->mDataLoaded, DATA_VTEX, vtex, sizeof(vtex)))
+                    {
+                        transposeTextureData(vtex, target->mTextures);
+                    }
+                    break;
+                }
+                default:
+                    reader.skipSubRecordData();
+                    break;
             }
         }
     }
@@ -309,14 +340,22 @@ namespace ESM
         }
     }
 
-    bool Land::condLoad(ESM::ESMReader& reader, int flags, int& targetFlags, int dataFlag, void *ptr, unsigned int size) const
+    // NOTE: assumes the sub-record header was read (which would have populated mCtx.subRecordHeader)
+    bool Land::condLoad(ESM::Reader& readerBase, int flags, int& targetFlags, int dataFlag, void *ptr, unsigned int size) const
     {
-        if ((targetFlags & dataFlag) == 0 && (flags & dataFlag) != 0) {
-            reader.getHExact(ptr, size);
+        ESM3::Reader& reader = static_cast<ESM3::Reader&>(readerBase);
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        if (subHdr.dataSize != size)
+            throw std::runtime_error("LAND data size mismatch");
+
+        if ((targetFlags & dataFlag) == 0 && (flags & dataFlag) != 0)
+        {
+            reader.get(*(char*)ptr, size); // HACK: to get around void*
             targetFlags |= dataFlag;
             return true;
         }
-        reader.skipHSubSize(size);
+
+        reader.skipSubRecordData(size); // no match, skip the sub record
         return false;
     }
 

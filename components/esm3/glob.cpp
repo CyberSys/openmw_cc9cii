@@ -1,31 +1,74 @@
-#include "loadglob.hpp"
+#include "glob.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+//#include <cassert>
+#include <cmath> // std::isnan
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+#include "../esm/common.hpp" // VarType
+
+namespace ESM3
 {
     unsigned int Global::sRecordId = REC_GLOB;
 
-    void Global::load (ESMReader &esm, bool &isDeleted)
+    void Global::load (Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
-        mId = esm.getHNString ("NAME");
+        char type = '\0';
+        while (reader.getSubRecordHeader())
+        {
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_NAME: reader.getZString(mId); break;
+                case ESM3::SUB_FNAM:
+                {
+                    //assert(subHdr.dataSize == 1);
+                    reader.get(type);
+                    break;
+                }
+                case ESM3::SUB_FLTV:
+                {
+                    //assert (type != '\0' && "GLOB value before type");
 
-        if (esm.isNextSub ("DELE"))
-        {
-            esm.skipHSub();
-            isDeleted = true;
-        }
-        else
-        {
-            mValue.read (esm, ESM::Variant::Format_Global);
+                    float value;
+                    reader.get(value);
+
+                    if (type == 's')
+                    {
+                        mValue.setType(ESM::VT_Short);
+                        if (std::isnan(value))
+                            mValue.setInteger(0);
+                        else
+                            mValue.setInteger(static_cast<short> (value));
+                    }
+                    else if (type == 'l')
+                    {
+                        mValue.setType(ESM::VT_Long);
+                        mValue.setInteger(static_cast<int> (value));
+                    }
+                    else if (type == 'f')
+                        mValue = Variant(value);
+                    else
+                        reader.fail ("unsupported global variable type");
+                    break;
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
+                    isDeleted = true;
+                    break;
+                }
+                default:
+                    reader.fail("Unknown subrecord");
+                    break;
+            }
         }
     }
 
-    void Global::save (ESMWriter &esm, bool isDeleted) const
+    void Global::save (ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString ("NAME", mId);
 
@@ -35,7 +78,7 @@ namespace ESM
         }
         else
         {
-            mValue.write (esm, ESM::Variant::Format_Global);
+            mValue.write (esm, ESM3::Variant::Format_Global);
         }
     }
 

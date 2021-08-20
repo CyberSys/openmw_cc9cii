@@ -1,37 +1,35 @@
-#include "loadlevlist.hpp"
+#include "levlist.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    void LevelledListBase::load(ESMReader &esm, bool &isDeleted)
+    void LevelledListBase::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
-        mRecordFlags = esm.getRecordFlags();
+        mRecordFlags = reader.getRecordFlags();
 
+        std::uint32_t length = 0;
         bool hasName = false;
         bool hasList = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId); // FIXME: fixed size for item only?
                     hasName = true;
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    esm.getHT(mFlags);
-                    break;
-                case ESM::FourCC<'N','N','A','M'>::value:
-                    esm.getHT(mChanceNone);
-                    break;
-                case ESM::FourCC<'I','N','D','X'>::value:
+                }
+                case ESM3::SUB_DATA: reader.get(mFlags); break;
+                case ESM3::SUB_NNAM: reader.get(mChanceNone); break;
+                case ESM3::SUB_INDX:
                 {
-                    int length = 0;
-                    esm.getHT(length);
+                    reader.get(length);
+
                     mList.resize(length);
 
                     // If this levelled list was already loaded by a previous content file,
@@ -43,28 +41,47 @@ namespace ESM
                     for (size_t i = 0; i < mList.size(); i++)
                     {
                         LevelItem &li = mList[i];
-                        li.mId = esm.getHNString(mRecName);
-                        esm.getHNT(li.mLevel, "INTV");
+
+                        reader.getSubRecordHeader(mRecName);
+                        reader.getZString(li.mId); // FIXME: check if null terminated
+
+                        reader.getSubRecordHeader(ESM3::SUB_INTV);
+                        reader.get(li.mLevel);
                     }
 
                     hasList = true;
                     break;
                 }
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                case ESM3::SUB_INAM:
+                case ESM3::SUB_CNAM:
+                {
+                    LevelItem li;
+                    reader.getZString(li.mId);
+                    mList.push_back(li);
+                    break;
+                }
+                case ESM3::SUB_INTV:
+                {
+                    reader.get(mList.back().mLevel); // assumes this sub-record follows INAM/CNAM
+                    break;
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
                 {
                     if (!hasList)
                     {
                         // Original engine ignores rest of the record, even if there are items following
                         mList.clear();
-                        esm.skipRecord();
+                        reader.skipRecordData();
                     }
                     else
                     {
-                        esm.fail("Unknown subrecord");
+                        reader.fail("Unknown subrecord");
                     }
                     break;
                 }
@@ -72,10 +89,13 @@ namespace ESM
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
+
+        if (length != mList.size())
+            reader.fail("Item count incorrect");
     }
 
-    void LevelledListBase::save(ESMWriter &esm, bool isDeleted) const
+    void LevelledListBase::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -87,11 +107,11 @@ namespace ESM
 
         esm.writeHNT("DATA", mFlags);
         esm.writeHNT("NNAM", mChanceNone);
-        esm.writeHNT<int>("INDX", mList.size());
+        esm.writeHNT<int>("INDX", static_cast<unsigned int>(mList.size())); // FIXME: warning C4267
 
         for (std::vector<LevelItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNCString(mRecName, it->mId);
+            esm.writeHNCString(ESM::printName(mRecName), it->mId);
             esm.writeHNT("INTV", it->mLevel);
         }
     }

@@ -3,7 +3,7 @@
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/resourcemanager.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include <mutex>
 
@@ -34,10 +34,10 @@ namespace MWRender
         unsigned int getNodeMask() override;
 
         /// @return true if view needs rebuild
-        bool enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
+        bool enableObject(int type, const ESM3::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
 
         /// @return true if view needs rebuild
-        bool blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
+        bool blacklistObject(int type, const ESM3::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
 
         void clear();
 
@@ -47,7 +47,7 @@ namespace MWRender
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
-        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
+        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM3::RefNum> &out);
 
     private:
         Resource::SceneManager* mSceneManager;
@@ -61,8 +61,8 @@ namespace MWRender
         std::mutex mRefTrackerMutex;
         struct RefTracker
         {
-            std::set<ESM::RefNum> mDisabled;
-            std::set<ESM::RefNum> mBlacklist;
+            std::set<ESM3::RefNum> mDisabled;
+            std::set<ESM3::RefNum> mBlacklist;
             bool operator==(const RefTracker&other) const { return mDisabled == other.mDisabled && mBlacklist == other.mBlacklist; }
         };
         RefTracker mRefTracker;
@@ -73,7 +73,7 @@ namespace MWRender
         RefTracker& getWritableRefTracker() { return mRefTrackerLocked ? mRefTrackerNew : mRefTracker; }
 
         std::mutex mSizeCacheMutex;
-        typedef std::map<ESM::RefNum, float> SizeCache;
+        typedef std::map<ESM3::RefNum, float> SizeCache;
         SizeCache mSizeCache;
     };
 
@@ -84,7 +84,7 @@ namespace MWRender
         RefnumMarker(const RefnumMarker &copy, osg::CopyOp co) : mRefnum(copy.mRefnum), mNumVertices(copy.mNumVertices) {}
         META_Object(MWRender, RefnumMarker)
 
-        ESM::RefNum mRefnum;
+        ESM3::RefNum mRefnum;
         unsigned int mNumVertices;
     };
 }

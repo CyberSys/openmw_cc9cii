@@ -4,9 +4,9 @@
 
 #include <sstream>
 
-void CSMWorld::Pathgrid::load (ESM::ESMReader &esm, bool &isDeleted, const IdCollection<Cell>& cells)
+void CSMWorld::Pathgrid::load (ESM::Reader& reader, bool& isDeleted, const IdCollection<Cell>& cells)
 {
-    load (esm, isDeleted);
+    load (static_cast<ESM3::Reader&>(reader), isDeleted);
 
     // correct ID
     if (!mId.empty() && mId[0]!='#' && cells.searchId (mId)==-1)
@@ -17,9 +17,9 @@ void CSMWorld::Pathgrid::load (ESM::ESMReader &esm, bool &isDeleted, const IdCol
     }
 }
 
-void CSMWorld::Pathgrid::load (ESM::ESMReader &esm, bool &isDeleted)
+void CSMWorld::Pathgrid::load (ESM::Reader& reader, bool& isDeleted)
 {
-    ESM::Pathgrid::load (esm, isDeleted);
+    ESM3::Pathgrid::load (static_cast<ESM3::Reader&>(reader), isDeleted);
 
     mId = mCell;
     if (mCell.empty())

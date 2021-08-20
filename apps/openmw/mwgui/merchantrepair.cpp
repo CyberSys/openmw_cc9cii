@@ -1,6 +1,6 @@
 #include "merchantrepair.hpp"
 
-#include <components/esm/loadgmst.hpp>
+#include <components/esm3/gmst.hpp>
 
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
@@ -55,7 +55,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
                 continue;
 
             int basePrice = iter->getClass().getValue(*iter);
-            float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>()
                     .find("fRepairMult")->mValue.getFloat();
 
             float p = static_cast<float>(std::max(1, basePrice));
@@ -69,7 +69,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
             std::string name = iter->getClass().getName(*iter)
                     + " - " + MyGUI::utility::toString(price)
-                    + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                    + MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>()
                     .find("sgp")->mValue.getString();
 
             MyGUI::Button* button =

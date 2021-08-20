@@ -1,6 +1,6 @@
 #include "clothing.hpp"
 
-#include <components/esm/loadclot.hpp>
+#include <components/esm3/clot.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -31,7 +31,7 @@ namespace MWClass
 
     std::string Clothing::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -42,7 +42,7 @@ namespace MWClass
 
     std::string Clothing::getName (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
@@ -56,18 +56,18 @@ namespace MWClass
 
     std::string Clothing::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         return ref->mBase->mScript;
     }
 
     std::pair<std::vector<int>, bool> Clothing::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         std::vector<int> slots_;
 
-        if (ref->mBase->mData.mType==ESM::Clothing::Ring)
+        if (ref->mBase->mData.mType==ESM3::Clothing::Ring)
         {
             slots_.push_back (int (MWWorld::InventoryStore::Slot_LeftRing));
             slots_.push_back (int (MWWorld::InventoryStore::Slot_RightRing));
@@ -78,15 +78,15 @@ namespace MWClass
 
             static const int sMapping[size][2] =
             {
-                { ESM::Clothing::Shirt, MWWorld::InventoryStore::Slot_Shirt },
-                { ESM::Clothing::Belt, MWWorld::InventoryStore::Slot_Belt },
-                { ESM::Clothing::Robe, MWWorld::InventoryStore::Slot_Robe },
-                { ESM::Clothing::Pants, MWWorld::InventoryStore::Slot_Pants },
-                { ESM::Clothing::Shoes, MWWorld::InventoryStore::Slot_Boots },
-                { ESM::Clothing::LGlove, MWWorld::InventoryStore::Slot_LeftGauntlet },
-                { ESM::Clothing::RGlove, MWWorld::InventoryStore::Slot_RightGauntlet },
-                { ESM::Clothing::Skirt, MWWorld::InventoryStore::Slot_Skirt },
-                { ESM::Clothing::Amulet, MWWorld::InventoryStore::Slot_Amulet }
+                { ESM3::Clothing::Shirt, MWWorld::InventoryStore::Slot_Shirt },
+                { ESM3::Clothing::Belt, MWWorld::InventoryStore::Slot_Belt },
+                { ESM3::Clothing::Robe, MWWorld::InventoryStore::Slot_Robe },
+                { ESM3::Clothing::Pants, MWWorld::InventoryStore::Slot_Pants },
+                { ESM3::Clothing::Shoes, MWWorld::InventoryStore::Slot_Boots },
+                { ESM3::Clothing::LGlove, MWWorld::InventoryStore::Slot_LeftGauntlet },
+                { ESM3::Clothing::RGlove, MWWorld::InventoryStore::Slot_RightGauntlet },
+                { ESM3::Clothing::Skirt, MWWorld::InventoryStore::Slot_Skirt },
+                { ESM3::Clothing::Amulet, MWWorld::InventoryStore::Slot_Amulet }
             };
 
             for (int i=0; i<size; ++i)
@@ -102,17 +102,17 @@ namespace MWClass
 
     int Clothing::getEquipmentSkill (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
-        if (ref->mBase->mData.mType==ESM::Clothing::Shoes)
-            return ESM::Skill::Unarmored;
+        if (ref->mBase->mData.mType==ESM3::Clothing::Shoes)
+            return ESM3::Skill::Unarmored;
 
         return -1;
     }
 
     int Clothing::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         return ref->mBase->mData.mValue;
     }
@@ -121,12 +121,12 @@ namespace MWClass
     {
         std::shared_ptr<Class> instance (new Clothing);
 
-        registerClass (typeid (ESM::Clothing).name(), instance);
+        registerClass (typeid (ESM3::Clothing).name(), instance);
     }
 
     std::string Clothing::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         if (ref->mBase->mData.mType == 8)
         {
@@ -137,7 +137,7 @@ namespace MWClass
 
     std::string Clothing::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         if (ref->mBase->mData.mType == 8)
         {
@@ -148,14 +148,14 @@ namespace MWClass
 
     std::string Clothing::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         return ref->mBase->mIcon;
     }
 
     MWGui::ToolTipInfo Clothing::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         MWGui::ToolTipInfo info;
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
@@ -182,21 +182,21 @@ namespace MWClass
 
     std::string Clothing::getEnchantment (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         return ref->mBase->mEnchant;
     }
 
     std::string Clothing::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
-        ESM::Clothing newItem = *ref->mBase;
+        ESM3::Clothing newItem = *ref->mBase;
         newItem.mId="";
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
-        const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        const ESM3::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
     }
 
@@ -210,19 +210,19 @@ namespace MWClass
 
         if (npc.getClass().isNpc())
         {
-            std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+            std::string npcRace = npc.get<ESM3::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-            if(race->mData.mFlags & ESM::Race::Beast)
+            const ESM3::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM3::Race::Beast)
             {
-                std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
+                std::vector<ESM3::PartReference> parts = ptr.get<ESM3::Clothing>()->mBase->mParts.mParts;
 
-                for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                for(std::vector<ESM3::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                 {
-                    if((*itr).mPart == ESM::PRT_Head)
+                    if((*itr).mPart == ESM3::PRT_Head)
                         return std::make_pair(0, "#{sNotifyMessage13}");
-                    if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                    if((*itr).mPart == ESM3::PRT_LFoot || (*itr).mPart == ESM3::PRT_RFoot)
                         return std::make_pair(0, "#{sNotifyMessage15}");
                 }
             }
@@ -242,27 +242,27 @@ namespace MWClass
 
     MWWorld::Ptr Clothing::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     int Clothing::getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
 
         return ref->mBase->mData.mEnchant;
     }
 
     bool Clothing::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return (npcServices & ESM::NPC::Clothing)
-                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
+        return (npcServices & ESM3::NPC::Clothing)
+                || ((npcServices & ESM3::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Clothing::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM3::Clothing> *ref = ptr.get<ESM3::Clothing>();
         return ref->mBase->mData.mWeight;
     }
 }

@@ -1,39 +1,43 @@
-#ifndef OPENMW_ESM_REPA_H
-#define OPENMW_ESM_REPA_H
+#ifndef ESM3_REPA_H
+#define ESM3_REPA_H
 
 #include <string>
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-struct Repair
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Repair"; }
+    class Reader;
 
-    struct Data
+    struct Repair
     {
-        float mWeight;
-        int mValue;
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "Repair"; }
 
-        int mUses;
-        float mQuality;
-    }; // Size = 16
+#pragma pack(push, 1)
+        struct Data
+        {
+            float mWeight;
+            int mValue;
 
-    Data mData;
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mIcon, mScript;
+            int mUses;
+            float mQuality;
+        }; // Size = 16
+#pragma pack(pop)
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        Data mData;
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mIcon, mScript;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
 
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 }
 #endif

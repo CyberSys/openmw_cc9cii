@@ -1,6 +1,6 @@
 #include "aipursue.hpp"
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -21,7 +21,7 @@ AiPursue::AiPursue(const MWWorld::Ptr& actor)
     mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
-AiPursue::AiPursue(const ESM::AiSequence::AiPursue *pursue)
+AiPursue::AiPursue(const ESM3::AiSequence::AiPursue *pursue)
 {
     mTargetActorId = pursue->mTargetActorId;
 }
@@ -74,13 +74,13 @@ MWWorld::Ptr AiPursue::getTarget() const
     return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
 }
 
-void AiPursue::writeState(ESM::AiSequence::AiSequence &sequence) const
+void AiPursue::writeState(ESM3::AiSequence::AiSequence &sequence) const
 {
-    std::unique_ptr<ESM::AiSequence::AiPursue> pursue(new ESM::AiSequence::AiPursue());
+    std::unique_ptr<ESM3::AiSequence::AiPursue> pursue(new ESM3::AiSequence::AiPursue());
     pursue->mTargetActorId = mTargetActorId;
 
-    ESM::AiSequence::AiPackageContainer package;
-    package.mType = ESM::AiSequence::Ai_Pursue;
+    ESM3::AiSequence::AiPackageContainer package;
+    package.mType = ESM3::AiSequence::Ai_Pursue;
     package.mPackage = pursue.release();
     sequence.mPackages.push_back(package);
 }

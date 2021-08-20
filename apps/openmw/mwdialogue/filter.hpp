@@ -5,7 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct DialInfo;
     struct Dialogue;
@@ -21,16 +21,16 @@ namespace MWDialogue
             int mChoice;
             bool mTalkedToPlayer;
 
-            bool testActor (const ESM::DialInfo& info) const;
+            bool testActor (const ESM3::DialInfo& info) const;
             ///< Is this the right actor for this \a info?
 
-            bool testPlayer (const ESM::DialInfo& info) const;
+            bool testPlayer (const ESM3::DialInfo& info) const;
             ///< Do the player and the cell the player is currently in match \a info?
 
-            bool testSelectStructs (const ESM::DialInfo& info) const;
+            bool testSelectStructs (const ESM3::DialInfo& info) const;
             ///< Are all select structs matching?
 
-            bool testDisposition (const ESM::DialInfo& info, bool invert=false) const;
+            bool testDisposition (const ESM3::DialInfo& info, bool invert=false) const;
             ///< Is the actor disposition toward the player high enough (or low enough, if \a invert is true)?
 
             bool testFunctionLocal(const SelectWrapper& select) const;
@@ -55,15 +55,15 @@ namespace MWDialogue
 
             Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);
 
-            std::vector<const ESM::DialInfo *> list (const ESM::Dialogue& dialogue,
+            std::vector<const ESM3::DialInfo *> list (const ESM3::Dialogue& dialogue,
                 bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition=false) const;
             ///< List all infos that could be used on the given actor, using the current runtime state of the actor.
             /// \note If fallbackToInfoRefusal is used, the returned DialInfo might not be from the supplied ESM::Dialogue.
 
-            std::vector<const ESM::DialInfo *> listAll (const ESM::Dialogue& dialogue) const;
+            std::vector<const ESM3::DialInfo *> listAll (const ESM3::Dialogue& dialogue) const;
             ///< List all infos that could possibly be used on the given actor, ignoring runtime state filters and ignoring player filters.
 
-            const ESM::DialInfo* search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
+            const ESM3::DialInfo* search (const ESM3::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
             ///< Get a matching response for the requested dialogue.
             ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
     };

@@ -4,7 +4,7 @@
 #include <components/detournavigator/exceptions.hpp>
 #include <components/misc/rng.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
-#include <components/esm/loadland.hpp>
+#include <components/esm3/land.hpp>
 #include <components/resource/bulletshape.hpp>
 
 #include <osg/ref_ptr>
@@ -44,7 +44,7 @@ namespace
         AreaCosts mAreaCosts;
         Loading::Listener mListener;
         const osg::Vec2i mCellPosition {0, 0};
-        const int mHeightfieldTileSize = ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1);
+        const int mHeightfieldTileSize = ESM3::Land::REAL_SIZE / (ESM3::Land::LAND_SIZE - 1);
         const osg::Vec3f mShift {0, 0, 0};
 
         DetourNavigatorNavigatorTest()

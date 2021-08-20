@@ -1,4 +1,4 @@
-#include "loadcell.hpp"
+#include "cell.hpp"
 
 #include <string>
 #include <limits>
@@ -9,17 +9,17 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 #include "cellid.hpp"
 
 namespace
 {
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
-    void adjustRefNum (ESM::RefNum& refNum, ESM::ESMReader& reader)
+    void adjustRefNum (ESM3::RefNum& refNum, ESM3::Reader& reader)
     {
-        unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
+        std::uint32_t local = (refNum.mIndex & 0xff000000) >> 24;
 
         // If we have an index value that does not make sense, assume that it was an addition
         // by the present plugin (but a faulty one)
@@ -33,12 +33,12 @@ namespace
         else
         {
             // This is an addition by the present plugin. Set the corresponding plugin index.
-            refNum.mContentFile = reader.getIndex();
+            refNum.mContentFile = reader.getModIndex();
         }
     }
 }
 
-namespace ESM
+namespace ESM3
 {
     unsigned int Cell::sRecordId = REC_CELL;
 
@@ -53,13 +53,13 @@ namespace ESM
         return ref.mRefNum == refNum;
     }
 
-    void Cell::load(ESMReader &esm, bool &isDeleted, bool saveContext)
+    void Cell::load(Reader& reader, bool& isDeleted, bool saveContext)
     {
-        loadNameAndData(esm, isDeleted);
-        loadCell(esm, saveContext);
+        loadNameAndData(reader, isDeleted);
+        loadCell(reader, saveContext);
     }
 
-    void Cell::loadNameAndData(ESMReader &esm, bool &isDeleted)
+    void Cell::loadNameAndData(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -67,37 +67,45 @@ namespace ESM
 
         bool hasData = false;
         bool isLoaded = false;
-        while (!isLoaded && esm.hasMoreSubs())
+        while (!isLoaded && reader.getNextSubRecordType() != 0)
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mName = esm.getHString();
+                case ESM3::SUB_NAME:
+                    reader.getSubRecordHeader();
+                    reader.getZString(mName);
                     break;
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    esm.getHT(mData, 12);
+                case ESM3::SUB_DATA:
+                {
+                    reader.getSubRecordHeader();
+                    if (subHdr.dataSize != sizeof(mData) || subHdr.dataSize != 12)
+                        reader.fail("CELL incorrect data size");
+                    reader.get(mData);
                     hasData = true;
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.getSubRecordHeader();
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.cacheSubName();
                     isLoaded = true;
                     break;
             }
         }
 
         if (!hasData)
-            esm.fail("Missing DATA subrecord");
+            reader.fail("Missing DATA subrecord");
 
         mCellId.mPaged = !(mData.mFlags & Interior);
 
         if (mCellId.mPaged)
         {
-            mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            mCellId.mWorldspace = ESM3::CellId::sDefaultWorldspace;
             mCellId.mIndex.mX = mData.mX;
             mCellId.mIndex.mY = mData.mY;
         }
@@ -109,50 +117,54 @@ namespace ESM
         }
     }
 
-    void Cell::loadCell(ESMReader &esm, bool saveContext)
+    void Cell::loadCell(Reader& reader, bool saveContext)
     {
         bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
-        while (!isLoaded && esm.hasMoreSubs())
+        while (!isLoaded && reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::FourCC<'I','N','T','V'>::value:
-                    int waterl;
-                    esm.getHT(waterl);
+                case ESM3::SUB_INTV:
+                {
+                    int32_t waterl;
+                    reader.get(waterl);
                     mWater = static_cast<float>(waterl);
                     mWaterInt = true;
                     break;
-                case ESM::FourCC<'W','H','G','T'>::value:
+                }
+                case ESM3::SUB_WHGT:
+                {
                     float waterLevel;
-                    esm.getHT(waterLevel);
+                    reader.get(waterLevel);
                     mWaterInt = false;
                     if(!std::isfinite(waterLevel))
                     {
                         if(!overriding)
                             mWater = std::numeric_limits<float>::max();
-                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName << " defined in " << esm.getContext().filename;
+                        Log(Debug::Warning)
+                            << "Warning: Encountered invalid water level in cell "
+                            << mName << " defined in " << reader.getFileName();
                     }
                     else
                         mWater = waterLevel;
                     break;
-                case ESM::FourCC<'A','M','B','I'>::value:
-                    esm.getHT(mAmbi);
+                }
+                case ESM3::SUB_AMBI:
+                {
+                    if (subHdr.dataSize != sizeof(mAmbi) || subHdr.dataSize != 16)
+                        reader.fail("AMBI incorrect data size");
+                    reader.get(mAmbi);
                     mHasAmbi = true;
                     break;
-                case ESM::FourCC<'R','G','N','N'>::value:
-                    mRegion = esm.getHString();
-                    break;
-                case ESM::FourCC<'N','A','M','5'>::value:
-                    esm.getHT(mMapColor);
-                    break;
-                case ESM::FourCC<'N','A','M','0'>::value:
-                    esm.getHT(mRefNumCounter);
-                    break;
+                }
+                case ESM3::SUB_RGNN: reader.getZString(mRegion); break;
+                case ESM3::SUB_NAM5: reader.get(mMapColor); break;
+                case ESM3::SUB_NAM0: reader.get(mRefNumCounter); break;
                 default:
-                    esm.cacheSubName();
+                    reader.cacheSubRecordHeader(); // urgh
                     isLoaded = true;
                     break;
             }
@@ -160,19 +172,20 @@ namespace ESM
 
         if (saveContext)
         {
-            mContextList.push_back(esm.getContext());
-            esm.skipRecord();
+            mContextList.push_back(reader.getContext());
+            reader.skipRecordData();
         }
     }
 
-    void Cell::postLoad(ESMReader &esm)
+    // called from MWWorld::Store<ESM3::Cell>::load()
+    void Cell::postLoad(Reader& reader)
     {
         // Save position of the cell references and move on
-        mContextList.push_back(esm.getContext());
-        esm.skipRecord();
+        mContextList.push_back(reader.getContext());
+        reader.skipRecordData();
     }
 
-    void Cell::save(ESMWriter &esm, bool isDeleted) const
+    void Cell::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mName);
         esm.writeHNT("DATA", mData, 12);
@@ -211,15 +224,15 @@ namespace ESM
         }
     }
 
-    void Cell::saveTempMarker(ESMWriter &esm, int tempCount) const
+    void Cell::saveTempMarker(ESM::ESMWriter& esm, int tempCount) const
     {
         if (tempCount != 0)
             esm.writeHNT("NAM0", tempCount);
     }
 
-    void Cell::restore(ESMReader &esm, int iCtx) const
+    void Cell::restore(Reader& reader, int iCtx) const
     {
-        esm.restoreContext(mContextList.at (iCtx));
+        reader.restoreContext(mContextList.at (iCtx));
     }
 
     std::string Cell::getDescription() const
@@ -236,70 +249,110 @@ namespace ESM
         return region + ' ' + cellGrid;
     }
 
-    bool Cell::getNextRef(ESMReader& esm, CellRef& ref, bool& isDeleted)
+    bool Cell::getNextRef(Reader& reader, CellRef& cellRef, bool& isDeleted)
     {
         isDeleted = false;
 
         // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
-        if (!esm.hasMoreSubs())
+        if (!reader.hasMoreSubs())
             return false;
 
         // MVRF are FRMR are present in pairs. MVRF indicates that following FRMR describes moved CellRef.
         // This function has to skip all moved CellRefs therefore read all such pairs to ignored values.
-        while (esm.isNextSub("MVRF"))
+        while (reader.getSubRecordHeader())
         {
-            MovedCellRef movedCellRef;
-            esm.getHT(movedCellRef.mRefNum.mIndex);
-            esm.getHNOT(movedCellRef.mTarget, "CNDT");
-            CellRef skippedCellRef;
-            if (!esm.peekNextSub("FRMR"))
-                return false;
-            bool skippedDeleted;
-            skippedCellRef.load(esm, skippedDeleted);
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+
+            bool skipDeleted = false;
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_MVRF:
+                {
+                    MovedCellRef movedCellRef;
+                    reader.get(movedCellRef.mRefNum.mIndex);
+                    // assumed that "CNDT" follows "MVRF"
+                    reader.getSubRecordHeader(ESM3::SUB_CNDT);
+                    reader.get(movedCellRef.mTarget);
+                    skipDeleted = true;
+
+                    if (reader.getNextSubRecordHeader(ESM3::SUB_CNDT))
+                        reader.get(movedCellRef.mTarget);
+                    CellRef skippedCellRef;
+                    if (reader.getNextSubRecordType() != ESM3::SUB_FRMR)
+                        return false;
+                    bool skippedDeleted;
+                    skippedCellRef.load(reader, skippedDeleted);
+                    break;
+                }
+                case ESM3::SUB_FRMR:
+                {
+                    if (skipDeleted)
+                    {
+                        reader.skipSubRecordData();
+                        skipDeleted = false;
+                        break;
+                    }
+
+                    cellRef.load(reader, isDeleted);
+
+                    // TODO: should count the number of temp refs and validate the number
+
+                    // Identify references belonging to a parent file and adapt the ID accordingly.
+                    adjustRefNum(cellRef.mRefNum, reader);
+                    return true;
+                }
+                default:
+                    return false;
+            }
         }
 
-        if (esm.peekNextSub("FRMR"))
-        {
-            ref.load (esm, isDeleted);
-
-            // TODO: should count the number of temp refs and validate the number
-
-            // Identify references belonging to a parent file and adapt the ID accordingly.
-            adjustRefNum (ref.mRefNum, esm);
-            return true;
-        }
         return false;
     }
 
-    bool Cell::getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved)
+    bool Cell::getNextRef(Reader& reader, CellRef& cellRef, bool& isDeleted, MovedCellRef& movedCellRef, bool& moved)
     {
-        deleted = false;
+        isDeleted = false;
         moved = false;
 
-        if (!esm.hasMoreSubs())
+        if (!reader.hasMoreSubs())
             return false;
 
-        if (esm.isNextSub("MVRF"))
+        while (reader.getSubRecordHeader())
         {
-            moved = true;
-            getNextMVRF(esm, movedCellRef);
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_MVRF:
+                {
+                    moved = true;
+                    getNextMVRF(reader, movedCellRef);
+                    break;
+                }
+                case ESM3::SUB_FRMR:
+                {
+                    cellRef.load(reader, isDeleted);
+                    adjustRefNum(cellRef.mRefNum, reader);
+
+                    return true;
+                }
+                default:
+                    std::cout << "unexpected sub-rec " << ESM::printName(subHdr.typeId) << std::endl;
+                    //return false;
+            }
         }
 
-        if (!esm.peekNextSub("FRMR"))
-            return false;
-
-        cellRef.load(esm, deleted);
-        adjustRefNum(cellRef.mRefNum, esm);
-
-        return true;
+        return false;
     }
 
-    bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
+    // NOTE: assumes the sub-record header was just read
+    bool Cell::getNextMVRF(Reader& reader, MovedCellRef &mref)
     {
-        esm.getHT(mref.mRefNum.mIndex);
-        esm.getHNOT(mref.mTarget, "CNDT");
+        reader.get(mref.mRefNum.mIndex);
+        // assumed that "CNDT" follows "MVRF"
+        reader.getSubRecordHeader(ESM3::SUB_CNDT);
+        reader.get(mref.mTarget);
 
-        adjustRefNum (mref.mRefNum, esm);
+        adjustRefNum (mref.mRefNum, reader);
 
         return true;
     }
@@ -311,7 +364,7 @@ namespace ESM
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;
-        mRefNumCounter = 0;
+        mRefNumCounter = -1;
 
         mData.mFlags = 0;
         mData.mX = 0;

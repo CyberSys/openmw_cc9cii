@@ -115,8 +115,8 @@ namespace MWGui
 
             // exterior cell names aren't technically identifiers, but since the COC function accepts them,
             // we should list them too
-            for (MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().extBegin();
-                 it != store.get<ESM::Cell>().extEnd(); ++it)
+            for (MWWorld::Store<ESM3::Cell>::iterator it = store.get<ESM3::Cell>().extBegin();
+                 it != store.get<ESM3::Cell>().extEnd(); ++it)
             {
                 if (!it->mName.empty())
                     mNames.push_back(it->mName);

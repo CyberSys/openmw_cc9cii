@@ -1,6 +1,6 @@
 #include "npcstate.hpp"
 
-void ESM::NpcState::load (ESMReader &esm)
+void ESM3::NpcState::load (Reader& esm)
 {
     ObjectState::load (esm);
 
@@ -14,7 +14,7 @@ void ESM::NpcState::load (ESMReader &esm)
     }
 }
 
-void ESM::NpcState::save (ESMWriter &esm, bool inInventory) const
+void ESM3::NpcState::save (ESM::ESMWriter& esm, bool inInventory) const
 {
     ObjectState::save (esm, inInventory);
 
@@ -28,7 +28,7 @@ void ESM::NpcState::save (ESMWriter &esm, bool inInventory) const
     }
 }
 
-void ESM::NpcState::blank()
+void ESM3::NpcState::blank()
 {
     ObjectState::blank();
     mNpcStats.blank();

@@ -3,15 +3,15 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/reader.hpp>
 
 namespace CSMWorld
 {
-    void LandTexture::load(ESM::ESMReader &esm, bool &isDeleted)
+    void LandTexture::load(ESM::Reader& reader, bool& isDeleted)
     {
-        ESM::LandTexture::load(esm, isDeleted);
+        ESM3::LandTexture::load(static_cast<ESM3::Reader&>(reader), isDeleted);
 
-        mPluginIndex = esm.getIndex();
+        mPluginIndex = static_cast<ESM3::Reader&>(reader).getModIndex(); // FIXME: is there another way to get index?
     }
 
     std::string LandTexture::createUniqueRecordId(int plugin, int index)

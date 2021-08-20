@@ -17,7 +17,11 @@
 namespace ESM
 {
     class ESMWriter;
-    class ESMReader;
+}
+
+namespace ESM3
+{
+    class Reader;
     struct RefNum;
 }
 
@@ -37,7 +41,7 @@ namespace MWScript
     {
         bool mRunning;
         Locals mLocals;
-        boost::variant<MWWorld::Ptr, std::pair<ESM::RefNum, std::string> > mTarget; // Used to start targeted script
+        boost::variant<MWWorld::Ptr, std::pair<ESM3::RefNum, std::string> > mTarget; // Used to start targeted script
 
         GlobalScriptDesc();
 
@@ -75,7 +79,7 @@ namespace MWScript
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            bool readRecord (ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
+            bool readRecord (ESM3::Reader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
             ///< Records for variables that do not exist are dropped silently.
             ///
             /// \return Known type?

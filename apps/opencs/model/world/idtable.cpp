@@ -7,7 +7,7 @@
 #include <map>
 #include <stdexcept>
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
@@ -311,7 +311,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
         return std::make_pair (UniversalId::Type_None, "");
 
     if (id[0]=='#')
-        id = ESM::CellId::sDefaultWorldspace;
+        id = ESM3::CellId::sDefaultWorldspace;
 
     return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
 }

@@ -1,32 +1,32 @@
-#ifndef OPENMW_ESM_VARIANTIMP_H
-#define OPENMW_ESM_VARIANTIMP_H
+#ifndef ESM3_VARIANTIMP_H
+#define ESM3_VARIANTIMP_H
 
 #include <string>
 #include <functional>
 
 #include "variant.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    void readESMVariantValue(ESMReader& reader, Variant::Format format, VarType type, std::string& value);
+    void readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarType type, std::string& value);
 
-    void readESMVariantValue(ESMReader& reader, Variant::Format format, VarType type, float& value);
+    void readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarType type, float& value);
 
-    void readESMVariantValue(ESMReader& reader, Variant::Format format, VarType type, int& value);
+    void readESMVariantValue(Reader& reader, Variant::Format format, ESM::VarType type, int& value);
 
-    void writeESMVariantValue(ESMWriter& writer, Variant::Format format, VarType type, const std::string& value);
+    void writeESMVariantValue(ESM::ESMWriter& writer, Variant::Format format, ESM::VarType type, const std::string& value);
 
-    void writeESMVariantValue(ESMWriter& writer, Variant::Format format, VarType type, float value);
+    void writeESMVariantValue(ESM::ESMWriter& writer, Variant::Format format, ESM::VarType type, float value);
 
-    void writeESMVariantValue(ESMWriter& writer, Variant::Format format, VarType type, int value);
+    void writeESMVariantValue(ESM::ESMWriter& writer, Variant::Format format, ESM::VarType type, int value);
 
     struct ReadESMVariantValue
     {
-        std::reference_wrapper<ESMReader> mReader;
+        std::reference_wrapper<Reader> mReader;
         Variant::Format mFormat;
-        VarType mType;
+        ESM::VarType mType;
 
-        ReadESMVariantValue(ESMReader& reader, Variant::Format format, VarType type)
+        ReadESMVariantValue(Reader& reader, Variant::Format format, ESM::VarType type)
             : mReader(reader), mFormat(format), mType(type) {}
 
         void operator()(std::monostate) const {}
@@ -40,11 +40,11 @@ namespace ESM
 
     struct WriteESMVariantValue
     {
-        std::reference_wrapper<ESMWriter> mWriter;
+        std::reference_wrapper<ESM::ESMWriter> mWriter;
         Variant::Format mFormat;
-        VarType mType;
+        ESM::VarType mType;
 
-        WriteESMVariantValue(ESMWriter& writer, Variant::Format format, VarType type)
+        WriteESMVariantValue(ESM::ESMWriter& writer, Variant::Format format, ESM::VarType type)
             : mWriter(writer), mFormat(format), mType(type) {}
 
         void operator()(std::monostate) const {}

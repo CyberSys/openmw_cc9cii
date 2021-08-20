@@ -19,8 +19,8 @@ namespace MWMechanics
 void Repair::repair(const MWWorld::Ptr &itemToRepair)
 {
     MWWorld::Ptr player = getPlayer();
-    MWWorld::LiveCellRef<ESM::Repair> *ref =
-        mTool.get<ESM::Repair>();
+    MWWorld::LiveCellRef<ESM3::Repair> *ref =
+        mTool.get<ESM3::Repair>();
 
     // unstack tool if required
     player.getClass().getContainerStore(player).unstack(mTool, player);
@@ -35,9 +35,9 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     float fatigueTerm = stats.getFatigueTerm();
     float pcStrength = stats.getAttribute(ESM::Attribute::Strength).getModified();
     float pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
-    float armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
+    float armorerSkill = player.getClass().getSkill(player, ESM3::Skill::Armorer);
 
-    float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+    float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>()
             .find("fRepairAmountMult")->mValue.getFloat();
 
     float toolQuality = ref->mBase->mData.mQuality;
@@ -64,7 +64,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
             stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
 
         // increase skill
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, 0);
+        player.getClass().skillUsageSucceeded(player, ESM3::Skill::Armorer, 0);
 
         MWBase::Environment::get().getWindowManager()->playSound("Repair");
         MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairSuccess}");
@@ -82,7 +82,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
         store.remove(mTool, 1, player);
 
-        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>()
                 .find("sNotifyMessage51")->mValue.getString();
         message = Misc::StringUtils::format(message, mTool.getClass().getName(mTool));
 

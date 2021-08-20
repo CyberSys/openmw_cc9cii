@@ -65,9 +65,9 @@ namespace DetourNavigator
             return false;
         }
 
-        void addPathgrid(const ESM::Cell& /*cell*/, const ESM::Pathgrid& /*pathgrid*/) override {}
+        void addPathgrid(const ESM3::Cell& /*cell*/, const ESM3::Pathgrid& /*pathgrid*/) override {}
 
-        void removePathgrid(const ESM::Pathgrid& /*pathgrid*/) override {}
+        void removePathgrid(const ESM3::Pathgrid& /*pathgrid*/) override {}
 
         void update(const osg::Vec3f& /*playerPosition*/) override {}
 

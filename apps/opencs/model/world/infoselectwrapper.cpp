@@ -148,7 +148,7 @@ std::string CSMWorld::ConstInfoSelectWrapper::convertToString(ComparisonType typ
 
 // ConstInfoSelectWrapper
 
-CSMWorld::ConstInfoSelectWrapper::ConstInfoSelectWrapper(const ESM::DialInfo::SelectStruct& select)
+CSMWorld::ConstInfoSelectWrapper::ConstInfoSelectWrapper(const ESM3::DialInfo::SelectStruct& select)
     : mConstSelect(select)
 {
     readRule();
@@ -230,7 +230,7 @@ bool CSMWorld::ConstInfoSelectWrapper::variantTypeIsValid() const
     return (mConstSelect.mValue.getType() == ESM::VT_Int || mConstSelect.mValue.getType() == ESM::VT_Float);
 }
 
-const ESM::Variant& CSMWorld::ConstInfoSelectWrapper::getVariant() const
+const ESM3::Variant& CSMWorld::ConstInfoSelectWrapper::getVariant() const
 {
     return mConstSelect.mValue;
 }
@@ -688,11 +688,11 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getValidFloatRange() c
         case Function_PcMagicka:
         case Function_PcFatigue:
         case Function_PcHealth:
-            return std::pair<float, float>(0, FloatMax);
+            return std::pair<float, float>(0.f, FloatMax);
 
         case Function_Health_Percent:
         case Function_PcHealthPercent:
-            return std::pair<float, float>(0, 100);
+            return std::pair<float, float>(0.f, 100.f);
 
         default:
             throw std::runtime_error("InfoSelectWrapper: function does not exist or is not numeric");
@@ -753,7 +753,7 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(std::pair<T1,T1> co
             throw std::logic_error("InfoCondition: operator can not be used to compare");
     }
 
-    return false;
+    //return false; // warning C4702: unreachable code
 }
 
 template <typename T1, typename T2>
@@ -779,12 +779,12 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(std::pair<T1,T1> con
             throw std::logic_error("InfoCondition: operator can not be used to compare");
     }
 
-    return false;
+    //return false; // warning C4702: unreachable code
 }
 
 // InfoSelectWrapper
 
-CSMWorld::InfoSelectWrapper::InfoSelectWrapper(ESM::DialInfo::SelectStruct& select)
+CSMWorld::InfoSelectWrapper::InfoSelectWrapper(ESM3::DialInfo::SelectStruct& select)
     : CSMWorld::ConstInfoSelectWrapper(select), mSelect(select)
 {
 }
@@ -886,7 +886,7 @@ void CSMWorld::InfoSelectWrapper::update()
     mSelect.mSelectRule = stream.str();
 }
 
-ESM::Variant& CSMWorld::InfoSelectWrapper::getVariant()
+ESM3::Variant& CSMWorld::InfoSelectWrapper::getVariant()
 {
     return mSelect.mValue;
 }

@@ -2,13 +2,16 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <iostream> // FIXME
 
 #include <QAbstractItemModel>
 
-#include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/cellref.hpp>
+#include <components/esm3/glob.hpp>
+#include <components/esm3/cellref.hpp>
+
+#include <components/esm3/reader.hpp>
+#include <components/esm4/reader.hpp>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/shadow.hpp>
@@ -93,52 +96,52 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
 
     int index = 0;
 
-    mGlobals.addColumn (new StringIdColumn<ESM::Global>);
-    mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
-    mGlobals.addColumn (new FixedRecordTypeColumn<ESM::Global> (UniversalId::Type_Global));
-    mGlobals.addColumn (new VarTypeColumn<ESM::Global> (ColumnBase::Display_GlobalVarType));
-    mGlobals.addColumn (new VarValueColumn<ESM::Global>);
+    mGlobals.addColumn (new StringIdColumn<ESM3::Global>);
+    mGlobals.addColumn (new RecordStateColumn<ESM3::Global>);
+    mGlobals.addColumn (new FixedRecordTypeColumn<ESM3::Global> (UniversalId::Type_Global));
+    mGlobals.addColumn (new VarTypeColumn<ESM3::Global> (ColumnBase::Display_GlobalVarType));
+    mGlobals.addColumn (new VarValueColumn<ESM3::Global>);
 
-    mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
-    mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
-    mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
-    mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
-    mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new StringIdColumn<ESM3::GameSetting>);
+    mGmsts.addColumn (new RecordStateColumn<ESM3::GameSetting>);
+    mGmsts.addColumn (new FixedRecordTypeColumn<ESM3::GameSetting> (UniversalId::Type_Gmst));
+    mGmsts.addColumn (new VarTypeColumn<ESM3::GameSetting> (ColumnBase::Display_GmstVarType));
+    mGmsts.addColumn (new VarValueColumn<ESM3::GameSetting>);
 
-    mSkills.addColumn (new StringIdColumn<ESM::Skill>);
-    mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
-    mSkills.addColumn (new FixedRecordTypeColumn<ESM::Skill> (UniversalId::Type_Skill));
-    mSkills.addColumn (new AttributeColumn<ESM::Skill>);
-    mSkills.addColumn (new SpecialisationColumn<ESM::Skill>);
+    mSkills.addColumn (new StringIdColumn<ESM3::Skill>);
+    mSkills.addColumn (new RecordStateColumn<ESM3::Skill>);
+    mSkills.addColumn (new FixedRecordTypeColumn<ESM3::Skill> (UniversalId::Type_Skill));
+    mSkills.addColumn (new AttributeColumn<ESM3::Skill>);
+    mSkills.addColumn (new SpecialisationColumn<ESM3::Skill>);
     for (int i=0; i<4; ++i)
-        mSkills.addColumn (new UseValueColumn<ESM::Skill> (i));
-    mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
+        mSkills.addColumn (new UseValueColumn<ESM3::Skill> (i));
+    mSkills.addColumn (new DescriptionColumn<ESM3::Skill>);
 
-    mClasses.addColumn (new StringIdColumn<ESM::Class>);
-    mClasses.addColumn (new RecordStateColumn<ESM::Class>);
-    mClasses.addColumn (new FixedRecordTypeColumn<ESM::Class> (UniversalId::Type_Class));
-    mClasses.addColumn (new NameColumn<ESM::Class>);
-    mClasses.addColumn (new AttributesColumn<ESM::Class> (0));
-    mClasses.addColumn (new AttributesColumn<ESM::Class> (1));
-    mClasses.addColumn (new SpecialisationColumn<ESM::Class>);
+    mClasses.addColumn (new StringIdColumn<ESM3::Class>);
+    mClasses.addColumn (new RecordStateColumn<ESM3::Class>);
+    mClasses.addColumn (new FixedRecordTypeColumn<ESM3::Class> (UniversalId::Type_Class));
+    mClasses.addColumn (new NameColumn<ESM3::Class>);
+    mClasses.addColumn (new AttributesColumn<ESM3::Class> (0));
+    mClasses.addColumn (new AttributesColumn<ESM3::Class> (1));
+    mClasses.addColumn (new SpecialisationColumn<ESM3::Class>);
     for (int i=0; i<5; ++i)
-        mClasses.addColumn (new SkillsColumn<ESM::Class> (i, true, true));
+        mClasses.addColumn (new SkillsColumn<ESM3::Class> (i, true, true));
     for (int i=0; i<5; ++i)
-        mClasses.addColumn (new SkillsColumn<ESM::Class> (i, true, false));
-    mClasses.addColumn (new PlayableColumn<ESM::Class>);
-    mClasses.addColumn (new DescriptionColumn<ESM::Class>);
+        mClasses.addColumn (new SkillsColumn<ESM3::Class> (i, true, false));
+    mClasses.addColumn (new PlayableColumn<ESM3::Class>);
+    mClasses.addColumn (new DescriptionColumn<ESM3::Class>);
 
-    mFactions.addColumn (new StringIdColumn<ESM::Faction>);
-    mFactions.addColumn (new RecordStateColumn<ESM::Faction>);
-    mFactions.addColumn (new FixedRecordTypeColumn<ESM::Faction> (UniversalId::Type_Faction));
-    mFactions.addColumn (new NameColumn<ESM::Faction>(ColumnBase::Display_String32));
-    mFactions.addColumn (new AttributesColumn<ESM::Faction> (0));
-    mFactions.addColumn (new AttributesColumn<ESM::Faction> (1));
-    mFactions.addColumn (new HiddenColumn<ESM::Faction>);
+    mFactions.addColumn (new StringIdColumn<ESM3::Faction>);
+    mFactions.addColumn (new RecordStateColumn<ESM3::Faction>);
+    mFactions.addColumn (new FixedRecordTypeColumn<ESM3::Faction> (UniversalId::Type_Faction));
+    mFactions.addColumn (new NameColumn<ESM3::Faction>(ColumnBase::Display_String32));
+    mFactions.addColumn (new AttributesColumn<ESM3::Faction> (0));
+    mFactions.addColumn (new AttributesColumn<ESM3::Faction> (1));
+    mFactions.addColumn (new HiddenColumn<ESM3::Faction>);
     for (int i=0; i<7; ++i)
-        mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
+        mFactions.addColumn (new SkillsColumn<ESM3::Faction> (i));
     // Faction Reactions
-    mFactions.addColumn (new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions));
+    mFactions.addColumn (new NestedParentColumn<ESM3::Faction> (Columns::ColumnId_FactionReactions));
     index = mFactions.getColumns()-1;
     mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionReactionsAdapter ()));
     mFactions.getNestableColumn(index)->addColumn(
@@ -147,7 +150,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
     // Faction Ranks
-    mFactions.addColumn (new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionRanks));
+    mFactions.addColumn (new NestedParentColumn<ESM3::Faction> (Columns::ColumnId_FactionRanks));
     index = mFactions.getColumns()-1;
     mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionRanksAdapter ()));
     mFactions.getNestableColumn(index)->addColumn(
@@ -163,25 +166,25 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FactionRep, ColumnBase::Display_Integer));
 
-    mRaces.addColumn (new StringIdColumn<ESM::Race>);
-    mRaces.addColumn (new RecordStateColumn<ESM::Race>);
-    mRaces.addColumn (new FixedRecordTypeColumn<ESM::Race> (UniversalId::Type_Race));
-    mRaces.addColumn (new NameColumn<ESM::Race>);
-    mRaces.addColumn (new DescriptionColumn<ESM::Race>);
-    mRaces.addColumn (new FlagColumn<ESM::Race> (Columns::ColumnId_Playable, 0x1));
-    mRaces.addColumn (new FlagColumn<ESM::Race> (Columns::ColumnId_BeastRace, 0x2));
-    mRaces.addColumn (new WeightHeightColumn<ESM::Race> (true, true));
-    mRaces.addColumn (new WeightHeightColumn<ESM::Race> (true, false));
-    mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
-    mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, false));
+    mRaces.addColumn (new StringIdColumn<ESM3::Race>);
+    mRaces.addColumn (new RecordStateColumn<ESM3::Race>);
+    mRaces.addColumn (new FixedRecordTypeColumn<ESM3::Race> (UniversalId::Type_Race));
+    mRaces.addColumn (new NameColumn<ESM3::Race>);
+    mRaces.addColumn (new DescriptionColumn<ESM3::Race>);
+    mRaces.addColumn (new FlagColumn<ESM3::Race> (Columns::ColumnId_Playable, 0x1));
+    mRaces.addColumn (new FlagColumn<ESM3::Race> (Columns::ColumnId_BeastRace, 0x2));
+    mRaces.addColumn (new WeightHeightColumn<ESM3::Race> (true, true));
+    mRaces.addColumn (new WeightHeightColumn<ESM3::Race> (true, false));
+    mRaces.addColumn (new WeightHeightColumn<ESM3::Race> (false, true));
+    mRaces.addColumn (new WeightHeightColumn<ESM3::Race> (false, false));
     // Race spells
-    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_PowerList));
+    mRaces.addColumn (new NestedParentColumn<ESM3::Race> (Columns::ColumnId_PowerList));
     index = mRaces.getColumns()-1;
-    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
+    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM3::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
     // Race attributes
-    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes,
+    mRaces.addColumn (new NestedParentColumn<ESM3::Race> (Columns::ColumnId_RaceAttributes,
         ColumnBase::Flag_Dialogue, true)); // fixed rows table
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceAttributeAdapter()));
@@ -193,7 +196,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Female, ColumnBase::Display_Integer));
     // Race skill bonus
-    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceSkillBonus,
+    mRaces.addColumn (new NestedParentColumn<ESM3::Race> (Columns::ColumnId_RaceSkillBonus,
         ColumnBase::Flag_Dialogue, true)); // fixed rows table
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceSkillsBonusAdapter()));
@@ -202,27 +205,27 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_RaceBonus, ColumnBase::Display_Integer));
 
-    mSounds.addColumn (new StringIdColumn<ESM::Sound>);
-    mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
-    mSounds.addColumn (new FixedRecordTypeColumn<ESM::Sound> (UniversalId::Type_Sound));
-    mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_Volume));
-    mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MinRange));
-    mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MaxRange));
-    mSounds.addColumn (new SoundFileColumn<ESM::Sound>);
+    mSounds.addColumn (new StringIdColumn<ESM3::Sound>);
+    mSounds.addColumn (new RecordStateColumn<ESM3::Sound>);
+    mSounds.addColumn (new FixedRecordTypeColumn<ESM3::Sound> (UniversalId::Type_Sound));
+    mSounds.addColumn (new SoundParamColumn<ESM3::Sound> (SoundParamColumn<ESM3::Sound>::Type_Volume));
+    mSounds.addColumn (new SoundParamColumn<ESM3::Sound> (SoundParamColumn<ESM3::Sound>::Type_MinRange));
+    mSounds.addColumn (new SoundParamColumn<ESM3::Sound> (SoundParamColumn<ESM3::Sound>::Type_MaxRange));
+    mSounds.addColumn (new SoundFileColumn<ESM3::Sound>);
 
-    mScripts.addColumn (new StringIdColumn<ESM::Script>);
-    mScripts.addColumn (new RecordStateColumn<ESM::Script>);
-    mScripts.addColumn (new FixedRecordTypeColumn<ESM::Script> (UniversalId::Type_Script));
-    mScripts.addColumn (new ScriptColumn<ESM::Script> (ScriptColumn<ESM::Script>::Type_File));
+    mScripts.addColumn (new StringIdColumn<ESM3::Script>);
+    mScripts.addColumn (new RecordStateColumn<ESM3::Script>);
+    mScripts.addColumn (new FixedRecordTypeColumn<ESM3::Script> (UniversalId::Type_Script));
+    mScripts.addColumn (new ScriptColumn<ESM3::Script> (ScriptColumn<ESM3::Script>::Type_File));
 
-    mRegions.addColumn (new StringIdColumn<ESM::Region>);
-    mRegions.addColumn (new RecordStateColumn<ESM::Region>);
-    mRegions.addColumn (new FixedRecordTypeColumn<ESM::Region> (UniversalId::Type_Region));
-    mRegions.addColumn (new NameColumn<ESM::Region>);
-    mRegions.addColumn (new MapColourColumn<ESM::Region>);
-    mRegions.addColumn (new SleepListColumn<ESM::Region>);
+    mRegions.addColumn (new StringIdColumn<ESM3::Region>);
+    mRegions.addColumn (new RecordStateColumn<ESM3::Region>);
+    mRegions.addColumn (new FixedRecordTypeColumn<ESM3::Region> (UniversalId::Type_Region));
+    mRegions.addColumn (new NameColumn<ESM3::Region>);
+    mRegions.addColumn (new MapColourColumn<ESM3::Region>);
+    mRegions.addColumn (new SleepListColumn<ESM3::Region>);
     // Region Weather
-    mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionWeather));
+    mRegions.addColumn (new NestedParentColumn<ESM3::Region> (Columns::ColumnId_RegionWeather));
     index = mRegions.getColumns()-1;
     mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionWeatherAdapter ()));
     mRegions.getNestableColumn(index)->addColumn(
@@ -230,7 +233,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_WeatherChance, ColumnBase::Display_UnsignedInteger8));
     // Region Sounds
-    mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds));
+    mRegions.addColumn (new NestedParentColumn<ESM3::Region> (Columns::ColumnId_RegionSounds));
     index = mRegions.getColumns()-1;
     mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionSoundListAdapter ()));
     mRegions.getNestableColumn(index)->addColumn(
@@ -238,33 +241,33 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_UnsignedInteger8));
 
-    mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
-    mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
-    mBirthsigns.addColumn (new FixedRecordTypeColumn<ESM::BirthSign> (UniversalId::Type_Birthsign));
-    mBirthsigns.addColumn (new NameColumn<ESM::BirthSign>);
-    mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
-    mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
+    mBirthsigns.addColumn (new StringIdColumn<ESM3::BirthSign>);
+    mBirthsigns.addColumn (new RecordStateColumn<ESM3::BirthSign>);
+    mBirthsigns.addColumn (new FixedRecordTypeColumn<ESM3::BirthSign> (UniversalId::Type_Birthsign));
+    mBirthsigns.addColumn (new NameColumn<ESM3::BirthSign>);
+    mBirthsigns.addColumn (new TextureColumn<ESM3::BirthSign>);
+    mBirthsigns.addColumn (new DescriptionColumn<ESM3::BirthSign>);
     // Birthsign spells
-    mBirthsigns.addColumn (new NestedParentColumn<ESM::BirthSign> (Columns::ColumnId_PowerList));
+    mBirthsigns.addColumn (new NestedParentColumn<ESM3::BirthSign> (Columns::ColumnId_PowerList));
     index = mBirthsigns.getColumns()-1;
     mBirthsigns.addAdapter (std::make_pair(&mBirthsigns.getColumn(index),
-        new SpellListAdapter<ESM::BirthSign> ()));
+        new SpellListAdapter<ESM3::BirthSign> ()));
     mBirthsigns.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
 
-    mSpells.addColumn (new StringIdColumn<ESM::Spell>);
-    mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
-    mSpells.addColumn (new FixedRecordTypeColumn<ESM::Spell> (UniversalId::Type_Spell));
-    mSpells.addColumn (new NameColumn<ESM::Spell>);
-    mSpells.addColumn (new SpellTypeColumn<ESM::Spell>);
-    mSpells.addColumn (new CostColumn<ESM::Spell>);
-    mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AutoCalc, 0x1));
-    mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
-    mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
+    mSpells.addColumn (new StringIdColumn<ESM3::Spell>);
+    mSpells.addColumn (new RecordStateColumn<ESM3::Spell>);
+    mSpells.addColumn (new FixedRecordTypeColumn<ESM3::Spell> (UniversalId::Type_Spell));
+    mSpells.addColumn (new NameColumn<ESM3::Spell>);
+    mSpells.addColumn (new SpellTypeColumn<ESM3::Spell>);
+    mSpells.addColumn (new CostColumn<ESM3::Spell>);
+    mSpells.addColumn (new FlagColumn<ESM3::Spell> (Columns::ColumnId_AutoCalc, 0x1));
+    mSpells.addColumn (new FlagColumn<ESM3::Spell> (Columns::ColumnId_StarterSpell, 0x2));
+    mSpells.addColumn (new FlagColumn<ESM3::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
     // Spell effects
-    mSpells.addColumn (new NestedParentColumn<ESM::Spell> (Columns::ColumnId_EffectList));
+    mSpells.addColumn (new NestedParentColumn<ESM3::Spell> (Columns::ColumnId_EffectList));
     index = mSpells.getColumns()-1;
-    mSpells.addAdapter (std::make_pair(&mSpells.getColumn(index), new EffectsListAdapter<ESM::Spell> ()));
+    mSpells.addAdapter (std::make_pair(&mSpells.getColumn(index), new EffectsListAdapter<ESM3::Spell> ()));
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mSpells.getNestableColumn(index)->addColumn(
@@ -282,15 +285,15 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
-    mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
-    mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
-    mTopics.addColumn (new FixedRecordTypeColumn<ESM::Dialogue> (UniversalId::Type_Topic));
-    mTopics.addColumn (new DialogueTypeColumn<ESM::Dialogue>);
+    mTopics.addColumn (new StringIdColumn<ESM3::Dialogue>);
+    mTopics.addColumn (new RecordStateColumn<ESM3::Dialogue>);
+    mTopics.addColumn (new FixedRecordTypeColumn<ESM3::Dialogue> (UniversalId::Type_Topic));
+    mTopics.addColumn (new DialogueTypeColumn<ESM3::Dialogue>);
 
-    mJournals.addColumn (new StringIdColumn<ESM::Dialogue>);
-    mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
-    mJournals.addColumn (new FixedRecordTypeColumn<ESM::Dialogue> (UniversalId::Type_Journal));
-    mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
+    mJournals.addColumn (new StringIdColumn<ESM3::Dialogue>);
+    mJournals.addColumn (new RecordStateColumn<ESM3::Dialogue>);
+    mJournals.addColumn (new FixedRecordTypeColumn<ESM3::Dialogue> (UniversalId::Type_Journal));
+    mJournals.addColumn (new DialogueTypeColumn<ESM3::Dialogue> (true));
 
     mTopicInfos.addColumn (new StringIdColumn<Info> (true));
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
@@ -341,10 +344,10 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
     mCells.addColumn (new NameColumn<Cell>(ColumnBase::Display_String64));
-    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM::Cell::NoSleep));
-    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater,
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM3::Cell::NoSleep));
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM3::Cell::HasWater,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
-    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx,
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM3::Cell::QuasiEx,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mCells.addColumn (new RegionColumn<Cell>);
     mCells.addColumn (new RefNumCounterColumn<Cell>);
@@ -369,18 +372,18 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Colour));
 
-    mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
-    mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
-    mEnchantments.addColumn (new FixedRecordTypeColumn<ESM::Enchantment> (UniversalId::Type_Enchantment));
-    mEnchantments.addColumn (new EnchantmentTypeColumn<ESM::Enchantment>);
-    mEnchantments.addColumn (new CostColumn<ESM::Enchantment>);
-    mEnchantments.addColumn (new ChargesColumn2<ESM::Enchantment>);
-    mEnchantments.addColumn (new FlagColumn<ESM::Enchantment> (Columns::ColumnId_AutoCalc, ESM::Enchantment::Autocalc));
+    mEnchantments.addColumn (new StringIdColumn<ESM3::Enchantment>);
+    mEnchantments.addColumn (new RecordStateColumn<ESM3::Enchantment>);
+    mEnchantments.addColumn (new FixedRecordTypeColumn<ESM3::Enchantment> (UniversalId::Type_Enchantment));
+    mEnchantments.addColumn (new EnchantmentTypeColumn<ESM3::Enchantment>);
+    mEnchantments.addColumn (new CostColumn<ESM3::Enchantment>);
+    mEnchantments.addColumn (new ChargesColumn2<ESM3::Enchantment>);
+    mEnchantments.addColumn (new FlagColumn<ESM3::Enchantment> (Columns::ColumnId_AutoCalc, ESM3::Enchantment::Autocalc));
     // Enchantment effects
-    mEnchantments.addColumn (new NestedParentColumn<ESM::Enchantment> (Columns::ColumnId_EffectList));
+    mEnchantments.addColumn (new NestedParentColumn<ESM3::Enchantment> (Columns::ColumnId_EffectList));
     index = mEnchantments.getColumns()-1;
     mEnchantments.addAdapter (std::make_pair(&mEnchantments.getColumn(index),
-        new EffectsListAdapter<ESM::Enchantment> ()));
+        new EffectsListAdapter<ESM3::Enchantment> ()));
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mEnchantments.getNestableColumn(index)->addColumn(
@@ -398,50 +401,50 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
-    mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
-    mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);
-    mBodyParts.addColumn (new FixedRecordTypeColumn<ESM::BodyPart> (UniversalId::Type_BodyPart));
-    mBodyParts.addColumn (new BodyPartTypeColumn<ESM::BodyPart>);
-    mBodyParts.addColumn (new VampireColumn<ESM::BodyPart>);
-    mBodyParts.addColumn(new GenderNpcColumn<ESM::BodyPart>);
-    mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Playable,
-        ESM::BodyPart::BPF_NotPlayable, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true));
+    mBodyParts.addColumn (new StringIdColumn<ESM3::BodyPart>);
+    mBodyParts.addColumn (new RecordStateColumn<ESM3::BodyPart>);
+    mBodyParts.addColumn (new FixedRecordTypeColumn<ESM3::BodyPart> (UniversalId::Type_BodyPart));
+    mBodyParts.addColumn (new BodyPartTypeColumn<ESM3::BodyPart>);
+    mBodyParts.addColumn (new VampireColumn<ESM3::BodyPart>);
+    mBodyParts.addColumn(new GenderNpcColumn<ESM3::BodyPart>);
+    mBodyParts.addColumn (new FlagColumn<ESM3::BodyPart> (Columns::ColumnId_Playable,
+        ESM3::BodyPart::BPF_NotPlayable, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true));
 
     int meshTypeFlags = ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh;
-    MeshTypeColumn<ESM::BodyPart> *meshTypeColumn = new MeshTypeColumn<ESM::BodyPart>(meshTypeFlags);
+    MeshTypeColumn<ESM3::BodyPart> *meshTypeColumn = new MeshTypeColumn<ESM3::BodyPart>(meshTypeFlags);
     mBodyParts.addColumn (meshTypeColumn);
-    mBodyParts.addColumn (new ModelColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new ModelColumn<ESM3::BodyPart>);
     mBodyParts.addColumn (new BodyPartRaceColumn(meshTypeColumn));
 
-    mSoundGens.addColumn (new StringIdColumn<ESM::SoundGenerator>);
-    mSoundGens.addColumn (new RecordStateColumn<ESM::SoundGenerator>);
-    mSoundGens.addColumn (new FixedRecordTypeColumn<ESM::SoundGenerator> (UniversalId::Type_SoundGen));
-    mSoundGens.addColumn (new CreatureColumn<ESM::SoundGenerator>);
-    mSoundGens.addColumn (new SoundColumn<ESM::SoundGenerator>);
-    mSoundGens.addColumn (new SoundGeneratorTypeColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new StringIdColumn<ESM3::SoundGenerator>);
+    mSoundGens.addColumn (new RecordStateColumn<ESM3::SoundGenerator>);
+    mSoundGens.addColumn (new FixedRecordTypeColumn<ESM3::SoundGenerator> (UniversalId::Type_SoundGen));
+    mSoundGens.addColumn (new CreatureColumn<ESM3::SoundGenerator>);
+    mSoundGens.addColumn (new SoundColumn<ESM3::SoundGenerator>);
+    mSoundGens.addColumn (new SoundGeneratorTypeColumn<ESM3::SoundGenerator>);
 
-    mMagicEffects.addColumn (new StringIdColumn<ESM::MagicEffect>);
-    mMagicEffects.addColumn (new RecordStateColumn<ESM::MagicEffect>);
-    mMagicEffects.addColumn (new FixedRecordTypeColumn<ESM::MagicEffect> (UniversalId::Type_MagicEffect));
-    mMagicEffects.addColumn (new SchoolColumn<ESM::MagicEffect>);
-    mMagicEffects.addColumn (new BaseCostColumn<ESM::MagicEffect>);
-    mMagicEffects.addColumn (new EffectTextureColumn<ESM::MagicEffect> (Columns::ColumnId_Icon));
-    mMagicEffects.addColumn (new EffectTextureColumn<ESM::MagicEffect> (Columns::ColumnId_Particle));
-    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_CastingObject));
-    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_HitObject));
-    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_AreaObject));
-    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_BoltObject));
-    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_CastingSound));
-    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_HitSound));
-    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_AreaSound));
-    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_BoltSound));
-    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
-        Columns::ColumnId_AllowSpellmaking, ESM::MagicEffect::AllowSpellmaking));
-    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
-        Columns::ColumnId_AllowEnchanting, ESM::MagicEffect::AllowEnchanting));
-    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
-        Columns::ColumnId_NegativeLight, ESM::MagicEffect::NegativeLight));
-    mMagicEffects.addColumn (new DescriptionColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new StringIdColumn<ESM3::MagicEffect>);
+    mMagicEffects.addColumn (new RecordStateColumn<ESM3::MagicEffect>);
+    mMagicEffects.addColumn (new FixedRecordTypeColumn<ESM3::MagicEffect> (UniversalId::Type_MagicEffect));
+    mMagicEffects.addColumn (new SchoolColumn<ESM3::MagicEffect>);
+    mMagicEffects.addColumn (new BaseCostColumn<ESM3::MagicEffect>);
+    mMagicEffects.addColumn (new EffectTextureColumn<ESM3::MagicEffect> (Columns::ColumnId_Icon));
+    mMagicEffects.addColumn (new EffectTextureColumn<ESM3::MagicEffect> (Columns::ColumnId_Particle));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM3::MagicEffect> (Columns::ColumnId_CastingObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM3::MagicEffect> (Columns::ColumnId_HitObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM3::MagicEffect> (Columns::ColumnId_AreaObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM3::MagicEffect> (Columns::ColumnId_BoltObject));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM3::MagicEffect> (Columns::ColumnId_CastingSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM3::MagicEffect> (Columns::ColumnId_HitSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM3::MagicEffect> (Columns::ColumnId_AreaSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM3::MagicEffect> (Columns::ColumnId_BoltSound));
+    mMagicEffects.addColumn (new FlagColumn<ESM3::MagicEffect> (
+        Columns::ColumnId_AllowSpellmaking, ESM3::MagicEffect::AllowSpellmaking));
+    mMagicEffects.addColumn (new FlagColumn<ESM3::MagicEffect> (
+        Columns::ColumnId_AllowEnchanting, ESM3::MagicEffect::AllowEnchanting));
+    mMagicEffects.addColumn (new FlagColumn<ESM3::MagicEffect> (
+        Columns::ColumnId_NegativeLight, ESM3::MagicEffect::NegativeLight));
+    mMagicEffects.addColumn (new DescriptionColumn<ESM3::MagicEffect>);
 
     mLand.addColumn (new StringIdColumn<Land>);
     mLand.addColumn (new RecordStateColumn<Land>);
@@ -492,9 +495,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridEdge1, ColumnBase::Display_Integer));
 
-    mStartScripts.addColumn (new StringIdColumn<ESM::StartScript>);
-    mStartScripts.addColumn (new RecordStateColumn<ESM::StartScript>);
-    mStartScripts.addColumn (new FixedRecordTypeColumn<ESM::StartScript> (UniversalId::Type_StartScript));
+    mStartScripts.addColumn (new StringIdColumn<ESM3::StartScript>);
+    mStartScripts.addColumn (new RecordStateColumn<ESM3::StartScript>);
+    mStartScripts.addColumn (new FixedRecordTypeColumn<ESM3::StartScript> (UniversalId::Type_StartScript));
 
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
@@ -530,24 +533,24 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRefs.addColumn (new OwnerGlobalColumn<CellRef>);
     mRefs.addColumn (new RefNumColumn<CellRef>);
 
-    mFilters.addColumn (new StringIdColumn<ESM::Filter>);
-    mFilters.addColumn (new RecordStateColumn<ESM::Filter>);
-    mFilters.addColumn (new FixedRecordTypeColumn<ESM::Filter> (UniversalId::Type_Filter));
-    mFilters.addColumn (new FilterColumn<ESM::Filter>);
-    mFilters.addColumn (new DescriptionColumn<ESM::Filter>);
+    mFilters.addColumn (new StringIdColumn<ESM3::Filter>);
+    mFilters.addColumn (new RecordStateColumn<ESM3::Filter>);
+    mFilters.addColumn (new FixedRecordTypeColumn<ESM3::Filter> (UniversalId::Type_Filter));
+    mFilters.addColumn (new FilterColumn<ESM3::Filter>);
+    mFilters.addColumn (new DescriptionColumn<ESM3::Filter>);
 
-    mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
-    mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
-    mDebugProfiles.addColumn (new FixedRecordTypeColumn<ESM::DebugProfile> (UniversalId::Type_DebugProfile));
-    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
-        Columns::ColumnId_DefaultProfile, ESM::DebugProfile::Flag_Default));
-    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
-        Columns::ColumnId_BypassNewGame, ESM::DebugProfile::Flag_BypassNewGame));
-    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
-        Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
-    mDebugProfiles.addColumn (new DescriptionColumn<ESM::DebugProfile>);
-    mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
-        ScriptColumn<ESM::DebugProfile>::Type_Lines));
+    mDebugProfiles.addColumn (new StringIdColumn<ESM3::DebugProfile>);
+    mDebugProfiles.addColumn (new RecordStateColumn<ESM3::DebugProfile>);
+    mDebugProfiles.addColumn (new FixedRecordTypeColumn<ESM3::DebugProfile> (UniversalId::Type_DebugProfile));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM3::DebugProfile> (
+        Columns::ColumnId_DefaultProfile, ESM3::DebugProfile::Flag_Default));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM3::DebugProfile> (
+        Columns::ColumnId_BypassNewGame, ESM3::DebugProfile::Flag_BypassNewGame));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM3::DebugProfile> (
+        Columns::ColumnId_GlobalProfile, ESM3::DebugProfile::Flag_Global));
+    mDebugProfiles.addColumn (new DescriptionColumn<ESM3::DebugProfile>);
+    mDebugProfiles.addColumn (new ScriptColumn<ESM3::DebugProfile> (
+        ScriptColumn<ESM3::DebugProfile>::Type_Lines));
 
     mMetaData.appendBlankRecord ("sys::meta");
 
@@ -625,133 +628,133 @@ std::shared_ptr<const Resource::ResourceSystem> CSMWorld::Data::getResourceSyste
     return mResourceSystem;
 }
 
-const CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals() const
+const CSMWorld::IdCollection<ESM3::Global>& CSMWorld::Data::getGlobals() const
 {
     return mGlobals;
 }
 
-CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals()
+CSMWorld::IdCollection<ESM3::Global>& CSMWorld::Data::getGlobals()
 {
     return mGlobals;
 }
 
-const CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts() const
+const CSMWorld::IdCollection<ESM3::GameSetting>& CSMWorld::Data::getGmsts() const
 {
     return mGmsts;
 }
 
-CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
+CSMWorld::IdCollection<ESM3::GameSetting>& CSMWorld::Data::getGmsts()
 {
     return mGmsts;
 }
 
-const CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills() const
+const CSMWorld::IdCollection<ESM3::Skill>& CSMWorld::Data::getSkills() const
 {
     return mSkills;
 }
 
-CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills()
+CSMWorld::IdCollection<ESM3::Skill>& CSMWorld::Data::getSkills()
 {
     return mSkills;
 }
 
-const CSMWorld::IdCollection<ESM::Class>& CSMWorld::Data::getClasses() const
+const CSMWorld::IdCollection<ESM3::Class>& CSMWorld::Data::getClasses() const
 {
     return mClasses;
 }
 
-CSMWorld::IdCollection<ESM::Class>& CSMWorld::Data::getClasses()
+CSMWorld::IdCollection<ESM3::Class>& CSMWorld::Data::getClasses()
 {
     return mClasses;
 }
 
-const CSMWorld::IdCollection<ESM::Faction>& CSMWorld::Data::getFactions() const
+const CSMWorld::IdCollection<ESM3::Faction>& CSMWorld::Data::getFactions() const
 {
     return mFactions;
 }
 
-CSMWorld::IdCollection<ESM::Faction>& CSMWorld::Data::getFactions()
+CSMWorld::IdCollection<ESM3::Faction>& CSMWorld::Data::getFactions()
 {
     return mFactions;
 }
 
-const CSMWorld::IdCollection<ESM::Race>& CSMWorld::Data::getRaces() const
+const CSMWorld::IdCollection<ESM3::Race>& CSMWorld::Data::getRaces() const
 {
     return mRaces;
 }
 
-CSMWorld::IdCollection<ESM::Race>& CSMWorld::Data::getRaces()
+CSMWorld::IdCollection<ESM3::Race>& CSMWorld::Data::getRaces()
 {
     return mRaces;
 }
 
-const CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds() const
+const CSMWorld::IdCollection<ESM3::Sound>& CSMWorld::Data::getSounds() const
 {
     return mSounds;
 }
 
-CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds()
+CSMWorld::IdCollection<ESM3::Sound>& CSMWorld::Data::getSounds()
 {
     return mSounds;
 }
 
-const CSMWorld::IdCollection<ESM::Script>& CSMWorld::Data::getScripts() const
+const CSMWorld::IdCollection<ESM3::Script>& CSMWorld::Data::getScripts() const
 {
     return mScripts;
 }
 
-CSMWorld::IdCollection<ESM::Script>& CSMWorld::Data::getScripts()
+CSMWorld::IdCollection<ESM3::Script>& CSMWorld::Data::getScripts()
 {
     return mScripts;
 }
 
-const CSMWorld::IdCollection<ESM::Region>& CSMWorld::Data::getRegions() const
+const CSMWorld::IdCollection<ESM3::Region>& CSMWorld::Data::getRegions() const
 {
     return mRegions;
 }
 
-CSMWorld::IdCollection<ESM::Region>& CSMWorld::Data::getRegions()
+CSMWorld::IdCollection<ESM3::Region>& CSMWorld::Data::getRegions()
 {
     return mRegions;
 }
 
-const CSMWorld::IdCollection<ESM::BirthSign>& CSMWorld::Data::getBirthsigns() const
+const CSMWorld::IdCollection<ESM3::BirthSign>& CSMWorld::Data::getBirthsigns() const
 {
     return mBirthsigns;
 }
 
-CSMWorld::IdCollection<ESM::BirthSign>& CSMWorld::Data::getBirthsigns()
+CSMWorld::IdCollection<ESM3::BirthSign>& CSMWorld::Data::getBirthsigns()
 {
     return mBirthsigns;
 }
 
-const CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells() const
+const CSMWorld::IdCollection<ESM3::Spell>& CSMWorld::Data::getSpells() const
 {
     return mSpells;
 }
 
-CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells()
+CSMWorld::IdCollection<ESM3::Spell>& CSMWorld::Data::getSpells()
 {
     return mSpells;
 }
 
 
-const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics() const
+const CSMWorld::IdCollection<ESM3::Dialogue>& CSMWorld::Data::getTopics() const
 {
     return mTopics;
 }
 
-CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics()
+CSMWorld::IdCollection<ESM3::Dialogue>& CSMWorld::Data::getTopics()
 {
     return mTopics;
 }
 
-const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals() const
+const CSMWorld::IdCollection<ESM3::Dialogue>& CSMWorld::Data::getJournals() const
 {
     return mJournals;
 }
 
-CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals()
+CSMWorld::IdCollection<ESM3::Dialogue>& CSMWorld::Data::getJournals()
 {
     return mJournals;
 }
@@ -806,42 +809,42 @@ CSMWorld::RefCollection& CSMWorld::Data::getReferences()
     return mRefs;
 }
 
-const CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters() const
+const CSMWorld::IdCollection<ESM3::Filter>& CSMWorld::Data::getFilters() const
 {
     return mFilters;
 }
 
-CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters()
+CSMWorld::IdCollection<ESM3::Filter>& CSMWorld::Data::getFilters()
 {
     return mFilters;
 }
 
-const CSMWorld::IdCollection<ESM::Enchantment>& CSMWorld::Data::getEnchantments() const
+const CSMWorld::IdCollection<ESM3::Enchantment>& CSMWorld::Data::getEnchantments() const
 {
     return mEnchantments;
 }
 
-CSMWorld::IdCollection<ESM::Enchantment>& CSMWorld::Data::getEnchantments()
+CSMWorld::IdCollection<ESM3::Enchantment>& CSMWorld::Data::getEnchantments()
 {
     return mEnchantments;
 }
 
-const CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts() const
+const CSMWorld::IdCollection<ESM3::BodyPart>& CSMWorld::Data::getBodyParts() const
 {
     return mBodyParts;
 }
 
-CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
+CSMWorld::IdCollection<ESM3::BodyPart>& CSMWorld::Data::getBodyParts()
 {
     return mBodyParts;
 }
 
-const CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles() const
+const CSMWorld::IdCollection<ESM3::DebugProfile>& CSMWorld::Data::getDebugProfiles() const
 {
     return mDebugProfiles;
 }
 
-CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
+CSMWorld::IdCollection<ESM3::DebugProfile>& CSMWorld::Data::getDebugProfiles()
 {
     return mDebugProfiles;
 }
@@ -866,22 +869,22 @@ CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures()
     return mLandTextures;
 }
 
-const CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens() const
+const CSMWorld::IdCollection<ESM3::SoundGenerator>& CSMWorld::Data::getSoundGens() const
 {
     return mSoundGens;
 }
 
-CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens()
+CSMWorld::IdCollection<ESM3::SoundGenerator>& CSMWorld::Data::getSoundGens()
 {
     return mSoundGens;
 }
 
-const CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects() const
+const CSMWorld::IdCollection<ESM3::MagicEffect>& CSMWorld::Data::getMagicEffects() const
 {
     return mMagicEffects;
 }
 
-CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects()
+CSMWorld::IdCollection<ESM3::MagicEffect>& CSMWorld::Data::getMagicEffects()
 {
     return mMagicEffects;
 }
@@ -896,12 +899,12 @@ CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids()
     return mPathgrids;
 }
 
-const CSMWorld::IdCollection<ESM::StartScript>& CSMWorld::Data::getStartScripts() const
+const CSMWorld::IdCollection<ESM3::StartScript>& CSMWorld::Data::getStartScripts() const
 {
     return mStartScripts;
 }
 
-CSMWorld::IdCollection<ESM::StartScript>& CSMWorld::Data::getStartScripts()
+CSMWorld::IdCollection<ESM3::StartScript>& CSMWorld::Data::getStartScripts()
 {
     return mStartScripts;
 }
@@ -963,14 +966,12 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 {
     int records = 0;
 
-    std::unique_ptr<ESM::ESMReader> reader = std::unique_ptr<ESM::ESMReader>(new ESM::ESMReader);
-
     for (unsigned int i = 0; i < files.size(); ++i)
     {
         if (!boost::filesystem::exists(files[i]))
             continue;
 
-        reader->open(files[i].string());
+        ESM::Reader* reader = ESM::Reader::getReader(files[i].string());
         records += reader->getRecordCount();
         reader->close();
     }
@@ -980,28 +981,52 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
+    // This section was probably copied from OpenMW where ESM3Terrain::Storage::getVtexIndexAt()
+    // gets the plugin index (i.e. ESM3::Land::mPlugin) but even in OpenMW the readers are not
+    // reused (a new reader is created and saved context is restored).
+    // Also see: 8786fb639ff5ce1d1e608ede1f11a746df9319cc
+#if 0
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-    std::shared_ptr<ESM::ESMReader> ptr(mReader);
-    mReaders.push_back(ptr);
-    mReader = nullptr;
+    if (mReader) // only for ESM4
+    {
+        std::shared_ptr<ESM::Reader> ptr;
+        ptr.reset(mReader);
+        mReaders.push_back(ptr);
 
-    mDialogue = nullptr;
+        mReader = nullptr;
+    }
+#else
+    delete mReader;
+#endif
 
-    mReader = new ESM::ESMReader;
+    if (mDialogue)
+        throw std::logic_error ("won't start loading, someone forgot to cleanup");
+
+    mReader = ESM::Reader::getReader(path.string());
     mReader->setEncoder (&mEncoder);
-    mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
-    mReader->open (path.string());
 
-    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex()));
+    mReader->setModIndex((project || !base) ? 0 : mReaderIndex++);
+    mLoadedFiles.push_back(path.filename().string());
+
+    if (mReader->isEsm4())
+    {
+        ESM4::Reader* reader = static_cast<ESM4::Reader*>(mReader);
+        reader->updateModIndices(mLoadedFiles);
+    }
+
+    // NOTE: Unlike OpenMW (see ESMStore::load()) we don't enforce content file master
+    //       dependencies.  For OpenCS, the content selector won't allow it anyway.
+    //       Even if the content selector rule is relaxed in future we shouldn't enforce
+    //       it because the end-user may have legitimate reasons.
 
     mBase = base;
     mProject = project;
 
-    if (!mProject && !mBase)
+    if (!mProject && !mBase && !mReader->isEsm4()) // FIXME: not yet supported for ESM4
     {
         MetaData metaData;
         metaData.mId = "sys::meta";
-        metaData.load (*mReader);
+        metaData.load (static_cast<ESM3::Reader&>(*mReader));
 
         mMetaData.setRecord (0, std::make_unique<Record<MetaData> >(
                     Record<MetaData> (RecordBase::State_ModifiedOnly, nullptr, &metaData)));
@@ -1029,10 +1054,10 @@ void CSMWorld::Data::loadFallbackEntries()
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
-            ESM::Static newMarker;
+            ESM3::Static newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
-            std::unique_ptr<CSMWorld::Record<ESM::Static> > record(new CSMWorld::Record<ESM::Static>);
+            std::unique_ptr<CSMWorld::Record<ESM3::Static> > record(new CSMWorld::Record<ESM3::Static>);
             record->mBase = newMarker;
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord (std::move(record), CSMWorld::UniversalId::Type_Static);
@@ -1043,10 +1068,10 @@ void CSMWorld::Data::loadFallbackEntries()
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
-            ESM::Door newMarker;
+            ESM3::Door newMarker;
             newMarker.mId = marker.first;
             newMarker.mModel = marker.second;
-            std::unique_ptr<CSMWorld::Record<ESM::Door> > record(new CSMWorld::Record<ESM::Door>);
+            std::unique_ptr<CSMWorld::Record<ESM3::Door> > record(new CSMWorld::Record<ESM3::Door>);
             record->mBase = newMarker;
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord (std::move(record), CSMWorld::UniversalId::Type_Door);
@@ -1059,17 +1084,20 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
     if (!mReader)
         throw std::logic_error ("can't continue loading, because no load has been started");
 
-    if (!mReader->hasMoreRecs())
+    if (!mReader->hasMoreRecs()) // FIXME: how to do this independently without vtable
     {
+#if 0
         if (mBase)
         {
             // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
             // We don't store non-base reader, because everything going into modified will be
             // fully loaded during the initial loading process.
-            std::shared_ptr<ESM::ESMReader> ptr(mReader);
+            std::shared_ptr<ESM::Reader> ptr;
+            ptr.reset(mReader);
             mReaders.push_back(ptr);
         }
         else
+#endif
             delete mReader;
 
         mReader = nullptr;
@@ -1081,38 +1109,57 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         return true;
     }
 
-    ESM::NAME n = mReader->getRecName();
-    mReader->getRecHeader();
+    if (mReader->isEsm4())
+    {
+        ESM4::Reader* reader = static_cast<ESM4::Reader*>(mReader);
+
+        unsigned int esmVer = reader->esmVersion();
+        bool isTes4 = esmVer == ESM4::VER_080 || esmVer == ESM4::VER_100;
+        bool isTes5 = esmVer == ESM4::VER_094 || esmVer == ESM4::VER_170;
+        bool isFONV = esmVer == ESM4::VER_132 || esmVer == ESM4::VER_133 || esmVer == ESM4::VER_134;
+        if (isTes4 || isTes5 || isFONV)
+        {
+            // Check if previous record/group was the final one in this group.  Must be done before
+            // calling mReader->hasMoreRecs() below, because all records may have been processed when
+            // the previous group is popped off the stack.
+            reader->exitGroupCheck();
+
+            return loadTes4Group(messages);
+        }
+    }
+
+    ESM3::Reader *reader = static_cast<ESM3::Reader*>(mReader);
+    reader->getRecordHeader();
+    const ESM3::RecordHeader& hdr = reader->hdr();
 
     bool unhandledRecord = false;
-
-    switch (n.intval)
+    switch (hdr.typeId)
     {
-        case ESM::REC_GLOB: mGlobals.load (*mReader, mBase); break;
-        case ESM::REC_GMST: mGmsts.load (*mReader, mBase); break;
-        case ESM::REC_SKIL: mSkills.load (*mReader, mBase); break;
-        case ESM::REC_CLAS: mClasses.load (*mReader, mBase); break;
-        case ESM::REC_FACT: mFactions.load (*mReader, mBase); break;
-        case ESM::REC_RACE: mRaces.load (*mReader, mBase); break;
-        case ESM::REC_SOUN: mSounds.load (*mReader, mBase); break;
-        case ESM::REC_SCPT: mScripts.load (*mReader, mBase); break;
-        case ESM::REC_REGN: mRegions.load (*mReader, mBase); break;
-        case ESM::REC_BSGN: mBirthsigns.load (*mReader, mBase); break;
-        case ESM::REC_SPEL: mSpells.load (*mReader, mBase); break;
-        case ESM::REC_ENCH: mEnchantments.load (*mReader, mBase); break;
-        case ESM::REC_BODY: mBodyParts.load (*mReader, mBase); break;
-        case ESM::REC_SNDG: mSoundGens.load (*mReader, mBase); break;
-        case ESM::REC_MGEF: mMagicEffects.load (*mReader, mBase); break;
-        case ESM::REC_PGRD: mPathgrids.load (*mReader, mBase); break;
-        case ESM::REC_SSCR: mStartScripts.load (*mReader, mBase); break;
+        case ESM3::REC_GLOB: mGlobals.load (*reader, mBase); break;
+        case ESM3::REC_GMST: mGmsts.load (*reader, mBase); break;
+        case ESM3::REC_SKIL: mSkills.load (*reader, mBase); break;
+        case ESM3::REC_CLAS: mClasses.load (*reader, mBase); break;
+        case ESM3::REC_FACT: mFactions.load (*reader, mBase); break;
+        case ESM3::REC_RACE: mRaces.load (*reader, mBase); break;
+        case ESM3::REC_SOUN: mSounds.load (*reader, mBase); break;
+        case ESM3::REC_SCPT: mScripts.load (*reader, mBase); break;
+        case ESM3::REC_REGN: mRegions.load (*reader, mBase); break;
+        case ESM3::REC_BSGN: mBirthsigns.load (*reader, mBase); break;
+        case ESM3::REC_SPEL: mSpells.load (*reader, mBase); break;
+        case ESM3::REC_ENCH: mEnchantments.load (*reader, mBase); break;
+        case ESM3::REC_BODY: mBodyParts.load (*reader, mBase); break;
+        case ESM3::REC_SNDG: mSoundGens.load (*reader, mBase); break;
+        case ESM3::REC_MGEF: mMagicEffects.load (*reader, mBase); break;
+        case ESM3::REC_PGRD: mPathgrids.load (*reader, mBase); break;
+        case ESM3::REC_SSCR: mStartScripts.load (*reader, mBase); break;
 
-        case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
+        case ESM3::REC_LTEX: mLandTextures.load (*reader, mBase); break;
 
-        case ESM::REC_LAND: mLand.load(*mReader, mBase); break;
+        case ESM3::REC_LAND: mLand.load(*reader, mBase); break;
 
-        case ESM::REC_CELL:
+        case ESM3::REC_CELL:
         {
-            int index = mCells.load (*mReader, mBase);
+            int index = mCells.load (*reader, mBase);
             if (index < 0 || index >= mCells.getSize())
             {
                 // log an error and continue loading the refs to the last loaded cell
@@ -1121,40 +1168,40 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
-            mRefs.load (*mReader, index, mBase, mRefLoadCache[cellId], messages);
+            mRefs.load (*reader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
 
-        case ESM::REC_ACTI: mReferenceables.load (*mReader, mBase, UniversalId::Type_Activator); break;
-        case ESM::REC_ALCH: mReferenceables.load (*mReader, mBase, UniversalId::Type_Potion); break;
-        case ESM::REC_APPA: mReferenceables.load (*mReader, mBase, UniversalId::Type_Apparatus); break;
-        case ESM::REC_ARMO: mReferenceables.load (*mReader, mBase, UniversalId::Type_Armor); break;
-        case ESM::REC_BOOK: mReferenceables.load (*mReader, mBase, UniversalId::Type_Book); break;
-        case ESM::REC_CLOT: mReferenceables.load (*mReader, mBase, UniversalId::Type_Clothing); break;
-        case ESM::REC_CONT: mReferenceables.load (*mReader, mBase, UniversalId::Type_Container); break;
-        case ESM::REC_CREA: mReferenceables.load (*mReader, mBase, UniversalId::Type_Creature); break;
-        case ESM::REC_DOOR: mReferenceables.load (*mReader, mBase, UniversalId::Type_Door); break;
-        case ESM::REC_INGR: mReferenceables.load (*mReader, mBase, UniversalId::Type_Ingredient); break;
-        case ESM::REC_LEVC:
-            mReferenceables.load (*mReader, mBase, UniversalId::Type_CreatureLevelledList); break;
-        case ESM::REC_LEVI:
-            mReferenceables.load (*mReader, mBase, UniversalId::Type_ItemLevelledList); break;
-        case ESM::REC_LIGH: mReferenceables.load (*mReader, mBase, UniversalId::Type_Light); break;
-        case ESM::REC_LOCK: mReferenceables.load (*mReader, mBase, UniversalId::Type_Lockpick); break;
-        case ESM::REC_MISC:
-            mReferenceables.load (*mReader, mBase, UniversalId::Type_Miscellaneous); break;
-        case ESM::REC_NPC_: mReferenceables.load (*mReader, mBase, UniversalId::Type_Npc); break;
-        case ESM::REC_PROB: mReferenceables.load (*mReader, mBase, UniversalId::Type_Probe); break;
-        case ESM::REC_REPA: mReferenceables.load (*mReader, mBase, UniversalId::Type_Repair); break;
-        case ESM::REC_STAT: mReferenceables.load (*mReader, mBase, UniversalId::Type_Static); break;
-        case ESM::REC_WEAP: mReferenceables.load (*mReader, mBase, UniversalId::Type_Weapon); break;
+        case ESM3::REC_ACTI: mReferenceables.load (*reader, mBase, UniversalId::Type_Activator); break;
+        case ESM3::REC_ALCH: mReferenceables.load (*reader, mBase, UniversalId::Type_Potion); break;
+        case ESM3::REC_APPA: mReferenceables.load (*reader, mBase, UniversalId::Type_Apparatus); break;
+        case ESM3::REC_ARMO: mReferenceables.load (*reader, mBase, UniversalId::Type_Armor); break;
+        case ESM3::REC_BOOK: mReferenceables.load (*reader, mBase, UniversalId::Type_Book); break;
+        case ESM3::REC_CLOT: mReferenceables.load (*reader, mBase, UniversalId::Type_Clothing); break;
+        case ESM3::REC_CONT: mReferenceables.load (*reader, mBase, UniversalId::Type_Container); break;
+        case ESM3::REC_CREA: mReferenceables.load (*reader, mBase, UniversalId::Type_Creature); break;
+        case ESM3::REC_DOOR: mReferenceables.load (*reader, mBase, UniversalId::Type_Door); break;
+        case ESM3::REC_INGR: mReferenceables.load (*reader, mBase, UniversalId::Type_Ingredient); break;
+        case ESM3::REC_LEVC:
+            mReferenceables.load (*reader, mBase, UniversalId::Type_CreatureLevelledList); break;
+        case ESM3::REC_LEVI:
+            mReferenceables.load (*reader, mBase, UniversalId::Type_ItemLevelledList); break;
+        case ESM3::REC_LIGH: mReferenceables.load (*reader, mBase, UniversalId::Type_Light); break;
+        case ESM3::REC_LOCK: mReferenceables.load (*reader, mBase, UniversalId::Type_Lockpick); break;
+        case ESM3::REC_MISC:
+            mReferenceables.load (*reader, mBase, UniversalId::Type_Miscellaneous); break;
+        case ESM3::REC_NPC_: mReferenceables.load (*reader, mBase, UniversalId::Type_Npc); break;
+        case ESM3::REC_PROB: mReferenceables.load (*reader, mBase, UniversalId::Type_Probe); break;
+        case ESM3::REC_REPA: mReferenceables.load (*reader, mBase, UniversalId::Type_Repair); break;
+        case ESM3::REC_STAT: mReferenceables.load (*reader, mBase, UniversalId::Type_Static); break;
+        case ESM3::REC_WEAP: mReferenceables.load (*reader, mBase, UniversalId::Type_Weapon); break;
 
-        case ESM::REC_DIAL:
+        case ESM3::REC_DIAL:
         {
-            ESM::Dialogue record;
+            ESM3::Dialogue record;
             bool isDeleted = false;
 
-            record.load (*mReader, isDeleted);
+            record.load (*reader, isDeleted);
 
             if (isDeleted)
             {
@@ -1178,7 +1225,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             }
             else
             {
-                if (record.mType == ESM::Dialogue::Journal)
+                if (record.mType == ESM3::Dialogue::Journal)
                 {
                     mJournals.load (record, mBase);
                     mDialogue = &mJournals.getRecord (record.mId).get();
@@ -1193,26 +1240,26 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             break;
         }
 
-        case ESM::REC_INFO:
+        case ESM3::REC_INFO:
         {
             if (!mDialogue)
             {
                 messages.add (UniversalId::Type_None,
                     "Found info record not following a dialogue record", "", CSMDoc::Message::Severity_Error);
 
-                mReader->skipRecord();
+                reader->skipRecordData();
                 break;
             }
 
-            if (mDialogue->mType==ESM::Dialogue::Journal)
-                mJournalInfos.load (*mReader, mBase, *mDialogue);
+            if (mDialogue->mType==ESM3::Dialogue::Journal)
+                mJournalInfos.load (*reader, mBase, *mDialogue);
             else
-                mTopicInfos.load (*mReader, mBase, *mDialogue);
+                mTopicInfos.load (*reader, mBase, *mDialogue);
 
             break;
         }
 
-        case ESM::REC_FILT:
+        case ESM3::REC_FILT:
 
             if (!mProject)
             {
@@ -1220,10 +1267,10 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 break;
             }
 
-            mFilters.load (*mReader, mBase);
+            mFilters.load (*reader, mBase);
             break;
 
-        case ESM::REC_DBGP:
+        case ESM3::REC_DBGP:
 
             if (!mProject)
             {
@@ -1231,7 +1278,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 break;
             }
 
-            mDebugProfiles.load (*mReader, mBase);
+            mDebugProfiles.load (*reader, mBase);
             break;
 
         default:
@@ -1241,10 +1288,10 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString(), "",
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + ESM::printName(hdr.typeId), "",
             CSMDoc::Message::Severity_Error);
 
-        mReader->skipRecord();
+        reader->skipRecordData();
     }
 
     return false;
@@ -1378,4 +1425,132 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
     return mVFS.get();
+}
+
+bool CSMWorld::Data::loadTes4Group (CSMDoc::Messages& messages)
+{
+    ESM4::Reader& reader = static_cast<ESM4::Reader&>(*mReader);
+
+    // check for EOF, sometimes there is a empty group at the end e.g. FONV DeadMoney.esm
+    if (!reader.getRecordHeader() || !reader.hasMoreRecs())
+        return false;
+
+    const ESM4::RecordHeader& hdr = reader.hdr();
+
+    if (hdr.record.typeId != ESM4::REC_GRUP)
+        return loadTes4Record(hdr, messages);
+
+    // Skip groups that are of no interest.  See also:
+    // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format#Hierarchical_Top_Groups
+    switch (hdr.group.type)
+    {
+        case ESM4::Grp_RecordType:
+        {
+            // FIXME: rewrite to workaround reliability issue
+            if (hdr.group.label.value == ESM4::REC_NAVI || hdr.group.label.value == ESM4::REC_WRLD ||
+                hdr.group.label.value == ESM4::REC_REGN || hdr.group.label.value == ESM4::REC_STAT ||
+                hdr.group.label.value == ESM4::REC_ANIO || hdr.group.label.value == ESM4::REC_CONT ||
+                hdr.group.label.value == ESM4::REC_MISC || hdr.group.label.value == ESM4::REC_ACTI ||
+                hdr.group.label.value == ESM4::REC_ARMO || hdr.group.label.value == ESM4::REC_NPC_ ||
+                hdr.group.label.value == ESM4::REC_FLOR || hdr.group.label.value == ESM4::REC_GRAS ||
+                hdr.group.label.value == ESM4::REC_TREE || hdr.group.label.value == ESM4::REC_LIGH ||
+                hdr.group.label.value == ESM4::REC_BOOK || hdr.group.label.value == ESM4::REC_FURN ||
+                hdr.group.label.value == ESM4::REC_SOUN || hdr.group.label.value == ESM4::REC_WEAP ||
+                hdr.group.label.value == ESM4::REC_DOOR || hdr.group.label.value == ESM4::REC_AMMO ||
+                hdr.group.label.value == ESM4::REC_CLOT || hdr.group.label.value == ESM4::REC_ALCH ||
+                hdr.group.label.value == ESM4::REC_APPA || hdr.group.label.value == ESM4::REC_INGR ||
+                hdr.group.label.value == ESM4::REC_SGST || hdr.group.label.value == ESM4::REC_SLGM ||
+                hdr.group.label.value == ESM4::REC_KEYM || hdr.group.label.value == ESM4::REC_HAIR ||
+                hdr.group.label.value == ESM4::REC_EYES || hdr.group.label.value == ESM4::REC_CELL ||
+                hdr.group.label.value == ESM4::REC_CREA || hdr.group.label.value == ESM4::REC_LVLC ||
+                hdr.group.label.value == ESM4::REC_LVLI || hdr.group.label.value == ESM4::REC_MATO ||
+                hdr.group.label.value == ESM4::REC_IDLE || hdr.group.label.value == ESM4::REC_LTEX
+                )
+            {
+                //std::cout << "loading group... " << ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
+                // NOTE: The label field of a group is not reliable.  See:
+                // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format
+                //
+                // ASCII Q 0x51 0101 0001
+                //       A 0x41 0100 0001
+                //
+                // Ignore flag  0000 1000 (i.e. probably unrelated)
+                //
+                // Workaround by getting the record header and checking its typeId
+                reader.enterGroup();
+                // FIXME: comment may no longer be releavant
+                loadTes4Group(messages); // CELL group with record type may have sub-groups
+            }
+            else
+            {
+                //std::cout << "Skipping group... "  // FIXME: testing only
+                    //<< ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
+
+                reader.skipGroup();
+                return false;
+            }
+
+            break;
+        }
+        case ESM4::Grp_CellChild:
+        {
+            reader.adjustGRUPFormId();  // not needed or even shouldn't be done? (only labels anyway)
+            reader.enterGroup();
+            if (!reader.hasMoreRecs())
+                return false; // may have been an empty group followed by EOF
+
+            loadTes4Group(messages);
+
+            break;
+        }
+        case ESM4::Grp_WorldChild:
+        case ESM4::Grp_TopicChild:
+        // FIXME: need to save context if skipping
+        case ESM4::Grp_CellPersistentChild:
+        case ESM4::Grp_CellTemporaryChild:
+        case ESM4::Grp_CellVisibleDistChild:
+        {
+            reader.adjustGRUPFormId();  // not needed or even shouldn't be done? (only labels anyway)
+            reader.enterGroup();
+            if (!reader.hasMoreRecs())
+                return false; // may have been an empty group followed by EOF
+
+            loadTes4Group(messages);
+
+            break;
+        }
+        case ESM4::Grp_ExteriorCell:
+        case ESM4::Grp_ExteriorSubCell:
+        case ESM4::Grp_InteriorCell:
+        case ESM4::Grp_InteriorSubCell:
+        {
+            reader.enterGroup();
+            loadTes4Group(messages);
+
+            break;
+        }
+        default:
+            std::cout << "unknown group..." << std::endl; // FIXME
+            reader.skipGroup();
+            break;
+    }
+
+    return false;
+}
+
+// Deal with Tes4 records separately, as some have the same name as Tes3, e.g. REC_CELL
+bool CSMWorld::Data::loadTes4Record (const ESM4::RecordHeader& hdr, CSMDoc::Messages& messages)
+{
+    ESM4::Reader& reader = static_cast<ESM4::Reader&>(*mReader);
+
+    switch (hdr.record.typeId)
+    {
+
+        // FIXME: removed for now
+
+        default:
+            reader.skipRecordData();
+    }
+
+    return false;
 }

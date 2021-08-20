@@ -1,39 +1,41 @@
-#ifndef OPENMW_ESM_PROBE_H
-#define OPENMW_ESM_PROBE_H
+#ifndef ESM3_PROBE_H
+#define ESM3_PROBE_H
 
 #include <string>
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-struct Probe
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Probe"; }
+    class Reader;
 
-    struct Data
+    struct Probe
     {
-        float mWeight;
-        int mValue;
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "Probe"; }
 
-        float mQuality;
-        int mUses;
-    }; // Size = 16
+        struct Data
+        {
+            float mWeight;
+            int mValue;
 
-    Data mData;
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mIcon, mScript;
+            float mQuality;
+            int mUses;
+        }; // Size = 16
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        Data mData;
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mIcon, mScript;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
 
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 }
 #endif

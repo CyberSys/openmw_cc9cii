@@ -3,7 +3,7 @@
 
 #include <typeindex>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -14,7 +14,7 @@ namespace MWLua
 {
     // ObjectId is a unique identifier of a game object.
     // It can change only if the order of content files was change.
-    using ObjectId = ESM::RefNum;
+    using ObjectId = ESM3::RefNum;
     inline const ObjectId& getId(const MWWorld::Ptr& ptr) { return ptr.getCellRef().getRefNum(); }
     std::string idToString(const ObjectId& id);
     std::string ptrToString(const MWWorld::Ptr& ptr);

@@ -38,7 +38,7 @@ namespace MWMechanics
 
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will
-            /// default to the values of the ESM::NPC object, if no explicit information is given.
+            /// default to the values of the ESM3::NPC object, if no explicit information is given.
 
             MechanicsManager();
 
@@ -72,7 +72,7 @@ namespace MWMechanics
             void setPlayerClass (const std::string& id) override;
             ///< Set player class to stock class.
 
-            void setPlayerClass (const ESM::Class& class_) override;
+            void setPlayerClass (const ESM3::Class& class_) override;
             ///< Set player class to custom class.
 
             void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) override;
@@ -172,7 +172,7 @@ namespace MWMechanics
 
             void write (ESM::ESMWriter& writer, Loading::Listener& listener) const override;
 
-            void readRecord (ESM::ESMReader& reader, uint32_t type) override;
+            void readRecord (ESM3::Reader& reader, uint32_t type) override;
 
             void clear() override;
 

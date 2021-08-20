@@ -265,22 +265,22 @@ namespace CSMWorld
     }
 
     /* BodyPartRaceColumn */
-    BodyPartRaceColumn::BodyPartRaceColumn(const MeshTypeColumn<ESM::BodyPart> *meshType)
+    BodyPartRaceColumn::BodyPartRaceColumn(const MeshTypeColumn<ESM3::BodyPart> *meshType)
         : mMeshType(meshType)
     {}
 
-    QVariant BodyPartRaceColumn::get(const Record<ESM::BodyPart> &record) const
+    QVariant BodyPartRaceColumn::get(const Record<ESM3::BodyPart> &record) const
     {
-        if (mMeshType != nullptr && mMeshType->get(record) == ESM::BodyPart::MT_Skin)
+        if (mMeshType != nullptr && mMeshType->get(record) == ESM3::BodyPart::MT_Skin)
         {
             return QString::fromUtf8(record.get().mRace.c_str());
         }
         return QVariant(QVariant::UserType);
     }
 
-    void BodyPartRaceColumn::set(Record<ESM::BodyPart> &record, const QVariant &data)
+    void BodyPartRaceColumn::set(Record<ESM3::BodyPart> &record, const QVariant &data)
     {
-        ESM::BodyPart record2 = record.get();
+        ESM3::BodyPart record2 = record.get();
 
         record2.mRace = data.toString().toUtf8().constData();
 

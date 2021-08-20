@@ -9,11 +9,11 @@
 namespace
 {
 
-void printAIPackage(const ESM::AIPackage& p)
+void printAIPackage(const ESM3::AIPackage& p)
 {
     std::cout << "  AI Type: " << aiTypeLabel(p.mType)
               << " (" << Misc::StringUtils::format("0x%08X", p.mType) << ")" << std::endl;
-    if (p.mType == ESM::AI_Wander)
+    if (p.mType == ESM3::AI_Wander)
     {
         std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
         std::cout << "    Duration: " << p.mWander.mDuration << std::endl;
@@ -26,13 +26,13 @@ void printAIPackage(const ESM::AIPackage& p)
             std::cout << (int)p.mWander.mIdle[i] << " ";
         std::cout << std::endl;
     }
-    else if (p.mType == ESM::AI_Travel)
+    else if (p.mType == ESM3::AI_Travel)
     {
         std::cout << "    Travel Coordinates: (" << p.mTravel.mX << ","
                   << p.mTravel.mY << "," << p.mTravel.mZ << ")" << std::endl;
         std::cout << "    Travel Unknown: " << p.mTravel.mUnk << std::endl;
     }
-    else if (p.mType == ESM::AI_Follow || p.mType == ESM::AI_Escort)
+    else if (p.mType == ESM3::AI_Follow || p.mType == ESM3::AI_Escort)
     {
         std::cout << "    Follow Coordinates: (" << p.mTarget.mX << ","
                   << p.mTarget.mY << "," << p.mTarget.mZ << ")" << std::endl;
@@ -40,7 +40,7 @@ void printAIPackage(const ESM::AIPackage& p)
         std::cout << "    Target ID: " << p.mTarget.mId.toString() << std::endl;
         std::cout << "    Unknown: " << p.mTarget.mUnk << std::endl;
     }
-    else if (p.mType == ESM::AI_Activate)
+    else if (p.mType == ESM3::AI_Activate)
     {
         std::cout << "    Name: " << p.mActivate.mName.toString() << std::endl;
         std::cout << "    Activate Unknown: " << p.mActivate.mUnk << std::endl;
@@ -53,7 +53,7 @@ void printAIPackage(const ESM::AIPackage& p)
         std::cout << "    Cell Name: " << p.mCellName << std::endl;
 }
 
-std::string ruleString(const ESM::DialInfo::SelectStruct& ss)
+std::string ruleString(const ESM3::DialInfo::SelectStruct& ss)
 {
     std::string rule = ss.mSelectRule;
 
@@ -126,10 +126,10 @@ std::string ruleString(const ESM::DialInfo::SelectStruct& ss)
     return result;
 }
 
-void printEffectList(const ESM::EffectList& effects)
+void printEffectList(const ESM3::EffectList& effects)
 {
     int i = 0;
-    for (const ESM::ENAMstruct& effect : effects.mList)
+    for (const ESM3::ENAMstruct& effect : effects.mList)
     {
         std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mEffectID)
                   << " (" << effect.mEffectID << ")" << std::endl;
@@ -150,9 +150,9 @@ void printEffectList(const ESM::EffectList& effects)
     }
 }
 
-void printTransport(const std::vector<ESM::Transport::Dest>& transport)
+void printTransport(const std::vector<ESM3::Transport::Dest>& transport)
 {
-    for (const ESM::Transport::Dest& dest : transport)
+    for (const ESM3::Transport::Dest& dest : transport)
     {
         std::cout << "  Destination Position: "
                   << Misc::StringUtils::format("%12.3f", dest.mPos.pos[0]) << ","
@@ -172,232 +172,232 @@ void printTransport(const std::vector<ESM::Transport::Dest>& transport)
 namespace EsmTool {
 
 RecordBase *
-RecordBase::create(const ESM::NAME type)
+RecordBase::create(const std::uint32_t typeId)
 {
     RecordBase *record = nullptr;
 
-    switch (type.intval) {
+    switch (typeId) {
     case ESM::REC_ACTI:
     {
-        record = new EsmTool::Record<ESM::Activator>;
+        record = new EsmTool::Record<ESM3::Activator>;
         break;
     }
     case ESM::REC_ALCH:
     {
-        record = new EsmTool::Record<ESM::Potion>;
+        record = new EsmTool::Record<ESM3::Potion>;
         break;
     }
     case ESM::REC_APPA:
     {
-        record = new EsmTool::Record<ESM::Apparatus>;
+        record = new EsmTool::Record<ESM3::Apparatus>;
         break;
     }
     case ESM::REC_ARMO:
     {
-        record = new EsmTool::Record<ESM::Armor>;
+        record = new EsmTool::Record<ESM3::Armor>;
         break;
     }
     case ESM::REC_BODY:
     {
-        record = new EsmTool::Record<ESM::BodyPart>;
+        record = new EsmTool::Record<ESM3::BodyPart>;
         break;
     }
     case ESM::REC_BOOK:
     {
-        record = new EsmTool::Record<ESM::Book>;
+        record = new EsmTool::Record<ESM3::Book>;
         break;
     }
     case ESM::REC_BSGN:
     {
-        record = new EsmTool::Record<ESM::BirthSign>;
+        record = new EsmTool::Record<ESM3::BirthSign>;
         break;
     }
     case ESM::REC_CELL:
     {
-        record = new EsmTool::Record<ESM::Cell>;
+        record = new EsmTool::Record<ESM3::Cell>;
         break;
     }
     case ESM::REC_CLAS:
     {
-        record = new EsmTool::Record<ESM::Class>;
+        record = new EsmTool::Record<ESM3::Class>;
         break;
     }
     case ESM::REC_CLOT:
     {
-        record = new EsmTool::Record<ESM::Clothing>;
+        record = new EsmTool::Record<ESM3::Clothing>;
         break;
     }
     case ESM::REC_CONT:
     {
-        record = new EsmTool::Record<ESM::Container>;
+        record = new EsmTool::Record<ESM3::Container>;
         break;
     }
     case ESM::REC_CREA:
     {
-        record = new EsmTool::Record<ESM::Creature>;
+        record = new EsmTool::Record<ESM3::Creature>;
         break;
     }
     case ESM::REC_DIAL:
     {
-        record = new EsmTool::Record<ESM::Dialogue>;
+        record = new EsmTool::Record<ESM3::Dialogue>;
         break;
     }
     case ESM::REC_DOOR:
     {
-        record = new EsmTool::Record<ESM::Door>;
+        record = new EsmTool::Record<ESM3::Door>;
         break;
     }
     case ESM::REC_ENCH:
     {
-        record = new EsmTool::Record<ESM::Enchantment>;
+        record = new EsmTool::Record<ESM3::Enchantment>;
         break;
     }
     case ESM::REC_FACT:
     {
-        record = new EsmTool::Record<ESM::Faction>;
+        record = new EsmTool::Record<ESM3::Faction>;
         break;
     }
     case ESM::REC_GLOB:
     {
-        record = new EsmTool::Record<ESM::Global>;
+        record = new EsmTool::Record<ESM3::Global>;
         break;
     }
     case ESM::REC_GMST:
     {
-        record = new EsmTool::Record<ESM::GameSetting>;
+        record = new EsmTool::Record<ESM3::GameSetting>;
         break;
     }
     case ESM::REC_INFO:
     {
-        record = new EsmTool::Record<ESM::DialInfo>;
+        record = new EsmTool::Record<ESM3::DialInfo>;
         break;
     }
     case ESM::REC_INGR:
     {
-        record = new EsmTool::Record<ESM::Ingredient>;
+        record = new EsmTool::Record<ESM3::Ingredient>;
         break;
     }
     case ESM::REC_LAND:
     {
-        record = new EsmTool::Record<ESM::Land>;
+        record = new EsmTool::Record<ESM3::Land>;
         break;
     }
     case ESM::REC_LEVI:
     {
-        record = new EsmTool::Record<ESM::ItemLevList>;
+        record = new EsmTool::Record<ESM3::ItemLevList>;
         break;
     }
     case ESM::REC_LEVC:
     {
-        record = new EsmTool::Record<ESM::CreatureLevList>;
+        record = new EsmTool::Record<ESM3::CreatureLevList>;
         break;
     }
     case ESM::REC_LIGH:
     {
-        record = new EsmTool::Record<ESM::Light>;
+        record = new EsmTool::Record<ESM3::Light>;
         break;
     }
     case ESM::REC_LOCK:
     {
-        record = new EsmTool::Record<ESM::Lockpick>;
+        record = new EsmTool::Record<ESM3::Lockpick>;
         break;
     }
     case ESM::REC_LTEX:
     {
-        record = new EsmTool::Record<ESM::LandTexture>;
+        record = new EsmTool::Record<ESM3::LandTexture>;
         break;
     }
     case ESM::REC_MISC:
     {
-        record = new EsmTool::Record<ESM::Miscellaneous>;
+        record = new EsmTool::Record<ESM3::Miscellaneous>;
         break;
     }
     case ESM::REC_MGEF:
     {
-        record = new EsmTool::Record<ESM::MagicEffect>;
+        record = new EsmTool::Record<ESM3::MagicEffect>;
         break;
     }
     case ESM::REC_NPC_:
     {
-        record = new EsmTool::Record<ESM::NPC>;
+        record = new EsmTool::Record<ESM3::NPC>;
         break;
     }
     case ESM::REC_PGRD:
     {
-        record = new EsmTool::Record<ESM::Pathgrid>;
+        record = new EsmTool::Record<ESM3::Pathgrid>;
         break;
     }
     case ESM::REC_PROB:
     {
-        record = new EsmTool::Record<ESM::Probe>;
+        record = new EsmTool::Record<ESM3::Probe>;
         break;
     }
     case ESM::REC_RACE:
     {
-        record = new EsmTool::Record<ESM::Race>;
+        record = new EsmTool::Record<ESM3::Race>;
         break;
     }
     case ESM::REC_REGN:
     {
-        record = new EsmTool::Record<ESM::Region>;
+        record = new EsmTool::Record<ESM3::Region>;
         break;
     }
     case ESM::REC_REPA:
     {
-        record = new EsmTool::Record<ESM::Repair>;
+        record = new EsmTool::Record<ESM3::Repair>;
         break;
     }
     case ESM::REC_SCPT:
     {
-        record = new EsmTool::Record<ESM::Script>;
+        record = new EsmTool::Record<ESM3::Script>;
         break;
     }
     case ESM::REC_SKIL:
     {
-        record = new EsmTool::Record<ESM::Skill>;
+        record = new EsmTool::Record<ESM3::Skill>;
         break;
     }
     case ESM::REC_SNDG:
     {
-        record = new EsmTool::Record<ESM::SoundGenerator>;
+        record = new EsmTool::Record<ESM3::SoundGenerator>;
         break;
     }
     case ESM::REC_SOUN:
     {
-        record = new EsmTool::Record<ESM::Sound>;
+        record = new EsmTool::Record<ESM3::Sound>;
         break;
     }
     case ESM::REC_SPEL:
     {
-        record = new EsmTool::Record<ESM::Spell>;
+        record = new EsmTool::Record<ESM3::Spell>;
         break;
     }
     case ESM::REC_STAT:
     {
-        record = new EsmTool::Record<ESM::Static>;
+        record = new EsmTool::Record<ESM3::Static>;
         break;
     }
     case ESM::REC_WEAP:
     {
-        record = new EsmTool::Record<ESM::Weapon>;
+        record = new EsmTool::Record<ESM3::Weapon>;
         break;
     }
     case ESM::REC_SSCR:
     {
-        record = new EsmTool::Record<ESM::StartScript>;
+        record = new EsmTool::Record<ESM3::StartScript>;
         break;
     }
     default:
         record = nullptr;
     }
     if (record) {
-        record->mType = type;
+        record->mType.assign(ESM::printName(typeId));
     }
     return record;
 }
 
 template<>
-void Record<ESM::Activator>::print()
+void Record<ESM3::Activator>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -406,7 +406,7 @@ void Record<ESM::Activator>::print()
 }
 
 template<>
-void Record<ESM::Potion>::print()
+void Record<ESM3::Potion>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -421,7 +421,7 @@ void Record<ESM::Potion>::print()
 }
 
 template<>
-void Record<ESM::Armor>::print()
+void Record<ESM3::Armor>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -437,7 +437,7 @@ void Record<ESM::Armor>::print()
     std::cout << "  Health: " << mData.mData.mHealth << std::endl;
     std::cout << "  Armor: " << mData.mData.mArmor << std::endl;
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
-    for (const ESM::PartReference &part : mData.mParts.mParts)
+    for (const ESM3::PartReference &part : mData.mParts.mParts)
     {
         std::cout << "  Body Part: " << bodyPartLabel(part.mPart)
                   << " (" << (int)(part.mPart) << ")" << std::endl;
@@ -450,7 +450,7 @@ void Record<ESM::Armor>::print()
 }
 
 template<>
-void Record<ESM::Apparatus>::print()
+void Record<ESM3::Apparatus>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -465,7 +465,7 @@ void Record<ESM::Apparatus>::print()
 }
 
 template<>
-void Record<ESM::BodyPart>::print()
+void Record<ESM3::BodyPart>::print()
 {
     std::cout << "  Race: " << mData.mRace << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -479,7 +479,7 @@ void Record<ESM::BodyPart>::print()
 }
 
 template<>
-void Record<ESM::Book>::print()
+void Record<ESM3::Book>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -508,7 +508,7 @@ void Record<ESM::Book>::print()
 }
 
 template<>
-void Record<ESM::BirthSign>::print()
+void Record<ESM3::BirthSign>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Texture: " << mData.mTexture << std::endl;
@@ -519,7 +519,7 @@ void Record<ESM::BirthSign>::print()
 }
 
 template<>
-void Record<ESM::Cell>::print()
+void Record<ESM3::Cell>::print()
 {
     // None of the cells have names...
     if (!mData.mName.empty())
@@ -531,8 +531,8 @@ void Record<ESM::Cell>::print()
     std::cout << "  Coordinates: " << " (" << mData.getGridX() << ","
               << mData.getGridY() << ")" << std::endl;
 
-    if (mData.mData.mFlags & ESM::Cell::Interior &&
-        !(mData.mData.mFlags & ESM::Cell::QuasiEx))
+    if (mData.mData.mFlags & ESM3::Cell::Interior &&
+        !(mData.mData.mFlags & ESM3::Cell::QuasiEx))
     {
         if (mData.hasAmbient())
         {
@@ -557,7 +557,7 @@ void Record<ESM::Cell>::print()
 }
 
 template<>
-void Record<ESM::Class>::print()
+void Record<ESM3::Class>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Description: " << mData.mDescription << std::endl;
@@ -579,7 +579,7 @@ void Record<ESM::Class>::print()
 }
 
 template<>
-void Record<ESM::Clothing>::print()
+void Record<ESM3::Clothing>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -593,7 +593,7 @@ void Record<ESM::Clothing>::print()
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
-    for (const ESM::PartReference &part : mData.mParts.mParts)
+    for (const ESM3::PartReference &part : mData.mParts.mParts)
     {
         std::cout << "  Body Part: " << bodyPartLabel(part.mPart)
                   << " (" << (int)(part.mPart) << ")" << std::endl;
@@ -605,7 +605,7 @@ void Record<ESM::Clothing>::print()
 }
 
 template<>
-void Record<ESM::Container>::print()
+void Record<ESM3::Container>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -613,14 +613,14 @@ void Record<ESM::Container>::print()
         std::cout << "  Script: " << mData.mScript << std::endl;
     std::cout << "  Flags: " << containerFlags(mData.mFlags) << std::endl;
     std::cout << "  Weight: " << mData.mWeight << std::endl;
-    for (const ESM::ContItem &item : mData.mInventory.mList)
+    for (const ESM3::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                   << " Item: " << item.mItem << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
-void Record<ESM::Creature>::print()
+void Record<ESM3::Creature>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -659,7 +659,7 @@ void Record<ESM::Creature>::print()
               << "-" <<  mData.mData.mAttack[5] << std::endl;
     std::cout << "  Gold: " << mData.mData.mGold << std::endl;
 
-    for (const ESM::ContItem &item : mData.mInventory.mList)
+    for (const ESM3::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                   << " Item: " << item.mItem << std::endl;
 
@@ -678,13 +678,13 @@ void Record<ESM::Creature>::print()
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
     std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
-    for (const ESM::AIPackage &package : mData.mAiPackage.mList)
+    for (const ESM3::AIPackage &package : mData.mAiPackage.mList)
         printAIPackage(package);
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
-void Record<ESM::Dialogue>::print()
+void Record<ESM3::Dialogue>::print()
 {
     std::cout << "  Type: " << dialogTypeLabel(mData.mType)
               << " (" << (int)mData.mType << ")" << std::endl;
@@ -692,12 +692,12 @@ void Record<ESM::Dialogue>::print()
     // Sadly, there are no DialInfos, because the loader dumps as it
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
-    for (const ESM::DialInfo &info : mData.mInfo)
+    for (const ESM3::DialInfo &info : mData.mInfo)
         std::cout << "INFO!" << info.mId << std::endl;
 }
 
 template<>
-void Record<ESM::Door>::print()
+void Record<ESM3::Door>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -708,7 +708,7 @@ void Record<ESM::Door>::print()
 }
 
 template<>
-void Record<ESM::Enchantment>::print()
+void Record<ESM3::Enchantment>::print()
 {
     std::cout << "  Type: " << enchantTypeLabel(mData.mData.mType)
               << " (" << mData.mData.mType << ")" << std::endl;
@@ -720,7 +720,7 @@ void Record<ESM::Enchantment>::print()
 }
 
 template<>
-void Record<ESM::Faction>::print()
+void Record<ESM3::Faction>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
@@ -752,20 +752,20 @@ void Record<ESM::Faction>::print()
 }
 
 template<>
-void Record<ESM::Global>::print()
+void Record<ESM3::Global>::print()
 {
     std::cout << "  " << mData.mValue << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
-void Record<ESM::GameSetting>::print()
+void Record<ESM3::GameSetting>::print()
 {
     std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>
-void Record<ESM::DialInfo>::print()
+void Record<ESM3::DialInfo>::print()
 {
     std::cout << "  Id: " << mData.mId << std::endl;
     if (!mData.mPrev.empty())
@@ -793,7 +793,7 @@ void Record<ESM::DialInfo>::print()
         std::cout << "  Cell: " << mData.mCell << std::endl;
     if (mData.mData.mDisposition > 0)
         std::cout << "  Disposition/Journal index: " << mData.mData.mDisposition << std::endl;
-    if (mData.mData.mGender != ESM::DialInfo::NA)
+    if (mData.mData.mGender != ESM3::DialInfo::NA)
         std::cout << "  Gender: " << mData.mData.mGender << std::endl;
     if (!mData.mSound.empty())
         std::cout << "  Sound File: " << mData.mSound << std::endl;
@@ -804,7 +804,7 @@ void Record<ESM::DialInfo>::print()
     std::cout << "  Unknown1: " << mData.mData.mUnknown1 << std::endl;
     std::cout << "  Unknown2: " << (int)mData.mData.mUnknown2 << std::endl;
 
-    for (const ESM::DialInfo::SelectStruct &rule : mData.mSelects)
+    for (const ESM3::DialInfo::SelectStruct &rule : mData.mSelects)
         std::cout << "  Select Rule: " << ruleString(rule) << std::endl;
 
     if (!mData.mResultScript.empty())
@@ -825,7 +825,7 @@ void Record<ESM::DialInfo>::print()
 }
 
 template<>
-void Record<ESM::Ingredient>::print()
+void Record<ESM3::Ingredient>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -849,13 +849,13 @@ void Record<ESM::Ingredient>::print()
 }
 
 template<>
-void Record<ESM::Land>::print()
+void Record<ESM3::Land>::print()
 {
     std::cout << "  Coordinates: (" << mData.mX << "," << mData.mY << ")" << std::endl;
     std::cout << "  Flags: " << landFlags(mData.mFlags) << std::endl;
     std::cout << "  DataTypes: " << mData.mDataTypes << std::endl;
 
-    if (const ESM::Land::LandData *data = mData.getLandData (mData.mDataTypes))
+    if (const ESM3::Land::LandData *data = mData.getLandData (mData.mDataTypes))
     {
         std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
         // Lots of missing members.
@@ -867,31 +867,31 @@ void Record<ESM::Land>::print()
 }
 
 template<>
-void Record<ESM::CreatureLevList>::print()
+void Record<ESM3::CreatureLevList>::print()
 {
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
     std::cout << "  Flags: " << creatureListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
-    for (const ESM::LevelledListBase::LevelItem &item : mData.mList)
+    for (const ESM3::LevelledListBase::LevelItem &item : mData.mList)
         std::cout << "  Creature: Level: " << item.mLevel
                   << " Creature: " << item.mId << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
-void Record<ESM::ItemLevList>::print()
+void Record<ESM3::ItemLevList>::print()
 {
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
     std::cout << "  Flags: " << itemListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
-    for (const ESM::LevelledListBase::LevelItem &item : mData.mList)
+    for (const ESM3::LevelledListBase::LevelItem &item : mData.mList)
         std::cout << "  Inventory: Level: " << item.mLevel
                   << " Item: " << item.mId << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
-void Record<ESM::Light>::print()
+void Record<ESM3::Light>::print()
 {
     if (!mData.mName.empty())
         std::cout << "  Name: " << mData.mName << std::endl;
@@ -912,7 +912,7 @@ void Record<ESM::Light>::print()
 }
 
 template<>
-void Record<ESM::Lockpick>::print()
+void Record<ESM3::Lockpick>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -927,7 +927,7 @@ void Record<ESM::Lockpick>::print()
 }
 
 template<>
-void Record<ESM::Probe>::print()
+void Record<ESM3::Probe>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -942,7 +942,7 @@ void Record<ESM::Probe>::print()
 }
 
 template<>
-void Record<ESM::Repair>::print()
+void Record<ESM3::Repair>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -957,7 +957,7 @@ void Record<ESM::Repair>::print()
 }
 
 template<>
-void Record<ESM::LandTexture>::print()
+void Record<ESM3::LandTexture>::print()
 {
     std::cout << "  Id: " << mData.mId << std::endl;
     std::cout << "  Index: " << mData.mIndex << std::endl;
@@ -966,7 +966,7 @@ void Record<ESM::LandTexture>::print()
 }
 
 template<>
-void Record<ESM::MagicEffect>::print()
+void Record<ESM3::MagicEffect>::print()
 {
     std::cout << "  Index: " << magicEffectLabel(mData.mIndex)
               << " (" << mData.mIndex << ")" << std::endl;
@@ -1003,7 +1003,7 @@ void Record<ESM::MagicEffect>::print()
 }
 
 template<>
-void Record<ESM::Miscellaneous>::print()
+void Record<ESM3::Miscellaneous>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
@@ -1017,7 +1017,7 @@ void Record<ESM::Miscellaneous>::print()
 }
 
 template<>
-void Record<ESM::NPC>::print()
+void Record<ESM3::NPC>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Animation: " << mData.mModel << std::endl;
@@ -1033,7 +1033,7 @@ void Record<ESM::NPC>::print()
     if (mData.mBloodType != 0)
         std::cout << "  Blood Type: " << mData.mBloodType+1 << std::endl;
 
-    if (mData.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+    if (mData.mNpdtType == ESM3::NPC::NPC_WITH_AUTOCALCULATED_STATS)
     {
         std::cout << "  Level: " << mData.mNpdt.mLevel << std::endl;
         std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
@@ -1058,7 +1058,7 @@ void Record<ESM::NPC>::print()
         std::cout << "    Luck: " << (int)mData.mNpdt.mLuck << std::endl;
 
         std::cout << "  Skills:" << std::endl;
-        for (int i = 0; i != ESM::Skill::Length; i++)
+        for (int i = 0; i != ESM3::Skill::Length; i++)
             std::cout << "    " << skillLabel(i) << ": "
                       << (int)(mData.mNpdt.mSkills[i]) << std::endl;
 
@@ -1068,7 +1068,7 @@ void Record<ESM::NPC>::print()
         std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
 
-    for (const ESM::ContItem &item : mData.mInventory.mList)
+    for (const ESM3::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                   << " Item: " << item.mItem << std::endl;
 
@@ -1087,14 +1087,14 @@ void Record<ESM::NPC>::print()
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
     std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
-    for (const ESM::AIPackage &package : mData.mAiPackage.mList)
+    for (const ESM3::AIPackage &package : mData.mAiPackage.mList)
         printAIPackage(package);
 
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
-void Record<ESM::Pathgrid>::print()
+void Record<ESM3::Pathgrid>::print()
 {
     std::cout << "  Cell: " << mData.mCell << std::endl;
     std::cout << "  Coordinates: (" << mData.mData.mX << "," << mData.mData.mY << ")" << std::endl;
@@ -1105,7 +1105,7 @@ void Record<ESM::Pathgrid>::print()
     std::cout << "  Edge Count: " << mData.mEdges.size() << std::endl;
 
     int i = 0;
-    for (const ESM::Pathgrid::Point &point : mData.mPoints)
+    for (const ESM3::Pathgrid::Point &point : mData.mPoints)
     {
         std::cout << "  Point[" << i << "]:" << std::endl;
         std::cout << "    Coordinates: (" << point.mX << ","
@@ -1117,7 +1117,7 @@ void Record<ESM::Pathgrid>::print()
     }
 
     i = 0;
-    for (const ESM::Pathgrid::Edge &edge : mData.mEdges)
+    for (const ESM3::Pathgrid::Edge &edge : mData.mEdges)
     {
         std::cout << "  Edge[" << i << "]: " << edge.mV0 << " -> " << edge.mV1 << std::endl;
         if (edge.mV0 >= mData.mData.mS2 || edge.mV1 >= mData.mData.mS2)
@@ -1129,7 +1129,7 @@ void Record<ESM::Pathgrid>::print()
 }
 
 template<>
-void Record<ESM::Race>::print()
+void Record<ESM3::Race>::print()
 {
     static const char *sAttributeNames[8] =
     {
@@ -1170,7 +1170,7 @@ void Record<ESM::Race>::print()
 }
 
 template<>
-void Record<ESM::Region>::print()
+void Record<ESM3::Region>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
 
@@ -1188,12 +1188,12 @@ void Record<ESM::Region>::print()
     std::cout << "  Map Color: " << mData.mMapColor << std::endl;
     if (!mData.mSleepList.empty())
         std::cout << "  Sleep List: " << mData.mSleepList << std::endl;
-    for (const ESM::Region::SoundRef &soundref : mData.mSoundList)
+    for (const ESM3::Region::SoundRef &soundref : mData.mSoundList)
         std::cout << "  Sound: " << (int)soundref.mChance << " = " << soundref.mSound << std::endl;
 }
 
 template<>
-void Record<ESM::Script>::print()
+void Record<ESM3::Script>::print()
 {
     std::cout << "  Name: " << mData.mId << std::endl;
 
@@ -1227,7 +1227,7 @@ void Record<ESM::Script>::print()
 }
 
 template<>
-void Record<ESM::Skill>::print()
+void Record<ESM3::Skill>::print()
 {
     std::cout << "  ID: " << skillLabel(mData.mIndex)
               << " (" << mData.mIndex << ")" << std::endl;
@@ -1241,7 +1241,7 @@ void Record<ESM::Skill>::print()
 }
 
 template<>
-void Record<ESM::SoundGenerator>::print()
+void Record<ESM3::SoundGenerator>::print()
 {
     if (!mData.mCreature.empty())
         std::cout << "  Creature: " << mData.mCreature << std::endl;
@@ -1252,7 +1252,7 @@ void Record<ESM::SoundGenerator>::print()
 }
 
 template<>
-void Record<ESM::Sound>::print()
+void Record<ESM3::Sound>::print()
 {
     std::cout << "  Sound: " << mData.mSound << std::endl;
     std::cout << "  Volume: " << (int)mData.mData.mVolume << std::endl;
@@ -1263,7 +1263,7 @@ void Record<ESM::Sound>::print()
 }
 
 template<>
-void Record<ESM::Spell>::print()
+void Record<ESM3::Spell>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Type: " << spellTypeLabel(mData.mData.mType)
@@ -1275,7 +1275,7 @@ void Record<ESM::Spell>::print()
 }
 
 template<>
-void Record<ESM::StartScript>::print()
+void Record<ESM3::StartScript>::print()
 {
     std::cout << "  Start Script: " << mData.mId << std::endl;
     std::cout << "  Start Data: " << mData.mData << std::endl;
@@ -1283,13 +1283,13 @@ void Record<ESM::StartScript>::print()
 }
 
 template<>
-void Record<ESM::Static>::print()
+void Record<ESM3::Static>::print()
 {
     std::cout << "  Model: " << mData.mModel << std::endl;
 }
 
 template<>
-void Record<ESM::Weapon>::print()
+void Record<ESM3::Weapon>::print()
 {
     // No names on VFX bolts
     if (!mData.mName.empty())
@@ -1324,31 +1324,31 @@ void Record<ESM::Weapon>::print()
 }
 
 template<> 
-std::string Record<ESM::Cell>::getId() const
+std::string Record<ESM3::Cell>::getId() const
 {
     return mData.mName;
 }
 
 template<> 
-std::string Record<ESM::Land>::getId() const
+std::string Record<ESM3::Land>::getId() const
 {
     return std::string(); // No ID for Land record
 }
 
 template<> 
-std::string Record<ESM::MagicEffect>::getId() const
+std::string Record<ESM3::MagicEffect>::getId() const
 {
     return std::string(); // No ID for MagicEffect record
 }
 
 template<> 
-std::string Record<ESM::Pathgrid>::getId() const
+std::string Record<ESM3::Pathgrid>::getId() const
 {
     return std::string(); // No ID for Pathgrid record
 }
 
 template<> 
-std::string Record<ESM::Skill>::getId() const
+std::string Record<ESM3::Skill>::getId() const
 {
     return std::string(); // No ID for Skill record
 }

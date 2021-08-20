@@ -7,14 +7,14 @@
 #include "aistate.hpp"
 #include "aipackagetypeid.hpp"
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/npc_.hpp>
 
 namespace MWWorld
 {
     class Ptr;
 }
 
-namespace ESM
+namespace ESM3
 {
     namespace AiSequence
     {
@@ -132,12 +132,12 @@ namespace MWMechanics
             /// Fills the AiSequence with packages
             /** Typically used for loading from the ESM
                 \see ESM::AIPackageList **/
-            void fill (const ESM::AIPackageList& list);
+            void fill (const ESM3::AIPackageList& list);
 
             bool isEmpty() const;
 
-            void writeState (ESM::AiSequence::AiSequence& sequence) const;
-            void readState (const ESM::AiSequence::AiSequence& sequence);
+            void writeState (ESM3::AiSequence::AiSequence& sequence) const;
+            void readState (const ESM3::AiSequence::AiSequence& sequence);
     };
 }
 

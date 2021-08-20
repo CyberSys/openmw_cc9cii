@@ -2,7 +2,7 @@
 #define OPENMW_GUI_SPELLMODEL_H
 
 #include "../mwworld/ptr.hpp"
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 namespace MWGui
 {
@@ -59,7 +59,7 @@ namespace MWGui
 
         std::string mFilter;
 
-        bool matchingEffectExists(std::string filter, const ESM::EffectList &effects);
+        bool matchingEffectExists(std::string filter, const ESM3::EffectList &effects);
     };
 
 }

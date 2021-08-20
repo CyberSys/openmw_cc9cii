@@ -3,12 +3,12 @@
 
 #include "importcntc.hpp"
 
-#include <components/esm/containerstate.hpp>
+#include <components/esm3/containerstate.hpp>
 
 namespace ESSImport
 {
 
-    void convertCNTC(const CNTC& cntc, ESM::ContainerState& state);
+    void convertCNTC(const CNTC& cntc, ESM3::ContainerState& state);
 
 }
 

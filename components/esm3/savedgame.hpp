@@ -1,15 +1,19 @@
-#ifndef OPENMW_ESM_SAVEDGAME_H
-#define OPENMW_ESM_SAVEDGAME_H
+#ifndef ESM3_SAVEDGAME_H
+#define ESM3_SAVEDGAME_H
 
 #include <vector>
 #include <string>
 
-#include "defs.hpp"
+#include "../esm/defs.hpp"
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
 
@@ -30,13 +34,13 @@ namespace ESM
         std::string mPlayerClassName;
 
         std::string mPlayerCell;
-        EpochTimeStamp mInGameTime;
+        ESM::EpochTimeStamp mInGameTime;
         double mTimePlayed;
         std::string mDescription;
         std::vector<char> mScreenshot; // raw jpg-encoded data
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

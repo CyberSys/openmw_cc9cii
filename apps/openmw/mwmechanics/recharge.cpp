@@ -22,7 +22,7 @@ bool rechargeItem(const MWWorld::Ptr &item, const float maxCharge, const float d
     if (charge == -1 || charge == maxCharge)
         return false;
 
-    static const float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+    static const float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find(
                 "fMagicItemRechargePerSecond")->mValue.getFloat();
 
     item.getCellRef().setEnchantmentCharge(std::min(charge + fMagicItemRechargePerSecond * duration, maxCharge));
@@ -48,16 +48,16 @@ bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem)
     if (intelligenceTerm < 1)
         intelligenceTerm = 1;
 
-    float x = (player.getClass().getSkill(player, ESM::Skill::Enchant) + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
+    float x = (player.getClass().getSkill(player, ESM3::Skill::Enchant) + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
     int roll = Misc::Rng::roll0to99();
     if (roll < x)
     {
         std::string soul = gem.getCellRef().getSoul();
-        const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
+        const ESM3::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Creature>().find(soul);
 
         float restored = creature->mData.mSoul * (roll / x);
 
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+        const ESM3::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Enchantment>().find(
                     item.getClass().getEnchantment(item));
         item.getCellRef().setEnchantmentCharge(
             std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
@@ -71,18 +71,18 @@ bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem)
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Fail");
     }
 
-    player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
+    player.getClass().skillUsageSucceeded (player, ESM3::Skill::Enchant, 0);
     gem.getContainerStore()->remove(gem, 1, player);
 
     if (gem.getRefData().getCount() == 0)
     {
-        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->mValue.getString();
+        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find("sNotifyMessage51")->mValue.getString();
         message = Misc::StringUtils::format(message, gem.getClass().getName(gem));
 
         MWBase::Environment::get().getWindowManager()->messageBox(message);
 
         // special case: readd Azura's Star
-        if (Misc::StringUtils::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
+        if (Misc::StringUtils::ciEqual(gem.get<ESM3::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
             player.getClass().getContainerStore(player).add("Misc_SoulGem_Azura", 1, player);
     }
 

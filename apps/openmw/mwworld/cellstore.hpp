@@ -11,31 +11,36 @@
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
 
-#include <components/esm/loadacti.hpp>
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadstat.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadmisc.hpp>
-#include <components/esm/loadbody.hpp>
+#include <components/esm3/acti.hpp>
+#include <components/esm3/alch.hpp>
+#include <components/esm3/appa.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/book.hpp>
+#include <components/esm3/clot.hpp>
+#include <components/esm3/cont.hpp>
+#include <components/esm3/crea.hpp>
+#include <components/esm3/door.hpp>
+#include <components/esm3/ingr.hpp>
+#include <components/esm3/levlist.hpp>
+#include <components/esm3/ligh.hpp>
+#include <components/esm3/lock.hpp>
+#include <components/esm3/prob.hpp>
+#include <components/esm3/repa.hpp>
+#include <components/esm3/stat.hpp>
+#include <components/esm3/weap.hpp>
+#include <components/esm3/npc_.hpp>
+#include <components/esm3/misc.hpp>
+#include <components/esm3/body.hpp>
 
 #include "timestamp.hpp"
 #include "ptr.hpp"
 
 namespace ESM
+{
+    class Reader;
+}
+
+namespace ESM3
 {
     struct Cell;
     struct CellState;
@@ -61,14 +66,14 @@ namespace MWWorld
         private:
 
             const MWWorld::ESMStore& mStore;
-            std::vector<ESM::ESMReader>& mReader;
+            std::vector<ESM::Reader*>& mReader;
 
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
             // Note this is nullptr until the cell is explored to save some memory
-            std::shared_ptr<ESM::FogState> mFogState;
+            std::shared_ptr<ESM3::FogState> mFogState;
 
-            const ESM::Cell *mCell;
+            const ESM3::Cell *mCell;
             State mState;
             bool mHasState;
             std::vector<std::string> mIds;
@@ -77,27 +82,27 @@ namespace MWWorld
             MWWorld::TimeStamp mLastRespawn;
 
             // List of refs owned by this cell
-            CellRefList<ESM::Activator>         mActivators;
-            CellRefList<ESM::Potion>            mPotions;
-            CellRefList<ESM::Apparatus>         mAppas;
-            CellRefList<ESM::Armor>             mArmors;
-            CellRefList<ESM::Book>              mBooks;
-            CellRefList<ESM::Clothing>          mClothes;
-            CellRefList<ESM::Container>         mContainers;
-            CellRefList<ESM::Creature>          mCreatures;
-            CellRefList<ESM::Door>              mDoors;
-            CellRefList<ESM::Ingredient>        mIngreds;
-            CellRefList<ESM::CreatureLevList>   mCreatureLists;
-            CellRefList<ESM::ItemLevList>       mItemLists;
-            CellRefList<ESM::Light>             mLights;
-            CellRefList<ESM::Lockpick>          mLockpicks;
-            CellRefList<ESM::Miscellaneous>     mMiscItems;
-            CellRefList<ESM::NPC>               mNpcs;
-            CellRefList<ESM::Probe>             mProbes;
-            CellRefList<ESM::Repair>            mRepairs;
-            CellRefList<ESM::Static>            mStatics;
-            CellRefList<ESM::Weapon>            mWeapons;
-            CellRefList<ESM::BodyPart>          mBodyParts;
+            CellRefList<ESM3::Activator>         mActivators;
+            CellRefList<ESM3::Potion>            mPotions;
+            CellRefList<ESM3::Apparatus>         mAppas;
+            CellRefList<ESM3::Armor>             mArmors;
+            CellRefList<ESM3::Book>              mBooks;
+            CellRefList<ESM3::Clothing>          mClothes;
+            CellRefList<ESM3::Container>         mContainers;
+            CellRefList<ESM3::Creature>          mCreatures;
+            CellRefList<ESM3::Door>              mDoors;
+            CellRefList<ESM3::Ingredient>        mIngreds;
+            CellRefList<ESM3::CreatureLevList>   mCreatureLists;
+            CellRefList<ESM3::ItemLevList>       mItemLists;
+            CellRefList<ESM3::Light>             mLights;
+            CellRefList<ESM3::Lockpick>          mLockpicks;
+            CellRefList<ESM3::Miscellaneous>     mMiscItems;
+            CellRefList<ESM3::NPC>               mNpcs;
+            CellRefList<ESM3::Probe>             mProbes;
+            CellRefList<ESM3::Repair>            mRepairs;
+            CellRefList<ESM3::Static>            mStatics;
+            CellRefList<ESM3::Weapon>            mWeapons;
+            CellRefList<ESM3::BodyPart>          mBodyParts;
 
             typedef std::map<LiveCellRefBase*, MWWorld::CellStore*> MovedRefTracker;
             // References owned by a different cell that have been moved here.
@@ -211,11 +216,11 @@ namespace MWWorld
             }
 
             /// @param readerList The readers to use for loading of the cell on-demand.
-            CellStore (const ESM::Cell *cell_,
+            CellStore (const ESM3::Cell *cell_,
                        const MWWorld::ESMStore& store,
-                       std::vector<ESM::ESMReader>& readerList);
+                       std::vector<ESM::Reader*>& readerList);
 
-            const ESM::Cell *getCell() const;
+            const ESM3::Cell *getCell() const;
 
             State getState() const;
 
@@ -243,7 +248,7 @@ namespace MWWorld
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
 
-            Ptr searchViaRefNum (const ESM::RefNum& refNum);
+            Ptr searchViaRefNum (const ESM3::RefNum& refNum);
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
             /// @note Triggers CellStore hasState flag.
@@ -254,10 +259,10 @@ namespace MWWorld
 
             void setWaterLevel (float level);
 
-            void setFog (ESM::FogState* fog);
+            void setFog (ESM3::FogState* fog);
             ///< \note Takes ownership of the pointer
 
-            ESM::FogState* getFog () const;
+            ESM3::FogState* getFog () const;
 
             std::size_t count() const;
             ///< Return total number of references, including deleted ones.
@@ -360,11 +365,11 @@ namespace MWWorld
 
             // NOTE: does not account for moved references
             // Should be phased out when we have const version of forEach
-            inline const CellRefList<ESM::Door>& getReadOnlyDoors() const
+            inline const CellRefList<ESM3::Door>& getReadOnlyDoors() const
             {
                 return mDoors;
             }
-            inline const CellRefList<ESM::Static>& getReadOnlyStatics() const
+            inline const CellRefList<ESM3::Static>& getReadOnlyStatics() const
             {
                 return mStatics;
             }
@@ -373,13 +378,13 @@ namespace MWWorld
 
             Ptr searchInContainer (const std::string& id);
 
-            void loadState (const ESM::CellState& state);
+            void loadState (const ESM3::CellState& state);
 
-            void saveState (ESM::CellState& state) const;
+            void saveState (ESM3::CellState& state) const;
 
             void writeFog (ESM::ESMWriter& writer) const;
 
-            void readFog (ESM::ESMReader& reader);
+            void readFog (ESM3::Reader& reader);
 
             void writeReferences (ESM::ESMWriter& writer) const;
 
@@ -387,12 +392,12 @@ namespace MWWorld
             {
             public:
                 ///@note must return nullptr if the cell is not found
-                virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
+                virtual CellStore* getCellStore(const ESM3::CellId& cellId) = 0;
                 virtual ~GetCellStoreCallback() = default;
             };
 
             /// @param callback to use for retrieving of additional CellStore objects by ID (required for resolving moved references)
-            void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback);
+            void readReferences (ESM3::Reader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback);
 
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
@@ -404,154 +409,154 @@ namespace MWWorld
 
             void loadRefs();
 
-            void loadRef (ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, std::string>& refNumToID);
+            void loadRef (ESM3::CellRef& ref, bool deleted, std::map<ESM3::RefNum, std::string>& refNumToID);
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
     };
 
     template<>
-    inline CellRefList<ESM::Activator>& CellStore::get<ESM::Activator>()
+    inline CellRefList<ESM3::Activator>& CellStore::get<ESM3::Activator>()
     {
         mHasState = true;
         return mActivators;
     }
 
     template<>
-    inline CellRefList<ESM::Potion>& CellStore::get<ESM::Potion>()
+    inline CellRefList<ESM3::Potion>& CellStore::get<ESM3::Potion>()
     {
         mHasState = true;
         return mPotions;
     }
 
     template<>
-    inline CellRefList<ESM::Apparatus>& CellStore::get<ESM::Apparatus>()
+    inline CellRefList<ESM3::Apparatus>& CellStore::get<ESM3::Apparatus>()
     {
         mHasState = true;
         return mAppas;
     }
 
     template<>
-    inline CellRefList<ESM::Armor>& CellStore::get<ESM::Armor>()
+    inline CellRefList<ESM3::Armor>& CellStore::get<ESM3::Armor>()
     {
         mHasState = true;
         return mArmors;
     }
 
     template<>
-    inline CellRefList<ESM::Book>& CellStore::get<ESM::Book>()
+    inline CellRefList<ESM3::Book>& CellStore::get<ESM3::Book>()
     {
         mHasState = true;
         return mBooks;
     }
 
     template<>
-    inline CellRefList<ESM::Clothing>& CellStore::get<ESM::Clothing>()
+    inline CellRefList<ESM3::Clothing>& CellStore::get<ESM3::Clothing>()
     {
         mHasState = true;
         return mClothes;
     }
 
     template<>
-    inline CellRefList<ESM::Container>& CellStore::get<ESM::Container>()
+    inline CellRefList<ESM3::Container>& CellStore::get<ESM3::Container>()
     {
         mHasState = true;
         return mContainers;
     }
 
     template<>
-    inline CellRefList<ESM::Creature>& CellStore::get<ESM::Creature>()
+    inline CellRefList<ESM3::Creature>& CellStore::get<ESM3::Creature>()
     {
         mHasState = true;
         return mCreatures;
     }
 
     template<>
-    inline CellRefList<ESM::Door>& CellStore::get<ESM::Door>()
+    inline CellRefList<ESM3::Door>& CellStore::get<ESM3::Door>()
     {
         mHasState = true;
         return mDoors;
     }
 
     template<>
-    inline CellRefList<ESM::Ingredient>& CellStore::get<ESM::Ingredient>()
+    inline CellRefList<ESM3::Ingredient>& CellStore::get<ESM3::Ingredient>()
     {
         mHasState = true;
         return mIngreds;
     }
 
     template<>
-    inline CellRefList<ESM::CreatureLevList>& CellStore::get<ESM::CreatureLevList>()
+    inline CellRefList<ESM3::CreatureLevList>& CellStore::get<ESM3::CreatureLevList>()
     {
         mHasState = true;
         return mCreatureLists;
     }
 
     template<>
-    inline CellRefList<ESM::ItemLevList>& CellStore::get<ESM::ItemLevList>()
+    inline CellRefList<ESM3::ItemLevList>& CellStore::get<ESM3::ItemLevList>()
     {
         mHasState = true;
         return mItemLists;
     }
 
     template<>
-    inline CellRefList<ESM::Light>& CellStore::get<ESM::Light>()
+    inline CellRefList<ESM3::Light>& CellStore::get<ESM3::Light>()
     {
         mHasState = true;
         return mLights;
     }
 
     template<>
-    inline CellRefList<ESM::Lockpick>& CellStore::get<ESM::Lockpick>()
+    inline CellRefList<ESM3::Lockpick>& CellStore::get<ESM3::Lockpick>()
     {
         mHasState = true;
         return mLockpicks;
     }
 
     template<>
-    inline CellRefList<ESM::Miscellaneous>& CellStore::get<ESM::Miscellaneous>()
+    inline CellRefList<ESM3::Miscellaneous>& CellStore::get<ESM3::Miscellaneous>()
     {
         mHasState = true;
         return mMiscItems;
     }
 
     template<>
-    inline CellRefList<ESM::NPC>& CellStore::get<ESM::NPC>()
+    inline CellRefList<ESM3::NPC>& CellStore::get<ESM3::NPC>()
     {
         mHasState = true;
         return mNpcs;
     }
 
     template<>
-    inline CellRefList<ESM::Probe>& CellStore::get<ESM::Probe>()
+    inline CellRefList<ESM3::Probe>& CellStore::get<ESM3::Probe>()
     {
         mHasState = true;
         return mProbes;
     }
 
     template<>
-    inline CellRefList<ESM::Repair>& CellStore::get<ESM::Repair>()
+    inline CellRefList<ESM3::Repair>& CellStore::get<ESM3::Repair>()
     {
         mHasState = true;
         return mRepairs;
     }
 
     template<>
-    inline CellRefList<ESM::Static>& CellStore::get<ESM::Static>()
+    inline CellRefList<ESM3::Static>& CellStore::get<ESM3::Static>()
     {
         mHasState = true;
         return mStatics;
     }
 
     template<>
-    inline CellRefList<ESM::Weapon>& CellStore::get<ESM::Weapon>()
+    inline CellRefList<ESM3::Weapon>& CellStore::get<ESM3::Weapon>()
     {
         mHasState = true;
         return mWeapons;
     }
 
     template<>
-    inline CellRefList<ESM::BodyPart>& CellStore::get<ESM::BodyPart>()
+    inline CellRefList<ESM3::BodyPart>& CellStore::get<ESM3::BodyPart>()
     {
         mHasState = true;
         return mBodyParts;

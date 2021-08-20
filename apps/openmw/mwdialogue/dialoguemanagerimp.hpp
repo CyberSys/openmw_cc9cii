@@ -15,7 +15,7 @@
 
 #include "../mwscript/compilercontext.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Dialogue;
 }
@@ -61,7 +61,7 @@ namespace MWDialogue
 
             void executeTopic (const std::string& topic, ResponseCallback* callback);
 
-            const ESM::Dialogue* searchDialogue(const std::string& id);
+            const ESM3::Dialogue* searchDialogue(const std::string& id);
 
             void updateOriginalDisposition();
 
@@ -107,7 +107,7 @@ namespace MWDialogue
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const override;
 
-            void readRecord (ESM::ESMReader& reader, uint32_t type) override;
+            void readRecord (ESM3::Reader& reader, uint32_t type) override;
 
             /// Changes faction1's opinion of faction2 by \a diff.
             void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff) override;

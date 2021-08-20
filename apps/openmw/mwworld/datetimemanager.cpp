@@ -155,7 +155,7 @@ namespace MWWorld
             "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar"
         };
 
-        const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(monthNames[month]);
+        const ESM3::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find(monthNames[month]);
         return setting->mValue.getString();
     }
 

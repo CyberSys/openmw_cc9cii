@@ -3,9 +3,9 @@
 
 #include "importinventory.hpp"
 
-namespace ESM
+namespace ESM3
 {
-    class ESMReader;
+    class Reader;
 }
 
 namespace ESSImport
@@ -18,7 +18,7 @@ namespace ESSImport
 
         Inventory mInventory;
 
-        void load(ESM::ESMReader& esm);
+        void load(ESM3::Reader& esm);
     };
 
 }

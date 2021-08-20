@@ -1,28 +1,32 @@
 #include "aisequence.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
 #include <memory>
 
-namespace ESM
+namespace ESM3
 {
 namespace AiSequence
 {
 
-    void AiWander::load(ESMReader &esm)
+    void AiWander::load(Reader& esm)
     {
-        esm.getHNT (mData, "DATA");
-        esm.getHNT(mDurationData, "STAR"); // was mStartTime
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
+        esm.get(mData);
+
+        esm.getSubRecordHeader(ESM3::SUB_STAR);
+        esm.get(mDurationData); // was mStartTime
+
         mStoredInitialActorPosition = false;
-        if (esm.isNextSub("POS_"))
+        if (esm.getNextSubRecordHeader(ESM3::SUB_POS_))
         {
             mStoredInitialActorPosition = true;
-            esm.getHT(mInitialActorPosition);
+            esm.get(mInitialActorPosition);
         }
     }
 
-    void AiWander::save(ESMWriter &esm) const
+    void AiWander::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNT ("STAR", mDurationData);
@@ -30,29 +34,41 @@ namespace AiSequence
             esm.writeHNT ("POS_", mInitialActorPosition);
     }
 
-    void AiTravel::load(ESMReader &esm)
+    void AiTravel::load(Reader& esm)
     {
-        esm.getHNT (mData, "DATA");
-        esm.getHNOT (mHidden, "HIDD");
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
+        esm.get(mData);
+
+        if (esm.getNextSubRecordHeader(ESM3::SUB_HIDD))
+            esm.get(mHidden);
     }
 
-    void AiTravel::save(ESMWriter &esm) const
+    void AiTravel::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNT ("HIDD", mHidden);
     }
 
-    void AiEscort::load(ESMReader &esm)
+    void AiEscort::load(Reader& esm)
     {
-        esm.getHNT (mData, "DATA");
-        mTargetId = esm.getHNString("TARG");
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
+        esm.get(mData);
+
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
+        esm.getString(mTargetId); // NOTE: string not null terminated
+
         mTargetActorId = -1;
-        esm.getHNOT (mTargetActorId, "TAID");
-        esm.getHNT (mRemainingDuration, "DURA");
-        mCellId = esm.getHNOString ("CELL");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_TAID))
+            esm.get(mTargetActorId);
+
+        esm.getSubRecordHeader(ESM3::SUB_DURA);
+        esm.get(mRemainingDuration);
+
+        if (esm.getNextSubRecordHeader(ESM3::SUB_CELL))
+            esm.getZString(mCellId);
     }
 
-    void AiEscort::save(ESMWriter &esm) const
+    void AiEscort::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNString ("TARG", mTargetId);
@@ -62,22 +78,37 @@ namespace AiSequence
             esm.writeHNString ("CELL", mCellId);
     }
 
-    void AiFollow::load(ESMReader &esm)
+    void AiFollow::load(Reader& esm)
     {
-        esm.getHNT (mData, "DATA");
-        mTargetId = esm.getHNString("TARG");
+        esm.getSubRecordHeader(ESM3::SUB_DATA);
+        esm.get(mData);
+
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
+        esm.getZString(mTargetId);
+
         mTargetActorId = -1;
-        esm.getHNOT (mTargetActorId, "TAID");
-        esm.getHNT (mRemainingDuration, "DURA");
-        mCellId = esm.getHNOString ("CELL");
-        esm.getHNT (mAlwaysFollow, "ALWY");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_TAID))
+            esm.get(mTargetActorId);
+
+        esm.getSubRecordHeader(ESM3::SUB_DURA);
+        esm.get(mRemainingDuration);
+
+        if (esm.getNextSubRecordHeader(ESM3::SUB_CELL))
+            esm.getZString(mCellId);
+
+        esm.getSubRecordHeader(ESM3::SUB_ALWY);
+        esm.get(mAlwaysFollow);
+
         mCommanded = false;
-        esm.getHNOT (mCommanded, "CMND");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_CMND))
+            esm.get(mCommanded);
+
         mActive = false;
-        esm.getHNOT (mActive, "ACTV");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_ACTV))
+            esm.get(mActive);
     }
 
-    void AiFollow::save(ESMWriter &esm) const
+    void AiFollow::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNString("TARG", mTargetId);
@@ -91,32 +122,35 @@ namespace AiSequence
             esm.writeHNT("ACTV", mActive);
     }
 
-    void AiActivate::load(ESMReader &esm)
+    void AiActivate::load(Reader& esm)
     {
-        mTargetId = esm.getHNString("TARG");
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
+        esm.getZString(mTargetId);
     }
 
-    void AiActivate::save(ESMWriter &esm) const
+    void AiActivate::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNString("TARG", mTargetId);
     }
 
-    void AiCombat::load(ESMReader &esm)
+    void AiCombat::load(Reader& esm)
     {
-        esm.getHNT (mTargetActorId, "TARG");
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
+        esm.get(mTargetActorId);
     }
 
-    void AiCombat::save(ESMWriter &esm) const
+    void AiCombat::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT ("TARG", mTargetActorId);
     }
 
-    void AiPursue::load(ESMReader &esm)
+    void AiPursue::load(Reader& esm)
     {
-        esm.getHNT (mTargetActorId, "TARG");
+        esm.getSubRecordHeader(ESM3::SUB_TARG);
+        esm.get(mTargetActorId);
     }
 
-    void AiPursue::save(ESMWriter &esm) const
+    void AiPursue::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT ("TARG", mTargetActorId);
     }
@@ -127,49 +161,13 @@ namespace AiSequence
             delete it->mPackage;
     }
 
-    void AiSequence::save(ESMWriter &esm) const
+    void AiSequence::load(Reader& esm)
     {
-        for (std::vector<AiPackageContainer>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
-        {
-            esm.writeHNT ("AIPK", it->mType);
-            switch (it->mType)
-            {
-            case Ai_Wander:
-                static_cast<const AiWander*>(it->mPackage)->save(esm);
-                break;
-            case Ai_Travel:
-                static_cast<const AiTravel*>(it->mPackage)->save(esm);
-                break;
-            case Ai_Escort:
-                static_cast<const AiEscort*>(it->mPackage)->save(esm);
-                break;
-            case Ai_Follow:
-                static_cast<const AiFollow*>(it->mPackage)->save(esm);
-                break;
-            case Ai_Activate:
-                static_cast<const AiActivate*>(it->mPackage)->save(esm);
-                break;
-            case Ai_Combat:
-                static_cast<const AiCombat*>(it->mPackage)->save(esm);
-                break;
-            case Ai_Pursue:
-                static_cast<const AiPursue*>(it->mPackage)->save(esm);
-                break;
 
-            default:
-                break;
-            }
-        }
-
-        esm.writeHNT ("LAST", mLastAiPackage);
-    }
-
-    void AiSequence::load(ESMReader &esm)
-    {
-        while (esm.isNextSub("AIPK"))
+        while (esm.getNextSubRecordHeader(ESM3::SUB_AIPK))
         {
             int type;
-            esm.getHT(type);
+            esm.get(type);
 
             mPackages.emplace_back();
             mPackages.back().mType = type;
@@ -230,7 +228,45 @@ namespace AiSequence
             }
         }
 
-        esm.getHNOT (mLastAiPackage, "LAST");
+        if (esm.getNextSubRecordHeader(ESM3::SUB_LAST))
+            esm.get(mLastAiPackage);
+    }
+
+    void AiSequence::save(ESM::ESMWriter& esm) const
+    {
+        for (std::vector<AiPackageContainer>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+        {
+            esm.writeHNT ("AIPK", it->mType);
+            switch (it->mType)
+            {
+            case Ai_Wander:
+                static_cast<const AiWander*>(it->mPackage)->save(esm);
+                break;
+            case Ai_Travel:
+                static_cast<const AiTravel*>(it->mPackage)->save(esm);
+                break;
+            case Ai_Escort:
+                static_cast<const AiEscort*>(it->mPackage)->save(esm);
+                break;
+            case Ai_Follow:
+                static_cast<const AiFollow*>(it->mPackage)->save(esm);
+                break;
+            case Ai_Activate:
+                static_cast<const AiActivate*>(it->mPackage)->save(esm);
+                break;
+            case Ai_Combat:
+                static_cast<const AiCombat*>(it->mPackage)->save(esm);
+                break;
+            case Ai_Pursue:
+                static_cast<const AiPursue*>(it->mPackage)->save(esm);
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        esm.writeHNT ("LAST", mLastAiPackage);
     }
 }
 }

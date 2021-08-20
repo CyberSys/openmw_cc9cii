@@ -4,7 +4,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include <osg/Vec3f>
 

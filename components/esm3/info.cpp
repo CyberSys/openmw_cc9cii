@@ -1,98 +1,107 @@
-#include "loadinfo.hpp"
+#include "info.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+//#include <cassert>
 
-namespace ESM
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
+
+namespace ESM3
 {
     unsigned int DialInfo::sRecordId = REC_INFO;
 
-    void DialInfo::load(ESMReader &esm, bool &isDeleted)
+    void DialInfo::load(Reader& reader, bool& isDeleted)
     {
-        mId = esm.getHNString("INAM");
-
         isDeleted = false;
 
         mQuestStatus = QS_None;
         mFactionLess = false;
 
-        mPrev = esm.getHNString("PNAM");
-        mNext = esm.getHNString("NNAM");
-
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    esm.getHT(mData, 12);
-                    break;
-                case ESM::FourCC<'O','N','A','M'>::value:
-                    mActor = esm.getHString();
-                    break;
-                case ESM::FourCC<'R','N','A','M'>::value:
-                    mRace = esm.getHString();
-                    break;
-                case ESM::FourCC<'C','N','A','M'>::value:
-                    mClass = esm.getHString();
-                    break;
-                case ESM::FourCC<'F','N','A','M'>::value:
+                case ESM3::SUB_INAM: reader.getZString(mId); break;
+                case ESM3::SUB_PNAM: reader.getZString(mPrev); break;
+                case ESM3::SUB_NNAM: reader.getZString(mNext); break;
+                case ESM3::SUB_ONAM: reader.getZString(mActor); break;
+                case ESM3::SUB_RNAM: reader.getZString(mRace); break;
+                case ESM3::SUB_CNAM: reader.getZString(mClass); break;
+                case ESM3::SUB_ANAM: reader.getZString(mCell); break;
+                case ESM3::SUB_DNAM: reader.getZString(mPcFaction); break;
+                case ESM3::SUB_SNAM: reader.getZString(mSound); break;
+                case ESM3::SUB_NAME: reader.getString(mResponse); break; // NOTE: not null terminated
+                case ESM3::SUB_BNAM: reader.getString(mResultScript); break; // NOTE: not null terminated
+                case ESM3::SUB_FNAM:
                 {
-                    mFaction = esm.getHString();
+                    reader.getZString(mFaction);
                     if (mFaction == "FFFF")
                     {
                         mFactionLess = true;
                     }
                     break;
                 }
-                case ESM::FourCC<'A','N','A','M'>::value:
-                    mCell = esm.getHString();
+                case ESM3::SUB_DATA:
+                {
+                    //assert (subHdr.dataSize == 12 && "INFO incorrect data size");
+                    reader.get(mData);
                     break;
-                case ESM::FourCC<'D','N','A','M'>::value:
-                    mPcFaction = esm.getHString();
-                    break;
-                case ESM::FourCC<'S','N','A','M'>::value:
-                    mSound = esm.getHString();
-                    break;
-                case ESM::SREC_NAME:
-                    mResponse = esm.getHString();
-                    break;
-                case ESM::FourCC<'S','C','V','R'>::value:
+                }
+                case ESM3::SUB_SCVR:
                 {
                     SelectStruct ss;
-                    ss.mSelectRule = esm.getHString();
-                    ss.mValue.read(esm, Variant::Format_Info);
+                    ss.mSelectRule.resize(subHdr.dataSize);
+                    reader.get(*ss.mSelectRule.data(), subHdr.dataSize);
                     mSelects.push_back(ss);
                     break;
                 }
-                case ESM::FourCC<'B','N','A','M'>::value:
-                    mResultScript = esm.getHString();
+                case ESM3::SUB_INTV: // NOTE: assumes follows SUB_SCVR
+                {
+                    std::uint32_t value;
+                    reader.get(value);
+                    mSelects.back().mValue = Variant(static_cast<int>(value));
+                    mSelects.back().mValue.setType(ESM::VT_Int);
                     break;
-                case ESM::FourCC<'Q','S','T','N'>::value:
+                }
+                case ESM3::SUB_FLTV: // NOTE: assumes follows SUB_SCVR
+                {
+                    float value;
+                    reader.get(value);
+                    mSelects.back().mValue = Variant(value);
+                    mSelects.back().mValue.setType(ESM::VT_Float);
+                    break;
+                }
+                case ESM3::SUB_QSTN:
+                {
                     mQuestStatus = QS_Name;
-                    esm.skipRecord();
+                    reader.skipSubRecordData(); // FIXME: skipRecord?
                     break;
-                case ESM::FourCC<'Q','S','T','F'>::value:
+                }
+                case ESM3::SUB_QSTF:
+                {
                     mQuestStatus = QS_Finished;
-                    esm.skipRecord();
+                    reader.skipSubRecordData(); // FIXME: skipRecord?
                     break;
-                case ESM::FourCC<'Q','S','T','R'>::value:
+                }
+                case ESM3::SUB_QSTR:
+                {
                     mQuestStatus = QS_Restart;
-                    esm.skipRecord();
+                    reader.skipSubRecordData(); // FIXME: skipRecord?
                     break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
     }
 
-    void DialInfo::save(ESMWriter &esm, bool isDeleted) const
+    void DialInfo::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("INAM", mId);
         esm.writeHNCString("PNAM", mPrev);

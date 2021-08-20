@@ -3,13 +3,13 @@
 #include <sstream>
 #include <map>
 
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/spel.hpp>
 
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
 
-CSMTools::SpellCheckStage::SpellCheckStage (const CSMWorld::IdCollection<ESM::Spell>& spells)
+CSMTools::SpellCheckStage::SpellCheckStage (const CSMWorld::IdCollection<ESM3::Spell>& spells)
 : mSpells (spells)
 {
     mIgnoreBaseRecords = false;
@@ -24,13 +24,13 @@ int CSMTools::SpellCheckStage::setup()
 
 void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Spell>& record = mSpells.getRecord (stage);
+    const CSMWorld::Record<ESM3::Spell>& record = mSpells.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Spell& spell = record.get();
+    const ESM3::Spell& spell = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Spell, spell.mId);
 
@@ -38,9 +38,12 @@ void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (spell.mName.empty())
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
+    // Cost is 32-bit unsigned, so cannot be negative
+#if 0
     // test for invalid cost values
-    if (spell.mData.mCost<0)
+    if (spell.mData.mCost < 0)
         messages.add(id, "Spell cost is negative", "", CSMDoc::Message::Severity_Error);
+#endif
 
     /// \todo check data members that can't be edited in the table view
 }

@@ -4,11 +4,11 @@
 #include <vector>
 #include <set>
 
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct Potion;
 }
@@ -30,7 +30,7 @@ namespace MWMechanics
             typedef std::vector<MWWorld::Ptr> TIngredientsContainer;
             typedef TIngredientsContainer::const_iterator TIngredientsIterator;
 
-            typedef std::vector<ESM::ENAMstruct> TEffectsContainer;
+            typedef std::vector<ESM3::ENAMstruct> TEffectsContainer;
             typedef TEffectsContainer::const_iterator TEffectsIterator;
 
             enum Result
@@ -59,7 +59,7 @@ namespace MWMechanics
 
             Result getReadyStatus() const;
 
-            const ESM::Potion *getRecord(const ESM::Potion& toFind) const;
+            const ESM3::Potion *getRecord(const ESM3::Potion& toFind) const;
             ///< Try to find a potion record similar to \a toFind in the record store, or return 0 if not found
             /// \note Does not account for record ID, model or icon
 

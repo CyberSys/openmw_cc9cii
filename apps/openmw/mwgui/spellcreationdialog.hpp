@@ -1,8 +1,8 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/mgef.hpp>
+#include <components/esm3/spel.hpp>
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
@@ -31,9 +31,9 @@ namespace MWGui
         void setSkill(int skill);
         void setAttribute(int attribute);
 
-        void newEffect (const ESM::MagicEffect* effect);
-        void editEffect (ESM::ENAMstruct effect);
-        typedef MyGUI::delegates::CMultiDelegate1<ESM::ENAMstruct> EventHandle_Effect;
+        void newEffect (const ESM3::MagicEffect* effect);
+        void editEffect (ESM3::ENAMstruct effect);
+        typedef MyGUI::delegates::CMultiDelegate1<ESM3::ENAMstruct> EventHandle_Effect;
 
         EventHandle_Effect eventEffectAdded;
         EventHandle_Effect eventEffectModified;
@@ -77,15 +77,15 @@ namespace MWGui
         void onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos);
         void onDurationChanged (MyGUI::ScrollBar* sender, size_t pos);
         void onAreaChanged (MyGUI::ScrollBar* sender, size_t pos);
-        void setMagicEffect(const ESM::MagicEffect* effect);
+        void setMagicEffect(const ESM3::MagicEffect* effect);
 
         void updateBoxes();
 
     protected:
-        ESM::ENAMstruct mEffect;
-        ESM::ENAMstruct mOldEffect;
+        ESM3::ENAMstruct mEffect;
+        ESM3::ENAMstruct mOldEffect;
 
-        const ESM::MagicEffect* mMagicEffect;
+        const ESM3::MagicEffect* mMagicEffect;
 
         bool mConstantEffect;
     };
@@ -120,11 +120,11 @@ namespace MWGui
 
         bool mConstantEffect;
 
-        std::vector<ESM::ENAMstruct> mEffects;
+        std::vector<ESM3::ENAMstruct> mEffects;
 
-        void onEffectAdded(ESM::ENAMstruct effect);
-        void onEffectModified(ESM::ENAMstruct effect);
-        void onEffectRemoved(ESM::ENAMstruct effect);
+        void onEffectAdded(ESM3::ENAMstruct effect);
+        void onEffectModified(ESM3::ENAMstruct effect);
+        void onEffectRemoved(ESM3::ENAMstruct effect);
 
         void onAvailableEffectClicked (MyGUI::Widget* sender);
 
@@ -173,7 +173,7 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
 
-        ESM::Spell mSpell;
+        ESM3::Spell mSpell;
 
     };
 

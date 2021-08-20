@@ -1,42 +1,47 @@
-#ifndef OPENMW_ESM_INGR_H
-#define OPENMW_ESM_INGR_H
+#ifndef ESM3_INGR_H
+#define ESM3_INGR_H
 
 #include <string>
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-/*
- * Alchemy ingredient
- */
-
-struct Ingredient
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Ingredient"; }
+    class Reader;
 
-    struct IRDTstruct
+    /*
+     * Alchemy ingredient
+     */
+
+    struct Ingredient
     {
-        float mWeight;
-        int mValue;
-        int mEffectID[4]; // Effect, 0 or -1 means none
-        int mSkills[4]; // SkillEnum related to effect
-        int mAttributes[4]; // Attribute related to effect
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "Ingredient"; }
+
+#pragma pack(push, 1)
+        struct IRDTstruct
+        {
+            float mWeight;
+            int mValue;
+            int mEffectID[4]; // Effect, 0 or -1 means none
+            int mSkills[4]; // SkillEnum related to effect
+            int mAttributes[4]; // Attribute related to effect
+        };
+#pragma pack(pop)
+
+        IRDTstruct mData;
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mIcon, mScript;
+
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
     };
-
-    IRDTstruct mData;
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mIcon, mScript;
-
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
-
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
 }
 #endif

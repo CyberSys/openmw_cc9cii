@@ -6,7 +6,7 @@
 #include <osg/Geode>
 
 #include "world.hpp"
-#include "../esm/loadland.hpp"
+#include "../esm3/land.hpp"
 
 #include <components/resource/scenemanager.hpp>
 
@@ -23,7 +23,7 @@ CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask, 
 
 void CellBorder::createCellBorderGeometry(int x, int y)
 {
-    const int cellSize = ESM::Land::REAL_SIZE;
+    const int cellSize = ESM3::Land::REAL_SIZE;
     const int borderSegments = 40;
     const float offset = 10.0;
 

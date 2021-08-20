@@ -3,7 +3,7 @@
 
 #include "typedaipackage.hpp"
 
-namespace ESM
+namespace ESM3
 {
 namespace AiSequence
 {
@@ -24,7 +24,7 @@ namespace MWMechanics
             /** \param actor Actor to pursue **/
             AiPursue(const MWWorld::Ptr& actor);
 
-            AiPursue(const ESM::AiSequence::AiPursue* pursue);
+            AiPursue(const ESM3::AiSequence::AiPursue* pursue);
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
@@ -40,7 +40,7 @@ namespace MWMechanics
 
             MWWorld::Ptr getTarget() const override;
 
-            void writeState (ESM::AiSequence::AiSequence& sequence) const override;
+            void writeState (ESM3::AiSequence::AiSequence& sequence) const override;
     };
 }
 #endif

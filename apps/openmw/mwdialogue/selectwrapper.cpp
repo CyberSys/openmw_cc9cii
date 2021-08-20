@@ -25,7 +25,7 @@ namespace
     }
 
     template<typename T>
-    bool selectCompareImp (const ESM::DialInfo::SelectStruct& select, T value1)
+    bool selectCompareImp (const ESM3::DialInfo::SelectStruct& select, T value1)
     {
         if (select.mValue.getType()==ESM::VT_Int)
         {
@@ -94,7 +94,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
     return Function_False;
 }
 
-MWDialogue::SelectWrapper::SelectWrapper (const ESM::DialInfo::SelectStruct& select) : mSelect (select) {}
+MWDialogue::SelectWrapper::SelectWrapper (const ESM3::DialInfo::SelectStruct& select) : mSelect (select) {}
 
 MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() const
 {

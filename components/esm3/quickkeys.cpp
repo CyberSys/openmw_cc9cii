@@ -1,35 +1,44 @@
 #include "quickkeys.hpp"
 
-#include "esmwriter.hpp"
-#include "esmreader.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
-
-    void QuickKeys::load(ESMReader &esm)
+    // probably no equivalent records in vanilla savefile
+    // (called from StateManager::loadGame() via WindowManager::readRecord())
+    void QuickKeys::load(Reader& esm)
     {
-        if (esm.isNextSub("KEY_"))
-            esm.getSubHeader(); // no longer used, because sub-record hierachies do not work properly in esmreader
-
-        while (esm.isNextSub("TYPE"))
+        while (esm.getSubRecordHeader())
         {
-            int keyType;
-            esm.getHT(keyType);
-            std::string id;
-            id = esm.getHNString("ID__");
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_KEY_:
+                {
+                    // no longer used, because sub-record hierachies do not work properly in esmreader
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_TYPE:
+                {
+                    QuickKey key;
+                    esm.get(key.mType);
 
-            QuickKey key;
-            key.mType = keyType;
-            key.mId = id;
+                    esm.getSubRecordHeader(ESM3::SUB_ID__);
+                    esm.getZString(key.mId);
 
-            mKeys.push_back(key);
-
-            if (esm.isNextSub("KEY_"))
-                esm.getSubHeader();  // no longer used, because sub-record hierachies do not work properly in esmreader
+                    mKeys.push_back(key);
+                    break;
+                }
+                default:
+                    esm.skipSubRecordData();
+                    break;
+            }
         }
     }
 
-    void QuickKeys::save(ESMWriter &esm) const
+    void QuickKeys::save(ESM::ESMWriter& esm) const
     {
         for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
         {
@@ -37,6 +46,4 @@ namespace ESM
             esm.writeHNString("ID__", it->mId);
         }
     }
-
-
 }

@@ -44,7 +44,7 @@
 #include <components/terrain/terraingrid.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/cell.hpp>
 
 #include <components/detournavigator/navigator.hpp>
 
@@ -633,11 +633,11 @@ namespace MWRender
         mSky->setMoonColour(red);
     }
 
-    void RenderingManager::configureAmbient(const ESM::Cell *cell)
+    void RenderingManager::configureAmbient(const ESM3::Cell *cell)
     {
         bool needsAdjusting = false;
         if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            needsAdjusting = !cell->isExterior() && !(cell->mData.mFlags & ESM::Cell::QuasiEx);
+            needsAdjusting = !cell->isExterior() && !(cell->mData.mFlags & ESM3::Cell::QuasiEx);
 
         auto ambient = SceneUtil::colourFromRGB(cell->mAmbi.mAmbient);
 
@@ -779,7 +779,7 @@ namespace MWRender
         return false;
     }
 
-    void RenderingManager::configureFog(const ESM::Cell *cell)
+    void RenderingManager::configureFog(const ESM3::Cell *cell)
     {
         mFog->configure(mViewDistance, cell);
     }
@@ -1433,7 +1433,7 @@ namespace MWRender
     {
         if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
             return;
-        const ESM::RefNum & refnum = ptr.getCellRef().getRefNum();
+        const ESM3::RefNum & refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile()) return;
         if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3(), osg::Vec2i(ptr.getCell()->getCell()->getGridX(), ptr.getCell()->getCell()->getGridY())))
             mTerrain->rebuildViews();
@@ -1447,7 +1447,7 @@ namespace MWRender
         }
         return false;
     }
-    void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM3::RefNum> &out)
     {
         if (mObjectPaging)
             mObjectPaging->getPagedRefnums(activeGrid, out);

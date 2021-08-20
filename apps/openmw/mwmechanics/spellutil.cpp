@@ -14,33 +14,33 @@
 
 namespace MWMechanics
 {
-    ESM::Skill::SkillEnum spellSchoolToSkill(int school)
+    ESM3::Skill::SkillEnum spellSchoolToSkill(int school)
     {
-        static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray
+        static const std::array<ESM3::Skill::SkillEnum, 6> schoolSkillArray
         {
-            ESM::Skill::Alteration, ESM::Skill::Conjuration, ESM::Skill::Destruction,
-            ESM::Skill::Illusion, ESM::Skill::Mysticism, ESM::Skill::Restoration
+            ESM3::Skill::Alteration, ESM3::Skill::Conjuration, ESM3::Skill::Destruction,
+            ESM3::Skill::Illusion, ESM3::Skill::Mysticism, ESM3::Skill::Restoration
         };
         return schoolSkillArray.at(school);
     }
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
+    float calcEffectCost(const ESM3::ENAMstruct& effect, const ESM3::MagicEffect* magicEffect, const EffectCostMethod method)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (!magicEffect)
-            magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
-        bool hasMagnitude = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude);
-        bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
-        bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
+            magicEffect = store.get<ESM3::MagicEffect>().find(effect.mEffectID);
+        bool hasMagnitude = !(magicEffect->mData.mFlags & ESM3::MagicEffect::NoMagnitude);
+        bool hasDuration = !(magicEffect->mData.mFlags & ESM3::MagicEffect::NoDuration);
+        bool appliedOnce = magicEffect->mData.mFlags & ESM3::MagicEffect::AppliedOnce;
         int minMagn = hasMagnitude ? effect.mMagnMin : 1;
         int maxMagn = hasMagnitude ? effect.mMagnMax : 1;
         int duration = hasDuration ? effect.mDuration : 1;
         if (!appliedOnce)
             duration = std::max(1, duration);
-        static const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
+        static const float fEffectCostMult = store.get<ESM3::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
 
         int durationOffset = 0;
-        int minArea = 0;
+        unsigned int minArea = 0;
         if (method == EffectCostMethod::PlayerSpell) {
             durationOffset = 1;
             minArea = 1;
@@ -54,14 +54,14 @@ namespace MWMechanics
         return x * fEffectCostMult;
     }
 
-    int calcSpellCost (const ESM::Spell& spell)
+    int calcSpellCost (const ESM3::Spell& spell)
     {
-        if (!(spell.mData.mFlags & ESM::Spell::F_Autocalc))
+        if (!(spell.mData.mFlags & ESM3::Spell::F_Autocalc))
             return spell.mData.mCost;
 
         float cost = 0;
 
-        for (const ESM::ENAMstruct& effect : spell.mEffects.mList)
+        for (const ESM3::ENAMstruct& effect : spell.mEffects.mList)
         {
             float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect));
 
@@ -82,24 +82,24 @@ namespace MWMechanics
          * Each point of enchant skill above/under 10 subtracts/adds
          * one percent of enchantment cost while minimum is 1.
          */
-        int eSkill = actor.getClass().getSkill(actor, ESM::Skill::Enchant);
+        int eSkill = actor.getClass().getSkill(actor, ESM3::Skill::Enchant);
         const float result = castCost - (castCost / 100) * (eSkill - 10);
 
         return static_cast<int>((result < 1) ? 1 : result);
     }
 
-    float calcSpellBaseSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)
+    float calcSpellBaseSuccessChance (const ESM3::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float y = std::numeric_limits<float>::max();
         float lowestSkill = 0;
 
-        for (const ESM::ENAMstruct& effect : spell->mEffects.mList)
+        for (const ESM3::ENAMstruct& effect : spell->mEffects.mList)
         {
             float x = static_cast<float>(effect.mDuration);
-            const auto magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+            const auto magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM3::MagicEffect>().find(effect.mEffectID);
 
-            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
+            if (!(magicEffect->mData.mFlags & ESM3::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
 
             x *= 0.1f * magicEffect->mData.mBaseCost;
@@ -107,7 +107,7 @@ namespace MWMechanics
             x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost;
             if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
-            static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+            static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM3::GameSetting>().find(
                         "fEffectCostMult")->mValue.getFloat();
             x *= fEffectCostMult;
 
@@ -131,7 +131,7 @@ namespace MWMechanics
         return castChance;
     }
 
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
+    float getSpellSuccessChance (const ESM3::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
         // NB: Base chance is calculated here because the effective school pointer must be filled
         float baseChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool);
@@ -140,25 +140,25 @@ namespace MWMechanics
 
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() && !godmode)
+        if (stats.getMagicEffects().get(ESM3::MagicEffect::Silence).getMagnitude() && !godmode)
             return 0;
 
-        if (spell->mData.mType == ESM::Spell::ST_Power)
+        if (spell->mData.mType == ESM3::Spell::ST_Power)
             return stats.getSpells().canUsePower(spell) ? 100 : 0;
 
         if (godmode)
             return 100;
 
-        if (spell->mData.mType != ESM::Spell::ST_Spell)
+        if (spell->mData.mType != ESM3::Spell::ST_Spell)
             return 100;
 
         if (checkMagicka && calcSpellCost(*spell) > 0 && stats.getMagicka().getCurrent() < calcSpellCost(*spell))
             return 0;
 
-        if (spell->mData.mFlags & ESM::Spell::F_Always)
+        if (spell->mData.mFlags & ESM3::Spell::F_Always)
             return 100;
 
-        float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
+        float castBonus = -stats.getMagicEffects().get(ESM3::MagicEffect::Sound).getMagnitude();
         float castChance = baseChance + castBonus;
         castChance *= stats.getFatigueTerm();
 
@@ -167,7 +167,7 @@ namespace MWMechanics
 
     float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
-        if (const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId))
+        if (const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().search(spellId))
             return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
         return 0.f;
     }
@@ -179,21 +179,21 @@ namespace MWMechanics
         return school;
     }
 
-    int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor)
+    int getSpellSchool(const ESM3::Spell* spell, const MWWorld::Ptr& actor)
     {
         int school = 0;
         getSpellSuccessChance(spell, actor, &school);
         return school;
     }
 
-    bool spellIncreasesSkill(const ESM::Spell *spell)
+    bool spellIncreasesSkill(const ESM3::Spell *spell)
     {
-        return spell->mData.mType == ESM::Spell::ST_Spell && !(spell->mData.mFlags & ESM::Spell::F_Always);
+        return spell->mData.mType == ESM3::Spell::ST_Spell && !(spell->mData.mFlags & ESM3::Spell::F_Always);
     }
 
     bool spellIncreasesSkill(const std::string &spellId)
     {
-        const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+        const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);
     }
 
@@ -201,7 +201,7 @@ namespace MWMechanics
     {
         switch (effectId)
         {
-            case ESM::MagicEffect::Levitate:
+            case ESM3::MagicEffect::Levitate:
             {
                 if (!MWBase::Environment::get().getWorld()->isLevitationEnabled())
                 {
@@ -211,10 +211,10 @@ namespace MWMechanics
                 }
                 break;
             }
-            case ESM::MagicEffect::Soultrap:
+            case ESM3::MagicEffect::Soultrap:
             {
                 if (!target.getClass().isNpc() // no messagebox for NPCs
-                     && (target.getTypeName() == typeid(ESM::Creature).name() && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
+                     && (target.getTypeName() == typeid(ESM3::Creature).name() && target.get<ESM3::Creature>()->mBase->mData.mSoul == 0))
                 {
                     if (castByPlayer)
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
@@ -222,7 +222,7 @@ namespace MWMechanics
                 }
                 break;
             }
-            case ESM::MagicEffect::WaterWalking:
+            case ESM3::MagicEffect::WaterWalking:
             {
                 if (target.getClass().isPureWaterCreature(target) && MWBase::Environment::get().getWorld()->isSwimming(target))
                     return false;

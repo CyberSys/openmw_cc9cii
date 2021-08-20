@@ -84,7 +84,7 @@ int CSMTools::ScriptCheckStage::setup()
 
 void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Script> &record = mDocument.getData().getScripts().getRecord(stage);
+    const CSMWorld::Record<ESM3::Script> &record = mDocument.getData().getScripts().getRecord(stage);
 
     mId = mDocument.getData().getScripts().getId (stage);
 

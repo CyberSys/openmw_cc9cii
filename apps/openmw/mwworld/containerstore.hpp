@@ -6,25 +6,25 @@
 #include <memory>
 #include <utility>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadmisc.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadweap.hpp>
+#include <components/esm3/alch.hpp>
+#include <components/esm3/appa.hpp>
+#include <components/esm3/armo.hpp>
+#include <components/esm3/book.hpp>
+#include <components/esm3/clot.hpp>
+#include <components/esm3/ingr.hpp>
+#include <components/esm3/lock.hpp>
+#include <components/esm3/ligh.hpp>
+#include <components/esm3/misc.hpp>
+#include <components/esm3/prob.hpp>
+#include <components/esm3/repa.hpp>
+#include <components/esm3/weap.hpp>
 
 #include <components/misc/rng.hpp>
 
 #include "ptr.hpp"
 #include "cellreflist.hpp"
 
-namespace ESM
+namespace ESM3
 {
     struct InventoryList;
     struct InventoryState;
@@ -103,18 +103,18 @@ namespace MWWorld
 
         private:
 
-            MWWorld::CellRefList<ESM::Potion>            potions;
-            MWWorld::CellRefList<ESM::Apparatus>         appas;
-            MWWorld::CellRefList<ESM::Armor>             armors;
-            MWWorld::CellRefList<ESM::Book>              books;
-            MWWorld::CellRefList<ESM::Clothing>          clothes;
-            MWWorld::CellRefList<ESM::Ingredient>        ingreds;
-            MWWorld::CellRefList<ESM::Light>             lights;
-            MWWorld::CellRefList<ESM::Lockpick>          lockpicks;
-            MWWorld::CellRefList<ESM::Miscellaneous>     miscItems;
-            MWWorld::CellRefList<ESM::Probe>             probes;
-            MWWorld::CellRefList<ESM::Repair>            repairs;
-            MWWorld::CellRefList<ESM::Weapon>            weapons;
+            MWWorld::CellRefList<ESM3::Potion>            potions;
+            MWWorld::CellRefList<ESM3::Apparatus>         appas;
+            MWWorld::CellRefList<ESM3::Armor>             armors;
+            MWWorld::CellRefList<ESM3::Book>              books;
+            MWWorld::CellRefList<ESM3::Clothing>          clothes;
+            MWWorld::CellRefList<ESM3::Ingredient>        ingreds;
+            MWWorld::CellRefList<ESM3::Light>             lights;
+            MWWorld::CellRefList<ESM3::Lockpick>          lockpicks;
+            MWWorld::CellRefList<ESM3::Miscellaneous>     miscItems;
+            MWWorld::CellRefList<ESM3::Probe>             probes;
+            MWWorld::CellRefList<ESM3::Repair>            repairs;
+            MWWorld::CellRefList<ESM3::Weapon>            weapons;
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
@@ -131,21 +131,21 @@ namespace MWWorld
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
-                const ESM::ObjectState& state);
+                const ESM3::ObjectState& state);
 
             template<typename T>
-            void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
+            void storeState (const LiveCellRef<T>& ref, ESM3::ObjectState& state) const;
 
             template<typename T>
             void storeStates (const CellRefList<T>& collection,
-                ESM::InventoryState& inventory, int& index,
+                ESM3::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
             void updateRechargingItems();
 
-            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
+            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM3::InventoryState& inventory) const;
 
-            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
+            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM3::InventoryState& inventory);
 
         public:
 
@@ -221,10 +221,10 @@ namespace MWWorld
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed = Misc::Rng::getSeed());
+            void fill (const ESM3::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed = Misc::Rng::getSeed());
             ///< Insert items into *this.
 
-            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
+            void fillNonRandom (const ESM3::InventoryList& items, const std::string& owner, unsigned int seed);
             ///< Insert items into *this, excluding leveled items
 
             virtual void clear();
@@ -242,9 +242,9 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            virtual void writeState (ESM::InventoryState& state) const;
+            virtual void writeState (ESM3::InventoryState& state) const;
 
-            virtual void readState (const ESM::InventoryState& state);
+            virtual void readState (const ESM3::InventoryState& state);
 
             bool isResolved() const;
 
@@ -311,18 +311,18 @@ namespace MWWorld
         ContainerStoreType mContainer;
         mutable PtrType mPtr;
 
-        typename Iterator<ESM::Potion>::type mPotion;
-        typename Iterator<ESM::Apparatus>::type mApparatus;
-        typename Iterator<ESM::Armor>::type mArmor;
-        typename Iterator<ESM::Book>::type mBook;
-        typename Iterator<ESM::Clothing>::type mClothing;
-        typename Iterator<ESM::Ingredient>::type mIngredient;
-        typename Iterator<ESM::Light>::type mLight;
-        typename Iterator<ESM::Lockpick>::type mLockpick;
-        typename Iterator<ESM::Miscellaneous>::type mMiscellaneous;
-        typename Iterator<ESM::Probe>::type mProbe;
-        typename Iterator<ESM::Repair>::type mRepair;
-        typename Iterator<ESM::Weapon>::type mWeapon;
+        typename Iterator<ESM3::Potion>::type mPotion;
+        typename Iterator<ESM3::Apparatus>::type mApparatus;
+        typename Iterator<ESM3::Armor>::type mArmor;
+        typename Iterator<ESM3::Book>::type mBook;
+        typename Iterator<ESM3::Clothing>::type mClothing;
+        typename Iterator<ESM3::Ingredient>::type mIngredient;
+        typename Iterator<ESM3::Light>::type mLight;
+        typename Iterator<ESM3::Lockpick>::type mLockpick;
+        typename Iterator<ESM3::Miscellaneous>::type mMiscellaneous;
+        typename Iterator<ESM3::Probe>::type mProbe;
+        typename Iterator<ESM3::Repair>::type mRepair;
+        typename Iterator<ESM3::Weapon>::type mWeapon;
 
         ContainerStoreIteratorBase (ContainerStoreType container);
         ///< End-iterator
@@ -331,18 +331,18 @@ namespace MWWorld
         ///< Begin-iterator
 
         // construct iterator using a CellRefList iterator
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Potion>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Apparatus>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Armor>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Book>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Clothing>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Ingredient>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Light>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Lockpick>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Miscellaneous>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Probe>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Repair>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Weapon>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Potion>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Apparatus>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Armor>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Book>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Clothing>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Ingredient>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Light>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Lockpick>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Miscellaneous>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Probe>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Repair>::type);
+        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM3::Weapon>::type);
 
         template<class T>
         void copy (const ContainerStoreIteratorBase<T>& src);

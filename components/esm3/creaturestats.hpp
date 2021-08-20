@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_CREATURESTATS_H
-#define OPENMW_ESM_CREATURESTATS_H
+#ifndef ESM_CREATURESTATS_H
+#define ESM_CREATURESTATS_H
 
 #include <string>
 #include <vector>
@@ -7,9 +7,9 @@
 
 #include "statstate.hpp"
 
-#include "defs.hpp"
+#include "../esm/defs.hpp"
 
-#include "attr.hpp"
+#include "../esm/attr.hpp"
 #include "spellstate.hpp"
 #include "activespells.hpp"
 #include "magiceffects.hpp"
@@ -17,29 +17,33 @@
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 
     // format 0, saved games only
     struct CreatureStats
     {
         struct CorprusStats
         {
-            int mWorsenings[Attribute::Length];
-            TimeStamp mNextWorsening;
+            int mWorsenings[ESM::Attribute::Length];
+            ESM::TimeStamp mNextWorsening;
         };
 
-        StatState<float> mAttributes[Attribute::Length];
+        StatState<float> mAttributes[ESM::Attribute::Length];
         StatState<float> mDynamic[3];
 
-        MagicEffects mMagicEffects;
+        ESM3::MagicEffects mMagicEffects;
 
-        AiSequence::AiSequence mAiSequence;
+        ESM3::AiSequence::AiSequence mAiSequence;
 
         bool mHasAiSettings;
         StatState<int> mAiSettings[4];
 
-        std::map<SummonKey, int> mSummonedCreatureMap;
+        std::map<ESM3::SummonKey, int> mSummonedCreatureMap;
         std::vector<int> mSummonGraveyard;
 
         ESM::TimeStamp mTradeTime;
@@ -87,13 +91,13 @@ namespace ESM
 
         std::map<std::string, CorprusStats> mCorprusSpells;
         SpellState mSpells;
-        ActiveSpells mActiveSpells;
+        ESM3::ActiveSpells mActiveSpells;
 
         /// Initialize to default state
         void blank();
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load (Reader& esm);
+        void save (ESM::ESMWriter& esm) const;
     };
 }
 

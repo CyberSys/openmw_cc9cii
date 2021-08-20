@@ -1,22 +1,35 @@
 #include "locals.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-void ESM::Locals::load (ESMReader &esm)
+void ESM3::Locals::load (Reader& reader)
 {
-    while (esm.isNextSub ("LOCA"))
+    while (reader.getSubRecordHeader())
     {
-        std::string id = esm.getHString();
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        switch (subHdr.typeId)
+        {
+            case ESM3::SUB_LOCA:
+            {
+                std::string id;
+                reader.getString(id); // NOTE: not null terminated, unless omwsave :-(
 
-        Variant value;
-        value.read (esm, Variant::Format_Local);
+                Variant value;
+                value.read (reader, Variant::Format_Local);
 
-        mVariables.emplace_back (id, value);
+                mVariables.emplace_back (id, value);
+                break;
+            }
+            default:
+                reader.cacheSubRecordHeader();
+                return;
+        }
     }
 }
 
-void ESM::Locals::save (ESMWriter &esm) const
+void ESM3::Locals::save (ESM::ESMWriter& esm) const
 {
     for (std::vector<std::pair<std::string, Variant> >::const_iterator iter (mVariables.begin());
         iter!=mVariables.end(); ++iter)

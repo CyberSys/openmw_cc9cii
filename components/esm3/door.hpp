@@ -1,28 +1,31 @@
-#ifndef OPENMW_ESM_DOOR_H
-#define OPENMW_ESM_DOOR_H
+#ifndef ESM3_DOOR_H
+#define ESM3_DOOR_H
 
 #include <string>
 
 namespace ESM
 {
+    class ESMWriter;
+}
 
-class ESMReader;
-class ESMWriter;
-
-struct Door
+namespace ESM3
 {
-    static unsigned int sRecordId;
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string getRecordType() { return "Door"; }
+    class Reader;
 
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mScript, mOpenSound, mCloseSound;
+    struct Door
+    {
+        static unsigned int sRecordId;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string getRecordType() { return "Door"; }
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mScript, mOpenSound, mCloseSound;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        void load(Reader& reader, bool& isDeleted);
+        void save(ESM::ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 }
 #endif

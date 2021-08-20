@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/npc_.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -466,12 +466,12 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
+                    const ESM3::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM3::Spell>().find (id);
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
                     creatureStats.getSpells().add(id);
-                    ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
-                    if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Power)
+                    ESM3::Spell::SpellType type = static_cast<ESM3::Spell::SpellType>(spell->mData.mType);
+                    if (type != ESM3::Spell::ST_Spell && type != ESM3::Spell::ST_Power)
                     {
                         // Apply looping particles immediately for constant effects
                         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
@@ -592,7 +592,7 @@ namespace MWScript
                     }
                     ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(factionID);
 
                     if(factionID != "")
                     {
@@ -624,7 +624,7 @@ namespace MWScript
                     }
                     ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(factionID);
 
                     if(factionID != "")
                     {
@@ -663,7 +663,7 @@ namespace MWScript
                     }
                     ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(factionID);
 
                     if(factionID != "")
                     {
@@ -694,7 +694,7 @@ namespace MWScript
                     }
                     ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM3::Faction>().find(factionID);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     if(factionID!="")
@@ -920,7 +920,7 @@ namespace MWScript
                     ::Misc::StringUtils::lowerCaseInPlace(race);
                     runtime.pop();
 
-                    std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
+                    std::string npcRace = ptr.get<ESM3::NPC>()->mBase->mRace;
                     ::Misc::StringUtils::lowerCaseInPlace(npcRace);
 
                     runtime.push (npcRace == race);
@@ -1251,12 +1251,12 @@ namespace MWScript
                     currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
                 // GetResist* should take in account elemental shields
-                if (mPositiveEffect == ESM::MagicEffect::ResistFire)
-                    currentValue += effects.get(ESM::MagicEffect::FireShield).getMagnitude();
-                if (mPositiveEffect == ESM::MagicEffect::ResistShock)
-                    currentValue += effects.get(ESM::MagicEffect::LightningShield).getMagnitude();
-                if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
-                    currentValue += effects.get(ESM::MagicEffect::FrostShield).getMagnitude();
+                if (mPositiveEffect == ESM3::MagicEffect::ResistFire)
+                    currentValue += effects.get(ESM3::MagicEffect::FireShield).getMagnitude();
+                if (mPositiveEffect == ESM3::MagicEffect::ResistShock)
+                    currentValue += effects.get(ESM3::MagicEffect::LightningShield).getMagnitude();
+                if (mPositiveEffect == ESM3::MagicEffect::ResistFrost)
+                    currentValue += effects.get(ESM3::MagicEffect::FrostShield).getMagnitude();
 
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
@@ -1285,12 +1285,12 @@ namespace MWScript
                     currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
                 // SetResist* should take in account elemental shields
-                if (mPositiveEffect == ESM::MagicEffect::ResistFire)
-                    currentValue += effects.get(ESM::MagicEffect::FireShield).getMagnitude();
-                if (mPositiveEffect == ESM::MagicEffect::ResistShock)
-                    currentValue += effects.get(ESM::MagicEffect::LightningShield).getMagnitude();
-                if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
-                    currentValue += effects.get(ESM::MagicEffect::FrostShield).getMagnitude();
+                if (mPositiveEffect == ESM3::MagicEffect::ResistFire)
+                    currentValue += effects.get(ESM3::MagicEffect::FireShield).getMagnitude();
+                if (mPositiveEffect == ESM3::MagicEffect::ResistShock)
+                    currentValue += effects.get(ESM3::MagicEffect::LightningShield).getMagnitude();
+                if (mPositiveEffect == ESM3::MagicEffect::ResistFrost)
+                    currentValue += effects.get(ESM3::MagicEffect::FrostShield).getMagnitude();
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();
@@ -1474,30 +1474,30 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeGetStatExplicit, new OpGetStat<ExplicitRef>);
 
             static const MagicEffect sMagicEffects[] = {
-                { ESM::MagicEffect::ResistMagicka, ESM::MagicEffect::WeaknessToMagicka },
-                { ESM::MagicEffect::ResistFire, ESM::MagicEffect::WeaknessToFire },
-                { ESM::MagicEffect::ResistFrost, ESM::MagicEffect::WeaknessToFrost },
-                { ESM::MagicEffect::ResistShock, ESM::MagicEffect::WeaknessToShock },
-                { ESM::MagicEffect::ResistCommonDisease, ESM::MagicEffect::WeaknessToCommonDisease },
-                { ESM::MagicEffect::ResistBlightDisease, ESM::MagicEffect::WeaknessToBlightDisease },
-                { ESM::MagicEffect::ResistCorprusDisease, ESM::MagicEffect::WeaknessToCorprusDisease },
-                { ESM::MagicEffect::ResistPoison, ESM::MagicEffect::WeaknessToPoison },
-                { ESM::MagicEffect::ResistParalysis, -1 },
-                { ESM::MagicEffect::ResistNormalWeapons, ESM::MagicEffect::WeaknessToNormalWeapons },
-                { ESM::MagicEffect::WaterBreathing, -1 },
-                { ESM::MagicEffect::Chameleon, -1 },
-                { ESM::MagicEffect::WaterWalking, -1 },
-                { ESM::MagicEffect::SwiftSwim, -1 },
-                { ESM::MagicEffect::Jump, -1 },
-                { ESM::MagicEffect::Levitate, -1 },
-                { ESM::MagicEffect::Shield, -1 },
-                { ESM::MagicEffect::Sound, -1 },
-                { ESM::MagicEffect::Silence, -1 },
-                { ESM::MagicEffect::Blind, -1 },
-                { ESM::MagicEffect::Paralyze, -1 },
-                { ESM::MagicEffect::Invisibility, -1 },
-                { ESM::MagicEffect::FortifyAttack, -1 },
-                { ESM::MagicEffect::Sanctuary, -1 },
+                { ESM3::MagicEffect::ResistMagicka, ESM3::MagicEffect::WeaknessToMagicka },
+                { ESM3::MagicEffect::ResistFire, ESM3::MagicEffect::WeaknessToFire },
+                { ESM3::MagicEffect::ResistFrost, ESM3::MagicEffect::WeaknessToFrost },
+                { ESM3::MagicEffect::ResistShock, ESM3::MagicEffect::WeaknessToShock },
+                { ESM3::MagicEffect::ResistCommonDisease, ESM3::MagicEffect::WeaknessToCommonDisease },
+                { ESM3::MagicEffect::ResistBlightDisease, ESM3::MagicEffect::WeaknessToBlightDisease },
+                { ESM3::MagicEffect::ResistCorprusDisease, ESM3::MagicEffect::WeaknessToCorprusDisease },
+                { ESM3::MagicEffect::ResistPoison, ESM3::MagicEffect::WeaknessToPoison },
+                { ESM3::MagicEffect::ResistParalysis, -1 },
+                { ESM3::MagicEffect::ResistNormalWeapons, ESM3::MagicEffect::WeaknessToNormalWeapons },
+                { ESM3::MagicEffect::WaterBreathing, -1 },
+                { ESM3::MagicEffect::Chameleon, -1 },
+                { ESM3::MagicEffect::WaterWalking, -1 },
+                { ESM3::MagicEffect::SwiftSwim, -1 },
+                { ESM3::MagicEffect::Jump, -1 },
+                { ESM3::MagicEffect::Levitate, -1 },
+                { ESM3::MagicEffect::Shield, -1 },
+                { ESM3::MagicEffect::Sound, -1 },
+                { ESM3::MagicEffect::Silence, -1 },
+                { ESM3::MagicEffect::Blind, -1 },
+                { ESM3::MagicEffect::Paralyze, -1 },
+                { ESM3::MagicEffect::Invisibility, -1 },
+                { ESM3::MagicEffect::FortifyAttack, -1 },
+                { ESM3::MagicEffect::Sanctuary, -1 },
             };
 
             for (int i=0; i<24; ++i)

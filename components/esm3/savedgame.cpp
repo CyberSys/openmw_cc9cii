@@ -1,34 +1,49 @@
 #include "savedgame.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-unsigned int ESM::SavedGame::sRecordId = ESM::REC_SAVE;
-int ESM::SavedGame::sCurrentFormat = 16;
+unsigned int ESM3::SavedGame::sRecordId = ESM::REC_SAVE;
+int ESM3::SavedGame::sCurrentFormat = 16;
 
-void ESM::SavedGame::load (ESMReader &esm)
+void ESM3::SavedGame::load (Reader& esm)
 {
-    mPlayerName = esm.getHNString("PLNA");
-    esm.getHNOT (mPlayerLevel, "PLLE");
+    esm.getSubRecordHeader(ESM3::SUB_PLNA);
+    esm.getString(mPlayerName); // NOTE: not null terminated
 
-    mPlayerClassId = esm.getHNOString("PLCL");
-    mPlayerClassName = esm.getHNOString("PLCN");
+    if (esm.getNextSubRecordHeader(ESM3::SUB_PLLE))
+        esm.get(mPlayerLevel);
 
-    mPlayerCell = esm.getHNString("PLCE");
-    esm.getHNT (mInGameTime, "TSTM", 16);
-    esm.getHNT (mTimePlayed, "TIME");
-    mDescription = esm.getHNString ("DESC");
+    if (esm.getNextSubRecordHeader(ESM3::SUB_PLCL))
+        esm.getString(mPlayerClassId); // NOTE: not null terminated
+    if (esm.getNextSubRecordHeader(ESM3::SUB_PLCN))
+        esm.getString(mPlayerClassName); // NOTE: not null terminated
 
-    while (esm.isNextSub ("DEPE"))
-        mContentFiles.push_back (esm.getHString());
+    esm.getSubRecordHeader(ESM3::SUB_PLCE);
+    esm.getString(mPlayerCell); // NOTE: not null terminated
+    esm.getSubRecordHeader(ESM3::SUB_TSTM);
+    esm.get(mInGameTime, 16);
+    esm.getSubRecordHeader(ESM3::SUB_TIME);
+    esm.get(mTimePlayed);
+    esm.getSubRecordHeader(ESM3::SUB_DESC);
+    esm.getString(mDescription); // NOT: not null terminated
 
-    esm.getSubNameIs("SCRN");
-    esm.getSubHeader();
-    mScreenshot.resize(esm.getSubSize());
-    esm.getExact(mScreenshot.data(), mScreenshot.size());
+    while (esm.getNextSubRecordHeader(ESM3::SUB_DEPE))
+    {
+        std::string contentFile;
+        esm.getString(contentFile); // NOTE: not null terminated
+        mContentFiles.push_back(contentFile);
+    }
+
+    if (esm.getNextSubRecordHeader(ESM3::SUB_SCRN))
+    {
+        mScreenshot.resize(esm.subRecordHeader().dataSize);
+        esm.get(*mScreenshot.data(), mScreenshot.size());
+    }
 }
 
-void ESM::SavedGame::save (ESMWriter &esm) const
+void ESM3::SavedGame::save (ESM::ESMWriter& esm) const
 {
     esm.writeHNString ("PLNA", mPlayerName);
     esm.writeHNT ("PLLE", mPlayerLevel);

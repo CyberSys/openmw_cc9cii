@@ -3,17 +3,17 @@
 #include <assert.h>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 namespace MWWorld
 {
 
-    const ESM::RefNum& CellRef::getRefNum() const
+    const ESM3::RefNum& CellRef::getRefNum() const
     {
         return mCellRef.mRefNum;
     }
 
-    const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
+    const ESM3::RefNum& CellRef::getOrAssignRefNum(ESM3::RefNum& lastAssignedRefNum)
     {
         if (!mCellRef.mRefNum.isSet())
         {
@@ -258,7 +258,7 @@ namespace MWWorld
         if(lockLevel != 0)
             setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
         else
-            setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
+            setLockLevel(ESM3::UnbreakableLock); // If zero, set to max lock level
     }
 
     void CellRef::unlock()
@@ -299,7 +299,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::writeState(ESM::ObjectState &state) const
+    void CellRef::writeState(ESM3::ObjectState &state) const
     {
         state.mRef = mCellRef;
     }

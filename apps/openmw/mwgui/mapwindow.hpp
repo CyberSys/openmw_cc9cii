@@ -6,9 +6,9 @@
 
 #include "windowpinnablebase.hpp"
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
 
-#include <components/esm/custommarkerstate.hpp>
+#include <components/esm3/custommarkerstate.hpp>
 #include <components/misc/constants.hpp>
 
 namespace MWRender
@@ -19,8 +19,12 @@ namespace MWRender
 
 namespace ESM
 {
-    class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM3
+{
+    class Reader;
 }
 
 namespace MWWorld
@@ -44,22 +48,22 @@ namespace MWGui
     class CustomMarkerCollection
     {
     public:
-        void addMarker(const ESM::CustomMarker& marker, bool triggerEvent=true);
-        void deleteMarker (const ESM::CustomMarker& marker);
-        void updateMarker(const ESM::CustomMarker& marker, const std::string& newNote);
+        void addMarker(const ESM3::CustomMarker& marker, bool triggerEvent=true);
+        void deleteMarker (const ESM3::CustomMarker& marker);
+        void updateMarker(const ESM3::CustomMarker& marker, const std::string& newNote);
 
         void clear();
 
         size_t size() const;
 
-        typedef std::multimap<ESM::CellId, ESM::CustomMarker> ContainerType;
+        typedef std::multimap<ESM3::CellId, ESM3::CustomMarker> ContainerType;
 
         typedef std::pair<ContainerType::const_iterator, ContainerType::const_iterator> RangeType;
 
         ContainerType::const_iterator begin() const;
         ContainerType::const_iterator end() const;
 
-        RangeType getMarkers(const ESM::CellId& cellId) const;
+        RangeType getMarkers(const ESM3::CellId& cellId) const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
@@ -233,7 +237,7 @@ namespace MWGui
         void renderGlobalMap();
 
         /// adds the marker to the global map
-        /// @param name The ESM::Cell::mName
+        /// @param name The ESM3::Cell::mName
         void addVisitedLocation(const std::string& name, int x, int y);
 
         // reveals this cell's map on the global map
@@ -254,7 +258,7 @@ namespace MWGui
         void clear() override;
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-        void readRecord (ESM::ESMReader& reader, uint32_t type);
+        void readRecord (ESM3::Reader& reader, uint32_t type);
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
@@ -316,7 +320,7 @@ namespace MWGui
         std::map<MapMarkerType, std::vector<MapMarkerType>> mGlobalMapMarkers;
 
         EditNoteDialog mEditNoteDialog;
-        ESM::CustomMarker mEditingMarker;
+        ESM3::CustomMarker mEditingMarker;
 
         void onPinToggled() override;
         void onTitleDoubleClicked() override;

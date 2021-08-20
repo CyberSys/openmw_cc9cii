@@ -1,103 +1,132 @@
 #include "importplayer.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <cassert>
+
+#include <components/esm3/reader.hpp>
 
 namespace ESSImport
 {
 
-    void REFR::load(ESM::ESMReader &esm)
+    void REFR::load(ESM3::Reader& esm)
     {
-        esm.getHNT(mRefNum.mIndex, "FRMR");
+        assert(esm.hdr().typeId == ESM3::REC_REFR);
+        esm.getSubRecordHeader(ESM3::SUB_FRMR);
+        esm.get(mRefNum.mIndex);
 
-        mRefID = esm.getHNString("NAME");
+        esm.getSubRecordHeader(ESM3::SUB_NAME);
+        esm.getZString(mRefID);
 
         mActorData.load(esm);
 
-        esm.getHNOT(mPos, "DATA", 24);
+        if (esm.hasMoreSubs())
+        {
+            esm.getSubRecordHeader(ESM3::SUB_DATA);
+            esm.get(mPos,24);
+        }
     }
 
-    void PCDT::load(ESM::ESMReader &esm)
+    void PCDT::load(ESM3::Reader& esm)
     {
-        while (esm.isNextSub("DNAM"))
-        {
-            mKnownDialogueTopics.push_back(esm.getHString());
-        }
-
+        assert(esm.hdr().typeId == ESM3::REC_PCDT);
         mHasMark = false;
-        if (esm.isNextSub("MNAM"))
-        {
-            mHasMark = true;
-            mMNAM = esm.getHString();
-        }
-
-        esm.getHNT(mPNAM, "PNAM");
-
-        if (esm.isNextSub("SNAM"))
-            esm.skipHSub();
-        if (esm.isNextSub("NAM9"))
-            esm.skipHSub();
-
-        // Rest state. You shouldn't even be able to save during rest, but skip just in case.
-        if (esm.isNextSub("RNAM"))
-            /*
-                int hoursLeft;
-                float x, y, z; // resting position
-            */
-            esm.skipHSub(); // 16 bytes
-
-        mBounty = 0;
-        esm.getHNOT(mBounty, "CNAM");
-
-        mBirthsign = esm.getHNOString("BNAM");
-
-        // Holds the names of the last used Alchemy apparatus. Don't need to import this ATM,
-        // because our GUI auto-selects the best apparatus.
-        if (esm.isNextSub("NAM0"))
-            esm.skipHSub();
-        if (esm.isNextSub("NAM1"))
-            esm.skipHSub();
-        if (esm.isNextSub("NAM2"))
-            esm.skipHSub();
-        if (esm.isNextSub("NAM3"))
-            esm.skipHSub();
-
         mHasENAM = false;
-        if (esm.isNextSub("ENAM"))
-        {
-            mHasENAM = true;
-            esm.getHT(mENAM);
-        }
-
-        if (esm.isNextSub("LNAM"))
-            esm.skipHSub();
-
-        while (esm.isNextSub("FNAM"))
-        {
-            FNAM fnam;
-            esm.getHT(fnam);
-            mFactions.push_back(fnam);
-        }
-
         mHasAADT = false;
-        if (esm.isNextSub("AADT")) // Attack animation data?
+        mBounty = 0;
+
+        while (esm.getSubRecordHeader())
         {
-            mHasAADT = true;
-            esm.getHT(mAADT);
-        }
-
-        if (esm.isNextSub("KNAM"))
-            esm.skipHSub(); // assigned Quick Keys, I think
-
-        if (esm.isNextSub("ANIS"))
-            esm.skipHSub(); // 16 bytes
-
-        if (esm.isNextSub("WERE"))
-        {
-            // some werewolf data, 152 bytes
-            // maybe current skills and attributes for werewolf form
-            esm.getSubHeader();
-            esm.skip(152);
+            const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+            switch (subHdr.typeId)
+            {
+                case ESM3::SUB_DNAM:
+                {
+                    std::string topic;
+                    esm.getZString(topic);
+                    mKnownDialogueTopics.push_back(topic);
+                    break;
+                }
+                case ESM3::SUB_MNAM:
+                {
+                    mHasMark = true;
+                    esm.getZString(mMNAM);
+                    break;
+                }
+                case ESM3::SUB_PNAM:
+                {
+                    esm.get(mPNAM);
+                    break;
+                }
+                case ESM3::SUB_SNAM:
+                case ESM3::SUB_NAM9:
+                case ESM3::SUB_LNAM:
+                case ESM3::SUB_KNAM: // assigned Quick Keys, I think
+                case ESM3::SUB_ANIS: // 16 bytes
+                {
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_RNAM:
+                {
+                    // Rest state. You shouldn't even be able to save during rest, but skip just in case.
+                    /*
+                        int hoursLeft;
+                        float x, y, z; // resting position
+                    */
+                    assert(subHdr.dataSize == 16);
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_CNAM:
+                {
+                    esm.get(mBounty);
+                    break;
+                }
+                case ESM3::SUB_BNAM:
+                {
+                    esm.getZString(mBirthsign);
+                    break;
+                }
+                // Holds the names of the last used Alchemy apparatus. Don't need to import this ATM,
+                // because our GUI auto-selects the best apparatus.
+                case ESM3::SUB_NAM0:
+                case ESM3::SUB_NAM1:
+                case ESM3::SUB_NAM2:
+                case ESM3::SUB_NAM3:
+                {
+                    esm.skipSubRecordData();
+                    break;
+                }
+                case ESM3::SUB_ENAM:
+                {
+                    mHasENAM = true;
+                    esm.get(mENAM);
+                    break;
+                }
+                case ESM3::SUB_FNAM:
+                {
+                    FNAM fnam;
+                    esm.get(fnam);
+                    mFactions.push_back(fnam);
+                    break;
+                }
+                case ESM3::SUB_AADT: // Attack animation data?
+                {
+                    mHasAADT = true;
+                    esm.get(mAADT);
+                    break;
+                }
+                case ESM3::SUB_WERE:
+                {
+                    // some werewolf data, 152 bytes
+                    // maybe current skills and attributes for werewolf form
+                    assert(subHdr.dataSize == 152 && "WERE incorrect data size");
+                    esm.skipSubRecordData();
+                    break;
+                }
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
     }
-
 }

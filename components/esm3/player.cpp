@@ -1,42 +1,76 @@
 #include "player.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-void ESM::Player::load (ESMReader &esm)
+void ESM3::Player::load (Reader& esm)
 {
+    esm.getSubRecordHeader();
     mObject.mRef.loadId(esm, true);
     mObject.load (esm);
 
     mCellId.load (esm);
 
-    esm.getHNT (mLastKnownExteriorPosition, "LKEP", 12);
+    mHasMark = false;
+    bool checkPrevItems = false;
 
-    if (esm.isNextSub ("MARK"))
+    while (!checkPrevItems && esm.getSubRecordHeader())
     {
-        mHasMark = true;
-        esm.getHT (mMarkedPosition, 24);
-        mMarkedCell.load (esm);
+        const ESM3::SubRecordHeader& subHdr = esm.subRecordHeader();
+        switch (subHdr.typeId)
+        {
+            case ESM3::SUB_LKEP:
+            {
+                if (subHdr.dataSize != sizeof(mLastKnownExteriorPosition) || subHdr.dataSize != 12)
+                    esm.fail("LKEP incorrect data size");
+                esm.get(mLastKnownExteriorPosition);
+                break;
+            }
+            case ESM3::SUB_MARK:
+            {
+                if (subHdr.dataSize != sizeof(mMarkedPosition) || subHdr.dataSize != 24)
+                    esm.fail("MARK incorrect data size");
+                esm.get(mMarkedPosition);
+                mMarkedCell.load(esm);
+                break;
+            }
+            case ESM3::SUB_AMOV:// Automove, no longer used.
+            {
+                esm.skipSubRecordData();
+                break;
+            }
+            case ESM3::SUB_SIGN:
+            {
+                esm.getString(mBirthsign); // NOTE: string not null terminated
+                break;
+            }
+            case ESM3::SUB_CURD:
+            {
+                esm.get(mCurrentCrimeId);
+                break;
+            }
+            case ESM3::SUB_PAYD:
+            {
+                esm.get(mPaidCrimeId);
+                break;
+            }
+            default:
+                esm.cacheSubRecordHeader(); // :sadcat:
+                checkPrevItems = true;
+                break;
+        }
     }
-    else
-        mHasMark = false;
 
-    // Automove, no longer used.
-    if (esm.isNextSub("AMOV"))
-        esm.skipHSub();
-
-    mBirthsign = esm.getHNString ("SIGN");
-
-    mCurrentCrimeId = -1;
-    esm.getHNOT (mCurrentCrimeId, "CURD");
-    mPaidCrimeId = -1;
-    esm.getHNOT (mPaidCrimeId, "PAYD");
-
-    bool checkPrevItems = true;
     while (checkPrevItems)
     {
-        std::string boundItemId = esm.getHNOString("BOUN");
-        std::string prevItemId = esm.getHNOString("PREV");
+        std::string boundItemId;
+        std::string prevItemId;
+
+        if (esm.getNextSubRecordHeader(ESM3::SUB_BOUN))
+            esm.getZString(boundItemId);
+
+        if (esm.getNextSubRecordHeader(ESM3::SUB_PREV))
+             esm.getZString(prevItemId);
 
         if (!boundItemId.empty())
             mPreviousItems[boundItemId] = prevItemId;
@@ -47,14 +81,14 @@ void ESM::Player::load (ESMReader &esm)
     bool intFallback = esm.getFormat() < 11;
     if (esm.hasMoreSubs())
     {
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
             mSaveAttributes[i].load(esm, intFallback);
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM3::Skill::Length; ++i)
             mSaveSkills[i].load(esm, intFallback);
     }
 }
 
-void ESM::Player::save (ESMWriter &esm) const
+void ESM3::Player::save (ESM::ESMWriter& esm) const
 {
     mObject.save (esm);
 
@@ -79,8 +113,8 @@ void ESM::Player::save (ESMWriter &esm) const
         esm.writeHNString ("PREV", it->second);
     }
 
-    for (int i=0; i<ESM::Attribute::Length; ++i)
+    for (int i = 0; i < ESM::Attribute::Length; ++i)
         mSaveAttributes[i].save(esm);
-    for (int i=0; i<ESM::Skill::Length; ++i)
+    for (int i = 0; i < ESM3::Skill::Length; ++i)
         mSaveSkills[i].save(esm);
 }

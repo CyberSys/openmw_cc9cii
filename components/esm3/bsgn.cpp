@@ -1,56 +1,56 @@
-#include "loadbsgn.hpp"
+#include "bsgn.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-#include "defs.hpp"
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
     unsigned int BirthSign::sRecordId = REC_BSGN;
 
-    void BirthSign::load(ESMReader &esm, bool &isDeleted)
+    void BirthSign::load(Reader& reader, bool& isDeleted)
     {
         isDeleted = false;
 
         mPowers.mList.clear();
 
         bool hasName = false;
-        while (esm.hasMoreSubs())
+        while (reader.getSubRecordHeader())
         {
-            esm.getSubName();
-            switch (esm.retSubName().intval)
+            const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+            switch (subHdr.typeId)
             {
-                case ESM::SREC_NAME:
-                    mId = esm.getHString();
+                case ESM3::SUB_NAME:
+                {
+                    reader.getZString(mId);
                     hasName = true;
                     break;
-                case ESM::FourCC<'F','N','A','M'>::value:
-                    mName = esm.getHString();
+                }
+                case ESM3::SUB_FNAM: reader.getZString(mName); break;
+                case ESM3::SUB_TNAM: reader.getZString(mTexture); break;
+                case ESM3::SUB_DESC: reader.getZString(mDescription); break;
+                case ESM3::SUB_NPCS:
+                {
+                    mPowers.add(reader);
                     break;
-                case ESM::FourCC<'T','N','A','M'>::value:
-                    mTexture = esm.getHString();
-                    break;
-                case ESM::FourCC<'D','E','S','C'>::value:
-                    mDescription = esm.getHString();
-                    break;
-                case ESM::FourCC<'N','P','C','S'>::value:
-                    mPowers.add(esm);
-                    break;
-                case ESM::SREC_DELE:
-                    esm.skipHSub();
+                }
+                case ESM3::SUB_DELE:
+                {
+                    reader.skipSubRecordData();
                     isDeleted = true;
                     break;
+                }
                 default:
-                    esm.fail("Unknown subrecord");
+                    reader.fail("Unknown subrecord");
                     break;
             }
         }
 
         if (!hasName)
-            esm.fail("Missing NAME subrecord");
+            reader.fail("Missing NAME subrecord");
     }
 
-    void BirthSign::save(ESMWriter &esm, bool isDeleted) const
+    void BirthSign::save(ESM::ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

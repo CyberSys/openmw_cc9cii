@@ -1,13 +1,13 @@
 #include "containerstate.hpp"
 
-void ESM::ContainerState::load (ESMReader &esm)
+void ESM3::ContainerState::load (Reader& esm)
 {
     ObjectState::load (esm);
 
     mInventory.load (esm);
 }
 
-void ESM::ContainerState::save (ESMWriter &esm, bool inInventory) const
+void ESM3::ContainerState::save (ESM::ESMWriter& esm, bool inInventory) const
 {
     ObjectState::save (esm, inInventory);
 

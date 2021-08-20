@@ -2,23 +2,28 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include "common.hpp"
+#include "reader.hpp"
+#include "../esm/esmwriter.hpp"
 
-namespace ESM
+namespace ESM3
 {
-
-    void Transport::add(ESMReader &esm)
+    // NOTE: assumes the sub-record header was just read
+    void Transport::add(Reader& reader)
     {
-        if (esm.retSubName().intval == ESM::FourCC<'D','O','D','T'>::value)
+        const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
+        if (subHdr.typeId == ESM3::SUB_DODT)
         {
             Dest dodt;
-            esm.getHExact(&dodt.mPos, 24);
+            if (subHdr.dataSize != sizeof(dodt.mPos) || subHdr.dataSize != 24)
+                reader.fail("Transport pos incorrect data size");
+            reader.get(dodt.mPos);
             mList.push_back(dodt);
         }
-        else if (esm.retSubName().intval == ESM::FourCC<'D','N','A','M'>::value)
+        else if (subHdr.typeId == ESM3::SUB_DNAM)
         {
-            const std::string name = esm.getHString();
+            std::string name;
+            reader.getZString(name);
             if (mList.empty())
                 Log(Debug::Warning) << "Encountered DNAM record without DODT record, skipped.";
             else
@@ -26,7 +31,7 @@ namespace ESM
         }
     }
 
-    void Transport::save(ESMWriter &esm) const
+    void Transport::save(ESM::ESMWriter& esm) const
     {
         typedef std::vector<Dest>::const_iterator DestIter;
         for (DestIter it = mList.begin(); it != mList.end(); ++it)
