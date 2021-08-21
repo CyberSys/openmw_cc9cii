@@ -15,9 +15,9 @@ void ESM3::DebugProfile::load (Reader& reader, bool& isDeleted)
         const ESM3::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM3::SUB_NAME: reader.getString(mId); break; // TODO: check string not null terminated
-            case ESM3::SUB_DESC: reader.getString(mDescription); break; // TODO: check string not null terminated
-            case ESM3::SUB_SCRP: reader.getString(mScriptText); break; // TODO: check string not null terminated
+            case ESM3::SUB_NAME: reader.getZString(mId); break; // TODO: check string null terminated
+            case ESM3::SUB_DESC: reader.getZString(mDescription); break; // TODO: check string null terminated
+            case ESM3::SUB_SCRP: reader.getZString(mScriptText); break; // TODO: check string null terminated
             case ESM3::SUB_FLAG: reader.get(mFlags); break;
             case ESM3::SUB_DELE:
             {
