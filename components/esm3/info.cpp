@@ -53,6 +53,10 @@ namespace ESM3
                     SelectStruct ss;
                     ss.mSelectRule.resize(subHdr.dataSize);
                     reader.get(*ss.mSelectRule.data(), subHdr.dataSize);
+#if 1
+                    ss.mValue.read(reader, Variant::Format_Info);
+                    mSelects.push_back(ss);
+#else
                     mSelects.push_back(ss);
                     break;
                 }
@@ -70,6 +74,7 @@ namespace ESM3
                     reader.get(value);
                     mSelects.back().mValue = Variant(value);
                     mSelects.back().mValue.setType(ESM::VT_Float);
+#endif
                     break;
                 }
                 case ESM3::SUB_QSTN:
