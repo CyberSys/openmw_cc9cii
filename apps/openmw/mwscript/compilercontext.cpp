@@ -161,6 +161,18 @@ namespace MWScript
                     }
                     break;
                 }
+                case ESM4::REC_TERM: // e.g. VaultMainTerminalREF in NVDLC01MQ03Script
+                {
+                    const ESM4::Terminal* term = store.getForeign<ESM4::Terminal>().search(baseObj);
+                    if (term)
+                    {
+                        ESM4::FormId scriptId = term->mScriptId;
+                        const ESM4::Script* scriptRecord2 = store.getForeign<ESM4::Script>().search(scriptId);
+                        if (scriptRecord2)
+                            script = ESM4::formIdToString(scriptRecord2->mFormId);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -206,7 +218,7 @@ namespace MWScript
     ESM4::FormId CompilerContext::getReference (const std::string& lowerEditorId) const
     {
         if (lowerEditorId == "player" || lowerEditorId == "playerref")
-            return 0x00000014;
+            return 0x00000014;  // NOTE: player object has formid 0x00000007
 
         // first search the active cells
         MWWorld::Ptr ptr

@@ -59,6 +59,14 @@ namespace Tes4Compiler
         if (mState == StartState)
         {
             mName = name;
+            // hack to deal with a space in 188tradingpostbehavior Script (000E8948)
+            mState = PreBeginState;
+
+            return true;
+        }
+        else if (mState == PreBeginState)
+        {
+            mName += name;
             mState = BeginState; // followed by either variable declarations or "begin" keyword
             mScriptParser.reset(); // FIXME: not the most obvious place to clear locals
 
@@ -267,6 +275,13 @@ namespace Tes4Compiler
             {
                 return true; // ignore empty lines
             }
+            else if (mState == PreBeginState)
+            {
+                mState = BeginState;
+                mScriptParser.reset();
+
+                return true;
+            }
         }
 
         return Parser::parseSpecial (code, loc, scanner);
@@ -274,7 +289,7 @@ namespace Tes4Compiler
 
     void FileParser::parseEOF (Scanner& scanner)
     {
-        if (mState != BeginState)
+        if (mState != BeginState && mState != PreBeginState) // VMS09QuestScript (000EE504)
             Parser::parseEOF (scanner);
     }
 

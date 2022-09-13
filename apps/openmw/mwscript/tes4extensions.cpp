@@ -1,6 +1,7 @@
 #include "tes4extensions.hpp"
 
 #include <stdexcept>
+#include <cmath> // std::round
 
 #include <boost/format.hpp>
 
@@ -63,7 +64,7 @@ namespace MWScript
                     // NOTE: assumes actor is always valid
                     MWWorld::Ptr actor = R()(runtime, true/*required*/, false/*activeOnly*/, true/*actor*/);
 
-                    //std::cout << "IsActionRef: actor " << actor.getCellRef().getRefId() << std::endl;
+                    //std::cout << "IsActionRef: actor " << actor.getCellRef().getEditorId() << std::endl;
 
                     MWWorld::Ptr object;
                     int index = runtime[0].mInteger;
@@ -87,7 +88,11 @@ namespace MWScript
 
                     if (actor == object)
                     {
-                        std::cout << "ActionRef is " << object.getCellRef().getRefId() << std::endl; // FIXME: temp testing
+                        std::cout << "ActionRef is "
+                            << (object.getBase()->isTypeESM4() ?
+                               boost::variant2::get<MWWorld::CellReferenceWrap>(object.getCellRef()).get().getEditorId() :
+                               boost::variant2::get<MWWorld::CellRefWrap>(object.getCellRef()).get().getRefId())
+                            << std::endl; // FIXME: temp testing
 
                         runtime.push (true);
                     }
@@ -157,12 +162,32 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    //Interpreter::Type_Integer lockLevel = ptr.getCellRef().getLockLevel();
-                    bool isLocked = ptr.getCellRef().isLocked();
+                    //Interpreter::Type_Integer lockLevel = ptr.getCellRef<MWWorld::CellReference>().getLockLevel();
+                    bool isLocked = boost::variant2::get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().isLocked();
 
                     std::cout << "GetLocked: " << (isLocked ? "true" : "false") << std::endl; // FIXME: temp testing
 
                     runtime.push (isLocked);
+                }
+        };
+
+        template<class R>
+        class OpGetOpenState : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    // FIXME: need to be able to retrieve the animation states of doors
+
+                    int openState = 0; // 0 = not a door, 1 = open, 2 = opening, 3 = closed, 4 = closing
+
+                    // FIXME: temp testing
+                    //std::cout << "GetOpenState: " << ptr.getForeign<ESM4::Door>()->mBase->mEditorId << std::endl;
+
+                    runtime.push (openState);
                 }
         };
 
@@ -223,25 +248,35 @@ namespace MWScript
                         runtime.pop();
                     }
 
+                    using namespace boost::variant2;
+                    bool tes4Actor = actor.getBase()->isTypeESM4();
 #if 1  // FIXME: temp testing
                     if (ptr && actor)
-                        std::cout << ptr.getCellRef().getRefId() << ".Activate: "
-                                  << actor.getCellRef().getRefId() << std::endl;
+                        std::cout << get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().getEditorId() << "Activate: "
+                                  << (tes4Actor ?
+                                      get<MWWorld::CellReferenceWrap>(actor.getCellRef()).get().getEditorId() :
+                                      get<MWWorld::CellRefWrap>(actor.getCellRef()).get().getRefId())
+                                      << std::endl;
                     else
                         std::cout << "Activate" << std::endl;
 #endif
                     // FIXME: hack to avoid an infinite loop
                     // Apparently some level of looping is expected!? See the "Nesting" section
                     // of https://cs.elderscrolls.com/index.php?title=Activate for more details
-                    if (mCurrentActor == actor.getCellRef().getRefId() &&
-                        mCurrentObject == ptr.getCellRef().getRefId())
+                    if (mCurrentActor == (tes4Actor ?
+                           get<MWWorld::CellReferenceWrap>(actor.getCellRef()).get().getEditorId() :
+                           get<MWWorld::CellRefWrap>(actor.getCellRef()).get().getRefId())
+                        &&
+                        mCurrentObject == get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().getEditorId())
                     {
                         return;
                     }
                     else
                     {
-                        mCurrentActor = actor.getCellRef().getRefId();
-                        mCurrentObject = ptr.getCellRef().getRefId();
+                        mCurrentActor = (tes4Actor ?
+                            get<MWWorld::CellReferenceWrap>(actor.getCellRef()).get().getEditorId() :
+                            get<MWWorld::CellRefWrap>(actor.getCellRef()).get().getRefId());
+                        mCurrentObject = get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().getEditorId();
                     }
 
                     InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
@@ -264,15 +299,15 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    // first mandatory arg
+                    // first mandatory string arg
                     std::string playgroupId = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    // second mandatory arg
+                    // second mandatory integer arg
                     Interpreter::Type_Integer flag = runtime[0].mInteger;
                     runtime.pop();
 
-                    std::cout << "PlayGroup: " << playgroupId << " " << flag; // FIXME: temp testing
+                    //std::cout << "PlayGroup: " << playgroupId << " " << flag << std::endl; // FIXME: temp testing
 
                     MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
 #if 0
@@ -299,7 +334,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ESM4::FormId formId = ptr.getCellRef().getFormId();
+                    ESM4::FormId formId = boost::variant2::get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().getFormId();
 
                     std::cout << "GetSelf: " << ESM4::formIdToString(formId) << std::endl; // FIXME: temp testing
 
@@ -320,7 +355,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ESM4::FormId formId = ptr.getCellRef().getParentFormId();
+                    ESM4::FormId formId = boost::variant2::get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().getParentFormId();
 
                     std::cout << "GetParerentRef: " << ESM4::formIdToString(formId) << std::endl; // FIXME: temp testing
 
@@ -329,20 +364,45 @@ namespace MWScript
         };
 
         template<class R>
-        class OpIsAnimPlaying : public Interpreter::Opcode0
+        class OpIsAnimPlaying : public Interpreter::Opcode1
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                //virtual void execute (Interpreter::Runtime& runtime)
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    // Lucky38LightScript (0011B039)
+                    //
+                    // ptr is a reference (0x0016B5E8) to an activator (0016B5E7) NVProspectorSaloonLights
+                    //   the script belongs to the activator baseobj
+                    //
+                    // arg0 is 1, should be "Left" or "Right"
 
                     MWWorld::Ptr ptr = R()(runtime);
 
 
-                    //std::cout << "IsAnimPlaying: " << std::endl; // FIXME: temp testing
+                    std::string animGroup = "";
+                    if (arg0 >= 1) // optional string arg
+                    {
+                        int index = runtime[0].mInteger;
+                        runtime.pop(); // index
+                        animGroup = runtime.getStringLiteral(index);
+                    }
 
+                    bool isPlaying = false;
 
-                    runtime.push (0); // FIXME: just a dummy for testing
+                    MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+                    if (arg0 >= 1 && anim && anim->hasAnimation(animGroup))
+                    {
+                        // FIXME: temp testing
+                        //std::cout << "IsAnimPlaying: anim group " << animGroup <<
+                            //(isPlaying ? " is playing" : " is not playing") << std::endl;
+
+                        // FIXME: always returns false
+                        isPlaying = anim->isPlaying(animGroup);
+                    }
+
+                    runtime.push (isPlaying);
                 }
         };
 
@@ -392,7 +452,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::cout << "EvaluatePackage: " << ptr.getCellRef().getRefId() << std::endl; // FIXME: temp testing
+                    std::cout << "EvaluatePackage: "
+                        << boost::variant2::get<MWWorld::CellReferenceWrap>(ptr.getCellRef()).get().getEditorId() << std::endl; // FIXME: temp testing
                 }
         };
 
@@ -444,6 +505,53 @@ namespace MWScript
                     }
 
                     //std::cout << "UnLock" << std::endl;
+                }
+        };
+
+        template<class R>
+        class OpGetInFaction : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime); // in PrimmResidentScript (000E4490) returns implicit
+
+                    int index = runtime[0].mInteger;
+                    runtime.pop();
+                    std::string id = runtime.getStringLiteral (index); // faction EditorId in lowercase
+
+                    //if (id != "Player") // FIXME: this is called too often
+                    //std::cout << "GetInFaction: " << id << ", " << id2 << std::endl; // FIXME: temp testing
+
+                    // FIXME: how to get the faction value?
+
+                    runtime.push(-1);
+                }
+        };
+
+        template<class R>
+        class OpGetFactionRank : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    //MWWorld::Ptr ptr = R()(runtime);
+                    int index = runtime[0].mInteger;
+                    runtime.pop();
+                    std::string id = runtime.getStringLiteral (index); // explicit ref editor id
+
+                    // mandatory argument (faction id?)
+                    std::string id2 = runtime.getStringLiteral(runtime[0].mInteger);
+                    runtime.pop();
+
+                    //if (id != "Player") // FIXME: this is called too often
+                    //std::cout << "GetFactionRank: " << id << ", " << id2 << std::endl; // FIXME: temp testing
+
+                    // FIXME: how to get the faction value?
+
+                    runtime.push(-1);
                 }
         };
 
@@ -591,7 +699,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::cout << "GetInCell: " << std::endl; // FIXME: temp testing
+                    //std::cout << "GetInCell: " << std::endl; // FIXME: temp testing
 
                     runtime.push (0); // FIXME:
                 }
@@ -626,6 +734,44 @@ namespace MWScript
                 }
         };
 
+        class OpGetButtonPressed : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push (MWBase::Environment::get().getWindowManager()->readPressedButton());
+                }
+        };
+
+        class OpGetCurrentTime : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    float gamehour
+                        = std::round(MWBase::Environment::get().getWorld()->getGlobalFloat("gamehour") * 100);
+
+                    //std::cout << "Current Time " << gamehour / 100 << std::endl;
+
+                    runtime.push (gamehour / 100);
+                }
+        };
+
+        class OpGetDayofWeek : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    //std::cout << "Day of Week " <<
+                        //MWBase::Environment::get().getWorld()->getGlobalInt("gamedayspassed")%7 << std::endl;
+
+                    runtime.push (MWBase::Environment::get().getWorld()->getGlobalInt("gamedayspassed")%7);
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             // Actor
@@ -651,8 +797,10 @@ namespace MWScript
                 (Tes4Compiler::Tes4AI::opcodeGetCurrentAIProcedureExplicit, new OpGetCurrentAIProcedure<ExplicitTes4Ref>);
 
             // Animation
-            interpreter.installSegment5
+            interpreter.installSegment3
                 (Tes4Compiler::Tes4Animation::opcodeIsAnimPlaying, new OpIsAnimPlaying<ImplicitRef>);
+            interpreter.installSegment3
+                (Tes4Compiler::Tes4Animation::opcodeIsAnimPlayingExplicit, new OpIsAnimPlaying<ExplicitTes4Ref>);
 
             interpreter.installSegment5
                 (Tes4Compiler::Tes4Animation::opcodePlayGroup, new OpPlayGroup<ImplicitRef>);
@@ -666,6 +814,14 @@ namespace MWScript
                 (Tes4Compiler::Tes4Crime::opcodeKillActorExplicit, new OpKillActor<ExplicitTes4Ref>);
 
             // Faction
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Faction::opcodeGetInFaction, new OpGetInFaction<ImplicitRef>);
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Faction::opcodeGetInFactionExplicit, new OpGetInFaction<ExplicitTes4Ref>);
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Faction::opcodeGetFactionRank, new OpGetFactionRank<ImplicitRef>);
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Faction::opcodeGetFactionRankExplicit, new OpGetFactionRank<ExplicitTes4Ref>);
             interpreter.installSegment5
                 (Tes4Compiler::Tes4Faction::opcodeSetFactionReaction, new OpSetFactionReaction<ImplicitRef>);
 
@@ -714,6 +870,11 @@ namespace MWScript
                 (Tes4Compiler::Tes4Misc::opcodeGetLocked, new OpGetLocked<ImplicitRef>);
 
             interpreter.installSegment5
+                (Tes4Compiler::Tes4Misc::opcodeGetOpenState, new OpGetOpenState<ImplicitRef>);
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Misc::opcodeGetOpenStateExplicit, new OpGetOpenState<ExplicitTes4Ref>);
+
+            interpreter.installSegment5
                 (Tes4Compiler::Tes4Misc::opcodeGetParentRef, new OpGetParentRef<ImplicitRef>);
 
             interpreter.installSegment5
@@ -727,6 +888,15 @@ namespace MWScript
                 (Tes4Compiler::Tes4Misc::opcodeUnLock, new OpUnLock<ImplicitRef>);
             interpreter.installSegment3
                 (Tes4Compiler::Tes4Misc::opcodeUnLockExplicit, new OpUnLock<ExplicitTes4Ref>);
+
+            // RunestoneReman COW "Tamriel" -6 13
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Misc::opcodeGetButtonPressed, new OpGetButtonPressed);
+
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Misc::opcodeGetCurrentTime, new OpGetCurrentTime);
+            interpreter.installSegment5
+                (Tes4Compiler::Tes4Misc::opcodeGetDayofWeek, new OpGetDayofWeek);
         }
     }
 }

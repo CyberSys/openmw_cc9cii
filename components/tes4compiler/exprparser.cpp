@@ -414,8 +414,7 @@ namespace Tes4Compiler
             keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
             keyword==Scanner::K_message || keyword==Scanner::K_ref ||
             keyword==Scanner::K_to || keyword==Scanner::K_startscript ||
-            keyword==Scanner::K_stopscript || keyword==Scanner::K_enable ||
-            keyword==Scanner::K_disable)
+            keyword==Scanner::K_stopscript)
         {
             return parseName (loc.mLiteral, loc, scanner);
         }
@@ -571,7 +570,6 @@ namespace Tes4Compiler
                 start();
 
                 mTokenLoc = loc;
-                parseArguments ("l", scanner);
 
                 Generator::random (mCode);
                 mOperands.push_back ('l');

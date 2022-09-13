@@ -23,6 +23,7 @@ namespace Tes4Compiler
         Tes4Statistics::registerExtensions (extensions);
         Tes4Weather::registerExtensions (extensions);
         Tes4Misc::registerExtensions (extensions);
+        FONV::registerExtensions (extensions);
     }
 
     namespace Tes4Event
@@ -61,6 +62,8 @@ namespace Tes4Compiler
             extensions.registerFunction ("scripteffectfinish", 'l', "",  opcodeScriptEffectFinish);
             extensions.registerFunction ("scripteffectstart",  'l', "",  opcodeScriptEffectStart);
             extensions.registerFunction ("scripteffectupdate", 'l', "",  opcodeScriptEffectUpdate);
+            extensions.registerFunction ("ontriggerenter",   'l', "c",   opcodeOnTriggerEnter); // FONV
+            extensions.registerFunction ("ontriggerleave",   'l', "c",   opcodeOnTriggerLeave); // FONV
         }
     }
 
@@ -262,10 +265,11 @@ namespace Tes4Compiler
         {
             extensions.registerInstruction
                 ("addscriptpackage",      "c",      opcodeAddScriptPackage, opcodeAddScriptPackageExplicit);
+            // FONV seems to have an optional package name
             extensions.registerInstruction
-                ("evaluatepackage",       "",       opcodeEvaluatePackage, opcodeEvaluatePackageExplicit);
+                ("evaluatepackage",       "/c",     opcodeEvaluatePackage, opcodeEvaluatePackageExplicit);
             extensions.registerInstruction
-                ("evp",                   "",       opcodeEvaluatePackage, opcodeEvaluatePackageExplicit);
+                ("evp",                   "/c",     opcodeEvaluatePackage, opcodeEvaluatePackageExplicit);
             extensions.registerInstruction
                 ("forceflee",             "/cc",    opcodeForceFlee, opcodeForceFleeExplicit);
             extensions.registerInstruction
@@ -288,8 +292,10 @@ namespace Tes4Compiler
                 ("iscontinuingpackagepcnear", 'l', "", opcodeIsContinuingPackagePCNear, opcodeIsContinuingPackagePCNearExplicit);
             extensions.registerInstruction
                 ("look",                  "c",      opcodeLook, opcodeLookExplicit);
+            // FONV seems to have an optional package name
+            // e.g. FONV VES01VictorGSMyBodyguardScript (00154150)
             extensions.registerInstruction
-                ("removescriptpackage",    "",      opcodeRemoveScriptPackage, opcodeRemoveScriptPackageExplicit);
+                ("removescriptpackage",   "/c",     opcodeRemoveScriptPackage, opcodeRemoveScriptPackageExplicit);
             extensions.registerInstruction
                 ("setactorsai",           "l",      opcodeSetActorsAI, opcodeSetActorsAIExplicit);
             extensions.registerInstruction
@@ -331,8 +337,10 @@ namespace Tes4Compiler
     {
         void registerExtensions (Compiler::Extensions& extensions)
         {
+            // FONV has an optional parameter
+            // e.g. FONV NVDLC01FountainStartSequenceSCRIPT (010118E3)
             extensions.registerFunction
-                ("isanimplaying",         'l', "",  opcodeIsAnimPlaying, opcodeIsAnimPlayingExplicit);
+                ("isanimplaying",         'l', "/c", opcodeIsAnimPlaying, opcodeIsAnimPlayingExplicit);
             extensions.registerInstruction
                 ("loopgroup",             "cll",    opcodeLoopGroup, opcodeLoopGroupExplicit);
             extensions.registerInstruction
@@ -415,10 +423,11 @@ namespace Tes4Compiler
             // See Player functions for IsPlayerInJail
             extensions.registerFunction
                 ("istrespassing",         'l', "",  opcodeIsTrespassing, opcodeIsTrespassingExplicit);
+            // FONV has two additional optional int param
             extensions.registerInstruction
-                ("killactor",             "/c",     opcodeKillActor, opcodeKillActorExplicit);
+                ("killactor",             "/cll",   opcodeKillActor, opcodeKillActorExplicit);
             extensions.registerInstruction
-                ("kill",                  "/c",     opcodeKillActor, opcodeKillActorExplicit);
+                ("kill",                  "/cll",   opcodeKillActor, opcodeKillActorExplicit);
             extensions.registerInstruction
                 ("modcrimegold",          "l",      opcodeModCrimeGold, opcodeModCrimeGoldExplicit);
             extensions.registerInstruction
@@ -448,8 +457,10 @@ namespace Tes4Compiler
                 ("refreshtopiclist",      "",       opcodeRefreshTopicList, -1);
             extensions.registerFunction
                 ("say",                   'l', "c/lcll", opcodeSay, opcodeSayExplicit);
+            // FONV has an additional parameter
+            // e.g. FONV VGenericTimerSCRIPT (00168A80)
             extensions.registerFunction
-                ("sayto",                 'l', "cc/l", opcodeSayTo, opcodeSayToExplicit);
+                ("sayto",                 'l', "cc/ll", opcodeSayTo, opcodeSayToExplicit);
             extensions.registerInstruction
                 ("setnorumors",           "l",      opcodeSetNoRumors, opcodeSetNoRumorsExplicit);
             extensions.registerInstruction
@@ -502,8 +513,10 @@ namespace Tes4Compiler
                 ("activate",              "/cl",    opcodeActivate, opcodeActivateExplicit);
             extensions.registerInstruction
                 ("addflames",             "",       opcodeAddFlames, opcodeAddFlamesExplicit);
-            extensions.registerInstruction
-                ("additem",               "cl",     opcodeAddItem, opcodeAddItemExplicit);
+            // FONV (and probably FO3) has an additional optional parameter
+            // FONV VMS03QuestSCRIPT seems to expect a ref to be returned
+            extensions.registerFunction
+                ("additem",               'l', "cl/l", opcodeAddItem, opcodeAddItemExplicit);
             extensions.registerFunction
                 ("canhaveflames",         'l', "",  opcodeCanHaveFlames, opcodeCanHaveFlamesExplicit);
             extensions.registerInstruction
@@ -514,9 +527,11 @@ namespace Tes4Compiler
                 ("dropme",                "",       opcodeDropMe, opcodeDropMeExplicit);
             extensions.registerInstruction
                 ("duplicateallitems",     "/cl",    opcodeDuplicateAllItems, opcodeDuplicateAllItemsExplicit);
+            // FONV (and probably FO3) has two additional optional parameters
+            // e.g. FONV VMQ03bTimerSCRIPT (0013F374)
             extensions.registerInstruction
-                ("equipitem",             "c/l",    opcodeEquipItem, opcodeEquipItemExplicit);
-            extensions.registerInstruction
+                ("equipitem",             "c/ll",   opcodeEquipItem, opcodeEquipItemExplicit);
+            extensions.registerInstruction          // alternative name used in TES4
                 ("equipobject",           "c/l",    opcodeEquipItem, opcodeEquipItemExplicit);
             extensions.registerFunction
                 ("getdisabled",           'l', "",  opcodeGetDisabled, opcodeGetDisabledExplicit);
@@ -536,8 +551,10 @@ namespace Tes4Compiler
                 ("removeallitems",        "/cl",    opcodeRemoveAllItems, opcodeRemoveAllItemsExplicit);
             extensions.registerInstruction
                 ("removeflames",          "",       opcodeRemoveFlames, opcodeRemoveFlamesExplicit);
+            // FONV (and probably FO3) has an additional optional parameter
+            // e.g. VNPCFollowersQuestSCRIPT (001209D1)
             extensions.registerInstruction
-                ("removeitem",            "cl",     opcodeRemoveItem, opcodeRemoveItemExplicit);
+                ("removeitem",            "cl/l",   opcodeRemoveItem, opcodeRemoveItemExplicit);
             extensions.registerInstruction
                 ("removeme",              "/c",     opcodeRemoveMe, opcodeRemoveMeExplicit);
             extensions.registerInstruction
@@ -548,10 +565,12 @@ namespace Tes4Compiler
                 ("setrigidbodymass",      "f",      opcodeSetRigidBodyMass, -1);
             extensions.registerInstruction
                 ("setshowquestitems",     "l",      opcodeSetShowQuestItems, -1);
+            // FONV has two additiona optional int param
+            // e.g. FONV VMS30HealTimer1SCRIPT (00152E89)
             extensions.registerInstruction
-                ("unequipitem",           "c/l",    opcodeUnequipItem, opcodeUnequipItemExplicit);
-            extensions.registerInstruction
-                ("unequipobject",         "c/l",    opcodeUnequipItem, opcodeUnequipItemExplicit);
+                ("unequipitem",           "c/ll",    opcodeUnequipItem, opcodeUnequipItemExplicit);
+            extensions.registerInstruction           // alternative name used in TES4
+                ("unequipobject",         "c/l",     opcodeUnequipItem, opcodeUnequipItemExplicit);
         }
     }
 
@@ -663,10 +682,12 @@ namespace Tes4Compiler
                 ("advancepcskill",        "cl",     opcodeAdvancePCSkill, -1);
             extensions.registerInstruction
                 ("advskill",              "cl",     opcodeAdvancePCSkill, -1);
+            // FONV has 7 optional parameters
+            // e.g. FONV VEndingScript (00161DE1)
             extensions.registerInstruction
-                ("disableplayercontrols", "",       opcodeDisablePlayerControls, -1);
+                ("disableplayercontrols", "/lllllll", opcodeDisablePlayerControls, -1);
             extensions.registerInstruction
-                ("enableplayercontrols",  "",       opcodeEnablePlayerControls, -1);
+                ("enableplayercontrols",  "/lllllll", opcodeEnablePlayerControls, -1);
             extensions.registerFunction
                 ("getamountsoldstolen",   'l', "",  opcodeGetAmountSoldStolen, -1);
             extensions.registerFunction
@@ -909,16 +930,22 @@ namespace Tes4Compiler
                 ("closecurrentobliviongate", "/l",  opcodeCloseCurrentOblivionGate, -1);
             extensions.registerInstruction
                 ("closeobliviongate",     "/l",     opcodeCloseOblivionGate, opcodeCloseOblivionGateExplicit);
+
+            // disable does not have an optional parameter for TES4 but added one for  FONV
             extensions.registerInstruction
-                ("disable",               "",       opcodeDisable, opcodeDisableExplicit);
+                ("disable",               "/l",     opcodeDisable, opcodeDisableExplicit);
+
             // has explicit despite https://en.uesp.net/wiki/Tes4Mod:Script_Functions
             // indicating it is not a RefFunc - see MQ16Script
             extensions.registerInstruction
                 ("disablelinkedpathpoints", "",     opcodeDisableLinkedPathPoints, opcodeDisableLinkedPathPointsExplicit);
+            // enable does not have an optional parameter for TES4 but added one for  FONV
             extensions.registerInstruction
-                ("enable",                "",       opcodeEnable, opcodeEnableExplicit);
+                ("enable",                "/l",     opcodeEnable, opcodeEnableExplicit);
+
+            // FONV has optional 3 int params instead of 1 mandatory flag
             extensions.registerInstruction
-                ("enablefasttravel",       "l",     opcodeEnableFastTravel, -1);
+                ("enablefasttravel",       "/lll",  opcodeEnableFastTravel, -1);
             extensions.registerInstruction
                 ("enablefast",             "l",     opcodeEnableFastTravel, -1);
             extensions.registerInstruction
@@ -928,9 +955,9 @@ namespace Tes4Compiler
             extensions.registerInstruction
                 ("essentialdeathreload",  "c",      opcodeEssentialDeathReload, -1);
             extensions.registerFunction
-                ("getactionref",          'l', "",   opcodeGetActionRef, opcodeGetActionRefExplicit); // ref
+                ("getactionref",          'l', "",  opcodeGetActionRef, opcodeGetActionRefExplicit); // ref
             extensions.registerFunction
-                ("getar",                 'l', "",   opcodeGetActionRef, opcodeGetActionRefExplicit); // ref
+                ("getar",                 'l', "",  opcodeGetActionRef, opcodeGetActionRefExplicit); // ref
             extensions.registerFunction
                 ("getbuttonpressed",      'l', "",  opcodeGetButtonPressed, -1);
             extensions.registerFunction
@@ -968,14 +995,17 @@ namespace Tes4Compiler
                 ("lock",                  "/ll",    opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction
                 ("placeatme",             "c/lll",  opcodePlaceAtMe, opcodePlaceAtMeExplicit);
+            // FONV has 3 additional optional parameters
+            // e.g. FONV VEndingBinksSCRIPT (0015FF6F)
             extensions.registerInstruction
-                ("playbink",              "c/l",    opcodePlayBink, -1);
+                ("playbink",              "c/llll", opcodePlayBink, -1);
             // has explicit despite https://en.uesp.net/wiki/Tes4Mod:Script_Functions
             // indicating it is not a RefFunc - see SE08XedQuestScript
             extensions.registerInstruction
                 ("playsound",             "c",      opcodePlaySound, opcodePlaySoundExplicit);
+            // FONV has explicit references
             extensions.registerInstruction
-                ("playsound3d",           "c",      opcodePlaySound3D, -1);
+                ("playsound3d",           "c",      opcodePlaySound3D, opcodePlaySound3DExplicit);
             extensions.registerInstruction
                 ("purgecellbuffers",      "",       opcodePurgeCellBuffers, -1);
             extensions.registerInstruction
@@ -1026,7 +1056,7 @@ namespace Tes4Compiler
             extensions.registerFunction
                 ("getcurrenttime",        'f', "",  opcodeGetCurrentTime, -1);
             extensions.registerFunction
-                ("getdayofweek",          'l', "",  opcodeGetDayOfWeek, -1);
+                ("getdayofweek",          'l', "",  opcodeGetDayofWeek, -1);
             extensions.registerFunction
                 ("getsecondspassed",      'l', "",  opcodeGetSecondsPassed, -1);
 
@@ -1042,6 +1072,157 @@ namespace Tes4Compiler
             // deprecated
             // SetAtStart
             // GetDisease
+        }
+    }
+
+    namespace FONV
+    {
+        void registerExtensions (Compiler::Extensions& extensions)
+        {
+            extensions.registerInstruction          // implicit not seen in FalloutNV.esm
+                ("additemhealthpercent",  "clf/l",  opcodeAddItemHealthPercent, opcodeAddItemHealthPercentExplicit);
+            extensions.registerInstruction
+                ("imod",                  "c",      opcodeApplyImageSpaceModifier, -1);
+            extensions.registerInstruction
+                ("applyimagespacemodifier", "c",    opcodeApplyImageSpaceModifier, -1);
+            extensions.registerInstruction
+                ("cios",                  "c",      opcodeCastImmediateOnSelf, opcodeCastImmediateOnSelfExplicit);
+            extensions.registerInstruction
+                ("castimmediateonself",   "c",      opcodeCastImmediateOnSelf, opcodeCastImmediateOnSelfExplicit);
+            extensions.registerFunction
+                ("getdestructionstage",   'l', "",  opcodeGetDestructionStage, opcodeGetDestructionStageExplicit);
+            extensions.registerFunction
+                ("gethasnote",            'l', "c", opcodeGetHasNote, opcodeGetHasNoteExplicit);
+            extensions.registerFunction
+                ("gethealthpercentage",   'f', "",  opcodeGetHealthPercentage, opcodeGetHealthPercentageExplicit);
+            extensions.registerFunction             // FIXME: returning a reference, is it returning a string?
+                ("getlinkedref",          'l', "",  opcodeGetLinkedRef, opcodeGetLinkedRefExplicit);
+            extensions.registerFunction
+                ("hasbeeneaten",          'l', "",  opcodeHasBeenEaten, opcodeHasBeenEatenExplicit);
+            extensions.registerFunction
+                ("hasperk",               'l', "c", opcodeHasPerk, opcodeHasPerkExplicit);
+            // function ("isimagespaceactive", 'l', "c", opcodeIsImagespaceActive, -1);
+            extensions.registerFunction             // implicit not seen in FalloutNV.esm
+                ("ishardcore",            'l', "",  opcodeIsHardcore, opcodeIsHardcoreExplicit);
+            extensions.registerInstruction
+                ("markfordelete",         "",       opcodeMarkForDelete, opcodeMarkForDeleteExplicit);
+            extensions.registerInstruction
+                ("movetomarkerwithfade",  "c",      opcodeMoveToMarkerWithFade, opcodeMoveToMarkerWithFadeExplicit);
+            extensions.registerInstruction
+                ("playmusic",             "c",      opcodePlayMusic, -1);
+            extensions.registerInstruction          // implicit not seen in FalloutNV.esm
+                ("removealltypeditems",   "c/lllc", opcodeRemoveAllTypedItems, opcodeRemoveAllTypedItemsExplicit);
+            //extensions.registerInstruction          // FIXME: duplicate of TES4
+                //("removescriptpackage",   "c",      -1, opcodeRemoveScriptPackageExplicit);
+            extensions.registerInstruction
+                ("removefromfaction",     "c",      opcodeRemoveFromFaction, opcodeRemoveFromFactionExplicit);
+            extensions.registerInstruction
+                ("rimod",                 "c",      opcodeRemoveImageSpaceModifier, -1);
+            extensions.registerInstruction
+                ("removeimagespacemodifier", "c",   opcodeRemoveImageSpaceModifier, -1);
+            extensions.registerInstruction          // implicit not seen in FalloutNV.esm
+                ("resetai",               "",       opcodeResetAI, opcodeResetAIExplicit);
+            extensions.registerInstruction
+                ("setenemy",              "cc/ll",  opcodeSetEnemy, -1);
+            extensions.registerInstruction
+                ("setobjectivecompleted", "cll",    opcodeSetObjectiveCompleted, -1);
+            extensions.registerInstruction
+                ("setobjectivedisplayed", "cll",    opcodeSetObjectiveDisplayed, -1);
+            extensions.registerInstruction
+                ("setplayertagskill",     "cl",     opcodeSetPlayerTagSkill, -1);
+            extensions.registerInstruction
+                ("setplayerteammate",     "l",      opcodeSetPlayerTeammate, opcodeSetPlayerTeammateExplicit);
+            extensions.registerInstruction
+                ("setquestdelay",         "cf",     opcodeSetQuestDelay, -1);
+            extensions.registerInstruction // FIXME: variable number and the last is an int
+                ("showmessage",           "c/cccccccccc", opcodeShowMessage, opcodeShowMessageExplicit);
+            extensions.registerInstruction          // implicit not seen in FalloutNV.esm
+                ("startradioconversation", "/c",    opcodeStartRadioConversation, opcodeStartRadioConversationExplicit);
+            // FIXME: name clash
+            //extensions.registerInstruction
+                //("enable",                "l",       opcodeEnable, opcodeEnableExplicit);
+            //extensions.registerInstruction
+                //("disable",                "l",      opcodeDisable, opcodeDisableExplicit);
+
+            extensions.registerInstruction
+                ("setally",               "cc/ll",  opcodeSetAlly, -1);
+            extensions.registerInstruction          // FIXME: they all look like variables, i.e.strings?
+                ("setrumble",             "fff",    opcodeSetRumble, -1);
+            extensions.registerInstruction
+                ("addnote",               "c",      opcodeAddNote, opcodeAddNoteExplicit);
+            extensions.registerInstruction
+                ("addtofaction",          "cl",     opcodeAddToFaction, opcodeAddToFactionExplicit);
+            // FONV has an optional parameter
+            extensions.registerInstruction
+                ("addperk",               "c/l",    opcodeAddPerk, opcodeAddPerkExplicit);
+            extensions.registerInstruction
+                ("addreputation",         "cll",    opcodeAddReputation, opcodeAddReputationExplicit);
+            extensions.registerInstruction          // implicit not seen in FalloutNV.esm
+                ("cleardestruction",      "",       opcodeClearDestruction, opcodeClearDestructionExplicit);
+            extensions.registerInstruction          // implicit not seen in FalloutNV.esm
+                ("entertrigger",          "c",      opcodeEnterTriggerExplicit, opcodeEnterTriggerExplicit);
+            extensions.registerInstruction
+                ("exitgame",              "",       opcodeExitGame, -1);
+            extensions.registerFunction             // implicit not seen in FalloutNV.esm
+                ("getmapmarkervisible",   'l', "",  opcodeGetMapMarkerVisible, opcodeGetMapMarkerVisibleExplicit);
+            extensions.registerFunction             // implicit not seen in FalloutNV.esm
+                ("getweaponhealthperc",   'l', "",  opcodeGetWeaponHealthPerc, opcodeGetWeaponHealthPercExplicit);
+            extensions.registerInstruction          // FIXME: are these floats?
+                ("movetofade",            "c/ll",   opcodeMoveToFade, opcodeMoveToFadeExplicit);
+            extensions.registerInstruction
+                ("pipboyradiooff",        "",       opcodePipBoyRadioOff, -1);
+            extensions.registerFunction
+                ("placeatreticle",        'l', "c/lll", opcodePlaceAtReticle, opcodePlaceAtReticleExplicit);
+            extensions.registerInstruction
+                ("removeperk",            "c/l",    opcodeRemovePerk, opcodeRemovePerkExplicit);
+            extensions.registerInstruction
+                ("resetquest",            "c",      opcodeResetQuest, -1);
+            extensions.registerInstruction
+                ("rewardxp",              "l",      opcodeRewardXP, opcodeRewardXPExplicit);
+            extensions.registerInstruction
+                ("sendassaultalarm",      "/cc",    opcodeSendAssaultAlarm, opcodeSendAssaultAlarmExplicit);
+            extensions.registerInstruction
+                ("setnpcradio",           "lc",     opcodeSetNPCRadio, opcodeSetNPCRadioExplicit);
+            extensions.registerInstruction
+                ("setpcenemyoffaction",   "cl",     opcodeSetPCEnemyOfFaction, -1);
+            extensions.registerInstruction          // implcit not seen in FalloutNV.esm
+                ("sexchange",             "c/l",    opcodeSexChange, opcodeSexChangeExplicit);
+            extensions.registerInstruction
+                ("showwarning",           "c",      opcodeShowWarning, -1);
+            extensions.registerInstruction
+                ("resetinventory",        "",       opcodeResetInventory, opcodeResetInventoryExplicit);
+            extensions.registerInstruction
+                ("setreputation",         "clf",    opcodeSetReputation, -1);
+            extensions.registerInstruction          // FIXME: not sure if explict occurs
+                ("addreputationexact",    "clf",    opcodeAddReputationExact, -1);
+            extensions.registerInstruction
+                ("ignorecrime",           "l",      opcodeIgnoreCrime, opcodeIgnoreCrimeExplicit);
+            extensions.registerInstruction
+                ("playidle",              "c",      opcodePlayIdle, opcodePlayIdleExplicit);
+            extensions.registerInstruction
+                ("addformtoformlist",     "cc",     opcodeAddFormToFormList, -1);
+            extensions.registerInstruction
+                ("forceradiostationupdate", "",     opcodeForceRadioStationUpdate, -1);
+            extensions.registerInstruction
+                ("frsu",                  "",       opcodeForceRadioStationUpdate, -1);
+            extensions.registerInstruction
+                ("resetpipboymanager",    "",       opcodeResetPipboyManager, -1);
+            extensions.registerInstruction          // FIXME: can be integer
+                ("damageactorvalue",      "cf",     opcodeDamageActorValue, opcodeDamageActorValueExplicit);
+            extensions.registerInstruction
+                ("alwaysshowactorsubtitles", "l",  opcodeAlwaysShowActorSubtitles, opcodeAlwaysShowActorSubtitlesExplicit);
+            extensions.registerFunction
+                ("getbroadcaststate",     'l', "", opcodeGetBroadcastState, opcodeGetBroadcastStateExplicit);
+            extensions.registerInstruction
+                ("setbroadcaststate",     "l",     opcodeSetBroadcastState, opcodeSetBroadcastStateExplicit);
+            extensions.registerInstruction
+                ("pipboyradio",           "c/c",   opcodePipboyRadio, -1);
+            extensions.registerInstruction
+                ("showrecipemenu",        "c",     opcodeShowRecipeMenu, opcodeShowRecipeMenuExplicit);
+            extensions.registerInstruction
+                ("craft",                 "c",     opcodeShowRecipeMenu, opcodeShowRecipeMenuExplicit);
+            extensions.registerInstruction
+                ("removenote",            "c",     opcodeRemoveNote, -1);
         }
     }
 }

@@ -601,7 +601,7 @@ namespace MWScript
         if (id.empty())
             ref2 = getReferenceImp();
         else
-            ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false);
+            ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false/*search active cells only*/);
 
         if (ref2.getContainerStore()) // is the object contained?
         {
@@ -613,7 +613,12 @@ namespace MWScript
                 throw std::runtime_error("failed to find container ptr");
         }
 
-        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false);
+        // FIXME: need to create Ptr for persistent references
+        //        some REFR/ACHR/ACRE have empty EditorId
+        //        probably best to create a getPtr() method that accepts a FormId instead
+        // 
+        // Test with script 0001532A, "sleepingmatamuseiskingrad"
+        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false/*search active cells only*/);
 
         // If the objects are in different worldspaces, return a large value (just like vanilla)
         if (ref.getCell()->getCell()->getCellId().mWorldspace != ref2.getCell()->getCell()->getCellId().mWorldspace)

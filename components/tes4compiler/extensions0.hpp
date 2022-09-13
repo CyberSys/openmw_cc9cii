@@ -89,6 +89,11 @@ namespace Tes4Compiler
     {
         void registerExtensions (Compiler::Extensions& extensions);
     }
+
+    namespace FONV
+    {
+        void registerExtensions (Compiler::Extensions& extensions);
+    }
 }
 
 #endif

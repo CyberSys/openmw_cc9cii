@@ -87,11 +87,62 @@ namespace Tes4Compiler
             parser.parseEOF (*this);
             return false;
         }
-        else if (c==';')
+        // FONV uses comment leaders other than ";", e.g.:
+        //     "//" VES34VaultQuestScript (00159FA1), "--" VMS12QuestScript (000F81BC)
+        else if (c==';' || c=='/' || c=='-')
         {
             std::string comment;
 
-            comment += c;
+            if (c == '/' || c == '-')             // first character
+            {
+                char lead = c;
+                Compiler::TokenLoc loc = mLoc;
+                if (get(c))                       // second character
+                {
+                    putback (c);
+#if 0
+                    if (c == ' ')
+                    {
+                        putbackSpecial(Scanner::S_div, loc);
+
+                        return true;
+                    }
+                    else if (c != '/' && c!= '-')
+                    {
+                        if (lead == '-')
+                        {
+                            putback (c);
+                            putbackSpecial(Scanner::S_minus, loc);
+
+                            return true;
+                        }
+                        else
+                            return false; // FIXME: is this right?
+                    }
+                    else
+                        comment += ';';
+#else
+                    if (lead == '/' && c == ' ')      // "/ "
+                    {
+                        putbackSpecial(Scanner::S_div, loc);
+
+                        return true;
+                    }
+                    else if (lead == '-' && c != '-') // "- ", "-1", etc
+                    {
+                        putbackSpecial(Scanner::S_minus, loc);
+
+                        return true;
+                    }
+                    else                              // "//" or "--"
+                        comment += ';';
+#endif
+                }
+                else
+                    return false;
+            }
+            else
+                comment += c;
 
             while (get (c))
             {
@@ -271,11 +322,11 @@ namespace Tes4Compiler
         "set", "to",
         "getsquareroot",
         //"menumode", // handled as a function
-        "random",
+        "getrandompercent",
         "startscript", "stopscript", "scriptrunning",
         "getdistance",
         "getsecondspassed",
-        "enable", "disable", "getdisabled",
+        "getdisabled",
         "scriptname", "scn",
         0
     };
@@ -392,7 +443,21 @@ namespace Tes4Compiler
                 putback (c);
 
                 if (std::isdigit (c))
-                    return scanFloat ("", parser, cont);
+                {
+                    // FONV has member variable starting with a digit
+                    // e.g. RepconHQFreeformScript (000E77D8)
+                    //   set RepconHQFreeform.1stFloorAlarm to 1
+                    std::size_t pos = mStream.tellg();
+                    Compiler::TokenLoc loc(mLoc);
+
+                    if (scanFloat("", parser, cont))
+                        return true;
+                    else
+                    {
+                        mLoc = loc;
+                        mStream.seekg(pos); // is there another way other than tellg()/seekg()?
+                    }
+                }
             }
 
             special = S_ref_or_member;
@@ -411,8 +476,40 @@ namespace Tes4Compiler
                 }
                 else if (c=='=')
                 {
-                    special = S_cmpEQ;
-                    //std::cout << "scan special: cmpEQ" << std::endl; // FIXME: temp testing
+                    // FONV uses comment leaders other than ";", e.g.:
+                    //     "===" NVDLC01MQ03Script (0100496B)
+                    std::size_t pos = mStream.tellg();
+                    Compiler::TokenLoc loc (mLoc);
+
+                    if (get (c))
+                    {
+                        putback (c);
+
+                        if (c != '=')
+                        {
+                            special = S_cmpEQ;
+                        }
+                        else // "===" comment
+                        {
+                            std::string comment = ";";
+
+                            while (get (c))
+                            {
+                                if (c=='\n')
+                                {
+                                    putback (c);
+                                    break;
+                                }
+                                else
+                                    comment += c;
+                            }
+
+                            mLoc.mLiteral.clear();
+                            cont = parser.parseComment (comment, mLoc, *this);
+
+                            return true;
+                        }
+                    }
                 }
                 else
                 {

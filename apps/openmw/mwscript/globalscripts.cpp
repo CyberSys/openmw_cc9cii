@@ -116,21 +116,27 @@ namespace MWScript
         {
             scripts.push_back (iter->mId);
         }
-// FIXME: comment out for testing
-#if 1
+
         const MWWorld::ForeignStore<ESM4::Quest>& questStore = mStore.getForeign<ESM4::Quest>();
         const MWWorld::ForeignStore<ESM4::Script>& scriptStore = mStore.getForeign<ESM4::Script>();
         for (std::vector<ESM4::Quest*>::const_iterator iter = questStore.begin(); iter != questStore.end(); ++iter)
         {
+#if 1
+            // comment out to test more quest scripts (but most quest scripts seem to have this flag)
+            if (((*iter)->mData.flags & 0x01/*start game enabled*/) == 0)
+                continue;
+#endif
+
             if (ESM4::FormId scriptId = (*iter)->mQuestScript)
             {
                 if (const ESM4::Script* script = scriptStore.search(scriptId))
                 {
+                    // FIXME: probably should keep a separate set of scripts using formid
                     scripts.push_back(ESM4::formIdToString(script->mFormId));
                 }
             }
         }
-#endif
+
         // add scripts
         for (std::vector<std::string>::const_iterator iter (scripts.begin());
             iter!=scripts.end(); ++iter)

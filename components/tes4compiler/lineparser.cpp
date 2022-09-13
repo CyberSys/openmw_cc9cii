@@ -299,21 +299,6 @@ namespace Tes4Compiler
 
         if (mState==StartState || mState==ExplicitState)
         {
-            switch (keyword)
-            {
-                case Scanner::K_enable:
-
-                    Generator::enable (mCode, mLiterals, mExplicit);
-                    mState = PotentialEndState;
-                    return true;
-
-                case Scanner::K_disable:
-
-                    Generator::disable (mCode, mLiterals, mExplicit);
-                    mState = PotentialEndState;
-                    return true;
-            }
-
             // check for custom extensions
             if (const Compiler::Extensions *extensions = getContext().getExtensions())
             {
@@ -368,8 +353,11 @@ namespace Tes4Compiler
                         throw;
                     }
 #endif
-
-                    mState = EndState;
+                    if (Misc::StringUtils::lowerCase(loc.mLiteral) == "disable" ||
+                        Misc::StringUtils::lowerCase(loc.mLiteral) == "enable")
+                        mState = PotentialEndState;
+                    else
+                        mState = EndState;
                     return true;
                 }
                 else if (extensions->isFunction(keyword, returnType, argumentType, hasExplicit))

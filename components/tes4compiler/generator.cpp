@@ -980,33 +980,5 @@ namespace Tes4Compiler
                 opGetDisabledExplicit (code);
             }
         }
-
-        void enable (CodeContainer& code, Compiler::Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-            {
-                opEnable (code);
-            }
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opEnableExplicit (code);
-            }
-        }
-
-        void disable (CodeContainer& code, Compiler::Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-            {
-                opDisable (code);
-            }
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opDisableExplicit (code);
-            }
-        }
     }
 }

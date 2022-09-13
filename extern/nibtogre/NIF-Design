@@ -1,6 +1,7 @@
+<!--
 /*
 
-  Copyright (C) 2018-2021 cc9cii
+  Copyright (C) 2018-2022 cc9cii
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,6 +22,7 @@
   cc9cii cc9c@iinet.net.au
 
 */
+-->
 
 # [17/12/18] NIF Design
 
@@ -53,7 +55,7 @@ But at what level?  The choices seem to be:
 
 One design consideration is when does the Ogre objects (e.g. `Mesh`) get built?
 
-Currently the build is triggered when the associated `Entity` is built (via a loader callback mechanism).  This may not be efficient if the same mesh are re-used often (e.g. `skeleton.nif`, but have not tested if true - **EDIT: 22/02/19** Not true since an often used mesh will be retrieved from the `MeshManager`'s cache.  Also see below paragraph.).
+Currently the build is triggered when the associated `Entity` is built (via a loader callback mechanism).  This may not be efficient if the same mesh are re-used often (e.g. `skeleton.nif`, but have not tested if true - __EDIT: 22/02/19__ Not true since an often used mesh will be retrieved from the `MeshManager`'s cache.  Also see below paragraph.).
 
 Note that I may be misunderstanding some stuff here.  For example, the built meshes are managed by the `MeshManager` so they won't be built again. Similarly the skeletons are managed by the `SkeletonManager`.
 
@@ -310,7 +312,7 @@ Decided to revert the `bhkNiTriStripsShape` packing optimisation.  `bhkNiTriStri
 
 Ogre `MeshManager` needs a unique identifier (name?) for the `Mesh`.  For now the NIF model name plus the `NiNode` name is used but it may be possible to use a hash value + block number instead.
 
-**TODO:** Since the meshes are loaded on-demand, and sub-meshes are created from a mesh, each of the `NiGeomerty` children are registered to a loader.  An alternative is to re-scan the children at build time.  Not sure which is more efficient.
+__TODO:__ Since the meshes are loaded on-demand, and sub-meshes are created from a mesh, each of the `NiGeomerty` children are registered to a loader.  An alternative is to re-scan the children at build time.  Not sure which is more efficient.
 
 The mesh loader should be part of `NiModel` so that the cached one also has the loader.
 
@@ -581,11 +583,11 @@ With the current design where the loaders are "owned" by `NiModel`, `NiModel` ne
 
 One simple way could be to maintain a map of `NiModel` smart pointers in `ObjectScene` for deletion.  A slightly better way is to have a cache to avoid multiple loading of the same NIF files.  Or we could implement an `NiModelManager` as per above.  An `NiModel` can then be loaded on-demand.
 
-(**EDIT: 22/02/19** looks like keeping the mesh loader with the `NiModel` in `ObjectScene` won't work since the same mesh for a different instance could be used)
+(__EDIT: 22/02/19__ looks like keeping the mesh loader with the `NiModel` in `ObjectScene` won't work since the same mesh for a different instance could be used)
 
-**NOTE:** current implementation does not use a `ManualResourceLoader` which probably means `NiModel` cannot be reloaded automatically (actually, it can)
+__NOTE:__ current implementation does not use a `ManualResourceLoader` which probably means `NiModel` cannot be reloaded automatically (actually, it can)
 
-**IDEA:** Keep all the loaders in `ObjectScene`?  Or in `BtOgreInst` then have `ObjectScene` destroy `BtOgreInst` in the destructor?
+__IDEA:__ Keep all the loaders in `ObjectScene`?  Or in `BtOgreInst` then have `ObjectScene` destroy `BtOgreInst` in the destructor?
 
 `OEngine::Physic::PhysicEngine::mCollisionObjectMap` keeps `Physic::RigidBody*` for later destruction.  (and `mAnimatedShapes`, etc.)
 
@@ -604,7 +606,7 @@ One simple way could be to maintain a map of `NiModel` smart pointers in `Object
 
 # [02/01/2019] Physics continuing
 
-  1. Get `NiModel` & get a list of target Entities; need as inputs `Ogre::SceneNode`, position, rotation and scale.  This means that the `Mesh`/`Entity` needs to have been created *before* physics.
+  1. Get `NiModel` & get a list of target Entities; need as inputs `Ogre::SceneNode`, position, rotation and scale.  This means that the `Mesh`/`Entity` needs to have been created _before_ physics.
   2. For each target Entity create the resource using the resource manager.
   3. Using the resource create the `btRigidBody` corresponding the `Entity`.
   4. Additional setup (e.g. constraints) needs to be done for ragdolls. (how to detect?)
@@ -634,7 +636,7 @@ The shirt in display case is half clipping through the bottom (`ICMarketDistrict
 
 ## NiTriBasedGeom (NiTriShapes/NiTriStrips)
 
-**EDIT: 29/02/20** `MeshLoader` is being re-designed
+__EDIT: 29/02/20__ `MeshLoader` is being re-designed
 
   * in the constructor register self in `BuildData` (but first check if parent NiNode is named "`EditorMarker`")
   * during the registration a `MeshLoader` is created and associated with the parent `NiNode`
@@ -646,8 +648,7 @@ The shirt in display case is half clipping through the bottom (`ICMarketDistrict
 
 ## bhkEntity (bhkRigidBody/bhkRigidBodyT)
 
-  * in the constructor of `NiCollisionObject` register the collision object body
-    (**TODO:** should check if collision is enabled in BSX)
+  * in the constructor of `NiCollisionObject` register the collision object body (__TODO:__ should check if collision is enabled in BSX)
   * a `BtRigidBodyCI` object is created with the same name as the `NiModel`; it then looks for any registerd `bhkEntity` to build the `btShapes`, etc.
   * note that there may be more than one `RigidBody` per `NiModel` (these may need to be deleted manually)
 
@@ -655,17 +656,17 @@ The shirt in display case is half clipping through the bottom (`ICMarketDistrict
 
 The animation glitches, especially with the hand positions, may be due to the use of separate controllers for each of the bones.  It may be that each of the bones are showing rotations and/or positions at different points in time.
 
-**NOTE:** experiments indicate that all the bones are updated at the same time... :-(
+__NOTE:__ experiments indicate that all the bones are updated at the same time... :-(
 
-Nifskope uses `NiMultiTargetTransformController`, replacing the `NiTransformController` (which is *not* its parent class, interestingly) at the "Accum Root" bone specified in `NiControllerSequence`.
+Nifskope uses `NiMultiTargetTransformController`, replacing the `NiTransformController` (which is _not_ its parent class, interestingly) at the "Accum Root" bone specified in `NiControllerSequence`.
 
-Each of the target bones in the *Controlled Blocks* are then added to `mExtraTargetRefs` and `mNumExtraTargets` updated (this method is prob. not necessary).  Note that if multiple anims are added to the skeleton then only the additional bones are added to `mExtraTargetRefs`.
+Each of the target bones in the _Controlled Blocks_ are then added to `mExtraTargetRefs` and `mNumExtraTargets` updated (this method is prob. not necessary).  Note that if multiple anims are added to the skeleton then only the additional bones are added to `mExtraTargetRefs`.
 
 # [18/02/2019] skeleton for children
 
 Looks like the bones listed in the skinned meshes indicate the smaller size of the skeleton for children.  That means the body parts need to be added and the binding position re-set.
 
-**TODO:** this might not be true at all, need to experiment
+__TODO:__ this might not be true at all, need to experiment
 
 # [28/02/2019] instantiation refactoring
 
@@ -949,25 +950,25 @@ Diffuse (`*.dds`) and normal (`*_n.dds`) are easy enough but which ones are Anis
 
 Some [clues](https://www.nexusmods.com/skyrim/mods/30745?tab=posts) on the different texture maps:
 
->  Edit : Here's more information on the types of textures used in skyrim :
->
->  in a "menu"-folder: User-interface element, alpha is element-mask
->  in a "landscapelod"- or "terrain"-folder: World-space normal-map for terrain, no alpha
->  "_n"-suffix: Tangent-space normal-map, alpha is specularity
->  "_msn"-suffix: Model-space normal-map, no alpha
->  "_g"-, "_glow"- or "_emit"-suffix: Glow-map, alpha is a mask
->  "_hh"-suffix: Gloss-map for hair, no alpha
->  "_hl"-suffix: Detail-map for hair, alpha is opacity
->  "_m"-suffix: Reflectivity-map for light-sources, no alpha
->  "_em"- or "_envmap"-suffix: Reflectivity-map for environment-maps, no alpha
->  "_e"-suffix: Environment-map (some are planar, some are cube-maps), no alpha
->  "_b"- or "_bl"-suffix: Backlight-map, no alpha
->  "_s"-suffix: Specularity-map for skins, no alpha
->  "_sk"-suffix: Tone-map for skins, no alpha
->  "_p"-suffix: Parallax-map, no alpha
->  "_d"-suffix: Diffuse-map, alpha is opacity
->  "_h"-suffix: Haze-map, alpha is unknown
->  All others are color-map, alpha is opacity or parallax
+    >  Edit : Here's more information on the types of textures used in skyrim :
+    >
+    >  in a "menu"-folder: User-interface element, alpha is element-mask
+    >  in a "landscapelod"- or "terrain"-folder: World-space normal-map for terrain, no alpha
+    >  "_n"-suffix: Tangent-space normal-map, alpha is specularity
+    >  "_msn"-suffix: Model-space normal-map, no alpha
+    >  "_g"-, "_glow"- or "_emit"-suffix: Glow-map, alpha is a mask
+    >  "_hh"-suffix: Gloss-map for hair, no alpha
+    >  "_hl"-suffix: Detail-map for hair, alpha is opacity
+    >  "_m"-suffix: Reflectivity-map for light-sources, no alpha
+    >  "_em"- or "_envmap"-suffix: Reflectivity-map for environment-maps, no alpha
+    >  "_e"-suffix: Environment-map (some are planar, some are cube-maps), no alpha
+    >  "_b"- or "_bl"-suffix: Backlight-map, no alpha
+    >  "_s"-suffix: Specularity-map for skins, no alpha
+    >  "_sk"-suffix: Tone-map for skins, no alpha
+    >  "_p"-suffix: Parallax-map, no alpha
+    >  "_d"-suffix: Diffuse-map, alpha is opacity
+    >  "_h"-suffix: Haze-map, alpha is unknown
+    >  All others are color-map, alpha is opacity or parallax
 
 Initial guesses are:
 
@@ -1041,7 +1042,7 @@ One possibility is to pass on the `FormId` of the resource in a string so that t
 
 In summary we need the base model (NIF file), base texture, Npc record (for FGGS, etc) and Race record (again, FGGS, etc).
 
-**TODO:** It is unclear if the properties in the NIF should be used in creating the material.
+__TODO:__ It is unclear if the properties in the NIF should be used in creating the material.
 
   Record              | Data
   --------------------|-----
@@ -1054,7 +1055,7 @@ In summary we need the base model (NIF file), base texture, Npc record (for FGGS
 
 ## Helmets and Hoods
 
-Not sure how we identify hood & helmet - possibly by checking mArmorFlags/mClothingFlags.  The following armor/clothing in Oblivion.esm have **only** the `ESM4::Race::TES4_Hair` slot indicated in mArmorFlags/mClothingFlags (NOTE: only the bottom 16 bits are relavant) - looks like all of them?
+Not sure how we identify hood & helmet - possibly by checking mArmorFlags/mClothingFlags.  The following armor/clothing in Oblivion.esm have __only__ the `ESM4::Race::TES4_Hair` slot indicated in mArmorFlags/mClothingFlags (NOTE: only the bottom 16 bits are relavant) - looks like all of them?
 
 [//]: # (                                                             {{{
     SEAmberMagicHelmet2
@@ -1264,11 +1265,11 @@ Not sure how we identify hood & helmet - possibly by checking mArmorFlags/mCloth
   Morphed Material | NPC name + _ + base model + @ + NiTriBasedGeom name
   Morphed NiModel  | NPC name + _ + base model
 
-Note that, unlike other objects, FaceGen morph NIF models have **exactly one** NiNode with a `NiTriBasedGeom`.  i.e. one mesh  This means that the resources (mesh/materail/model) can't be reused.
+Note that, unlike other objects, FaceGen morph NIF models have __exactly one__ NiNode with a `NiTriBasedGeom`.  i.e. one mesh  This means that the resources (mesh/materail/model) can't be reused.
 
-**NOTE 1:** In TES5 `Architecture\Solitude\SolitudeBase.nif` has several NiNode instances with the same name.  Hence *both* NiNode index and NiNode name are needed in the mesh name.  Just the index is enough but for now it is easier for debugging if the NiNode name is also present.
+__NOTE 1:__ In TES5 `Architecture\Solitude\SolitudeBase.nif` has several NiNode instances with the same name.  Hence _both_ NiNode index and NiNode name are needed in the mesh name.  Just the index is enough but for now it is easier for debugging if the NiNode name is also present.
 
-**NOTE 2:** Material name may not match the actual NIF or NiTriBasedGeom (the same material from another model will be used if found).
+__NOTE 2:__ Material name may not match the actual NIF or NiTriBasedGeom (the same material from another model will be used if found).
 
 ## Putting it all together for `NiModel`
 
@@ -1305,9 +1306,9 @@ The diagram from 01/01/2018 needs to be updated:
 
 `NiModel::prepareImpl()` creates the NIF data stream and reads the header.  `NiModel::unprepareImpl()` undos `prepareImpl()`.  These are only called by `Ogre::Resource::load()` if NiModel is not manually loaded.
 
-**TODO:** check if we have to call `prepareImpl()` for manual loading as well?
+__TODO:__ check if we have to call `prepareImpl()` for manual loading as well?
 
-**NOTE:** consider changing `prepareImpl()` s.t. the NIF file is pre-buffered similar to `Ogre::Mesh::prepareImpl()`.  Below method implements the pre-buffering:
+__NOTE:__ consider changing `prepareImpl()` s.t. the NIF file is pre-buffered similar to `Ogre::Mesh::prepareImpl()`.  Below method implements the pre-buffering:
 
 ```cpp
 Ogre::MemoryDataStream::MemoryDataStream(const String& name,
@@ -1319,7 +1320,7 @@ Ogre::MemoryDataStream::MemoryDataStream(const String& name,
 `NiModel::loadImpl()` parses the NIF data stream to create the objects.
 
 Simplified interaction diagram for NiModel retrieving and manual loading sequences:
-**NOTE:** NiModel is loaded immediately upon creation (like manual loading Ogre::Mesh).
+__NOTE:__ NiModel is loaded immediately upon creation (like manual loading Ogre::Mesh).
 
         application    NiModelManager    ResourceManager   ManualResourceLoader   Resource
             |                 |                   |                 |                 |
@@ -1358,15 +1359,15 @@ Simplified interaction diagram for NiModel retrieving and manual loading sequenc
 
 # [29/02/2020] Redesign mesh loading
 
-Currently `Ogre::Mesh` is created and loaded *only* when an `Ogre::Entity` is instantiated.  That means, at least with the current design, NiModel is not fully built after `load()`.  It also means that any `Ogre::Material` used by the meshes are not created/loaded, either.
+Currently `Ogre::Mesh` is created and loaded _only_ when an `Ogre::Entity` is instantiated.  That means, at least with the current design, NiModel is not fully built after `load()`.  It also means that any `Ogre::Material` used by the meshes are not created/loaded, either.
 
 So, if we are to retain our current design, any morphed vertices or textures need to be prepared for loading the meshes and/or material at a later point in time.
 
 For the morphed vertices, we can directly modify the vertices read in from the NIF file.  The vertices are read and stored from the constructor (in `NiGeometryData::mVertices` as `std::vector<Ogre::Vector3>`).
 
-**TODO:** Current design uses the vertices from the TRI file, if available, rather than the one from the NIF.  These are slightly different (see `Characters\Imperial\HeadHumah.TRI`).  Alternatively, both sets of vertices could be stored at the cost of some memory so that the solution can be fine tuned later.
+__TODO:__ Current design uses the vertices from the TRI file, if available, rather than the one from the NIF.  These are slightly different (see `Characters\Imperial\HeadHumah.TRI`).  Alternatively, both sets of vertices could be stored at the cost of some memory so that the solution can be fine tuned later.
 
-**FIXME:** Should the normals, tangents and bitangents in NiGeometryData be re-calculated once the vertices are morphed?
+__FIXME:__ Should the normals, tangents and bitangents in NiGeometryData be re-calculated once the vertices are morphed?
 
 Current design:
 
@@ -1420,7 +1421,7 @@ Rather than creating a new resource manager based on `Ogre::MeshManager`, we can
 
 NiModel is either created from the NIF file, via `NiModel::loadImpl()`, or manually via `NiModelManager::createMorphedModel()` and `NiModelManager::loadResource()`.  In former case, the NIF file name can be deduced from the mesh name by takeing away the skeleton name (if any) and the NiNode name.  In latter case, re-loading the NiModel appears a little more difficult.
 
-**IDEA:** It might be possible to get Ogre to do most of the work - maybe just remember the resource name and get NiModelPtr from NiModelManager singleton?  Or just save a `NiModel*` and use it during `loadResource()`.
+__IDEA:__ It might be possible to get Ogre to do most of the work - maybe just remember the resource name and get NiModelPtr from NiModelManager singleton?  Or just save a `NiModel*` and use it during `loadResource()`.
 
 Simplified create and load interactions of NiMeshLoader:
 
@@ -1474,7 +1475,7 @@ Either way, still need to figure out how to determine the NPC's age just by exam
 
 The normal map for `headhuman.dds` must be age-based as well? (i.e. replace, not merge with `headhuman_n.dds`)
 
-**TODO:** experiement and compare the in-game visuals
+__TODO:__ experiement and compare the in-game visuals
 
 ## NPC Age
 
@@ -1494,7 +1495,7 @@ Make `SkeletonLoader` work the same way as NiMeshLoader.  Not too happy about cr
 There are 3 different use cases for skeletons.
 
   1. An NiModel may need to build a skeleton to animate the entities/meshes in the Model.
-  2. An NiModel may be "skinned", i.e. depends on an external skeleton (see below).  **NOTE:** there may be several different skeletons, so there needs to several different NiModels even with the same base NIF.
+  2. An NiModel may be "skinned", i.e. depends on an external skeleton (see below).  __NOTE:__ there may be several different skeletons, so there needs to several different NiModels even with the same base NIF.
   3. An NiModel may be a skeleton itself.  In TES4, BSX flag will indicate if a NIF is a skeleton.
 
 ## `MWRender::Animation::setObjectRoot()`
@@ -1544,8 +1545,8 @@ Manual creation for a skeleton `NiModel`:
 
 
 Creation for a normal `NiModel`:
-**NOTE:** `createSkeleton()` is currently triggered by build() which seems too late
-**NOTE:** `createSkeleton()`/`addBones()` uses `NiNode::mChildBoneNodes` whereas `createFullSkeleton()`/`addAllBones()` uses `NiNode::mChildren`
+__NOTE:__ `createSkeleton()` is currently triggered by build() which seems too late
+__NOTE:__ `createSkeleton()`/`addBones()` uses `NiNode::mChildBoneNodes` whereas `createFullSkeleton()`/`addAllBones()` uses `NiNode::mChildren`
 
         application    NiModelManager    NiModel            NiNode   NiSkeletonLoader  Ogre::Skeleton
           |               |                |                  |              |                |
@@ -1586,7 +1587,7 @@ Creation for a normal `NiModel`:
           |               |                |                  |              |                |
 
 
-**NOTE:** After all that effort, the new method of using `createFullSkeleton()/addAllBones()` turned out to be inferior and had to revert to using `createSkeleton()/buildSkeletion()/addBones()` even for skeleton.nif, etc.
+__NOTE:__ After all that effort, the new method of using `createFullSkeleton()/addAllBones()` turned out to be inferior and had to revert to using `createSkeleton()/buildSkeletion()/addBones()` even for skeleton.nif, etc.
 
 # [04/03/2020] Trying to get doors working again.
 
@@ -1629,7 +1630,7 @@ try
     if (ptr.getRefData().getBaseNode())
 ```
 
-It should be noted that RigidBody::mName is the same for **all** rigid bodies in a NIF.  There are some overly complicated code to handle this.
+It should be noted that RigidBody::mName is the same for __all__ rigid bodies in a NIF.  There are some overly complicated code to handle this.
 
 After some stepping through the debugger, it turns out that the raycast creation was not done, see below:
 
@@ -1707,9 +1708,9 @@ if (!raycasting)
 }
 ```
 
-**The activator is not working, however.**  Activation results in some weird rotation of the logs.
+__The activator is not working, however.__  Activation results in some weird rotation of the logs.
 
-**Also, there is this strange piece of code:**
+__Also, there is this strange piece of code:__
 
 ```cpp
 // FIXME
@@ -1717,11 +1718,11 @@ if (lowerMesh.find("traplog") == std::string::npos)
     return createAndAdjustRigidBody(mesh, name, scale, position, rotation, scaledBoxTranslation, boxRotation,   raycasting, placeable);
 ```
 
-That might be due to the inability to determine whether the rigid bodies are ragdoll or not? **NOTE: 08/03/20** most likely due to ragdoll being broken, other than the trap logs.
+That might be due to the inability to determine whether the rigid bodies are ragdoll or not? __NOTE: 08/03/20__ most likely due to ragdoll being broken, other than the trap logs.
 
 # [05/03/2020] Making progress with `NiModel`
 
-Naming convension needs to be revisited.  A head model may be morphed per NPC's FaceGen coefficients.  However it is alos skinned, meaning it will have an external skeleton.  **NOTE:** not sure if the external skeleton can be anything other than skeleton.nif for FaceGen head models.
+Naming convension needs to be revisited.  A head model may be morphed per NPC's FaceGen coefficients.  However it is alos skinned, meaning it will have an external skeleton.  __NOTE:__ not sure if the external skeleton can be anything other than skeleton.nif for FaceGen head models.
 
 Made progress with morphed models but looks like a redesign is required.  There were some assumptions that may not be correct:
 
@@ -1773,11 +1774,11 @@ if (targetBone == "Bip01 Head" && baseRotation == Ogre::Quaternion::IDENTITY)
 
 ## FIXME #5
 
-  * **FIXED:** crash accessing nullptr (prob. NiModel) during animation - I think this was caused by animation trying to move skeletons but some body parts didn't have skeleton root - we use external skeletons so we don't need this code block that copies bone position/rotaions
-  * **FIXED:** no eyes Cludette Perrick (The Gilded Carafe) - her NPC record does not have mEyes so we need to use the race defaults instead **TODO** need to remember the random selection so that we don't see a new texture each time.
-  * **FIXED: 08/03/20** one of the metal gates in the IC sewers doesn't move the collision shape (also the display cases)
+  * __FIXED:__ crash accessing nullptr (prob. NiModel) during animation - I think this was caused by animation trying to move skeletons but some body parts didn't have skeleton root - we use external skeletons so we don't need this code block that copies bone position/rotaions
+  * __FIXED:__ no eyes Cludette Perrick (The Gilded Carafe) - her NPC record does not have mEyes so we need to use the race defaults instead __TODO__ need to remember the random selection so that we don't see a new texture each time.
+  * __FIXED: 08/03/20__ one of the metal gates in the IC sewers doesn't move the collision shape (also the display cases)
   * [ESM4::Npc] = {mFormId=0x0004ef6f mFlags=0x00040000 mEditorId="CheydinhalGuardCityPostNight03" ...}
-  * **FIXED 08/03/20** error during rendering: ItemIdentityException: Bone named '' not found. in Skeleton::getBone at C:\Users\cc9c\Dev\src\ogre\OgreMain\src\OgreSkeleton.cpp (line 515) - no ears for Argonians so added a check
+  * __FIXED 08/03/20__ error during rendering: ItemIdentityException: Bone named '' not found. in Skeleton::getBone at C:\Users\cc9c\Dev\src\ogre\OgreMain\src\OgreSkeleton.cpp (line 515) - no ears for Argonians so added a check
 
 ## Design notes on body part handling
 
@@ -1787,9 +1788,9 @@ Note that the race body parts share the "slots" used by the armor/cloth body par
 
 Now mObjectParts in ForeignNpcAnimation is a map keyed by `ESM4::Armor::ArmorFlags`.  Note that the keys are not consequitive.  Body parts and weapons will need some translations to get the right keys.
 
-**NOTE:** TES4/TES5/FO3/FONV can each have different key values for the same slot, where they do have the same slot.  For example "Tail" slot key values between TES4 and TES5 are different.  On the other hand, the "Head" and "Hair" slot key values are the same for all games.
+__NOTE:__ TES4/TES5/FO3/FONV can each have different key values for the same slot, where they do have the same slot.  For example "Tail" slot key values between TES4 and TES5 are different.  On the other hand, the "Head" and "Hair" slot key values are the same for all games.
 
-**TODO:** The inventorystore currently only supports TES4.  Its slot handling is not very well suited for TES4, etc, and will need some changes to make things more efficient.
+__TODO:__ The inventorystore currently only supports TES4.  Its slot handling is not very well suited for TES4, etc, and will need some changes to make things more efficient.
 
 # [08/03/2020] Testing resource management
 
@@ -1848,9 +1849,9 @@ Hmmm... this is rather embarassing - it turns out we had a false positive - I si
 
 ## Doors
 
-  * **WONTFIX:** 0x000947B2 gate does not rotate on its edge (well it does, but not right at the edge - it could be just the way the NIF is done)
-  * **FIXED:** 0x0002A5C0 collision shape does not move, `dungeons\sewers\sewertunneldoor01.nif` - in `PhysicsSystem::rotateSubObject` only the parent object was checked for being static object when its child (children?) may not be.
-  * **FIXED:** 0003725e Architecture\ImperialCity\Interior\ICDoorInt01.NIF rotates on the center axis - this particular one turns out to be a static shape, so we can stop the physic shape rotating in rotateObject(), but how to stop the rendering to rotate as well? - resolved by adding a check in processDoors().  Places to test include:
+  * __WONTFIX:__ 0x000947B2 gate does not rotate on its edge (well it does, but not right at the edge - it could be just the way the NIF is done)
+  * __FIXED:__ 0x0002A5C0 collision shape does not move, `dungeons\sewers\sewertunneldoor01.nif` - in `PhysicsSystem::rotateSubObject` only the parent object was checked for being static object when its child (children?) may not be.
+  * __FIXED:__ 0003725e Architecture\ImperialCity\Interior\ICDoorInt01.NIF rotates on the center axis - this particular one turns out to be a static shape, so we can stop the physic shape rotating in rotateObject(), but how to stop the rendering to rotate as well? - resolved by adding a check in processDoors().  Places to test include:
     - COC "KvatchChapelofAkatosh" - go down to the hall and see the wooden doors move
     - COC "ImperialDungeon03" - various gates and doors
     - COW "AnvilWorld" -46 -8 - check the stone wall gate
@@ -1862,7 +1863,7 @@ The bone names between the physics system and Ogre are communicated using the Ni
 
 Note that a model may have a number of rigid bodies (like entities) and there is a concept of parent/child to deal with the raycasting test (see the notes on 04/03/20).
 
-Now since the **Ogre::Bone names match the RigidBody target name**, the physics system can mimic the movements of the rendering system.
+Now since the __Ogre::Bone names match the RigidBody target name__, the physics system can mimic the movements of the rendering system.
 
 ## Ragdolls
 
@@ -1895,7 +1896,7 @@ The info for the map ultimately comes from `NiModel::mBuildData::mBhkRigidBodyMa
 
 It should be noted that `btRigidBody` keep pointers to collision shapes so we need to find a way to ensure the lifetime of the collision shapes.  These are currently maintained in `BtRigidBodyCI::mBtCollisionShapeMap`.
 
-**FIXME:** BtRigidBodyCI is an Ogre::Resource.  These resources can be unloaded by the resource manager, which will result in crashes due to the collision shape pointers being deleted...   There must be a way to link BtRigidBodyCI to the associated Ogre::Entity or keeping them in RigidBody (like motion state).
+__FIXME:__ BtRigidBodyCI is an Ogre::Resource.  These resources can be unloaded by the resource manager, which will result in crashes due to the collision shape pointers being deleted...   There must be a way to link BtRigidBodyCI to the associated Ogre::Entity or keeping them in RigidBody (like motion state).
 
 ###  mBhkConstraints
 
@@ -1924,7 +1925,7 @@ Like `Ogre::Entity`, a `btRigidBody` in a cell should be destroyed once they are
 
 Alternatively, it may be possible for `Physic::RigidBody` to keep a smart pointer to NiModel and use the collision shapes owned and stored there (by keeping a smart pointer we can ensure that NiModel won't go away).  That may save the need to create new `btCollisionShape` for each `btRigidBody`.
 
-**TODO:** make it work similar to meshes?
+__TODO:__ make it work similar to meshes?
 
 ### Node animation comparison
 
@@ -1965,7 +1966,7 @@ if (mObjectRoot->mForeignObj->havokEnabled())
 
 That flag is set by `NiIntergerExtraData` using the `BSX` flags in the NIF file (e.g. `Dungeons\Chargen\IDGate01.NIF`, `FormId` 0x0003665B).  `IDGate01` has `BSX` flag 0x0B which for TES4 includes "enable animation", "enable collision" and "enable havok".
 
-We may need to change the code to exclude the models with animation enabled?  But that disables ragdoll from others such as `Dungeons\Misc\RootHavok06.NIF`.  Maybe it will be necessary to capture the presence of constraints during the construction of the NiModel.  **FIXME:** Even so objects such as `Clutter\MinotaurHead.NIF` and `Dungeons\Caves\Traps\CTrapLogs01.NIF` will have both animation and havok enabled, so some kind of control mechanism will need to be devised.
+We may need to change the code to exclude the models with animation enabled?  But that disables ragdoll from others such as `Dungeons\Misc\RootHavok06.NIF`.  Maybe it will be necessary to capture the presence of constraints during the construction of the NiModel.  __FIXME:__ Even so objects such as `Clutter\MinotaurHead.NIF` and `Dungeons\Caves\Traps\CTrapLogs01.NIF` will have both animation and havok enabled, so some kind of control mechanism will need to be devised.
 
 CTrapLogs01 animation, looking from the left of the pile from the top of the hill:
 
@@ -2208,11 +2209,11 @@ Using the target's local rotation (i.e. `rot`) as the binding orientation makes 
 
 I think we need to look at somewhere else for the bug - possibly `processDoors()`.  Somehow we need to take into account of the world rotation.  Or maybe `PhysicsSystem::moveSubObject()`.
 
-**FIXED:** it turned out to be an issue in `PhysicsSystem::moveSubObject()` indeed.  The local movement of the `Ogre::Bone` was not being properly converted to the movement of the collision shape because it was not taking into accout of the binding orientation of the collision shape.  This took a whole day.
+__FIXED:__ it turned out to be an issue in `PhysicsSystem::moveSubObject()` indeed.  The local movement of the `Ogre::Bone` was not being properly converted to the movement of the collision shape because it was not taking into accout of the binding orientation of the collision shape.  This took a whole day.
 
-**TODO:** There is still the issue of doors not remembering its open/closed state when leaving a cell then returning.
+__TODO:__ There is still the issue of doors not remembering its open/closed state when leaving a cell then returning.
 
-**TODO:** Also, if you look away quickly before the collision shape had not completed its movement, it can get stuck. (i.e. rendering and physics gets out of sync)  Need to ensure that the movement is completed somehow.
+__TODO:__ Also, if you look away quickly before the collision shape had not completed its movement, it can get stuck. (i.e. rendering and physics gets out of sync)  Need to ensure that the movement is completed somehow.
 
 Door activation is rather complicated (simplified shown below to get an idea):
 
@@ -2304,7 +2305,7 @@ On top of that those external textures, such as for a human Upper Body, could be
 
 ## More bugs
 
-Just noticed that Baurus stopped wearing his armor from around 06/03/20. **FIXED:** Blades armor have zero value - had to compare Armor Rating before comparing value.  **NOTE:** For now weapon ratings (e.g. damage) are ignored.
+Just noticed that Baurus stopped wearing his armor from around 06/03/20. __FIXED:__ Blades armor have zero value - had to compare Armor Rating before comparing value.  __NOTE:__ For now weapon ratings (e.g. damage) are ignored.
 
 # [15/03/2020] Bugs, bugs, bugs
 
@@ -2479,9 +2480,9 @@ Looking at the flags, though, they range from 0x01 to 0x09.  The most frequent o
    9   |  2
 
 
-**TODO:** But from the CS I can only see one blue node?
+__TODO:__ But from the CS I can only see one blue node?
 
-Pathgrids are in "Cell Temporary Child" group and loaded from `CellStore::loadTes4Record()`.  **NOTE:** they are not loaded from `ESMStore::loadTes4Record()` because the cells are preloaded and only the persistent records are (partially) loaded from `ESMStore`.
+Pathgrids are in "Cell Temporary Child" group and loaded from `CellStore::loadTes4Record()`.  __NOTE:__ they are not loaded from `ESMStore::loadTes4Record()` because the cells are preloaded and only the persistent records are (partially) loaded from `ESMStore`.
 
 ## Side note on performance and dummy cell
 
@@ -2561,9 +2562,9 @@ The PGRR record turned out to be similar to TES3, i.e. they are indices for the 
     CELL FormId 00049E2A
     PGRD FormId 000304B7
 
-**FIXME:** Noticed that some pathgrid points are floating in the air - again, a dummy physics shape can be used to "snap" to ground.
+__FIXME:__ Noticed that some pathgrid points are floating in the air - again, a dummy physics shape can be used to "snap" to ground.
 
-We also need a way to find paths to adjacent cells as well as far away destinations.  And we still don't know which nodes are the blue "priority" ones. **FIXED:** turns out that odd values in z poition indicates "priority".
+We also need a way to find paths to adjacent cells as well as far away destinations.  And we still don't know which nodes are the blue "priority" ones. __FIXED:__ turns out that odd values in z poition indicates "priority".
 
 # [29/03/2020 - 30/03/2020] LOD
 
@@ -2634,7 +2635,7 @@ Let's look at another one from Bravil.  We have 15, -8 and 0, 7.  The CELL 15, -
 
 `bravilworld_15_-8.lod` refers to a couple of trees and a static 0x000018FF CastleWall01 (`Architecture\Castle\CastleWall01.NIF`)
 
-**TODO:** So, what are we meant to do when we encounter these trees or static objects?  What's in the `.lod` files are clear enough, but what do the cell co-oridnates in the `.cmp` files mean?
+__TODO:__ So, what are we meant to do when we encounter these trees or static objects?  What's in the `.lod` files are clear enough, but what do the cell co-oridnates in the `.cmp` files mean?
 
 ## LOD NIF files
 
@@ -2709,7 +2710,7 @@ The Oblivion gates are visible from distance (at least it feels that way) so let
 
 Looking at the `.cmp` file again.  `tamriel.cmp` has 153 co-ordinates plus 0,7.  But there are 9347 tamriel `.lod` files.
 
-Maybe these are reference points for the generation of the LOD mesh and textures? **EDIT: 05/04/20** The `.cmp` files have grids where visibly distant statics are located and the `.lod` files have the base object `FormId` and position/orientation/scale of the visibly distant statics and trees.
+Maybe these are reference points for the generation of the LOD mesh and textures? __EDIT: 05/04/20__ The `.cmp` files have grids where visibly distant statics are located and the `.lod` files have the base object `FormId` and position/orientation/scale of the visibly distant statics and trees.
 
 # [31/03/2020 - 02/04/2020] Visible when distant
 
@@ -2741,7 +2742,7 @@ Either way, we need a special case of CellStore that holds these records (and ch
            |                     |             |            |
 
 
-**TODO:** `getForeignWorld()` should be changed to `getWorldCell()` **DONE**
+__TODO:__ `getForeignWorld()` should be changed to `getWorldCell()` __DONE__
 
         Scene       MWWorld::World   MWWorld::Cells     ESMStore  CellStore
           |                |              |               |          |
@@ -2784,7 +2785,7 @@ The loading of the REFR, ACHR and ACRE occurs in `CellStore::loadTes4Record()` a
 
 `MWWorld::Cells` stores `ForeignCell`s and it's probably the best place to keep a dummy cell for visibly distant REFRs.
 
-There are a couple of options on where to load the records - either initiate the call from `ESMStore` (when first scanning the ESM/ESPs or from Cells (when a new world is accessed for the first time).  I suspect that the former is going to be simpler, since it will have all the base and mods being scanned.  With the latter approach, WRLD context needs to be saved so that we can go back and scan all the CELLs that belong in the world, also all the mods that modifies the CELLS, REFRs, etc.  The only trouble with the former approach is the lack of access to `MWWorld::Cells`.  We may need to add a method to `WorldImp`.
+There are a couple of options on where to load the records - either initiate the call from `ESMStore` (when first scanning the ESM/ESPs or from cells (when a new world is accessed for the first time).  I suspect that the former is going to be simpler, since it will have all the base and mods being scanned.  With the latter approach, WRLD context needs to be saved so that we can go back and scan all the CELLs that belong in the world, also all the mods that modifies the CELLS, REFRs, etc.  The only trouble with the former approach is the lack of access to `MWWorld::Cells`.  We may need to add a method to `WorldImp`.
 
 ## Redesign needed
 
@@ -2792,12 +2793,12 @@ Having one cell to hold all the visibly distant REFR won't work.  In Tamriel the
 
 Just outside Vilverin approx 1.2M triangles with exterior grid size of 3 - single digit FPS sometimes going down to 0.
 
-**TODO:** Not very happy with having to add methods in MBase::World.  Need to look for alternatives.
-**TODO:** Not happy with ForeignWorld storing dummy cell `FormId` but visibly distant `CellStore` (inconsistent).  We just need to ensure that it is created when the world is first accessed.  However, if we were to load *all* the REFRs for the WRLD, which may have many CELLs, we had to load them in ESMStore and at that point nothing would be accessing any worlds.
+__TODO:__ Not very happy with having to add methods in MBase::World.  Need to look for alternatives.
+__TODO:__ Not happy with ForeignWorld storing dummy cell `FormId` but visibly distant `CellStore` (inconsistent).  We just need to ensure that it is created when the world is first accessed.  However, if we were to load _all_ the REFRs for the WRLD, which may have many CELLs, we had to load them in ESMStore and at that point nothing would be accessing any worlds.
 
-**FIXME:** Sometimes Morrowind cells get loaded?  I think this might be due to OpenMW using `getExterior(x, y)` which can confuse things.  We may need to keep the current world somewhere (player?) and change only when explicigly changing worlds.
+__FIXME:__ Sometimes Morrowind cells get loaded?  I think this might be due to OpenMW using `getExterior(x, y)` which can confuse things.  We may need to keep the current world somewhere (player?) and change only when explicigly changing worlds.
 
-**TODO:** WRLD has a flag "no LOD water"
+__TODO:__ WRLD has a flag "no LOD water"
 
 ## Revisit `.lod` and `.cmp` files
 
@@ -2833,7 +2834,7 @@ Examining `distantlod\oblivionmqkvatch_0_3.lod`:
     0002D3E9 qty 1, pos ...
     0000A010 qty 1, pos ...
 
-So, these might be look-ups to quickly locate the visibly distant statics and their grid locations.  **Or, maybe they provide enough details so that the ESM/ESP files don't have to be scanned at all.**
+So, these might be look-ups to quickly locate the visibly distant statics and their grid locations.  __Or, maybe they provide enough details so that the ESM/ESP files don't have to be scanned at all.__
 
 Still, the question is when to load them, i.e. all the time when in the OblivionMQKvatch world or only when in certain cells?
 
@@ -2871,7 +2872,7 @@ Grid -18, 1 is in `Tamriel.cmp`, but still no static.
     distantlod\tamriel_1_-18.lod
     00000BC6 \TreeWillowOakFreeSU.spt
 
-Try again and bingo!  **So it appears that the `.cmp` files have grids that have visible distant statics.** Also the filename structure is `<EditorId>_<grid x>_<grid y>.lod`.
+Try again and bingo!  __So it appears that the `.cmp` files have grids that have visible distant statics.__ Also the filename structure is `<EditorId>_<grid x>_<grid y>.lod`.
 
     distantlod\tamriel_-18_1.lod
     000232DB \ShrubVineMapleSU.spt
@@ -2886,7 +2887,7 @@ Try again and bingo!  **So it appears that the `.cmp` files have grids that have
 
 ## `Oblivion.ini`
 
-We will need a lightweight class (in comparison to Ptr) to represent LOD trees.  The vanilla implementation renders *a lot* of trees.  Maybe a 2D tree using billboard effect?
+We will need a lightweight class (in comparison to Ptr) to represent LOD trees.  The vanilla implementation renders _a lot_ of trees.  Maybe a 2D tree using billboard effect?
 
     [General]
     uGridDistantTreeRange=15
@@ -2950,11 +2951,11 @@ We will need a lightweight class (in comparison to Ptr) to represent LOD trees. 
 ## LOD strategy outline
 
   * Load the ESM/ESP files but don't load any references.
-  * Scan the `meshes\landscape\lod` directory and build a map of low-poly land meshes for the worlds that has them.  They seem to be in 32 x 32 cells in size.  There are some odd ones in Tamriel - **TODO:** check again
+  * Scan the `meshes\landscape\lod` directory and build a map of low-poly land meshes for the worlds that has them.  They seem to be in 32 x 32 cells in size.  There are some odd ones in Tamriel - __TODO:__ check again
   * Scan the `distantlod` directory and build a map of visibly distant objects (statics and trees, not sure if there is anything else).  The `.cmp` file has the list of the cell grid positions for the world.  The `.lod` files have the details of the objects, enough to make a REFR, for the cells.  There should be a `_far` variant of these objects (there are some that don't).
   * The number of cells loaded for visible distant child groups are larger than the cells with everything loaded. When the REFR from the visibly distant child groups are loaded, they should replace the low-poly versions.
   * When a player enters a world cell grid(x, y), cells around that grid needs to be loaded (but not using `Scene::insertCell()`).  A larger group for visibly distant and a smaller group for everything.
-  * **TODO:** Not so sure how to treat the REFR in the dummy cell, especially the doors. i.e. how to decide when to render it? **DONE: 22/05/20**
+  * __TODO:__ Not so sure how to treat the REFR in the dummy cell, especially the doors. i.e. how to decide when to render it? __DONE: 22/05/20__
 
 The low-poly land meshes only have `NiTriStrips` and `NiTriStripsData` blocks.  In order to use the existing codebase, a dummy `NiNode` will need to be inserted at the root.
 
@@ -2964,7 +2965,7 @@ The low-poly land meshes only have `NiTriStrips` and `NiTriStripsData` blocks.  
 
 Worlds such as ICMarketDistrict seems to require the parent world's LAND.  It also needs the parent world's visibly distant REFR such as the White-Gold Tower (possibly the low-poly version).
 
-**TODO:** `Cells::getWorldCell()` needs to change as it is auto-loading any new `CellStore` and also calling `initWorld()`.  This results in unnecessarily loading parent world's dummy cell when just the land and visibly distant statics may be required.  See the interaction diagram circa [31/03/2020 - 02/04/2020]. **DONE: 25/05/20**
+__TODO:__ `Cells::getWorldCell()` needs to change as it is auto-loading any new `CellStore` and also calling `initWorld()`.  This results in unnecessarily loading parent world's dummy cell when just the land and visibly distant statics may be required.  See the interaction diagram circa [31/03/2020 - 02/04/2020]. __DONE: 25/05/20__
 
 ## When to parse and load the `.lod` and `.cmp` files
 
@@ -2983,12 +2984,12 @@ OpenMW doesn't have a concept of having references that are not rendered and wit
 
 There are 153 grid positions in `tamriel.cmp`, excluding (0,7) at the end.  But there are 9347 `.lod` files.  This is different to `oblivionmqkvatch.cmp` where the number of grid positions and the number of `.lod` files were the same.
 
-**EDIT: 05/04/20** The `.cmp` file only has grids where visibly distant statics are located.
+__EDIT: 05/04/20__ The `.cmp` file only has grids where visibly distant statics are located.
 
 ## Observations on loading times
 
 For some strange reason Shivering Isles `.lod` files (and maybe others?) take much longer to load than from `Oblivion - Meshes.bsa`.  It might have something to do with the archive.
-**TODO:** try with loose files
+__TODO:__ try with loose files
 
 The file loading for all the `.lod` files does take quite a while.
 
@@ -3130,7 +3131,7 @@ xRight = int((x - 16 + 32) / 32) * 32; // = int((x + 16) / 32) * 32
 
 For loading cells, visibly distant objects and LOD landscape, hysteresis should be introduced to stop constant loading/unloading at specific points in the map.  i.e. loading and unloading occurs at different points
 
-In order to avoid keeping an unreasonable number of blocks around (again, in pathological cases), we can make the unloading happen *before* loading. e.g. 2 cells before midpoint would be (2,10) - (14,14) = (-12,-4)  As the player character goes up the map, the player will reach ((2,15).  At that point y bottom for unloading will be (15 -14 -32)/32 = 0 -31/32.
+In order to avoid keeping an unreasonable number of blocks around (again, in pathological cases), we can make the unloading happen _before_ loading. e.g. 2 cells before midpoint would be (2,10) - (14,14) = (-12,-4)  As the player character goes up the map, the player will reach ((2,15).  At that point y bottom for unloading will be (15 -14 -32)/32 = 0 -31/32.
 
 Testing for (0,0), unloading (note -14 rather than -16):
 
@@ -3184,11 +3185,11 @@ Testing for (2,15), unloading:
     y bottom      |    1 + -32 = -31   | -31/32 =  0 + -31/32
     y top         |    1 +  32 =  33   |  33/32 =  1 +   1/32
 
-Not quite right, we lose the bottom two blocks but gain two from the top?  Maybe use this to unload from the list of currently loaded blocks?  This way while the character is inside the coloured section only 1 - 2 blocks are loaded. **NOTE: that the diagram assumes the loading point was also changed, say (x,y) - (18,18)**
+Not quite right, we lose the bottom two blocks but gain two from the top?  Maybe use this to unload from the list of currently loaded blocks?  This way while the character is inside the coloured section only 1 - 2 blocks are loaded. __NOTE: that the diagram assumes the loading point was also changed, say (x,y) - (18,18)__
 
 ## Bugs 1
 
-**FIXME:** `NiTexturingPropery` has below test code which is hiding a problem in `ForeignNpcAnimation::createMorphedObject()` where the proper texture was not being passed.
+__FIXME:__ `NiTexturingPropery` has below test code which is hiding a problem in `ForeignNpcAnimation::createMorphedObject()` where the proper texture was not being passed.
 
 ```
 // FIXME: testing
@@ -3212,7 +3213,7 @@ How about storing them in `ForeignWorld`?  We can still trigger the loading some
 
 ## Dummy cell
 
-Tamriel has 0x7B9 = 1977 REFR in its dummy cell.  There would also be ACRE and ACHR in the dummy cell. Currently all these are inserted into the scene, resulting in a major FPS drop.  **NOTE:** another test suggest 1509 including ACHR/ACRE so further tests are needed - but the point is still valid, there are *a lot*.
+Tamriel has 0x7B9 = 1977 REFR in its dummy cell.  There would also be ACRE and ACHR in the dummy cell. Currently all these are inserted into the scene, resulting in a major FPS drop.  __NOTE:__ another test suggest 1509 including ACHR/ACRE so further tests are needed - but the point is still valid, there are _a lot_.
 
 Can't quite remember why the cell persistent children are read for door cells in ESMStore.  That was done back in 2016.  I think it is because if we leave that until we load a world or a cell, then there is a possibility that we haven't yet loaded a destination door to find out in which cell it is located. (i.e. because the cell in which a door is located is implied in the group structure, not explicitly stated anywhere)
 
@@ -3229,7 +3230,7 @@ We many need to introduce some changes here in order to deal with LOD data.  Cur
 
 A `Ptr` has an implicit understanding of to which cell it belongs.  Can we still use `Ptr` for the objects in the dummy cell?  The objects in the dummy cell can have positions in different actual cells (at least for exterior dummy cells).
 
-Also, `CellStore::forEachImp()` converts everything in its `CellRefList` stores into `Ptr` before inserting them into the scene.  **We need a way to selectively disable the rendering/animation/physics.  In case of doors, we would like to add them to the scene based on their positions, similarly with visibly distant statics and trees.**
+Also, `CellStore::forEachImp()` converts everything in its `CellRefList` stores into `Ptr` before inserting them into the scene.  __We need a way to selectively disable the rendering/animation/physics.  In case of doors, we would like to add them to the scene based on their positions, similarly with visibly distant statics and trees.__
 
                           mRef                   mCellRef
         LiveCellRefBase o------------- CellRef o---------- ESM::CellRef
@@ -3248,18 +3249,18 @@ Also, `CellStore::forEachImp()` converts everything in its `CellRefList` stores 
                                       DoorCustomData
 
 
-**FIXME:** not happy having mDestDoorId in CellRef, need to move it to somewhere else
-**TODO:** not sure of the original intent / design to use `std::list` in `CellRefList` - might have to investigate (might be because iterators don't become invalid as new items get inserted/erased?)
+__FIXME:__ not happy having mDestDoorId in CellRef, need to move it to somewhere else
+__TODO:__ not sure of the original intent / design to use `std::list` in `CellRefList` - might have to investigate (might be because iterators don't become invalid as new items get inserted/erased?)
 
 ## Initial design
 
   * Consider inheriting from `CellStore` to create `ForeignCellStore` or something similar.
-  * Load *all* REFR/ACHR/ACRE in Cell Persistent Child group from `ESMStore`.  Store them in a `CellStore` as usual but keep a map of their grid locations (at least for external dummy cell).
+  * Load _all_ REFR/ACHR/ACRE in Cell Persistent Child group from `ESMStore`.  Store them in a `CellStore` as usual but keep a map of their grid locations (at least for external dummy cell).
   * Load the visibly distant REFR from BSA and store them in a `CellStore`, similar to the dummy one.
   * These special `CellStore`s should be kept in their respective `ForeignWorld`, at least for external ones.
   * Modify (or create a similar one) `Scene::insertCell()` so that objects can be inserted selectively, based on location, class, etc.
 
-**TODO:** Fix the interaction diagram from 31/09/20
+__TODO:__ Fix the interaction diagram from 31/09/20
 
 ## `CellStore` use cases
 
@@ -3273,7 +3274,7 @@ Maybe keeping indices isn't the optial solution, anyway?  Perhaps keep a "Persis
 
 Or just brute-force by searching with x/y range each time?
 
-**TODO:** The references in "Persistent" cell child group may potentially be used for some performance gains since most of them do not move?
+__TODO:__ The references in "Persistent" cell child group may potentially be used for some performance gains since most of them do not move?
 
 # [09/04/2020] LOD meshes clipping with terrain
 
@@ -3287,7 +3288,7 @@ The `StaticGeometry` will need to be updated with the new material and built aga
 
 Alpha rejection does work, but results in ugly seams at the boundaries (in hindsight it had to happen due to the low-poly mesh having less vertices and at different positions).  I recall reading something about Oblivion LOD and alpha blending a long time ago - so went looking to see if I could find that article again.  I didn't find that particular one, but [this page](http://testg.wikidot.com/oblivion:lods) seems to have some good info.
 
-Also, the current terrain will need to change to *finally* use the proper materials.  [This Ogre wiki](https://wiki.ogre3d.org/Terrain+Alpha+Splatting) might be a good starting point.  With LOD landscapes we are unlikely to be having many cells & associated terrain at a time (maybe 3 x 3 or 4 x 4).  Maybe we can get away with a simpler terrain system.
+Also, the current terrain will need to change to _finally_ use the proper materials.  [This Ogre wiki](https://wiki.ogre3d.org/Terrain+Alpha+Splatting) might be a good starting point.  With LOD landscapes we are unlikely to be having many cells & associated terrain at a time (maybe 3 x 3 or 4 x 4).  Maybe we can get away with a simpler terrain system.
 
 ## Back-porting to OpenMW
 
@@ -3305,13 +3306,13 @@ There are also some new things that will need to be introduced:
   * A tool to generate low-poly landscape LOD mesh, if we decide not to use the Construction Set.
   * Landscape LOD meshes and textures themselves.  These can be part of a MOD.
   * Low-poly models of the visibly distant statics and trees. These can be part of the same MOD.  (if we want to be fancy, we can have multiple levels of complexity like Skyrim)
-  * The `.cmp` and `.lod` files to indicate where to place the visibly distant statics and trees.  Again part of the same MOD.  These are needed so that we know where to place them *before* the cells are read from the ESM/ESP/save files.  Unfortunately the formats of `.lod` files probably will need to differ from TES4 since there is no concept of FormId in OpenMW.
+  * The `.cmp` and `.lod` files to indicate where to place the visibly distant statics and trees.  Again part of the same MOD.  These are needed so that we know where to place them _before_ the cells are read from the ESM/ESP/save files.  Unfortunately the formats of `.lod` files probably will need to differ from TES4 since there is no concept of FormId in OpenMW.
 
 ## Landscape LOD mesh - Fallout 3, Fallout NV and Skyrim
 
 Each of these also have LOD meshes but their naming convensions are a little different.  Skyrim also has different size blocks, 16 x 16 as well as 4 x 4.  Some Fallout meshes have "level4" and "level8" in their names - might have something to do with the player level.
 
-**TODO:** If we're going to deal with each of these in one engine, we'll need something like an "interface" pattern with an abstract base class.
+__TODO:__ If we're going to deal with each of these in one engine, we'll need something like an "interface" pattern with an abstract base class.
 
 # [11/04/2020] Terrain cont.
 
@@ -3423,9 +3424,9 @@ Each game differs on what body and head parts are used for an NPC.  Similar to `
 
 The visibility of body parts can be selected in FO3/FONV/TES5 NIF files.  It is no longer feasible to have all the permuations created and have them ready in a `ResourceManager`.
 
-How this is done in real-time is uncertain.  **One idea is to have a map of availabile options and have the sub-entity visibilty to be controlled.**  That might mean the naming of the sub-mesh and sub-entity may need to be carefully designed.
+How this is done in real-time is uncertain.  __One idea is to have a map of availabile options and have the sub-entity visibilty to be controlled.__  That might mean the naming of the sub-mesh and sub-entity may need to be carefully designed.
 
-**TODO:** what to do with the ragdoll physics of dismembered parts?  I noticed that `BPTD` records indicate bones and nodes so maybe they have some info that can be used.
+__TODO:__ what to do with the ragdoll physics of dismembered parts?  I noticed that `BPTD` records indicate bones and nodes so maybe they have some info that can be used.
 
 ### Inventory
 
@@ -3453,12 +3454,12 @@ For FO3/FONV the font textures have LOD levels, although there is only one level
 
 A combination of info from `NPC_` and `RACE` may be required to reliably detect which game.  The main issue is with FO3 which uses ESM version 094 (0x3f70a3d7) which Skyrim also uses. This means we can't just use the ESM version to detect which game.  As a workaround we use the size of the sub-record `DATA` in `RACE` to determine if the ESM is from Skyrim.
 
-**Note that in future we need to be careful of which ESP version is allowed.** e.g. if a Skyrim verision of ESP is used for a MOD in FONV it will mess up the logic in the code.
+__Note that in future we need to be careful of which ESP version is allowed.__ e.g. if a Skyrim verision of ESP is used for a MOD in FONV it will mess up the logic in the code.
 
 ## Skeleton and `BSX` flags
 
 TES4 versions of NIF has a flag to indicate that it was a skeleton.  Later games doesn't have this flag.
-**TODO:** how to reliably detect a `skeleton.nif` without comparing the filename?
+__TODO:__ how to reliably detect a `skeleton.nif` without comparing the filename?
 
 # [13/04/2020 - 16/04/2020] Debugging
 
@@ -3466,12 +3467,12 @@ TES4 versions of NIF has a flag to indicate that it was a skeleton.  Later games
 
 There is a door in `zBethOffice01` with NIF model `Dungeons\Office\Doors\OffDoorSmL02.NIF`.  There are two problems with this door.
 
-First, it has a `NiControllerSequence` target node with name "OffDoorSmL02@#0".  The name has the '@' character which we were using to identify node names in a mesh.  One obvious solution is to change it to another character, say '%', but that results in *a lot* of changes and it is not easy to confirm that all the changes were done correctly.
+First, it has a `NiControllerSequence` target node with name "OffDoorSmL02@#0".  The name has the '@' character which we were using to identify node names in a mesh.  One obvious solution is to change it to another character, say '%', but that results in _a lot_ of changes and it is not easy to confirm that all the changes were done correctly.
 
 Key places where the mesh naming convention is used:
 
   * `NiModel::createMesh()` - creating a mesh with a unique name
-  * `NiTriBasedGeom::getMaterial()` - creating a unique name for a material (currently NiNode name is *not* used, but it may be used in future).
+  * `NiTriBasedGeom::getMaterial()` - creating a unique name for a material (currently NiNode name is _not_ used, but it may be used in future).
   * `BtOgreInst::buildEntities()` - check `NiModel::mBuildData::mAnimNodesMap` to see if an `Ogre::Entity` should be inserted into `BtOgreInst::mNodeAnimEntities` (which is used in many places).
   * `ForeignActivatorAnimation` ctor - to check against `BtOgreInst::mNodeAnimEntities`.
   * `Animation::getBones()` - to check against `BtOgreInst::mNodeAnimEntities`.
@@ -3486,7 +3487,7 @@ One solution might be to somehow let the shape know that it is a target of a tra
 
 Another solution might be to supply a MOD that "corrects" the mesh, especially if there are only a few of these.  But doing so will mean that the "hole" in the mesh may be "filled".
 
-**FIXED:** Decided that the door meshes are not really "static" in terms of Bullet definition, since we're moving them via `updateSingleAabb()` anyway.  So the final solution is to selectively apply full world transform depending on whether the `bhkRigidBody` target was a `NiMultiTargetTransformController` target.  These are the ones in `zBethOffice01`:
+__FIXED:__ Decided that the door meshes are not really "static" in terms of Bullet definition, since we're moving them via `updateSingleAabb()` anyway.  So the final solution is to selectively apply full world transform depending on whether the `bhkRigidBody` target was a `NiMultiTargetTransformController` target.  These are the ones in `zBethOffice01`:
 
     meshes\clutter\health\firstaidkit01.nif
     meshes\furniture\officeruined\filingcabinetbunch04.nif
@@ -3499,7 +3500,7 @@ Another solution might be to supply a MOD that "corrects" the mesh, especially i
 
 ## FO3 Dismember body parts
 
-Need a way to control visibility at runtime.  Maybe keep a map of `Ogre::SubEntity*` and `BSDismemberSkinInstance::BodyPartList` in `BtOgreInst`.  Not sure if there is a reliable way to get the sub-entity index, however. Hopefully they are the same as sub-mesh index, which we already have. **FIXED**
+Need a way to control visibility at runtime.  Maybe keep a map of `Ogre::SubEntity*` and `BSDismemberSkinInstance::BodyPartList` in `BtOgreInst`.  Not sure if there is a reliable way to get the sub-entity index, however. Hopefully they are the same as sub-mesh index, which we already have. __FIXED__
 
 ## FO3 Inventory
 
@@ -3515,13 +3516,13 @@ Which means wearing a Hockey Mask will take any hat or eye glasses off.  Whereas
     FO3_Headband     = 0x00000200
     FO3_Mask         = 0x00004000
 
-Sometimes (often?) the `LVLI` selection returns just a helmet.  **FIXED:** had to observe `LVLI` "use all" flag
+Sometimes (often?) the `LVLI` selection returns just a helmet.  __FIXED:__ had to observe `LVLI` "use all" flag
 
-**FIXME:** ManualRef create() just puts dummy values
+__FIXME:__ ManualRef create() just puts dummy values
 
 ## FO3 Gnd and Go
 
-We need a special handling for FO3.  **FIXED**
+We need a special handling for FO3.  __FIXED__
 
     ForeignArmor Armor\EnclaveScientist\OutfitM_gnd.nif
     ESM          Armor\EnclaveScientist\GO.NIF"
@@ -3529,14 +3530,14 @@ We need a special handling for FO3.  **FIXED**
 
 ## FO3 NPC with model `marker_creature.nif`
 
-**FIXED:** These seem to work like ACHR (similarly with ACRE for Creatures). e.g.
+__FIXED:__ These seem to work like ACHR (similarly with ACRE for Creatures). e.g.
 
     mEditorId = "FFHitSquadDCTalonLeader"
     mBaseTemplate = 0x0003d9c5
 
 ## FO3 Land level
 
-The ground level just outside `OurLadyHope01` is too low. **FIXED**
+The ground level just outside `OurLadyHope01` is too low. __FIXED__
 
 ## Always female
 
@@ -3577,7 +3578,7 @@ But what would be the point of adding the bones?  There aren't any controllers m
 
 ### VGearDoor01
 
-The issue we had with `Dungeons\Vault\RoomU\VGearDoor01.NIF` may be due to similar issue?  One controller target node is block 350 `VGearDrill01e01` which has several children including `VGearDrill01e` (which has a child node tree of its own) and `VGearDrill01e:2`.  Note that some of the children *are* being controlled - which means we can't just add bones willy-nilly.   The sub-tree looks like below.
+The issue we had with `Dungeons\Vault\RoomU\VGearDoor01.NIF` may be due to similar issue?  One controller target node is block 350 `VGearDrill01e01` which has several children including `VGearDrill01e` (which has a child node tree of its own) and `VGearDrill01e:2`.  Note that some of the children _are_ being controlled - which means we can't just add bones willy-nilly.   The sub-tree looks like below.
 
     350 VGearDrill01e01 - has rendering only
            |
@@ -3595,7 +3596,7 @@ Each of these are controller targets. That implies the issue may be different to
 
 ### VDoor01
 
-The issue with `Dungeons\Vault\Halls\VDoor01.NIF` may be the same.  It looks like the controller targets should *not* have world transform baked in.  Looking at one of the sub-trees:
+The issue with `Dungeons\Vault\Halls\VDoor01.NIF` may be the same.  It looks like the controller targets should _not_ have world transform baked in.  Looking at one of the sub-trees:
 
     69 VDoorHinge01 - has rendering only
            |
@@ -3632,7 +3633,7 @@ Added some NiObjects:
     BSRefractionFirePeriodController characters\_male\locomotion\mtidle.kf (also FO3)
     NiFloatInterpController          characters\_male\locomotion\mtidle.kf (also FO3)
 
-Manny Vargas's 1st Recon Beret has an issue with TRI file - it dosn't exit (only EGM exists), so the code should be trying to create one from the mesh.  The issue is that the "dummy" TRI file does not get built properly. **FIXED:** There were two issues - first, when it got built the second time the "name" parameter was not folded to lower case.  Next, there was an incorrect use of `std::map::insert()`.
+Manny Vargas's 1st Recon Beret has an issue with TRI file - it dosn't exit (only EGM exists), so the code should be trying to create one from the mesh.  The issue is that the "dummy" TRI file does not get built properly. __FIXED:__ There were two issues - first, when it got built the second time the "name" parameter was not folded to lower case.  Next, there was an incorrect use of `std::map::insert()`.
 
     Novac is at "WastelandNV" 5 -8
     (Repconn is at "WastelandNV" -2 -8)
@@ -3640,7 +3641,7 @@ Manny Vargas's 1st Recon Beret has an issue with TRI file - it dosn't exit (only
     NIF = "meshes\\armor\\headgear\\red beret\\red_beret.nif"
     EGM = "meshes\\armor\\headgear\\red beret\\red_beret.egm"
 
-There are missing meshes.  **WONTFIX:** Not sure if there is a fix - maybe the original devs didn't clean up properly?
+There are missing meshes.  __WONTFIX:__ Not sure if there is a fix - maybe the original devs didn't clean up properly?
 
     resourceName = "meshes\\architecture\\novac\\novac_motel03.nif"
     resourceName = "meshes\\architecture\\novac\\novac_motel02.nif"
@@ -3655,7 +3656,7 @@ Missing texture `grey.dds` (shouldn't it be `grey.bmp`?) - it's just a thin stri
 
 Fixed some issues but many more remain.  Some of the outstanding ones include:
 
-  * Lack of interior lighting **FIXED:** FO3/FONV uses `LGTM` records for lighting.  **TODO:** had to multiply by a magic number to make it look right - need to see what is the correct way to interpret the numbers.
+  * Lack of interior lighting __FIXED:__ FO3/FONV uses `LGTM` records for lighting.  __TODO:__ had to multiply by a magic number to make it look right - need to see what is the correct way to interpret the numbers.
   * Raiders seem to be females only?
   * Floating animations - creatures only?
   * Doors with moving child nodes.
@@ -3667,7 +3668,7 @@ Fixed some issues but many more remain.  Some of the outstanding ones include:
 # [18/04/2020] Chance None in `LVLI`
 
 It seems to run from 0 to 100 in FO3. Lots of them has value 0 and these have the max value in FO3.
-**TODO:** does this mean they *never* get spawned?  But [this page](https://fallout.fandom.com/wiki/Fortune_Finder) seems to indicate the chance for Fortune Finder is 10%?  Or maybe it is 0% chance of *additional* loot until the perk is obtained? (which means we need game logic to handle the dynamic data)
+__TODO:__ does this mean they _never_ get spawned?  But [this page](https://fallout.fandom.com/wiki/Fortune_Finder) seems to indicate the chance for Fortune Finder is 10%?  Or maybe it is 0% chance of _additional_ loot until the perk is obtained? (which means we need game logic to handle the dynamic data)
 
     VendorChestProntoFreeformListGoodStuff
     VendorChestAhzrukhalChems
@@ -3824,14 +3825,14 @@ The only solution here is to properly implement supporting levelled Npc and Crea
   * Some of the data must come from the original `ACHR` or `REFR` - e.g. position
 
 COC "zBethOffice02"
-**FIXME:** Should have continued until the final Npc was found **FIXED**
+__FIXME:__ Should have continued until the final Npc was found __FIXED__
 
     BethRuinsLvlRaiderBoss Hispanic NPC_ with marker_creature.nif and BaseTemplate  0002f723
     LvlRaider2SpecialVar   Hispanic NPC_ with no model            and BaseTemplate  00029620
     VarRaider2Flamer                LVLN
     /* stopped here */
 
-**FIXME:** original inventory (this particular new doesn't have any inventory but some may have more than original)
+__FIXME:__ original inventory (this particular new doesn't have any inventory but some may have more than original)
 
     BOOK BookSkillBigGuns
     LVLI
@@ -3844,22 +3845,22 @@ COC "zBethOffice02"
 
 We can't use the data from one `NPC_` record any more - one has to be created with data from different sources.
 
-OpenMW creates a `ManaualRef` then calls `World::safePlaceObject()` which then calls `World::copyObjectToCell()`.  Some change will be needed since the existing code does not have any concept of worldspace and `World::positionToIndex()` uses different cell sizes. **FIXED**
+OpenMW creates a `ManaualRef` then calls `World::safePlaceObject()` which then calls `World::copyObjectToCell()`.  Some change will be needed since the existing code does not have any concept of worldspace and `World::positionToIndex()` uses different cell sizes. __FIXED__
 
 ## Female Head parts and FaceGen coefficients
 
-FO3/FONV provide separate female models and textures for head parts, as well as FaceGen coefficients.  This explains why some male raiders had fenimine facical features. **FIXED**
+FO3/FONV provide separate female models and textures for head parts, as well as FaceGen coefficients.  This explains why some male raiders had fenimine facical features. __FIXED__
 
 ## Visible skin mesh
 
-**FIXME:** Setting the race texture (both diffuse and normal/bump) results in breaking the current FaceGen code.  (and the raiders/fiends look better without FaceGen texture which is too "smooth" for some reason)
+__FIXME:__ Setting the race texture (both diffuse and normal/bump) results in breaking the current FaceGen code.  (and the raiders/fiends look better without FaceGen texture which is too "smooth" for some reason)
 
 # [20/04/2020 - 22/04/2020] Back to doors
 
 Been stuck on this for a couple of days now.  I now have a branch that instantiates each mesh for controlled nodes and attach them to bones but it has a number of issues:
 
   * Each `Ogre::Entity` seems to have its own skeleton instance.  Trying to share a single skeleton instance is producing strange results.
-  * The nodes and meshes that are not controller targets do not move - possibly because the entities are attached to the root's skeleton instance.  It is not clear how these can share the skeleton instance of thier ancestor that *is* a controller target (if that works at all, currently unproven). [23/04/20] this bullet point doesn't really make any sense
+  * The nodes and meshes that are not controller targets do not move - possibly because the entities are attached to the root's skeleton instance.  It is not clear how these can share the skeleton instance of thier ancestor that _is_ a controller target (if that works at all, currently unproven). [23/04/20] this bullet point doesn't really make any sense
   * The animations are wrong.  This might be because the meshes and sub-meshes have their own transforms? But that doesn't really make sense.  Even a simple animation example such as `Dungeons\Office\Doors\OffDoorSmL02.NIF` at `zBethOffice01` which has no interpolator transforms and only has rotation keyframes. In theory rotating the bone should rotate the door mesh - but it seems to be offset by something as it rotates.  NOTE: by attaching a coffee mug to the bone ` OffDoorSmL02@#0` one can verify that the bone is in the expected place.
 
 # [25/04/2020] Doors still
@@ -3868,7 +3869,7 @@ Didn't do much past few days - too depressing.  Looks like all that effort has b
 
 We need to either create node tracks using dummy interpolator values or create separate animation for these bones using `Ogre::Controller` like how the current skeletal animations are done.  If we are going to use the latter approach then why bother with Ogre's node animations at all?  May as well convert the entire thing over.
 
-One of the things that needs to be established is - can we reliably detect all the nodes (i.e. bones) that are not controller targets but still require animation (because they are descendants of nodes that *are* controller targets *and* they have meshes/collision shapes). **DONE:** but we may end up re-implementing it using the supplied object palette
+One of the things that needs to be established is - can we reliably detect all the nodes (i.e. bones) that are not controller targets but still require animation (because they are descendants of nodes that _are_ controller targets _and_ they have meshes/collision shapes). __DONE:__ but we may end up re-implementing it using the supplied object palette
 
 ## Node Animation recap
 
@@ -3902,7 +3903,7 @@ Too demotivating to start all over again, so will try to stick with node animati
 
 Some NIF models have `NiControllerManager`, `NiMultiTargetTransformController`, etc, but do not have any node animations and hence do not require a skeleton.  e.g. `clutter\vintageradio\vintageradio01.nif` which does have an `niTransformController` but without an interpolator nor any associated data.
 
-**FIXME:** How to deal with this?  Destroy the skeleton afterwards once we know that there aren't any node animations?
+__FIXME:__ How to deal with this?  Destroy the skeleton afterwards once we know that there aren't any node animations?
 
 # [26/04/2020 - 27/04/2020] Node hierarchy
 
@@ -3910,9 +3911,9 @@ The issue with extra controller targets for node animation is resolved (by using
 
 Some of the animations, such as simple doors, are now working.  Had to use full transform when creating a node animated sub-mesh then apply the inverse transform of the node when attaching the entity to the node (i.e. bone).  However some doors still don't work - e.g.  `Dungeons\Vault\RoomU\VGearDoor01.NIF`, `Dungeons\Vault\Halls\VDoor01.NIF`
 
-**FIXME:** The issue with `Dungeons\Utility\Rooms\UtlDoor01.NIF` could be due to lack of support for `LINEAR_KEY` rotation type (which I think means use "Quaternion Keys")
+__FIXME:__ The issue with `Dungeons\Utility\Rooms\UtlDoor01.NIF` could be due to lack of support for `LINEAR_KEY` rotation type (which I think means use "Quaternion Keys")
 
-**FIXME:** The issue with `Dungeons\Vault\Halls\VDoor01.NIF` could be due to lack of support for `TBC_KEY` rotation type
+__FIXME:__ The issue with `Dungeons\Vault\Halls\VDoor01.NIF` could be due to lack of support for `TBC_KEY` rotation type
 
 The TES4 activator `Architecture\Anvil\BenirusDoor01.NIF` appears almost working, however - except that the whole thing is rotated by 90 degrees.
 
@@ -3938,7 +3939,7 @@ Another is to have the sound manager maintain a list of resource groups for sear
 
 Looking at the "Garden of Eden Creation Kit" the music selection logic for FO3/FONV seems to be quite different:
 
-  * CELL: TES4 does not have XCAS sub-record for Acoustic Space; use XCMT sub-record for Music Type.  NOTE we can't detect the *lack* of XCMT since the value may be 0.
+  * CELL: TES4 does not have XCAS sub-record for Acoustic Space; use XCMT sub-record for Music Type.  NOTE we can't detect the _lack_ of XCMT since the value may be 0.
   * CELL: FO3/FONV cells specify music type with XCMO sub-record which is a formid of MUSC records. Note some have none ("1NoMusic").  Some MUSC files specify directory (e.g. "base\") but for FONV there are no such music directory.
   * CELL: Not sure what " DEFAULT" (sic.) music type means in FO3/FONV (doesn't seem to be one of the config entries?)
   * CELL: (guess} if no music type, use the default acoustic space data which typically has region sound and ambient looping sounds.
@@ -3948,18 +3949,18 @@ Looking at the "Garden of Eden Creation Kit" the music selection logic for FO3/F
 
 Summary:
 
-  * use the lack of Cell::mAcousticSpace to detect TES4
-  * use Cell::mMusicType for TES4
-  * use Cell::mMusic if available for FO3/FONV (but don't know how to do folders in FONV, nor " DEFAULT")
+  * use the lack of `Cell::mAcousticSpace` to detect TES4
+  * use `Cell::mMusicType` for TES4
+  * use `Cell::mMusic` if available for FO3/FONV (but don't know how to do folders in FONV, nor " DEFAULT")
   * maybe use the files in Music\OLD\FO3 directory somehow?
-  * if no Cell::mMusic then use Cell::mAcousticSpace ambient looping sounds (take note of mIsInterior)
+  * if no `Cell::mMusic` then use `Cell::mAcousticSpace` ambient looping sounds (take note of mIsInterior)
   * use AudioMarker REFR
 
 # [03/05/2020] Audio Marker - try interior first
 
 Exterior Auido Markers are in the world dummy cells.  We will need some way of determining which is the closest one from the current cell.
 
-Interior Audio Markers are easier.  **TODO:** test if there can be more than one in an interior cell
+Interior Audio Markers are easier.  __TODO:__ test if there can be more than one in an interior cell
 
 Above summary bullet points appear incorrect.  FONV seems to rely entirely upon Audio Marker / Media Location Controller to choose the music.
 
@@ -4147,9 +4148,9 @@ Guess: So, something kicks off RadioHello (auto-start somehow, or maybe all dial
          |        +---- FNAM (string mSoundFile <- yes!)
          +------------- SOUN (formid)
 
-**TODO:** In Fallout.esm `vCasinoTopsRadio` only has EDID, FULL, MODL, OBND, VNAM and INAM.  But in the GECK there are several flags including "Radion Station" and "Cont. Broadcast" - not sure where these come from.
+__TODO:__ In Fallout.esm `vCasinoTopsRadio` only has EDID, FULL, MODL, OBND, VNAM and INAM.  But in the GECK there are several flags including "Radion Station" and "Cont. Broadcast" - not sure where these come from.
 
-**FIXME:** CTDA needs adjust param1 formid depending on the function (I think?) How to do this without a function type lookup table?
+__FIXME:__ CTDA needs adjust param1 formid depending on the function (I think?) How to do this without a function type lookup table?
 
 # [05/05/2020] Dialogue Manager
 
@@ -4167,7 +4168,7 @@ The quest `vUltraLuxeRadioQuest` has "Start Game Enabled" and "Allow repeated co
 
 We can't get the TACT to check all the running quests since the `vCasinoTopsRadio` is in fact in the outside cell - in the vanilla game if you `COC "TopsCasino"` from outside Novac (or even from inside the gift shop) you still hear the radio.
 
-The only other way must be that the quest `TopsRadioQuest` checks that `vCasinoTopsRadio` is **defined** in the game.  Remember that this quest (like many others, e.g. `vCountryRadioQuest`) has the "Start Game Enabled" flag.  But then why bother checking?  Barring a bug it **will** be defined in the game.  As mentioned above, it isn't checking that the TACT is in the current cell, nor checking any proximity (not that I can see).
+The only other way must be that the quest `TopsRadioQuest` checks that `vCasinoTopsRadio` is __defined__ in the game.  Remember that this quest (like many others, e.g. `vCountryRadioQuest`) has the "Start Game Enabled" flag.  But then why bother checking?  Barring a bug it __will__ be defined in the game.  As mentioned above, it isn't checking that the TACT is in the current cell, nor checking any proximity (not that I can see).
 
 Maybe the trigger comes from the speakers?
 
@@ -4183,11 +4184,11 @@ If so the logic should be:
 
 # [09/05/2020] Region sounds
 
-**FIXME:** SoundManager crash at exit
-**FIXME:** Momentary stutter (i.e. low FPS) when env sound is played
-**FIXME:** TES4 external cells env sounds
+__FIXME:__ SoundManager crash at exit
+__FIXME:__ Momentary stutter (i.e. low FPS) when env sound is played
+__FIXME:__ TES4 external cells env sounds
 
-**TODO:** env sound start point - not sure if the supplied value is the % of the length
+__TODO:__ env sound start point - not sure if the supplied value is the % of the length
 
 # [10/05/2020] Containers and sound effects
 
@@ -4202,13 +4203,13 @@ virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
 
 For picking up objects in TES4, had to hard-code editor id's to choose the sound formid.  Not sure how else to get the correct sound.
 
-FO3 container sounds are specified as text keys in the NIF models. **FIXME**
+FO3 container sounds are specified as text keys in the NIF models. __FIXME__
 
 FONV seems to specify the open/close sounds for some (e.g. cash register) but need to fallback to checking text keys for others (e.g. filing cabinets).
 
 # [11/05/2020] World Dummy Cell design
 
-**NOTE: the interaction diagrams from [31/03/2020 - 02/04/2020] are now outdated**
+__NOTE: the interaction diagrams from [31/03/2020 - 02/04/2020] are now outdated__
 
 Current call stack: (NOTE: loadDummy is now in ForeignStore)
 
@@ -4221,7 +4222,7 @@ Current call stack: (NOTE: loadDummy is now in ForeignStore)
 
 Only `FXInvertedDaylightWorld`, "Holder Space for Inverted Region" does not have a wrld dummy cell.  All others have at least one Audio Marker (except FFEncounterWorld and TestMap01).
 
-**See the notes from 07/04/20 - 08/04/20**
+__See the notes from 07/04/20 - 08/04/20__
 
 Need a map of REFR/ACHR/ACRE keyed on cell grid.  Maybe per type?  e.g. statics and trees vs npcs and creatures.
 
@@ -4283,7 +4284,7 @@ Skyrim doesn't have `fLODMultLandscpe` nor `fLODMultTrees` but instead has `fLOD
 
 FO3, FONV and Skyrim don't have these (well, Skyrim has a few `.lod` files under `lodsettings\` but the contents look like the `.cmp` files from Oblivion).  FO3 and FONV also has `lodsettings\` folder (in Fallout - Misc.bsa) and the filenames are `.dlodsettings` just to make it more complicated.
 
-So the use of `.cmp` files, or equivalent, seem universal.  **This means we need a way to quickly scan the specified locations for lod objects**
+So the use of `.cmp` files, or equivalent, seem universal.  __This means we need a way to quickly scan the specified locations for lod objects__
 
   Game     |  BSA              |  Folder     | filename
   ---------|-------------------|-------------|--------------
@@ -4293,7 +4294,7 @@ So the use of `.cmp` files, or equivalent, seem universal.  **This means we need
 
 Note that a DLC can have its own `lodsettings\` folder, e.g. `PointLookout - Main.bsa`
 
-**NOTE: 06/06/20** FO3/FONV/Skyrim's `dlodsettings` or `.lod` files do *not* list distant statics. See notes from 29/03/20 for the format
+__NOTE: 06/06/20__ FO3/FONV/Skyrim's `dlodsettings` or `.lod` files do _not_ list distant statics. See notes from 29/03/20 for the format
 
 ## Record types
 
@@ -4340,7 +4341,7 @@ So, we have a couple of options:
   1. Make `DummyStore` a `CellStore` (presumably via inheritance)
   2. Instantiate actors then move them to active cells.
 
-**TODO:** This leads to the question of how to deal with actors that are not in an active cell - they all have schedules, etc.
+__TODO:__ This leads to the question of how to deal with actors that are not in an active cell - they all have schedules, etc.
 
 ## Persistent but only for References?
 
@@ -4351,10 +4352,10 @@ There are actors in dummy cells.  These actors can move to another cell - that m
 OpenMW code relies on `Ptr` and `CellStore` relationship.  It is looking like too much effort to break that.  One example is unloading cells in `MWWorld::Scene` - `CellStoreCollection::iterator` is used to call functor `ListAndResetHandles`.  Either `DummyStore` has to implement something similar or it has to fit into `CellStoreCollection`.
 
   * Objects::mCellSceneNodes is used for choosing which `Ogre::SceneNode` to use for inserting a new child scenenode and when updating Ptr movements between CellStore (called by `World::moveObject()`).
-  * if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr)) /* get correct sounds, update drowning */
-  * MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
-  * const std::string& playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());
-  * if (!mPtr.getCell()->isExterior()) /* gui travel window, getting region when waiting, update actor head tracking (apparently done different when exterior), updating actors for sun damage, various AI packages */ pathfinding, etc, etc
+  * `if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr)) /* get correct sounds, update drowning */`
+  * `MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());`
+  * `const std::string& playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());`
+  * `if (!mPtr.getCell()->isExterior()) /* gui travel window, getting region when waiting, update actor head tracking (apparently done different when exterior), updating actors for sun damage, various AI packages */` pathfinding, etc, etc
 
 ## A new base class or inherit from `CellStore`?
 
@@ -4373,21 +4374,21 @@ MWWorld::Ptr ForeignActivator::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::
 }
 ```
 
-**FIXME:** need to add code to update the indices in `CellStore` after the insertion. **FIXED:** updateLookupMaps()
+__FIXME:__ need to add code to update the indices in `CellStore` after the insertion. __FIXED:__ updateLookupMaps()
 
 # [13/05/2020 - 15/05/2020] World Dummy Cell - world of issues
 
-Spent most of 13/05/20 debugging weird issues where physics would not work sometimes, etc.  Had to re-implement in small increments to track down the cause.  Strangely, for the physics issue, had to insert the "foreign" objects in `CellStore::forEach()` - still no idea why this is needed. **FIXED: 16/05/20**
+Spent most of 13/05/20 debugging weird issues where physics would not work sometimes, etc.  Had to re-implement in small increments to track down the cause.  Strangely, for the physics issue, had to insert the "foreign" objects in `CellStore::forEach()` - still no idea why this is needed. __FIXED: 16/05/20__
 
-Another: `ACHR` with formid 0006C35E in Vilverin results in "Error in framelistener: Bad LiveCellRef cast to struct ESM4::Npc from struct ESM4::Npc".  Its base object is an `NPC_` with formid 0006C35D, and editor id "VilverinBanditFurnitureKhajiit". **FIXED: 15/05/20** not really "fixed", but to resolve this had to keep using std::list in `CellRefList`
+Another: `ACHR` with formid 0006C35E in Vilverin results in "Error in framelistener: Bad LiveCellRef cast to struct ESM4::Npc from struct ESM4::Npc".  Its base object is an `NPC_` with formid 0006C35D, and editor id "VilverinBanditFurnitureKhajiit". __FIXED: 15/05/20__ not really "fixed", but to resolve this had to keep using std::list in `CellRefList`
 
-**TODO:** can't remember how levelled actors are generated
+__TODO:__ can't remember how levelled actors are generated
 
-**TODO:** trees are not inserted as index map insertion was way too long
+__TODO:__ trees are not inserted as index map insertion was way too long
 
-**TODO:** replace objects should be marked as such **DONE** actually replaced rather than marking the record
+__TODO:__ replace objects should be marked as such __DONE__ actually replaced rather than marking the record
 
-**FIXME:** `PhysicsSystem::addObject()` never clears `handleToMesh[]` (also noted on 04/03/20)
+__FIXME:__ `PhysicsSystem::addObject()` never clears `handleToMesh[]` (also noted on 04/03/20)
 
 # [16/05/2020] Physics issues and `CellStore::forEach()`
 
@@ -4460,17 +4461,17 @@ So I will have to implement something like `unloadObjects()` or similar.  Becaus
 
 It turns out that there's already `void Scene::removeObjectFromScene (const Ptr& ptr)` which can be used if there'a functor that returns all the objects that needs to be removed.  It's a shame that a `Ptr` needs to be constructed for each object - maybe another method that will accept a `LiveCellRefBase*` should be created?  It also doesn't deal with physics child objects (yet).
 
-**FIXME:** `CellStore::hasFormId()` is not being used
-**FIXME:** `CellStore::preload()` does not support newer games (TES4, FO3, FONV, etc)
+__FIXME:__ `CellStore::hasFormId()` is not being used
+__FIXME:__ `CellStore::preload()` does not support newer games (TES4, FO3, FONV, etc)
 
 # [20/05/2020 - 21/05/2020] LOD Landscape
 
 ## Hysteresis revisited
 
-**FIXME:** distant landscape near Namira's shrine (11, 34) has a gap **FIXED**
-**FIXME:** going from AnvilWorld to outside does not add LOD landscape mesh **FIXED**
+__FIXME:__ distant landscape near Namira's shrine (11, 34) has a gap __FIXED__
+__FIXME:__ going from AnvilWorld to outside does not add LOD landscape mesh __FIXED__
 
-Unlike the notes from 06/04/2020, I now think the loading should happen *before* unloading.
+Unlike the notes from 06/04/2020, I now think the loading should happen _before_ unloading.
 
 IDEA: assuming this method gets called each time the player's cell changes, put priority based on distance and add/delete one at a time - which means 4 cell changes are required before they are fully refreshed at a "corner" case.
 
@@ -4494,9 +4495,9 @@ Looking at the BSA files the block size appear to be 16x16, 8x8 and 4x4 cells.  
 
 # [22/05/2020 - 25/05/2020] Distant Statics
 
-**FIXME:** animation broken since ee64b18bb1552374aae498b1e7ea0263be11bbb0 - disabling the "insert without physics" in the dummy cell stops the crash **FIXED:** well, avoided by not loading any actors without physics.
+__FIXME:__ animation broken since ee64b18bb1552374aae498b1e7ea0263be11bbb0 - disabling the "insert without physics" in the dummy cell stops the crash __FIXED:__ well, avoided by not loading any actors without physics.
 
-Had an idea about distant statics - along with implementing the visibly distant statics with `.lod` and `.cmp` files, a modified CellStore could be used to load just the statics and trees (and terrain?) without any physics.  It may even be possible to simplify the terrain mesh on the fly. **NOTE:** it tuns out that vanilla doen't bother adding statics (e.g. rocks) beyond the loaced cells.
+Had an idea about distant statics - along with implementing the visibly distant statics with `.lod` and `.cmp` files, a modified CellStore could be used to load just the statics and trees (and terrain?) without any physics.  It may even be possible to simplify the terrain mesh on the fly. __NOTE:__ it tuns out that vanilla doen't bother adding statics (e.g. rocks) beyond the loaced cells.
 
 ## `.lod` files in TES4
 
@@ -4564,11 +4565,11 @@ We can even try to mimic the quad-tree like landscape LOD in FO3/FONV, i.e. add 
 
 Above diagram assumes (to be tested) that the loaded terrain can be next to either 4x4 or 8x8 landscape LOD mesh.  It could be that the loaded terrain can only be next to a 4x4 mesh - which will result in 4x4-1 = 15 level4 blocks and no real need for level8 blocks.  i.e. given that level8 blocks exist the initial assumption might be the correct one.
 
-Looking at FONV watelandnv there are 16 level32 blocks, 64 level16 blocks, 256 level8 blocks and *lots* of level4 blocks.
+Looking at FONV watelandnv there are 16 level32 blocks, 64 level16 blocks, 256 level8 blocks and _lots_ of level4 blocks.
 
 ## FIXME
 
-**FIXME:** COC "FortVariela" mesh name "meshes\\dungeons\\misc\\necrotapestryskinned01.nif#0%NecroTapestrySkinned01" Results in `Ogre::Mesh::softwareVertexBlend()` throwing an exception due to the lack of blend weights, etc.
+__FIXME:__ COC "FortVariela" mesh name "meshes\\dungeons\\misc\\necrotapestryskinned01.nif#0%NecroTapestrySkinned01" Results in `Ogre::Mesh::softwareVertexBlend()` throwing an exception due to the lack of blend weights, etc.
 
 This one is a skinned mesh, one of those that relies on Havok to move the self-made skeleton. The issue must be that we are reporting to Ogre that the mesh has animation even though it relies on Havok for animation instead.
 
@@ -4576,9 +4577,9 @@ I suspect Ogre tries to animate all `Ogre::Entity` that has a skeleton or has ve
 
 Worked around by stop setting the skeleton name for skinned meshes (see `NiBtOgre::NiTriBasedGeom::buildSubMesh()`).  Seems ok but not sure if this will break something else.
 
-**FIXME:** loading terrain and landscape LOD near the "32" cells boundary appear broken.  Test by going into Cheydinhal starting from COC "Tamriel" 27 22
+__FIXME:__ loading terrain and landscape LOD near the "32" cells boundary appear broken.  Test by going into Cheydinhal starting from COC "Tamriel" 27 22
 
-**FIXME:** door mRefID="AnutwyllExRef", mFormId = 0x00017571, mBaseObj = 0x0002eed2 seems to have an empty AABB Seems to be related to the experimental change in `CellRefList::search()`. Reverted the change for now, needs more testing and debugging.
+__FIXME:__ door mRefID="AnutwyllExRef", mFormId = 0x00017571, mBaseObj = 0x0002eed2 seems to have an empty AABB Seems to be related to the experimental change in `CellRefList::search()`. Reverted the change for now, needs more testing and debugging.
 
 # [28/05/2020 - 3/06/2020] Terrain texture
 
@@ -4638,7 +4639,7 @@ That means, for TerrainGrid, we need to modify ESM4Terrain::Storage to supply bl
 
 ## Indexing differences
 
-Ogre::PixeBox starts at **top** left corner while the VTXT sub-record starts at **bottom** left corner.  Not so sure about the textures.
+Ogre::PixeBox starts at __top__ left corner while the VTXT sub-record starts at __bottom__ left corner.  Not so sure about the textures.
 
 ## Unique textures
 
@@ -4667,13 +4668,13 @@ This needs to change (i.e. smaller) for the quads.
 
   1. The `Ogre::AxisAlignedBox` calculation appear incorrect, causing strange culling problems (quad render disappearing when not directly looking at it).  For now work around the issue by making the AABB larger (the cell size).  The issue might be due to box orientation being different to the positions of the quads.
 
-  2. ~~Similar issue exists with the position of the `SceneNode` for the quads.~~ **FIXED:** well, not fixed but the issue moved to `fillQuadVertexBuffers()`, see below.  (if done here then the quads appear wrong)
+  2. ~~Similar issue exists with the position of the `SceneNode` for the quads.~~ __FIXED:__ well, not fixed but the issue moved to `fillQuadVertexBuffers()`, see below.  (if done here then the quads appear wrong)
 
   3. For some reason the quad positions 1 (bottom right) and 2 (top left) need to be swapped to get the correct heights and weird culling issues (actually culling issues stil exist, but even the workaround sometimes fails without the swap).  See `getMinMaxQuadHeights()` and `fillQuadVertexBuffers()`.
 
   4. The order of VTXT values does not match the expectation.  The position indices are supposed to start from the bottom left corner, but it seems to start from the top left corner instead.  See `getQuadBlendmaps()`.
 
-  5. ~~The layers for cell (27,21) seems to be mixed up - small pebbles are seen in the middle when the large ones should be.~~ **FIXED:** the issue was using wrong texture scaling for additional passes, due to the initial experimental code haniging around unnoticed
+  5. ~~The layers for cell (27,21) seems to be mixed up - small pebbles are seen in the middle when the large ones should be.~~ __FIXED:__ the issue was using wrong texture scaling for additional passes, due to the initial experimental code haniging around unnoticed
 
   6. Non-shader version of terrain material no longer works.
 
@@ -4872,7 +4873,7 @@ Had to add `target_compile_options(${MINITRACE_LIBRARY} PUBLIC /TP)` so that it 
 
 Applied a couple of PRs that are still open (one that uses `C++11` and another that adds markdown syntax to the README file).  Should also consider applying the "concurrent flushing" PR.
 
-**TODO:** Should try the commented out block of code using `InterlockedExchangeAdd()`.
+__TODO:__ Should try the commented out block of code using `InterlockedExchangeAdd()`.
 
 # [30/07/2020] minitrace cont.
 
@@ -6268,7 +6269,7 @@ Alternatively, if the name following the special token is not a function or inst
 
 ## Persistent references for global scripts
 
-For compiling global scripts it is not possible to check if an identifier is a reference by searching the active cells.  In fact the references wouldn't have been loaded, i.e. we will be forced to load *all* cells to be able to check.
+For compiling global scripts it is not possible to check if an identifier is a reference by searching the active cells.  In fact the references wouldn't have been loaded, i.e. we will be forced to load _all_ cells to be able to check.
 
 However, `GlarthirRef` for example, is a "persistent" reference.  That means it should be possible to load all the references required by the global scripts.  The difficulty is in where and how to manage the data.  Currently the references are stored in `CellStore` and it would be impractical to keep all of those with persistent references "active".
 
@@ -6417,7 +6418,7 @@ Now that activator animations are working, time to try using the same for door a
 
 ## Issues
 
-  * **FIXME:** BenirusDoor01.NIF either the animation plays too fast or the sound starts late - worked around by using "0.5f" speed multiplier when calling `play()` from `MWRender::Animation::activateAnimatedDoor()`
+  * __FIXME:__ BenirusDoor01.NIF either the animation plays too fast or the sound starts late - worked around by using "0.5f" speed multiplier when calling `play()` from `MWRender::Animation::activateAnimatedDoor()`
   * Physics shapes for activators not updated (fixed 04/01/2021)
   * Physics shapes for descendants of animated bones not done (fixed 04/01/2021)
 
@@ -6661,7 +6662,7 @@ So the issue might be the generator pushing a string literal when it should be r
 
 Similarly with argument "mySelf" the generator should be able recognise it as a local ref variable and generate a code to retrieve its value (but then how do we deal with non ref variables such as editor ids?)
 
-A solution might be to convert *all* these to local ref variables.  Doing so might reduce the double-searching (once during compilation and once during runtime) as well.
+A solution might be to convert _all_ these to local ref variables.  Doing so might reduce the double-searching (once during compilation and once during runtime) as well.
 
 So an `EditorId` name for an explicit call should result in a store local ref variable (of the `FormId`) then pushing the index of that to the stack where as a local ref variable for an explicit call should be just pushing the index of the variable.
 
@@ -6805,13 +6806,13 @@ It may be possible to go through the location data of each package for a given N
 
 ## Record group load order
 
-PACK records are loaded **after** CELL and WRLD records (i.e. ACHR and ACRE).  This means we can't pre-process the AI package locations until all the loading is completed.
+PACK records are loaded __after__ CELL and WRLD records (i.e. ACHR and ACRE).  This means we can't pre-process the AI package locations until all the loading is completed.
 
 Note that all the DLCs should be loaded because a DLC may modify the records.  The best place, therefore, seems to be `ESMStore::setUp`.
 
 ## Travel package - Regner
 
-With a Travel AI package, we know the destination but we don't know the starting location.  For example, Regner sleeps in his house ("Editor Location") between 0 and 6, then wanders near the "Editor Location" (default package) until "Regner Sit" travel package starts at 8.  Based on above, the travel starts in his house and ends in cell "BrumaExteria06".  Without this detailed examination of Regner's activities before the travel, the starting location won't be known.  Also, some kind of path finding will need to be done in order to find all the cells visited during this travel.
+With a Travel AI package, we know the destination but we don't know the starting location.  For example, Regner sleeps in his house ("Editor Location") between 0 and 6, then wanders near the "Editor Location" (default package) until "Regner Sit" travel package starts at 8.  Based on above, the travel starts in his house and ends in cell "BrumaExteria06" which is just outside his house.  Without this detailed examination of Regner's activities before the travel, the starting location won't be known.  Also, some kind of path finding will need to be done in order to find all the cells visited during this travel.
 
 Also complicating matters is the conditions for the packages, which can change during the gameplay (e.g. quest stage update).  One possible way to deal with this is to ignore the conditions for now and check at the time of spawning.
 
@@ -6832,6 +6833,399 @@ Maybe required for predicting visited cells during a Travel package.
 
 
 
+
+# [14/06/2022 - 20/06/2022] Quests
+
+In OpenMW a Quest is a dialogue Topic.  However in TES4+DLCs there are 0x1a0 QUST records in ESM (i.e. 416).  Some of these are "global" - they are running at the start of the game (221, which is more than half of all quests).
+
+Not sure if there should be a quest manager (probably).  And if so whether it should be active or passive.  Well, since scripts can query a quest's current stage, it should have at least a passive/query function.  i.e. there should be a list of current quests and completed quests.
+
+## Quest Manager
+
+Not sure if I can get away with adding some methods in the DialogueManager.  Well, we'll start that way for now.
+
+## TES4 Dialogue Manager
+
+We may need a new DialogueManager if the interface is sufficiently different to allow for TES4 gameplay.  But for now we will just piggy back on the TES3 one.
+
+```cpp
+    void ESMStore::setUp()
+    {
+        mIds.clear();
+
+        std::map<int, StoreBase *>::iterator storeIt = mStores.begin();
+        for (; storeIt != mStores.end(); ++storeIt)
+        {
+            storeIt->second->setUp();
+
+            if (isCacheableRecord(storeIt->first))
+            {
+                std::vector<std::string> identifiers;
+                storeIt->second->listIdentifier(identifiers);
+
+                for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
+                    mIds[*record] = storeIt->first;
+            }
+        }
+
+        mSkills.setUp();
+        mMagicEffects.setUp();
+        mAttributes.setUp();
+        mDialogs.setUp();
+
+```
+
+Note that `mDialogs` is
+
+```cpp
+        Store<ESM::Dialogue>        mDialogs;
+```
+
+and we have
+
+```cpp
+        ForeignStore<ESM4::Quest>      mForeignQuests;
+```
+
+So we will need to create a new method to setup the starting quests, e.g.:
+
+```cpp
+        mForeignQuests.setUp();
+```
+## Persistent References
+
+In order to get the quest target all the "persistent references" must be loaded in memory.  Need to verify for sure, but I think they are stored in `MWWorld::ForeignStore<ESM4::Reference>`.
+
+## Tracking Quests
+
+In order to populate the quest logs, as well as to maintain the player's progress, there must be something in the savefile.
+
+The function `GetStageDone` seems purplexing - the stage must be "done" only if the player was in the stage to begin with.  Also, if there are multiple options within the stage, how does the game keep track of which option was taken?
+
+Left some questions at a couple of Discord servers but so far nothing.
+
+### Save 222 - Ejek - Benirus Manor, Level 27, Playing Time 237.52.10.ess
+
+Examine a savefile, using the quest MG05A as a guide.  The quest `FormId` 0x00028C05 occurs at file address 0x871E9.  Using [UESP](https://en.uesp.net/wiki/Oblivion_Mod:Save_File_Format/QUST):
+
+    058C0200  formid of the changed record
+    3B        type (59 == QUST)
+    04000018  flags (0x18000004)
+    7D        version (125)
+    BB00      size
+
+    02        flags (one byte since flags above has 0x04); address 0x871F5
+    0B        stageNum (11, same as the number of stages for this quest as seen in the TES Construction Set)
+
+    05        stageIndex (5)
+    00        stageFlag
+    01        stageEntryNum
+    00        EntryNum (0)
+    00000000
+    0A        stageIndex (10)
+    01        stageFlag
+    01        stageEntryNum
+    01        EntryNum (1)
+    F400B101                <- GetStageDone 1.00
+    0F        stageIndex (15)
+    00        stageFlag
+    01        stageEntryNum
+    02        EntryNum (2)
+    00000000
+    14        stageIndex (20)
+    01        stageFlag
+    01        stageEntryNum
+    03        EntryNum (3)
+    F400B101                <- GetStageDone 1.00
+    19        stageIndex (25)
+    00        stageFlag
+    01        stageEntryNum
+    04        EntryNum (4)
+    00000000
+    1E        stageIndex (30)
+    01        stageFlag
+    01        stageEntryNum
+    05        EntryNum (5)
+    F400B101                <- GetStageDone 1.00
+    28        stageIndex (40)
+    01        stageFlag
+    01        stageEntryNum
+    06        EntryNum (6)
+    F700B101                <- GetStageDone 1.00
+    64        stageIndex (100)
+    01        stageFlag
+    02        stageEntryNum <- note: 2
+    07        EntryNum (7)
+    F700B101                <- GetStageDone 1.00, must have chosen the first option
+    08        EntryNum (8)
+    00000000
+    96        stageIndex (150)
+    00        stageFlag
+    01        stageEntryNum
+    09        EntryNum (9)
+    00000000
+    C8        stageIndex (200)
+    00        stageFlag
+    01        stageEntryNum
+    0A        EntryNum (10)
+    00000000
+    FF        stageIndex (255)
+    00        stageFlag
+    02        stageEntryNum <- note: 2
+    0B        EntryNum (11)
+    00000000
+    0C        EntryNum (12)
+    00000000
+
+    0700      quest script dataNum (present since flags above has 0x08000000)
+    01
+    00 00 00 00 00 00 00 00 00 F0 3F 05
+    00 00 00 00 00 00 00 00 00 08 40 07
+    00 00 00 00 00 00 00 00 00 F0 3F 06
+    00 00 00 00 00 00 00 00 00 F0 3F 02
+    00 00 00 00 00 00 00 00 00 22 40 03
+    00 00 00 00 00 00 00 00 00 22 40 04
+    00 00 00 00 00 00 00 00 00 00 40 00 <- 7 entries, ends at address before 0x871F5+0x00BB = 0x872B0
+                                           (but MG05AScript has 8 variables? maybe doonce doesn't count?)
+
+    8DEE0100
+    31       type (49 == REFR)
+    ...
+
+In-game log shows when the quest was completed.  It is unclear where in the savefile this information is stored.  Might be something to do with the value `0x01B100F7`.  It doesn't look like a float, so it is either 2 shorts or a long integer.
+
+If 2 shorts:
+
+    0x00F7 = 247
+    0x01B1 = 433
+
+Well, Oblivion starts on Morndas, 27th of Last Seed, 3E 433.  The value 247 is probably translates to 4th of Heartfire.  This matches the date of the in-game log entry.
+
+## Tracking Quest States
+
+Ok, so we may as well track quest states similarly to the savefile.  Let's see how OpenMW deals with Dialogue states.
+
+CPhHWE3xfLcnqNe UESP
+
+Made an account on UESP and made some updates.  I should try to remember other issues that I had found earlier and update those as well.
+
+## Active Quests
+
+It is unclear how to detect the `Active` quest from a savefile.  Below are snippets from 2 different savefiles where the only difference is that the first one has "No Stone Unturned" quest set as `Active`.
+
+In both files 0x00185FE9 only occur twice.
+
+    301
+    E9 5F 18 00 3B 04 00 00 10 7D 2A 00 01 05 0A 00 01 00 00 00 00 00 14 01 01 01 87 00 B2 01 1E 00 01 02 00 00 00 00 64 00 01 03 00 00 00 00 C8 00 01 04 00 00 00 00
+
+    299
+    E9 5F 18 00 3B 04 00 00 10 7D 2A 00 01 05 0A 00 01 00 00 00 00 00 14 01 01 01 87 00 B2 01 1E 00 01 02 00 00 00 00 64 00 01 03 00 00 00 00 C8 00 01 04 00 00 00 00
+
+
+    301
+    51 87 0A 00
+    31
+    00 00 00 08 <- "Inventory"
+    7D
+    93 00
+    07 00          Num Items
+    BB 04 00 00    iref
+    01 00 00 00    stacked
+    01 00 00 00    changed entries
+    01 00          properties
+    36
+    06 00 00 00 00 D3 01 00 00 01 00
+    00 00 01 00 00 00 01 00 36 06 00 00 00 00 2A 02 00 00 01 00 00 00 01 00 00 00 01 00 36 06 00 00 00 00 2E 03 00 00 01 00 00 00 01 00 00 00 01 00 36 05 00 00 00 00 7C 04 00 00 01 00 00 00 01 00 00 00 01 00 36 02 00 00 00 00 40 01 00 00 09 00 00 00 01 00 00 00 02 00 36 00 00 00 00 00 2A 09 00 D5 0C 00 00 00 00 00 00 01 00 00 00 01 00 12 D6 0C 00 00 00 00 00
+
+    299
+    51 87 0A 00
+    31
+    00 00 00 08 <- "Inventory"
+    7D
+    93 00
+    07 00          Num Items
+    D5 0C 00 00    iref
+    00 00 00 00    not stacked?
+    01 00 00 00    changed entries
+    01 00          properties
+    12
+    D6 0C 00 00 00 00 00 40 01 00 00
+    09 00 00 00 01 00 00 00 02 00 36 00 00 00 00 00 2A 09 00 7C 04 00 00 01 00 00 00 01 00 00 00 01 00 36 02 00 00 00 00 2E 03 00 00 01 00 00 00 01 00 00 00 01 00 36 05 00 00 00 00 2A 02 00 00 01 00 00 00 01 00 00 00 01 00 36 06 00 00 00 00 D3 01 00 00 01 00 00 00 01 00 00 00 01 00 36 06 00 00 00 00 BB 04 00 00 01 00 00 00 01 00 00 00 01 00 36 06 00 00 00 00
+
+# [06/09/2022 - 09/09/2022] Taking A Breather
+
+Took a bit of time to commit the chnages so far.
+
+## Loading A Different Game Type
+
+Going from one game type to another results in a crash.  The issue seems to be:
+
+    1. `StateManager::loadGame()` calls `cleanup()` which then calls `World::clear()` that puts an empty `RefData` to the player character it keeps.
+    2. `StateManager::loadGame()` eventually calls `World::setupPlayer()` which sets up a new player then calls `RenderingManager::setupPlayer()`.  The `RefData` of the player character `Ptr` is then setup with a base `SceneNode`.
+    3. The trouble is that the player character at this point is a different one, e.g. TES4.
+    4. Subsquently `World::renderPlayer()` and then `RenderingManager::renderPlayer()`.  `RenderingManager` tries to refresh its copy of player animation (i.e. `mPlayerAnimation`) but it still has the old `Ptr`, e.g. TES3.
+    5. Because the old `Ptr` doesn't have a valid `RefData` the dtor throws an exception.
+
+So, we should probably update `RenderingManager` with a new `Ptr` before `renderPlayer()`.  Or, alternatively, put the base `SceneNode` to both `Ptr`s, knowing that one will be destructed shortly.
+
+## FONV Scripts
+
+### Comments
+
+FONV allows "//" as comment leader in addition to ";".  Also seen are long strings of "-----------------" or "==================".
+
+### Different Function Signatures
+
+In FONV many functions with the same name accpet additional optional parameters.
+
+### Space character in SCN Name
+
+FormId 000E8948.  Worked around by introducing a state after reading the script name but before "Begin" keyword is encountered.
+
+    scn 188tradingpostbehavior Script
+
+### Local Variable Same as Keyword
+
+Since TES4/FONV uses `GetRandomPercent` simply changed the keyword in the `Scanner`.  One difference is that `GetRandomPercent` does not have a parameter.
+
+    VOVFiendEncountersScript (0013AE15)
+
+    Short Random
+
+### Else With Only Whitespace
+
+    VES01VictorGSMyBodyguardScript (00154150)
+
+    if player.GetDistance GSVictorRef >= 10000
+        GSVictorRef.MoveTo Player 2500 2500
+        GSVictorRef.AddScriptPackage VES01VictorGSPathToPCPackage
+        ;GSVictorRef.SetPlayerTeammate 1					; Victor will now fight with the Player (and enemies will attack Victor)
+        GSVictorRef.AddToFaction VESVictorMyBodyguardFaction 1
+        set nVictorAttack to 1 										; Victor is close to the Player and the Player is in combat so Victor is attacking (has attacked) too
+        set nVictorArrived to 1									; Victor has arrived
+    else GSVictorRef.AddScriptPackage VES01VictorGSPathToPCPackage
+        if GSVictorRef.GetDistance player <= 1000
+            ;GSVictorRef.SetPlayerTeammate 1				; Victor will now fight with the Player (and enemies will attack Victor)
+            GSVictorRef.AddToFaction VESVictorMyBodyguardFaction 1
+            set nVictorAttack to 1									; Victor is now close enough to the Player to see enemies so Victor is attacking (has attacked) too
+            set nVictorArrived to 1								; Victor has arrived
+        endif
+    endif
+
+### Debugging Missing Variable
+
+NVDLC01MQ03Script (01001D1D)
+
+    ; Whoops! The player has reached a failure state leading to his doom.
+    if (VaultCodeBox.bElijahTeamsWithPlayer == 1) || (VaultCodeBox.bPlayerTrapped == 1) || (VaultMainTerminalREF.bReadPersonal == 1)
+
+
+    ScriptParser::parseKeyword
+        K_if
+        ControlParser::parseKeyword
+        StartState, K_if
+            Scanner using ExprParser
+            VaultCodeBox
+                ExprParser::parseSpecial
+                S_open, mOperators.push_back('(')
+                ExprParser::parseName
+                    not local var
+                    not global var (FIXME: using TES3 globals here)
+                    CompilerContext::getReference
+                        search Ptr via EditorId
+                        search persistent actor characters using EditorId
+                        search persistent refs using EditorId -> formId = 0x0100ae1e
+                        mPotentialExplicit = vaultcodebox
+                        mPotentialReference = 0x0100ae1e
+            '.' special = S_ref_or_member
+                ExprParser::parseSpecial
+                    mExplicit = VaultCodeBox, mRefOp = true, mNextOperand = true
+            bElijahTeamsWithPlayer
+                ExprParser::parseName
+                    ExprParser::handleMemberAccess
+                        CompilerContext::getMemberType
+                            search Scripts via EditorId
+                            search Quests via EditorId
+                            search ActorCharacter via EditorId
+                            search ActorCreature via EditorId
+                            search Reference via EditorId
+                                baseobj is an activator, get its script and convert to string (FIXME: why string?)
+                                use the ScriptManager::getLocals to get the local variable of the script
+                            Generator::fetchMember
+
+The code doesn't find the type of the base object (0x0100ABE1) for `VaultMainTerminalREF` and fails.  Need to figure out why.  It could be because it is a terminal?
+
+__FIXME:__ Some of the code could really do with some refactoring, for example `CompilerContext::getMemberType()`.
+
+### Elseif Without Matching If
+
+FormId 0x0017B778.  Should be treated as "If" but it isn't clear how the `ControlParser::parseKeyword` handles it.
+
+    scn BeatrixFXSCRIPT
+
+    float timer
+    int reset
+    int bump
+
+    begin gamemode
+
+        if reset == 0
+            VFSBeatrixREF.SetRestrained 1
+            DisablePlayerControls 1 1 1 0 1 1 1
+            imod FadeToBlack9sISFX
+            set timer to 0
+            set bump to 0
+            set reset to 1
+        endif
+
+        set timer to timer + getsecondspassed
+
+        if timer > 1.5 && bump == 0
+            PlaySound NPCIdleScratchShoulder
+            set bump to 1
+        endif
+        elseif timer > 2 && bump == 1
+            PlaySound NPCIdleSwattingSlap
+            set bump to 2
+        endif
+        elseif timer > 2.3 && bump == 2
+            PlaySound NPCIdleScratchSelf
+            set bump to 3
+        endif
+        elseif timer > 2.5 && bump == 3
+            PlaySound NPCIdleSwattingSlap
+            set bump to 4
+        endif
+        elseif timer > 3.5 && bump == 4
+            PlaySound NPCIdleScratchSelf
+            set bump to 5
+        endif
+        elseif timer > 4.5 && bump == 5
+            PlaySound NPCFeralGhoulAlert
+            set bump to 6
+        endif
+        elseif timer > 5.5 && bump == 6
+            PlaySound NPCFeralGhoulAware
+            set bump to 7
+        endif
+        if timer > 9
+            set reset to 0
+            enableplayercontrols
+
+            if GameHour <= 23
+                set GameHour to GameHour + 1
+            else
+                set GameDaysPassed to GameDaysPassed + 1
+                set Gamehour to 1
+            endif
+
+            set VFSBeatrixREF.iWorking to 0
+            VFSBeatrixREF.SetRestrained 0
+            VFSBeatrixREF.evp
+            stopquest BeatrixFX
+        endif
+
+    end
 
 [//]: # (/* spell spelllang=en_au syntax=cpp */)
 [//]: # (/* vim: set ft=markdown tw=0 lbr bri fen fdm=marker fdl=0: */)

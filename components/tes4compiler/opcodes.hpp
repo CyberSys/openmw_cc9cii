@@ -37,6 +37,9 @@ namespace Tes4Compiler
         const int opcodeScriptEffectFinish  = 0x200040a;
         const int opcodeScriptEffectStart   = 0x200040b;
         const int opcodeScriptEffectUpdate  = 0x200040c;
+        // FONV
+        const int opcodeOnTriggerEnter      = 0x2000667; // actor (FIXME: just a guess)
+        const int opcodeOnTriggerLeave      = 0x2000668; // actor (FIXME: just a guess)
     }
 
     namespace Tes4Actor
@@ -208,8 +211,10 @@ namespace Tes4Compiler
     {
         const int opcodeAddScriptPackage                    = 0x20004a6;
         const int opcodeAddScriptPackageExplicit            = 0x20004a7;
-        const int opcodeEvaluatePackage                     = 0x20004a8;
-        const int opcodeEvaluatePackageExplicit             = 0x20004a9;
+      //const int opcodeEvaluatePackage                     = 0x20004a8;
+      //const int opcodeEvaluatePackageExplicit             = 0x20004a9;
+        const int opcodeEvaluatePackage                     = 0x00200b2; //
+        const int opcodeEvaluatePackageExplicit             = 0x00200b3; //
         const int opcodeForceFlee                           = 0x002005a; //
         const int opcodeForceFleeExplicit                   = 0x002005b; //
         const int opcodeForceTakeCover                      = 0x20004aa;
@@ -228,8 +233,10 @@ namespace Tes4Compiler
         const int opcodeIsContinuingPackagePCNearExplicit   = 0x20004b7;
         const int opcodeLook                                = 0x20004b8;
         const int opcodeLookExplicit                        = 0x20004b9;
-        const int opcodeRemoveScriptPackage                 = 0x20004ba;
-        const int opcodeRemoveScriptPackageExplicit         = 0x20004bb;
+      //const int opcodeRemoveScriptPackage                 = 0x20004ba;
+      //const int opcodeRemoveScriptPackageExplicit         = 0x20004bb;
+        const int opcodeRemoveScriptPackage                 = 0x00200b0; //
+        const int opcodeRemoveScriptPackageExplicit         = 0x00200b1; //
         const int opcodeSetActorsAI                         = 0x20004bc;
         const int opcodeSetActorsAIExplicit                 = 0x20004bd;
         const int opcodeSetAlert                            = 0x20004be;
@@ -256,8 +263,10 @@ namespace Tes4Compiler
 
     namespace Tes4Animation
     {
-        const int opcodeIsAnimPlaying                       = 0x20004d0;
-        const int opcodeIsAnimPlayingExplicit               = 0x20004d1;
+      //const int opcodeIsAnimPlaying                       = 0x20004d0;
+      //const int opcodeIsAnimPlayingExplicit               = 0x20004d1;
+        const int opcodeIsAnimPlaying                       = 0x00200b8; //
+        const int opcodeIsAnimPlayingExplicit               = 0x00200b9; //
         const int opcodeLoopGroup                           = 0x20004d2;
         const int opcodeLoopGroupExplicit                   = 0x20004d3;
         const int opcodePlayGroup                           = 0x20004d4;
@@ -374,8 +383,10 @@ namespace Tes4Compiler
         const int opcodeActivateExplicit                    = 0x002006f; //
         const int opcodeAddFlames                           = 0x200051e;
         const int opcodeAddFlamesExplicit                   = 0x200051f;
-        const int opcodeAddItem                             = 0x2000520;
-        const int opcodeAddItemExplicit                     = 0x2000521;
+      //const int opcodeAddItem                             = 0x2000520;
+      //const int opcodeAddItemExplicit                     = 0x2000521;
+        const int opcodeAddItem                             = 0x00200ab; //
+        const int opcodeAddItemExplicit                     = 0x00200ac; //
         const int opcodeCanHaveFlames                       = 0x2000522;
         const int opcodeCanHaveFlamesExplicit               = 0x2000523;
         const int opcodeClearOwnership                      = 0x2000524;
@@ -406,8 +417,10 @@ namespace Tes4Compiler
         const int opcodeRemoveAllItemsExplicit              = 0x0020079; //
         const int opcodeRemoveFlames                        = 0x2000534;
         const int opcodeRemoveFlamesExplicit                = 0x2000535;
-        const int opcodeRemoveItem                          = 0x2000536;
-        const int opcodeRemoveItemExplicit                  = 0x2000537;
+      //const int opcodeRemoveItem                          = 0x2000536;
+      //const int opcodeRemoveItemExplicit                  = 0x2000537;
+        const int opcodeRemoveItem                          = 0x00200ad; //
+        const int opcodeRemoveItemExplicit                  = 0x00200ae; //
         const int opcodeRemoveMe                            = 0x002007a; //
         const int opcodeRemoveMeExplicit                    = 0x002007b; //
         const int opcodeSetOwnership                        = 0x002007c; //
@@ -487,8 +500,10 @@ namespace Tes4Compiler
     {
         const int opcodeAdvancePCLevel                      = 0x200056d;
         const int opcodeAdvancePCSkill                      = 0x200056e;
-        const int opcodeDisablePlayerControls               = 0x200056f;
-        const int opcodeEnablePlayerControls                = 0x2000570;
+      //const int opcodeDisablePlayerControls               = 0x200056f;
+        const int opcodeDisablePlayerControls               = 0x00200b4; //
+      //const int opcodeEnablePlayerControls                = 0x2000570;
+        const int opcodeEnablePlayerControls                = 0x00200b5; //
         const int opcodeGetAmountSoldStolen                 = 0x2000571;
         const int opcodeGetClassDefaultMatch                = 0x2000572;
         const int opcodeGetIsClassDefault                   = 0x2000573;
@@ -611,13 +626,18 @@ namespace Tes4Compiler
         const int opcodeCloseCurrentOblivionGate            = 0x002008a; //
         const int opcodeCloseOblivionGate                   = 0x002008b; //
         const int opcodeCloseOblivionGateExplicit           = 0x002008c; //
-        const int opcodeDisable                             = 0x20005d4;
-        const int opcodeDisableExplicit                     = 0x20005d5;
+      //const int opcodeDisable                             = 0x20005d4;
+      //const int opcodeDisableExplicit                     = 0x20005d5;
+        const int opcodeDisable                             = 0x00200a4; //
+        const int opcodeDisableExplicit                     = 0x00200a5; //
         const int opcodeDisableLinkedPathPoints             = 0x20005d6;
         const int opcodeDisableLinkedPathPointsExplicit     = 0x2000611; // unexpected
-        const int opcodeEnable                              = 0x20005d7;
-        const int opcodeEnableExplicit                      = 0x20005d8;
-        const int opcodeEnableFastTravel                    = 0x20005d9;
+      //const int opcodeEnable                              = 0x20005d7;
+      //const int opcodeEnableExplicit                      = 0x20005d8;
+        const int opcodeEnable                              = 0x00200a6; //
+        const int opcodeEnableExplicit                      = 0x00200a7; //
+      //const int opcodeEnableFastTravel                    = 0x20005d9;
+        const int opcodeEnableFastTravel                    = 0x00200af; //
         const int opcodeEnableLinkedPathPoints              = 0x20005da;
         const int opcodeForceCloseOblivionGate              = 0x002008d; //
         const int opcodeEssentialDeathReload                = 0x20005db;
@@ -682,9 +702,129 @@ namespace Tes4Compiler
         const int opcodeGetParentRef                        = 0x200060c;
         const int opcodeGetSelf                             = 0x200060d;
         const int opcodeGetCurrentTime                      = 0x200060e;
-        const int opcodeGetDayOfWeek                        = 0x200060f;
+        const int opcodeGetDayofWeek                        = 0x200060f;
         const int opcodeGetSecondsPassed                    = 0x2000610;
         // last used value is 0x2000612
+    }
+
+    // FIXME: for now this needs to be part of TES4, otherwise we need to make major changes to
+    //        the ScriptManager in order to handle multiple game types (not sure what to do
+    //        when there is a clash, however).
+    namespace FONV
+    {
+        //const int opcodeAddItemHealthPercent                = 0x2000613; // delme
+        //const int opcodeAddItemHealthPercentExplicit        = 0x2000614; // delme
+        const int opcodeAddItemHealthPercent                = 0x00200a8; // not seen
+        const int opcodeAddItemHealthPercentExplicit        = 0x00200a9;
+        const int opcodeApplyImageSpaceModifier             = 0x2000615;
+        const int opcodeCastImmediateOnSelf                 = 0x2000616;
+        const int opcodeCastImmediateOnSelfExplicit         = 0x2000617;
+        const int opcodeGetDestructionStage                 = 0x2000618;
+        const int opcodeGetDestructionStageExplicit         = 0x200065a;
+        const int opcodeGetHasNote                          = 0x2000619;
+        const int opcodeGetHasNoteExplicit                  = 0x200061a;
+        const int opcodeGetHealthPercentage                 = 0x200061b;
+        const int opcodeGetHealthPercentageExplicit         = 0x200061c;
+        const int opcodeGetLinkedRef                        = 0x200061a;
+        const int opcodeGetLinkedRefExplicit                = 0x200061b;
+        const int opcodeHasBeenEaten                        = 0x200061c;
+        const int opcodeHasBeenEatenExplicit                = 0x200061d;
+        const int opcodeHasPerk                             = 0x200061e;
+        const int opcodeHasPerkExplicit                     = 0x200061f;
+        //const int opcodeIMod                                = 0x2000620; // delme
+        const int opcodeIsHardcore                          = 0x2000654;
+        const int opcodeIsHardcoreExplicit                  = 0x2000621;
+        const int opcodeMarkForDelete                       = 0x2000622;
+        const int opcodeMarkForDeleteExplicit               = 0x2000623;
+        const int opcodeMoveToMarkerWithFade                = 0x2000624;
+        const int opcodeMoveToMarkerWithFadeExplicit        = 0x2000625;
+        const int opcodePlayMusic                           = 0x2000626;
+        const int opcodeRemoveAllTypedItems                 = 0x00200b7; //
+        const int opcodeRemoveAllTypedItemsExplicit         = 0x0020097; //
+        const int opcodeRemoveScriptPackageExplicit         = 0x2000627;
+        const int opcodeRemoveFromFaction                   = 0x2000628;
+        const int opcodeRemoveFromFactionExplicit           = 0x2000629;
+        const int opcodeRemoveImageSpaceModifier            = 0x200062a;
+        const int opcodeResetAI                             = 0x2000655;
+        const int opcodeResetAIExplicit                     = 0x200062b;
+      //const int opcodeScript                              = 0x200062?;
+        const int opcodeSetEnemy                            = 0x0020098; //
+        const int opcodeSetObjectiveCompleted               = 0x200062c;
+        const int opcodeSetObjectiveDisplayed               = 0x200062d;
+        const int opcodeSetPlayerTagSkill                   = 0x200062e;
+        const int opcodeSetPlayerTeammate                   = 0x200062f;
+        const int opcodeSetPlayerTeammateExplicit           = 0x2000630;
+        const int opcodeSetQuestDelay                       = 0x2000631;
+      //const int opcodeShowMessage                         = 0x2000632;
+        const int opcodeShowMessage                         = 0x00200bc; //
+        const int opcodeShowMessageExplicit                 = 0x2000633;
+        const int opcodeStartRadioConversation              = 0x0020099; //
+        const int opcodeStartRadioConversationExplicit      = 0x002009a; //
+      //const int opcodeAddItem                             = 0x2000634;
+        const int opcodeSetAlly                             = 0x002009b; //
+        const int opcodeSetRumble                           = 0x2000635;
+        const int opcodeAddNote                             = 0x2000636;
+        const int opcodeAddNoteExplicit                     = 0x2000637;
+        const int opcodeAddToFaction                        = 0x2000638;
+        const int opcodeAddToFactionExplicit                = 0x2000639;
+      //const int opcodeAddPerk                             = 0x200063a;
+      //const int opcodeAddPerkExplicit                     = 0x200063b;
+        const int opcodeAddPerk                             = 0x00200ba; //
+        const int opcodeAddPerkExplicit                     = 0x00200bb; //
+        const int opcodeAddReputation                       = 0x200063c;
+        const int opcodeAddReputationExplicit               = 0x200063d;
+        const int opcodeClearDestruction                    = 0x2000656;
+        const int opcodeClearDestructionExplicit            = 0x200063e;
+        const int opcodeEnterTrigger                        = 0x2000657;
+        const int opcodeEnterTriggerExplicit                = 0x200063f;
+        const int opcodeExitGame                            = 0x2000640;
+        const int opcodeGetMapMarkerVisible                 = 0x2000658;
+        const int opcodeGetMapMarkerVisibleExplicit         = 0x2000641;
+        const int opcodeGetWeaponHealthPerc                 = 0x2000659;
+        const int opcodeGetWeaponHealthPercExplicit         = 0x2000642;
+        const int opcodeMoveToFade                          = 0x002009c; //
+        const int opcodeMoveToFadeExplicit                  = 0x002009d; //
+        const int opcodePipBoyRadioOff                      = 0x2000643;
+        const int opcodePlaceAtReticle                      = 0x002009e; //
+        const int opcodePlaceAtReticleExplicit              = 0x002009f; //
+        const int opcodeRemovePerk                          = 0x00200a0; //
+        const int opcodeRemovePerkExplicit                  = 0x00200a1; //
+        const int opcodeResetQuest                          = 0x2000644;
+        const int opcodeRewardXP                            = 0x2000645;
+        const int opcodeRewardXPExplicit                    = 0x2000646;
+        //const int opcodeSendAssaultAlarm                    = 0x2000647; // delme
+        const int opcodeSendAssaultAlarm                    = 0x00200aa; //
+        const int opcodeSendAssaultAlarmExplicit            = 0x00200b6; //
+        const int opcodeSetNPCRadio                         = 0x2000648;
+        const int opcodeSetNPCRadioExplicit                 = 0x2000649;
+        const int opcodeSetPCEnemyOfFaction                 = 0x200064a;
+        const int opcodeSexChange                           = 0x00200a2; //
+        const int opcodeSexChangeExplicit                   = 0x00200a3; //
+        const int opcodeShowWarning                         = 0x200064b;
+        const int opcodeResetInventory                      = 0x200064c;
+        const int opcodeResetInventoryExplicit              = 0x200064d;
+        const int opcodeSetReputation                       = 0x200064e;
+        const int opcodeAddReputationExact                  = 0x200064f;
+        const int opcodeIgnoreCrime                         = 0x2000650;
+        const int opcodeIgnoreCrimeExplicit                 = 0x2000651;
+        const int opcodePlayIdle                            = 0x2000652;
+        const int opcodePlayIdleExplicit                    = 0x2000653;
+        const int opcodeAddFormToFormList                   = 0x200065b;
+        const int opcodeForceRadioStationUpdate             = 0x200065c;
+        const int opcodeResetPipboyManager                  = 0x200065d;
+        const int opcodeDamageActorValue                    = 0x200065e;
+        const int opcodeDamageActorValueExplicit            = 0x200065f;
+        const int opcodeAlwaysShowActorSubtitles            = 0x2000660;
+        const int opcodeAlwaysShowActorSubtitlesExplicit    = 0x2000661;
+        const int opcodeGetBroadcastState                   = 0x2000662;
+        const int opcodeGetBroadcastStateExplicit           = 0x2000663;
+        const int opcodeSetBroadcastState                   = 0x2000664;
+        const int opcodeSetBroadcastStateExplicit           = 0x2000665;
+        const int opcodePipboyRadio                         = 0x00200bd; // <- last
+        const int opcodeShowRecipeMenu                      = 0x2000666;
+        const int opcodeShowRecipeMenuExplicit              = 0x2000669;
+        const int opcodeRemoveNote                          = 0x200066a;
+        const int opcodeForceActiveQuest                    = 0x200066b; // <- last 5
     }
 }
 

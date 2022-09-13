@@ -129,10 +129,6 @@ namespace Tes4Compiler
         void getSecondsPassed (CodeContainer& code);
 
         void getDisabled (CodeContainer& code, Compiler::Literals& literals, const std::string& id);
-
-        void enable (CodeContainer& code, Compiler::Literals& literals, const std::string& id);
-
-        void disable (CodeContainer& code, Compiler::Literals& literals, const std::string& id);
     }
 }
 

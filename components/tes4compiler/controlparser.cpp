@@ -73,7 +73,10 @@ namespace Tes4Compiler
             }
             else if (keyword==Scanner::K_else)
             {
-                mState = IfElseJunkState; /// \todo should be IfElseEndState; add an option for that
+                // FIXME: this really isn't a good solution since there may indeed be junk
+                //        but does resolve FONV VES01VictorGSMyBodyguardScript (00154150)
+                mState = IfElseBodyState;
+                //mState = IfElseJunkState; /// \todo should be IfElseEndState; add an option for that
             }
 
             return true;

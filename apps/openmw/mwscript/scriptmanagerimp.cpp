@@ -288,7 +288,12 @@ namespace MWScript
             }
             catch (const std::exception& e)
             {
-                std::cerr << "Execution of foreign script " << name << " failed:" << std::endl;
+                const ESM4::Script *script = scriptStore.search(ESM4::stringToFormId(name));
+                std::string scriptName = "";
+                if (script)
+                    scriptName = script->mEditorId;
+
+                std::cerr << "Execution of foreign script " << scriptName << "(" <<name << ") failed:" << std::endl;
                 std::cerr << e.what() << std::endl;
 
                 iter2->second.first.clear(); // don't execute again.
